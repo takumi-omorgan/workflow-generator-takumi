@@ -11,7 +11,7 @@ project-locally (see ADR-001).
 
 | Skill | Purpose | Added in |
 |---|---|---|
-| `idea-to-prd/` | Turn a rough idea into a lightweight PRD | Issue #5 |
+| [`idea-to-prd/`](idea-to-prd/SKILL.md) | Turn a rough idea into a lightweight PRD | Issue #5 |
 | `prd-normalizer/` | Normalize standard or custom PRDs into one internal format | Issue #6 |
 | `prd-to-mvp/` | Scope a PRD down to an MVP statement | Issue #7 |
 | `adr-writer/` | Draft ADRs from the MVP and key decisions | Issue #7 |
