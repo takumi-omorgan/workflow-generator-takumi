@@ -15,6 +15,7 @@ by the kit's skills (see `docs/repo-structure.md`).
 | [`repo-structure.md`](repo-structure.md) | How the kit is laid out and what gets copied into target projects | Issue #1 |
 | [`install.md`](install.md) | How to install the kit into a new target project | Issue #2 |
 | [`github-setup.md`](github-setup.md) | GitHub repo / labels / branches / PR setup for generated projects | Issue #3 |
+| [`issue-prompt-guide.md`](issue-prompt-guide.md) | How to fill the reusable Claude Code session prompt and what the evaluation summary must contain | Issue #8 |
 | `workflow-guide.md` | End-to-end flow from idea or PRD to issue execution | later |
 | `adr-guide.md` | When and how to write ADRs in a generated project | later |
 | `claude-code-guide.md` | How to use the installed skills from inside a target project | later |

@@ -11,5 +11,8 @@ Contents:
 - `github-setup.md` / `github-setup2.md` — one-off setup prompts used to
   provision the GitHub repo, labels, milestones, and issues
 
-A more curated reusable issue prompt template will land under this
-directory in Issue #8.
+The reusable Claude Code session prompt is at
+[`issue-prompt.md`](issue-prompt.md), with a worked example at
+[`issue-prompt-sample.md`](issue-prompt-sample.md). See
+[`docs/issue-prompt-guide.md`](../docs/issue-prompt-guide.md) for how
+to fill it and what the end-of-session evaluation summary must contain.
