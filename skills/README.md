@@ -20,6 +20,6 @@ project-locally (see ADR-001).
 | [`changelog/`](changelog/SKILL.md) | Generate grouped release notes from git history between two refs | Issue #18 |
 | `workflow-docs/` | Generate README, CLAUDE.md, and AI summary | later |
 | `claude-issue-executor/` | Plan-first, test-alongside execution for each issue | later |
-| `pr-review-packager/` | Package PR summaries and review artifacts | later |
+| [`pr-review-packager/`](pr-review-packager/SKILL.md) | Package a branch into a PR with filled template, issue and ADR links, and a commit-derived change summary | Issue #17 |
 
 See ADR-001 for why skills live project-locally under `.claude/skills/`.
