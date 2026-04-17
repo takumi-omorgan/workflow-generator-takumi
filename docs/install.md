@@ -81,9 +81,14 @@ every new project.
 
 ```bash
 cd my-project                                   # target project root
-mkdir -p .claude/skills Design/adr notes
+mkdir -p .claude/skills Design/adr notes prompts
 cp -R ~/src/workflow-generator/skills/* .claude/skills/
+cp ~/src/workflow-generator/prompts/_template.md prompts/_template.md
 ```
+
+The `prompts/` folder holds one filled session brief per GitHub issue
+(`issue-NNN-short-title.md`), copied from `_template.md`. Freeform
+working notes stay in `notes/`. See [ADR-008](../Design/adr/adr-008-dedicated-prompts-folder.md).
 
 This is the step that makes the install **project-local**: the skills now
 live under the target project's own `.claude/skills/`, tracked in the
@@ -105,7 +110,7 @@ cp ~/src/workflow-generator/templates/claude-md-template.md CLAUDE.md
 ### 3.4 Commit the install
 
 ```bash
-git add .claude CLAUDE.md Design notes
+git add .claude CLAUDE.md Design notes prompts
 git commit -m "chore: install workflow kit (project-local)"
 ```
 
@@ -123,6 +128,8 @@ my-project/
       idea-to-prd/          # plus the other skills shipped by the kit
   Design/
     adr/
+  prompts/
+    _template.md            # blank template; copy to start an issue session
   notes/
 ```
 
@@ -130,6 +137,7 @@ A quick check:
 
 ```bash
 ls .claude/skills          # should list the skill directories
+ls prompts                 # should list _template.md
 cat CLAUDE.md | head -20   # should show your project rules, not this kit's
 ```
 
