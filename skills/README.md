@@ -15,7 +15,7 @@ project-locally (see ADR-001).
 | [`prd-normalizer/`](prd-normalizer/SKILL.md) | Normalize standard or custom PRDs into one internal format | Issue #6 |
 | [`prd-to-mvp/`](prd-to-mvp/SKILL.md) | Scope a PRD down to an MVP statement | Issue #7 |
 | [`adr-writer/`](adr-writer/SKILL.md) | Draft ADRs from the MVP and key decisions | Issue #7 |
-| `issue-planner/` | Turn MVP + ADRs into a GitHub issue backlog | later |
+| [`issue-planner/`](issue-planner/SKILL.md) | Turn MVP + ADRs into a GitHub issue backlog + Project board | Issue #14 |
 | `workflow-docs/` | Generate README, CLAUDE.md, and AI summary | later |
 | `claude-issue-executor/` | Plan-first, test-alongside execution for each issue | later |
 | `pr-review-packager/` | Package PR summaries and review artifacts | later |
