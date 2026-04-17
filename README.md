@@ -118,7 +118,8 @@ claude                                                         # step 4
 
 Full step-by-step guide, including the manual install path,
 `CLAUDE.md` details, and troubleshooting:
-[`docs/install.md`](docs/install.md).
+[`docs/install.md`](docs/install.md). For the end-to-end flow from idea
+to shipped release, see [`docs/workflow-guide.md`](docs/workflow-guide.md).
 
 ## What is in this repo
 

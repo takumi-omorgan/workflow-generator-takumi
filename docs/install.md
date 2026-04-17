@@ -292,6 +292,6 @@ names. If you want to replace them wholesale, remove them first.
 
 ## What's next
 
+- [`docs/workflow-guide.md`](workflow-guide.md) — end-to-end flow from idea to shipped release
 - [`docs/repo-structure.md`](repo-structure.md) — how the kit is laid out and what it generates
 - [`docs/github-setup.md`](github-setup.md) — GitHub labels, milestones, and branch conventions
-- `docs/workflow-guide.md` — end-to-end flow from idea to deploy (coming in a later issue)
