@@ -1,7 +1,7 @@
 
 # ADR-016: Auto-generated changelog and release notes skill
 
-**Status:** proposed
+**Status:** accepted
 **Date:** 2026-04-17
 
 ## Context

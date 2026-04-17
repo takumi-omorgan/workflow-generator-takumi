@@ -1,7 +1,7 @@
 
 # ADR-007: Provide a CLAUDE.md starter template with placeholders
 
-**Status:** proposed
+**Status:** accepted
 **Date:** 2026-04-17
 
 ## Context

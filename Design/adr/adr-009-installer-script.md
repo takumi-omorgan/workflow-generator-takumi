@@ -1,7 +1,7 @@
 
 # ADR-009: Installer script for target project setup
 
-**Status:** proposed
+**Status:** accepted
 **Date:** 2026-04-17
 
 ## Context

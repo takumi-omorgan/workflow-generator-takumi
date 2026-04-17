@@ -1,7 +1,7 @@
 
 # ADR-014: claude-issue-executor skill for disciplined implementation sessions
 
-**Status:** proposed
+**Status:** accepted
 **Date:** 2026-04-17
 
 ## Context

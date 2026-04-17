@@ -1,7 +1,7 @@
 
 # ADR-017: /release skill for version tagging and GitHub Releases
 
-**Status:** proposed
+**Status:** accepted
 **Date:** 2026-04-17
 
 ## Context

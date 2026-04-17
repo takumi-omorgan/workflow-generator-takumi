@@ -1,7 +1,7 @@
 
 # ADR-020: End-to-end workflow guide doc
 
-**Status:** proposed
+**Status:** accepted
 **Date:** 2026-04-17
 
 ## Context

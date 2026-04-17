@@ -1,7 +1,7 @@
 
 # ADR-018: workflow-docs skill for target project documentation
 
-**Status:** proposed
+**Status:** accepted
 **Date:** 2026-04-17
 
 ## Context

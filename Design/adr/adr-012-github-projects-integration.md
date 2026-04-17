@@ -1,7 +1,7 @@
 
 # ADR-012: Integrate GitHub Projects for visual workflow tracking
 
-**Status:** proposed
+**Status:** accepted
 **Date:** 2026-04-17
 
 ## Context

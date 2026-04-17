@@ -1,7 +1,7 @@
 
 # ADR-019: Write docs/claude-code-guide.md for kit usage guidance
 
-**Status:** proposed
+**Status:** accepted
 **Date:** 2026-04-17
 
 ## Context

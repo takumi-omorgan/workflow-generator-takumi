@@ -1,7 +1,7 @@
 
 # ADR-013: /prepare-issue skill for auto-filling issue prompts
 
-**Status:** proposed
+**Status:** accepted
 **Date:** 2026-04-17
 
 ## Context

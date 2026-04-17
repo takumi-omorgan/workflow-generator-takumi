@@ -1,7 +1,7 @@
 
 # ADR-010: Optional --with-docs flag on install
 
-**Status:** proposed
+**Status:** accepted
 **Date:** 2026-04-17
 
 ## Context

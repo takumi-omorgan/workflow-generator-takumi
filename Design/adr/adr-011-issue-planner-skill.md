@@ -1,7 +1,7 @@
 
 # ADR-011: issue-planner skill for automated issue creation
 
-**Status:** proposed
+**Status:** accepted
 **Date:** 2026-04-17
 
 ## Context

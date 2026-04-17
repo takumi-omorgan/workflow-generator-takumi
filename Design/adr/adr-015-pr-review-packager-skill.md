@@ -1,7 +1,7 @@
 
 # ADR-015: pr-review-packager skill for automated PR creation
 
-**Status:** proposed
+**Status:** accepted
 **Date:** 2026-04-17
 
 ## Context
