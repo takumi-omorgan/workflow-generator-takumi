@@ -68,35 +68,26 @@ GitHub repo and the local folder.
    cd my-project
    ```
 
-3. Copy the skills into the project:
+3. Run the installer from your kit clone. It scaffolds the folders,
+   copies the skills into `.claude/skills/`, renders `CLAUDE.md` from the
+   template, and makes the initial commit:
 
    ```bash
-   mkdir -p .claude/skills
-   cp -R ~/src/workflow-generator/skills/* .claude/skills/
+   ~/src/workflow-generator/bin/install-workflow-kit --project-name=my-project
    ```
+
+   Add `--with-docs` if you want the kit's reference docs copied into
+   `docs/workflow-kit/` alongside the project ([ADR-010](Design/adr/adr-010-optional-with-docs-flag.md)).
+   See `--help` for the full flag list. The installer is idempotent —
+   re-running it on an already-installed project skips existing files.
 
    > **Note — hidden folders.** `.claude/` starts with a dot, so it is
-   > hidden by default in macOS Finder and Windows Explorer. To see it
-   > in Finder, press `Cmd+Shift+.`; in Windows Explorer, enable *View →
-   > Show → Hidden items*. You don't need to see it in a GUI — verify
-   > the install from the terminal instead:
-   >
-   > ```bash
-   > ls .claude/skills
-   > ```
-   >
-   > You should see the skill directories (`idea-to-prd`,
-   > `prd-normalizer`, `prd-to-mvp`, `adr-writer`, …). If the command
-   > errors or the directory is empty, step 3's `cp` did not run from
-   > the right place — check the path to your kit clone.
+   > hidden by default in macOS Finder and Windows Explorer. Verify the
+   > install from the terminal instead: `ls .claude/skills` should show
+   > the skill directories (`idea-to-prd`, `prd-normalizer`, `prd-to-mvp`,
+   > `adr-writer`, …).
 
-4. Commit the install:
-
-   ```bash
-   git add .claude && git commit -m "chore: install workflow kit"
-   ```
-
-5. Open Claude Code in the project and run the skill that matches what you
+4. Open Claude Code in the project and run the skill that matches what you
    have in hand:
 
    | You have… | Run |
@@ -104,25 +95,29 @@ GitHub repo and the local folder.
    | A rough idea | `/idea-to-prd` |
    | A standard or custom PRD | `/prd-normalizer`, then `/prd-to-mvp` |
 
+Prefer the manual copy flow (or need to see exactly what the installer
+does)? The manual steps are preserved in
+[`docs/install.md`](docs/install.md#3b-manual-install-alternative).
+
 ### Worked example
 
 Installing the kit into a new project called `invoice-tracker`, starting
 from `~/src` with the kit already cloned at `~/src/workflow-generator`:
 
 ```bash
-cd ~/src                                                    # step 1
-gh repo create invoice-tracker --public --clone             # step 2
+cd ~/src                                                       # step 1
+gh repo create invoice-tracker --public --clone                # step 2
 cd invoice-tracker
-mkdir -p .claude/skills                                     # step 3
-cp -R ~/src/workflow-generator/skills/* .claude/skills/
-ls .claude/skills                                           # verify
+~/src/workflow-generator/bin/install-workflow-kit \
+  --project-name=invoice-tracker                               # step 3
+ls .claude/skills                                              # verify
 # → adr-writer  idea-to-prd  prd-normalizer  prd-to-mvp
-git add .claude && git commit -m "chore: install workflow kit"   # step 4
-claude                                                      # step 5
+claude                                                         # step 4
 # then inside Claude Code: /idea-to-prd
 ```
 
-Full step-by-step guide, including `CLAUDE.md` setup and troubleshooting:
+Full step-by-step guide, including the manual install path,
+`CLAUDE.md` details, and troubleshooting:
 [`docs/install.md`](docs/install.md).
 
 ## What is in this repo

@@ -65,10 +65,72 @@ git init
 
 ## 3. Install the kit into the target project
 
-The kit does not have an installer script in v1. Installation is a small,
-explicit copy step so nothing is hidden.
+You have two options:
 
-### 3.1 Clone the kit somewhere outside the target project
+- **Automated install** (recommended) — run `bin/install-workflow-kit` from
+  the kit clone. See [3A](#3a-automated-install-recommended) below.
+- **Manual install** — a small, explicit copy flow. See
+  [3B](#3b-manual-install-alternative) below. The manual flow is the
+  documented fallback and remains fully supported.
+
+Either path produces the same target-project layout described in
+[`docs/repo-structure.md`](repo-structure.md).
+
+### 3A. Automated install (recommended)
+
+Once you have cloned the kit (see [3B.1](#3b1-clone-the-kit-somewhere-outside-the-target-project)
+for the one-time clone step), the installer scaffolds the target project in
+a single command. It is implemented per
+[ADR-009](../Design/adr/adr-009-installer-script.md) and
+[ADR-010](../Design/adr/adr-010-optional-with-docs-flag.md).
+
+```bash
+cd my-project                                              # target project root
+~/src/workflow-generator/bin/install-workflow-kit \
+  --project-name=my-project
+```
+
+What it does, in order:
+
+1. Creates `Design/adr/`, `prompts/`, `notes/`, and `.claude/skills/` in
+   the target project.
+2. Copies every skill from the kit's `skills/` into `.claude/skills/`.
+3. Seeds `prompts/_template.md` so new per-issue prompts stay consistent
+   (ADR-008).
+4. Renders `CLAUDE.md` from `templates/claude-md-template.md` (ADR-007).
+   You are prompted for any `{{UPPER_SNAKE}}` placeholder not provided on
+   the command line, unless `--non-interactive` is set.
+5. `git init`s the target if it is not already a git repo, then creates
+   an initial commit `chore: install workflow kit (project-local)`.
+
+Useful flags:
+
+| Flag | What it does |
+|---|---|
+| `--target=PATH` | Target project directory (default: current dir) |
+| `--project-name=NAME` | Value for `{{PROJECT_NAME}}` in `CLAUDE.md` |
+| `--set KEY=VALUE` | Provide a value for any other `{{UPPER_SNAKE}}` placeholder. Repeatable. |
+| `--with-docs` | Also copy kit docs to `docs/workflow-kit/` in the target (ADR-010) |
+| `--force` | Overwrite existing `CLAUDE.md` and re-copy skills |
+| `--no-commit` | Skip the initial commit |
+| `--non-interactive` | Never prompt; fall back to defaults |
+| `-h`, `--help` | Show full usage |
+
+The script is idempotent: running it again on an already-installed target
+skips files that already exist and makes no commit if nothing changed.
+Pass `--force` if you want to re-render `CLAUDE.md` or re-copy the skills.
+
+If the automated path does not fit your setup — e.g. you want to tweak a
+step, or your project already has a conflicting layout — fall through to
+the [manual install](#3b-manual-install-alternative).
+
+### 3B. Manual install (alternative)
+
+The manual flow is the explicit, do-it-yourself version of what the
+installer does. Use it when you want full visibility, or as a diagnostic
+reference if the installer misbehaves.
+
+#### 3B.1 Clone the kit somewhere outside the target project
 
 ```bash
 git clone git@github.com:olivermorgan2/workflow-generator.git ~/src/workflow-generator
@@ -77,11 +139,15 @@ git clone git@github.com:olivermorgan2/workflow-generator.git ~/src/workflow-gen
 You only need one clone of the kit per machine. You can reuse it for
 every new project.
 
-### 3.2 From inside the target project, copy the skills
+#### 3B.2 From inside the target project, copy the skills
 
 ```bash
 cd my-project                                   # target project root
+<<<<<<< HEAD
 mkdir -p .claude/skills Design/adr notes prompts
+=======
+mkdir -p .claude/skills Design/adr prompts notes
+>>>>>>> worktree-agent-acac8ea5
 cp -R ~/src/workflow-generator/skills/* .claude/skills/
 cp ~/src/workflow-generator/prompts/_template.md prompts/_template.md
 ```
@@ -95,22 +161,35 @@ live under the target project's own `.claude/skills/`, tracked in the
 target project's git history. The kit clone is no longer required for
 those skills to work.
 
-### 3.3 Render the starter `CLAUDE.md`
+The `prompts/` folder is where per-issue session briefs live (ADR-008).
+Seed it with the reusable template from the kit:
+
+```bash
+cp ~/src/workflow-generator/notes/issue-prompt.md prompts/_template.md
+```
+
+#### 3B.3 Render the starter `CLAUDE.md`
 
 `CLAUDE.md` at the project root is Claude Code's primary rules file for
-the project. Copy the template and fill in the project-specific fields:
+the project. Copy the template and fill in the project-specific fields by
+hand:
 
 ```bash
 cp ~/src/workflow-generator/templates/claude-md-template.md CLAUDE.md
 ```
 
-> The template will be added in Issue #4. Until then, you can hand-write
-> a minimal `CLAUDE.md` using the stub in this kit's root as a reference.
+The template uses `{{PLACEHOLDER}}` tokens (ADR-007). Open `CLAUDE.md`
+and replace each one with real values, starting with `{{PROJECT_NAME}}`.
+The automated installer above does this substitution for you.
 
-### 3.4 Commit the install
+#### 3B.4 Commit the install
 
 ```bash
+<<<<<<< HEAD
 git add .claude CLAUDE.md Design notes prompts
+=======
+git add .claude CLAUDE.md Design prompts notes
+>>>>>>> worktree-agent-acac8ea5
 git commit -m "chore: install workflow kit (project-local)"
 ```
 
@@ -173,8 +252,6 @@ MVP spec, v1 intentionally does **not** include:
   Pointing it at an established codebase will not produce useful output.
 - **A global install.** Every target project gets its own copy of the
   skills. This is a design choice, not a limitation (see ADR-001).
-- **An installer script.** Installation is a documented copy flow in v1.
-  Automation is a Phase 2 candidate.
 - **Team/multi-repo features.** The kit is scoped to a solo developer or
   small team working on a single project at a time.
 - **Non-GitHub providers.** The workflow is GitHub-first
@@ -195,12 +272,17 @@ Install the GitHub CLI (`brew install gh` on macOS) and run `gh auth login`.
 
 **`gh auth status` reports you are logged out**
 Run `gh auth login`. Choose SSH as the git protocol to match the clone
-command in step 3.1.
+command in step 3B.1.
 
 **`cp: ~/src/workflow-generator/skills/*: No such file or directory`**
 The kit was cloned to a different path than the guide assumes. Either
 re-clone to `~/src/workflow-generator` or substitute your actual path in
-step 3.2.
+step 3B.2 (or pass the correct path to `bin/install-workflow-kit`).
+
+**`install-workflow-kit: error: kit skills/ not found`**
+The installer resolves its sources relative to its own location. Run it
+directly from the kit clone (e.g. `~/src/workflow-generator/bin/install-workflow-kit`),
+not via a copy detached from the kit repo.
 
 **Claude Code does not see the skills**
 Confirm you are running Claude Code from the **target project's root**.

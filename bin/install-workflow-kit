@@ -1,0 +1,391 @@
+#!/usr/bin/env bash
+# install-workflow-kit — scaffold a new target project with the Claude Code
+# Workflow Kit. Ships with the kit at bin/install-workflow-kit and discovers
+# its sources (skills/, templates/, docs/, prompts/, notes/) relative to its
+# own location.
+#
+# Implements ADR-009 (installer script) and ADR-010 (--with-docs flag).
+# See docs/install.md for usage.
+
+set -euo pipefail
+
+# ---------------------------------------------------------------------------
+# Paths and constants
+# ---------------------------------------------------------------------------
+
+# Resolve the kit root from the script's own location. Use a portable
+# resolver because macOS lacks GNU `readlink -f`.
+resolve_script_dir() {
+  local src="${BASH_SOURCE[0]}"
+  # Follow symlinks.
+  while [ -h "$src" ]; do
+    local dir
+    dir="$(cd -P "$(dirname "$src")" >/dev/null 2>&1 && pwd)"
+    src="$(readlink "$src")"
+    [[ "$src" != /* ]] && src="$dir/$src"
+  done
+  cd -P "$(dirname "$src")" >/dev/null 2>&1 && pwd
+}
+
+SCRIPT_DIR="$(resolve_script_dir)"
+KIT_ROOT="$(cd -P "$SCRIPT_DIR/.." >/dev/null 2>&1 && pwd)"
+
+# Default flag values.
+TARGET_DIR="$PWD"
+WITH_DOCS=0
+FORCE=0
+NO_COMMIT=0
+NO_GIT_INIT=0
+NON_INTERACTIVE=0
+PROJECT_NAME=""
+declare -a CLI_VALUES=()
+
+# ---------------------------------------------------------------------------
+# Output helpers
+# ---------------------------------------------------------------------------
+
+log()  { printf '%s\n' "$*"; }
+info() { printf '[install-workflow-kit] %s\n' "$*"; }
+warn() { printf '[install-workflow-kit] warning: %s\n' "$*" >&2; }
+err()  { printf '[install-workflow-kit] error: %s\n' "$*" >&2; }
+
+# ---------------------------------------------------------------------------
+# Usage
+# ---------------------------------------------------------------------------
+
+usage() {
+  cat <<'EOF'
+install-workflow-kit — scaffold a Claude Code Workflow Kit target project.
+
+USAGE
+  install-workflow-kit [OPTIONS]
+
+OPTIONS
+  --target=PATH            Target project directory (default: current dir)
+  --project-name=NAME      Value for the {{PROJECT_NAME}} placeholder in
+                           CLAUDE.md. If omitted and required, you will be
+                           prompted (or, with --non-interactive, the target
+                           directory's basename is used).
+  --set KEY=VALUE          Provide a value for an {{UPPER_SNAKE}} placeholder
+                           in templates/claude-md-template.md. May be
+                           repeated. Example: --set DATABASE=Postgres
+  --with-docs              Also copy the kit's docs/ to docs/workflow-kit/
+                           in the target (ADR-010).
+  --force                  Overwrite existing CLAUDE.md and re-copy skills
+                           on top of what is already there. By default the
+                           installer preserves existing files.
+  --no-commit              Skip the initial `git commit` step.
+  --no-git-init            Do not run `git init` if the target is not a
+                           git repo. Useful for testing.
+  --non-interactive        Never prompt. Missing required values fall back
+                           to sensible defaults (basename for project name;
+                           remaining placeholders are left unfilled and
+                           reported).
+  -h, --help               Show this message and exit.
+
+EXAMPLES
+  # Interactive install into a fresh repo
+  cd ~/src/my-project
+  ~/src/workflow-generator/bin/install-workflow-kit
+
+  # One-shot install with flags, plus local docs copy
+  install-workflow-kit \
+    --target=/tmp/demo \
+    --project-name=demo \
+    --with-docs \
+    --non-interactive
+
+  # Re-run on a half-installed project, overwriting CLAUDE.md
+  install-workflow-kit --force
+
+SEE ALSO
+  docs/install.md, docs/repo-structure.md, Design/adr/adr-009-installer-script.md
+EOF
+}
+
+# ---------------------------------------------------------------------------
+# Argument parsing
+# ---------------------------------------------------------------------------
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --target=*)        TARGET_DIR="${1#*=}"; shift ;;
+    --target)          TARGET_DIR="${2:?--target requires a value}"; shift 2 ;;
+    --project-name=*)  PROJECT_NAME="${1#*=}"; shift ;;
+    --project-name)    PROJECT_NAME="${2:?--project-name requires a value}"; shift 2 ;;
+    --set)             CLI_VALUES+=("${2:?--set requires KEY=VALUE}"); shift 2 ;;
+    --set=*)           CLI_VALUES+=("${1#*=}"); shift ;;
+    --with-docs)       WITH_DOCS=1; shift ;;
+    --force)           FORCE=1; shift ;;
+    --no-commit)       NO_COMMIT=1; shift ;;
+    --no-git-init)     NO_GIT_INIT=1; shift ;;
+    --non-interactive) NON_INTERACTIVE=1; shift ;;
+    -h|--help)         usage; exit 0 ;;
+    --)                shift; break ;;
+    -*)                err "unknown option: $1"; usage >&2; exit 2 ;;
+    *)                 err "unexpected positional argument: $1"; usage >&2; exit 2 ;;
+  esac
+done
+
+# ---------------------------------------------------------------------------
+# Sanity checks
+# ---------------------------------------------------------------------------
+
+if [ ! -d "$KIT_ROOT/skills" ]; then
+  err "kit skills/ not found at $KIT_ROOT/skills — is this script inside the kit repo?"
+  exit 1
+fi
+if [ ! -f "$KIT_ROOT/templates/claude-md-template.md" ]; then
+  err "kit template not found at $KIT_ROOT/templates/claude-md-template.md"
+  exit 1
+fi
+
+# Create target directory if it doesn't exist.
+mkdir -p "$TARGET_DIR"
+TARGET_DIR="$(cd -P "$TARGET_DIR" >/dev/null 2>&1 && pwd)"
+
+if [ "$TARGET_DIR" = "$KIT_ROOT" ]; then
+  err "refusing to install the kit into its own source tree ($KIT_ROOT)"
+  exit 1
+fi
+
+info "kit root:   $KIT_ROOT"
+info "target:     $TARGET_DIR"
+info "with-docs:  $([ "$WITH_DOCS" -eq 1 ] && echo yes || echo no)"
+info "force:      $([ "$FORCE" -eq 1 ] && echo yes || echo no)"
+
+# ---------------------------------------------------------------------------
+# Placeholder handling
+# ---------------------------------------------------------------------------
+
+TEMPLATE_FILE="$KIT_ROOT/templates/claude-md-template.md"
+
+# Discover every {{UPPER_SNAKE}} placeholder in the template. Uses a portable
+# grep -o pipeline; works on BSD and GNU grep.
+discover_placeholders() {
+  grep -oE '\{\{[A-Z][A-Z0-9_]*\}\}' "$TEMPLATE_FILE" \
+    | sed -e 's/^{{//' -e 's/}}$//' \
+    | awk '!seen[$0]++'
+}
+
+# Seed the KEY=VALUE map from CLI flags.
+declare -a PH_KEYS=()
+declare -a PH_VALS=()
+
+ph_set() {
+  local key="$1" val="$2" i=0
+  for i in "${!PH_KEYS[@]}"; do
+    if [ "${PH_KEYS[$i]}" = "$key" ]; then
+      PH_VALS[$i]="$val"
+      return 0
+    fi
+  done
+  PH_KEYS+=("$key")
+  PH_VALS+=("$val")
+}
+
+ph_get() {
+  local key="$1" i=0
+  for i in "${!PH_KEYS[@]}"; do
+    if [ "${PH_KEYS[$i]}" = "$key" ]; then
+      printf '%s' "${PH_VALS[$i]}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+# Apply --project-name.
+if [ -n "$PROJECT_NAME" ]; then
+  ph_set "PROJECT_NAME" "$PROJECT_NAME"
+fi
+
+# Apply every --set KEY=VALUE.
+for kv in "${CLI_VALUES[@]+"${CLI_VALUES[@]}"}"; do
+  case "$kv" in
+    *=*) ph_set "${kv%%=*}" "${kv#*=}" ;;
+    *)   err "--set requires KEY=VALUE form (got: $kv)"; exit 2 ;;
+  esac
+done
+
+# ---------------------------------------------------------------------------
+# Scaffolding
+# ---------------------------------------------------------------------------
+
+mkdir -p \
+  "$TARGET_DIR/.claude/skills" \
+  "$TARGET_DIR/Design/adr" \
+  "$TARGET_DIR/prompts" \
+  "$TARGET_DIR/notes"
+
+# 1. Copy skills. Directory-level copy; existing skill directories are
+#    preserved unless --force, in which case they are overwritten.
+info "copying skills into .claude/skills/"
+for skill_dir in "$KIT_ROOT/skills"/*/; do
+  [ -d "$skill_dir" ] || continue
+  name="$(basename "$skill_dir")"
+  dest="$TARGET_DIR/.claude/skills/$name"
+  if [ -d "$dest" ] && [ "$FORCE" -ne 1 ]; then
+    info "  skip (exists): .claude/skills/$name"
+    continue
+  fi
+  if [ -d "$dest" ]; then
+    info "  overwrite:    .claude/skills/$name"
+    rm -rf "$dest"
+  else
+    info "  copy:         .claude/skills/$name"
+  fi
+  cp -R "$skill_dir" "$dest"
+done
+
+# 2. Seed prompts/_template.md. Prefer the canonical kit location; fall
+#    back to notes/issue-prompt.md (the historical home, per ADR-008).
+PROMPT_TEMPLATE_SRC=""
+if [ -f "$KIT_ROOT/prompts/_template.md" ]; then
+  PROMPT_TEMPLATE_SRC="$KIT_ROOT/prompts/_template.md"
+elif [ -f "$KIT_ROOT/notes/issue-prompt.md" ]; then
+  PROMPT_TEMPLATE_SRC="$KIT_ROOT/notes/issue-prompt.md"
+fi
+
+if [ -n "$PROMPT_TEMPLATE_SRC" ]; then
+  prompt_dest="$TARGET_DIR/prompts/_template.md"
+  if [ -f "$prompt_dest" ] && [ "$FORCE" -ne 1 ]; then
+    info "skip prompts/_template.md (exists)"
+  else
+    info "copy prompts/_template.md"
+    cp "$PROMPT_TEMPLATE_SRC" "$prompt_dest"
+  fi
+else
+  warn "no prompts/_template.md or notes/issue-prompt.md found in the kit; prompts/ created empty"
+fi
+
+# 3. Render CLAUDE.md. Skipped if it already exists unless --force.
+CLAUDE_DEST="$TARGET_DIR/CLAUDE.md"
+if [ -f "$CLAUDE_DEST" ] && [ "$FORCE" -ne 1 ]; then
+  info "skip CLAUDE.md (exists; pass --force to overwrite)"
+else
+  # Gather required values. Prompt for any placeholder whose value is not
+  # already known, unless --non-interactive is set.
+  placeholders="$(discover_placeholders || true)"
+  # Default PROJECT_NAME to the target directory basename if still missing.
+  if ! ph_get "PROJECT_NAME" >/dev/null 2>&1; then
+    default_name="$(basename "$TARGET_DIR")"
+    if [ "$NON_INTERACTIVE" -eq 1 ] || [ ! -t 0 ]; then
+      ph_set "PROJECT_NAME" "$default_name"
+    else
+      printf 'Project name [%s]: ' "$default_name" >&2
+      read -r answer || answer=""
+      ph_set "PROJECT_NAME" "${answer:-$default_name}"
+    fi
+  fi
+
+  if [ -n "$placeholders" ]; then
+    while IFS= read -r key; do
+      [ -z "$key" ] && continue
+      if ph_get "$key" >/dev/null 2>&1; then continue; fi
+      if [ "$NON_INTERACTIVE" -eq 1 ] || [ ! -t 0 ]; then
+        warn "placeholder {{$key}} left unfilled (use --set $key=VALUE)"
+        continue
+      fi
+      printf 'Value for {{%s}} (blank to leave unfilled): ' "$key" >&2
+      read -r answer || answer=""
+      if [ -n "$answer" ]; then
+        ph_set "$key" "$answer"
+      fi
+    done <<< "$placeholders"
+  fi
+
+  info "render CLAUDE.md from templates/claude-md-template.md"
+  tmp="$(mktemp "${TMPDIR:-/tmp}/claude-md.XXXXXX")"
+  cp "$TEMPLATE_FILE" "$tmp"
+  # Substitute every known placeholder. Use Python if available for
+  # robust literal substitution; otherwise fall back to portable sed with
+  # escaped delimiters.
+  if command -v python3 >/dev/null 2>&1; then
+    # Write KEY<TAB>VALUE pairs to a temp file and pass both paths to
+    # python. This avoids fighting over stdin vs. a heredoc for code.
+    pairs_file="$(mktemp "${TMPDIR:-/tmp}/claude-md-pairs.XXXXXX")"
+    for i in "${!PH_KEYS[@]+"${!PH_KEYS[@]}"}"; do
+      printf '%s\t%s\n' "${PH_KEYS[$i]}" "${PH_VALS[$i]}" >> "$pairs_file"
+    done
+    python3 - "$tmp" "$pairs_file" <<'PY'
+import sys
+path, pairs_path = sys.argv[1], sys.argv[2]
+with open(pairs_path, "r", encoding="utf-8") as f:
+    pairs = [line.rstrip("\n").split("\t", 1) for line in f if line.strip()]
+with open(path, "r", encoding="utf-8") as f:
+    data = f.read()
+for k, v in pairs:
+    data = data.replace("{{" + k + "}}", v)
+with open(path, "w", encoding="utf-8") as f:
+    f.write(data)
+PY
+    rm -f "$pairs_file"
+  else
+    # Portable sed fallback. Escape & / and \ in replacement strings, and
+    # pick a delimiter unlikely to appear in typical values.
+    for i in "${!PH_KEYS[@]}"; do
+      key="${PH_KEYS[$i]}"
+      val="${PH_VALS[$i]}"
+      # Escape backslashes, pipes, and ampersands for sed replacement.
+      esc="$(printf '%s' "$val" | sed -e 's/[\\|&]/\\&/g' -e 's/$/\\/' -e '$s/\\$//' | tr '\n' '|' | sed 's/|$//')"
+      sed -e "s|{{${key}}}|${esc}|g" "$tmp" > "$tmp.new" && mv "$tmp.new" "$tmp"
+    done
+  fi
+  mv "$tmp" "$CLAUDE_DEST"
+fi
+
+# 4. Optional: copy kit docs to docs/workflow-kit/ (ADR-010).
+if [ "$WITH_DOCS" -eq 1 ]; then
+  if [ -d "$KIT_ROOT/docs" ]; then
+    info "copying kit docs to docs/workflow-kit/ (ADR-010)"
+    mkdir -p "$TARGET_DIR/docs/workflow-kit"
+    # cp -R src/. dest preserves directory contents without creating
+    # nested docs/workflow-kit/docs/ even on re-runs.
+    cp -R "$KIT_ROOT/docs/." "$TARGET_DIR/docs/workflow-kit/"
+  else
+    warn "kit docs/ not found at $KIT_ROOT/docs; --with-docs had nothing to copy"
+  fi
+fi
+
+# ---------------------------------------------------------------------------
+# Git: init if needed, then commit.
+# ---------------------------------------------------------------------------
+
+in_git_repo() {
+  git -C "$TARGET_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1
+}
+
+if ! in_git_repo; then
+  if [ "$NO_GIT_INIT" -eq 1 ]; then
+    info "skip git init (--no-git-init); not committing"
+    NO_COMMIT=1
+  else
+    info "git init"
+    git -C "$TARGET_DIR" init -q
+  fi
+fi
+
+if [ "$NO_COMMIT" -ne 1 ] && in_git_repo; then
+  # Stage only the paths this installer produces — do not sweep in
+  # whatever else happens to sit in the target directory.
+  git -C "$TARGET_DIR" add \
+    CLAUDE.md \
+    .claude \
+    Design \
+    prompts \
+    notes 2>/dev/null || true
+  if [ "$WITH_DOCS" -eq 1 ] && [ -d "$TARGET_DIR/docs/workflow-kit" ]; then
+    git -C "$TARGET_DIR" add docs/workflow-kit 2>/dev/null || true
+  fi
+  if git -C "$TARGET_DIR" diff --cached --quiet; then
+    info "nothing to commit (idempotent re-run)"
+  else
+    info "creating initial commit"
+    git -C "$TARGET_DIR" -c commit.gpgsign=false commit -q \
+      -m "chore: install workflow kit (project-local)" \
+      -m "Scaffolded by bin/install-workflow-kit. References ADR-009."
+  fi
+fi
+
+info "done. target: $TARGET_DIR"
