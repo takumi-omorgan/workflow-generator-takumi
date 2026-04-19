@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+._*
+
+# Obsidian (personal vault metadata — not kit content)
+.obsidian/
+
+# Claude Code — per-project state and dev-mode assets that must not ship
+.claude/worktrees/
+.claude/skills/
+.claude/settings.local.json
+
+# Dev-only scaffolding for dogfooding the kit on itself
+.dev/
+
+# Editor / IDE junk
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Backup and temp files
+*.bak
+*.bak.*
+*.tmp

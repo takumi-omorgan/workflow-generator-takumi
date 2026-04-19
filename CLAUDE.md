@@ -40,6 +40,24 @@ that gets generated for a target project — that one is rendered from
 - Never edit accepted ADRs in place. If a decision needs to change, add a
   new ADR that supersedes the old one.
 
+## Developing the kit on itself (dogfooding)
+
+The kit ships skills under `skills/` as distribution source. To use those
+skills while developing the kit itself (so `/prepare-issue`, `/release`,
+etc. are invokable in this repo), run once:
+
+```bash
+.dev/link-skills.sh
+```
+
+This symlinks each `skills/<name>/` directory into `.claude/skills/<name>/`.
+Both `.dev/` and `.claude/skills/` are gitignored, so this scaffolding
+never ships. Re-run the script only when the set of skill directories
+changes (add, rename, delete). Edits to a skill's `SKILL.md` are live on
+the next invocation without re-syncing.
+
+See `.dev/README.md` for rationale and mechanics.
+
 ## What this file is NOT
 
 This file is a stub added in Issue #1 so Claude Code has a minimal rules
