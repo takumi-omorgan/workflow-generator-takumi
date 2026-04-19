@@ -413,6 +413,53 @@ Best written after the skills and structural decisions are settled, so the docs 
 
 ---
 
+### 16. PRD template for external-LLM drafting
+
+**Status:** ready-for-adr
+**Target:** v-next
+**Captured:** 2026-04-17
+
+**Context / trigger:** `templates/` ships `mvp-template.md`, `build-out-plan-template.md`, `adr-template.md`, `issue-template.md`, `pr-template.md`, `claude-md-template.md`, `ai-summary-template.md`, `readme-template.md` — but no `prd-template.md`. Users who draft PRDs in external LLMs (Perplexity, ChatGPT) have no paste-in skeleton matching the kit's canonical 11-field shape from `skills/prd-normalizer/SKILL.md:46-63`. Only `examples/standard-prd-example.md` hints at shape, and it's an 8-section illustrative example rather than a reusable template. A provisional `templates/prd-template.md` was added locally to unblock drafting today, ahead of formalization — this entry records the work that's still owed.
+
+**Sketch of the idea:** Ship `templates/prd-template.md` with `{{UPPER_SNAKE}}` placeholders matching the 11 canonical fields (product name, one-line description, problem, target users, goal, user stories, core capabilities, non-goals, constraints and preferences, success signals, open questions). Document the flow: paste the template into an external LLM → get a filled PRD → save to `Design/prd.md` → run `prd-normalizer` (near-no-op if filled faithfully). Update `templates/README.md` index and add a reference from `docs/install.md` or the forthcoming `docs/workflow-guide.md` (#14).
+
+**Options in mind:**
+- 11-field canonical shape (recommended — closest to `prd-normalized.md`, fast-path through the normalizer).
+- 8-section standard shape matching `examples/standard-prd-example.md` — more familiar to users with prior PRD experience but forces a full normalization pass.
+- Ship both shapes with guidance on when to use each.
+- Do nothing — users derive shape from the example.
+
+**Open questions:** Does the template duplicate enough of `examples/standard-prd-example.md` that the example should be trimmed or cross-linked? Should the template ship with an accompanying "prompt for your LLM" snippet that briefs the external model on the format and hard-required fields? Does `prd-normalizer` need a fast-path for inputs already in the canonical shape (treat as pass-through after self-check)?
+
+**Consequences to think through:** Easier — lower friction for users who draft PRDs in external LLMs; downstream skills receive cleaner inputs. Harder — one more template to keep in lockstep with `prd-normalizer`'s canonical field list; drift would silently break the fast-path. Maintenance — low: a static skeleton with placeholder hints, versioned alongside the normalizer's field list.
+
+**Dependency note:** Independent of the execution-chain skills (#5–#11). Consumed as input by the already-shipped `prd-normalizer`. Best referenced from `docs/workflow-guide.md` (#14) once that lands. Does not block any other entry.
+
+---
+
+### 17. Strong README template for target projects
+
+**Status:** idea
+**Target:** v-next
+**Captured:** 2026-04-19
+
+**Context / trigger:** `templates/readme-template.md` (shipped via ADR-018 `/workflow-docs`) covers the essentials — name, overview, scope, how-to-run, key decisions — but is minimal compared to widely-cited conventions like the [Standard README spec](https://github.com/RichardLitt/standard-readme) and [makeareadme.com](https://www.makeareadme.com). Projects using the kit get a functional README, not a polished OSS-quality one. GitHub also visibly flags missing License sections on the repo homepage.
+
+**Sketch of the idea:** Enhance `templates/readme-template.md` (or ship a more opinionated `readme-strong-template.md` alongside) aligned with the Standard README spec. Add optional sections that `/workflow-docs` can fill when source data is available: badges row (license, CI status, version), features bullets (from MVP), roadmap (from build-out plan), contributing, license, acknowledgments. Keep section-omission behaviour so thin projects still get a clean README.
+
+**Options in mind:**
+- **Enhance in place** — one template, more optional sections. Simple, one source of truth.
+- **Ship two variants** — minimal (current) and strong, selected via `/workflow-docs --template=strong` or installer flag.
+- **Post-install tailoring skill** — follow-up skill asks the user which sections they want.
+
+**Open questions:** One opinionated template or a choose-your-own-adventure? What's the right default — lean or full-featured? Include a demo-gif slot even though the kit can't generate one? Does `/workflow-docs` grow to read CI config for badge URLs, or stay artifact-only?
+
+**Consequences to think through:** Easier: target projects look production-ready from day one; closes the "missing License" gap GitHub flags. Harder: more optional sections means more ways `/workflow-docs` can emit empty-ish output when source data is thin. Maintenance: convention-driven bits (badges, license format) drift over time, needs occasional template refresh.
+
+**Dependency note:** Extends `/workflow-docs` (ADR-018). Compatible with the existing marker-based re-run safety.
+
+---
+
 ## Future Entries
 
 Features for consideration in later versions. Ordered by theme.

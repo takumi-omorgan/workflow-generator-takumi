@@ -35,6 +35,8 @@ for the full list of non-goals.
 - **Plan-first execution** — Claude Code proposes a plan, you approve,
   then it implements.
 - **Three starting paths** — rough idea, standard PRD, or custom PRD.
+- **Full end-to-end flow** — see [`docs/workflow-guide.md`](docs/workflow-guide.md)
+  for idea → PRD → MVP → ADRs → issues → PRs → release in one pass.
 
 ## Quick start
 
@@ -137,4 +139,12 @@ what lives in the kit versus what gets generated inside a target project.
 
 ## Status
 
-Early development. Work is tracked in GitHub issues against milestones M1–M4.
+Milestones M1–M5 shipped. v1 is feature-complete for the "new project only"
+scope (see [ADR-002](Design/adr/adr-002-new-project-only-scope.md)); further
+work is tracked in `notes/feature-ideas.md` and as issues under future
+milestones.
+
+## License
+
+Not yet specified. A `LICENSE` file will be added before v1 is announced
+externally — see `notes/feature-ideas.md` for open questions.
