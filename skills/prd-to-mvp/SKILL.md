@@ -35,7 +35,7 @@ decisions and `issue-planner` (later issue) for the GitHub backlog.
 
 - **Required:** `Design/prd-normalized.md`.
 - **Optional:** user preference on project size — weekend project,
-  one-month, multi-month — to guide how aggressive the v1 cut is.
+  one-month, multi-month — to guide how aggressive the scope cut is.
 
 ## Outputs
 
@@ -46,14 +46,14 @@ decisions and `issue-planner` (later issue) for the GitHub backlog.
 
 Both files are produced from a single scoping conversation. The two
 artifacts are tightly coupled: phase 1 of the build-out plan must
-cover every in-v1 capability of the MVP.
+cover every in-scope capability of the MVP.
 
 ## Scoping protocol
 
 1. Read `Design/prd-normalized.md` end to end.
-2. Propose a v1 / deferred split for every core capability and user
-   story. Default to aggressive cuts; over-scoping is the more common
-   failure.
+2. Propose an in-scope / out-of-scope split for every core capability
+   and user story. Default to aggressive cuts; over-scoping is the
+   more common failure.
 3. Ask the user to confirm or adjust the split — one batched turn
    (≤ 5 questions). Include the project-size question if the user
    has not stated a preference.
@@ -85,14 +85,14 @@ The normalized PRD may contain `[TBD]` markers (see `prd-normalizer`).
 Do not write either file until all five hold:
 
 - [ ] Every core capability from the normalized PRD is classified
-  (in-v1 or deferred). None left ambiguous.
+  (in scope or out of scope). None left ambiguous.
 - [ ] The MVP success criteria are end-to-end user outcomes, not
   implementation tasks.
-- [ ] The "Not in v1" list combines (a) product-level non-goals from
+- [ ] The "Out of scope" list combines (a) product-level non-goals from
   the normalized PRD and (b) capabilities this skill deferred. The two
   sources are not conflated — readers can see why each item is out.
 - [ ] Build-out-plan phase 1's exit criteria collectively cover every
-  in-v1 capability.
+  in-scope capability.
 - [ ] No `{{...}}` template placeholders remain in either rendered
   file.
 

@@ -11,8 +11,8 @@ that gets generated for a target project — that one is rendered from
   templates, docs, and examples.
 - Users install the kit into a **target project** under `.claude/skills/`.
   See [`docs/repo-structure.md`](docs/repo-structure.md).
-- v1 is for **new projects only** (ADR-002). Do not add migration tooling
-  for existing repos.
+- The kit is scoped to **new projects only** (ADR-002). Do not add migration
+  tooling for existing repos.
 - The workflow is **GitHub-first** (ADR-004) and **plan-first, issue-by-issue**
   for execution (ADR-006).
 - The branching and PR model follows [GitHub Flow](https://docs.github.com/en/get-started/using-github/github-flow).

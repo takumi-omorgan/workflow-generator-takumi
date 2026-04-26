@@ -62,7 +62,7 @@ omitted.
 | Source                | What it contributes                                          |
 |-----------------------|--------------------------------------------------------------|
 | `Design/prd.md` or `Design/prd-normalized.md` | Project description, primary user, problem statement |
-| `Design/mvp.md`       | Product name, tagline, principles, In-v1, Not-in-v1, success criteria |
+| `Design/mvp.md`       | Product name, tagline, principles, In-scope, Out-of-scope, success criteria |
 | `Design/adr/*.md`     | "Key decisions" bullets — one line per ADR, newest first     |
 | `CLAUDE.md`           | Tech stack, commands (install, dev, test), current phase, milestone |
 
@@ -124,7 +124,7 @@ Each generated section has a deterministic rule for when it appears:
 | `overview`      | `Design/prd.md` / `prd-normalized.md` or `Design/mvp.md` exists |
 | `who-for`       | PRD / MVP identifies a primary user                         |
 | `status`        | `CLAUDE.md` has a non-placeholder `{{CURRENT_PHASE}}` or milestone |
-| `scope`         | `Design/mvp.md` has an "In v1" and/or "Not in v1" section   |
+| `scope`         | `Design/mvp.md` has an "In scope" and/or "Out of scope" section |
 | `how-to-run`    | `CLAUDE.md` has non-placeholder commands                    |
 | `key-decisions` | `Design/adr/` contains at least one ADR                     |
 | `more`          | Always — static pointers to `CLAUDE.md`, `Design/`          |
@@ -212,8 +212,8 @@ field is optional; missing fields drive section omission (see above).
 | `{{PRIMARY_USER}}`     | `Design/mvp.md` "Primary user", else PRD "Target user"    |
 | `{{CURRENT_PHASE}}`    | `CLAUDE.md` "Current phase" section                       |
 | `{{CURRENT_MILESTONE}}`| `CLAUDE.md` active milestone                              |
-| `{{IN_V1_BULLETS}}`    | `Design/mvp.md` "In v1" bullets                           |
-| `{{NOT_IN_V1_BULLETS}}`| `Design/mvp.md` "Not in v1" bullets                       |
+| `{{IN_SCOPE_BULLETS}}`     | `Design/mvp.md` "In scope" bullets                    |
+| `{{OUT_OF_SCOPE_BULLETS}}` | `Design/mvp.md` "Out of scope" bullets                |
 | `{{INSTALL_COMMAND}}`  | `CLAUDE.md` install command                               |
 | `{{DEV_COMMAND}}`      | `CLAUDE.md` dev command                                   |
 | `{{TEST_COMMAND}}`     | `CLAUDE.md` test command                                  |

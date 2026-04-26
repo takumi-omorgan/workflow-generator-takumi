@@ -21,7 +21,7 @@ stay on the keyboard and get an answer in under a second.
 
 - No GUI. This is a terminal tool.
 - No fuzzy matching across apps. You must name the app.
-- No user-contributed shortcuts in v1. Data is bundled.
+- No user-contributed shortcuts. Data is bundled.
 - No support for customised/rebound shortcuts. We show defaults only.
 
 ## Target user

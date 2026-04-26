@@ -25,7 +25,7 @@ from [ADR-003](../../Design/adr/adr-003-prd-intake-model.md).
 
 ## What this skill does not do
 
-- Does not scope to v1 / not-v1 — that is `prd-to-mvp` (Issue #7).
+- Does not scope to in/out of scope — that is `prd-to-mvp` (Issue #7).
 - Does not draft ADRs — that is `adr-writer` (Issue #7).
 - Does not rewrite the user's prose for tone or polish.
 - Does not invent content. Missing fields are marked `[TBD]`, not
@@ -71,9 +71,10 @@ names.
 1. Map each input section onto the matching canonical field.
 2. Fill the two identity fields (product name, one-line description) if
    missing — usually one or two questions.
-3. Scan non-goals for items that are really MVP-scope decisions ("in v1
-   we won't ship X"). Leave them here only if they are product-level;
-   otherwise mark them for `prd-to-mvp` and drop from non-goals.
+3. Scan non-goals for items that are really MVP-scope decisions ("not
+   in the first release"). Leave them here only if they are
+   product-level; otherwise mark them for `prd-to-mvp` and drop from
+   non-goals.
 4. Extract a "constraints and preferences" section if the input's prose
    mentions platform, stack, or timing hints; otherwise mark `[TBD]`.
 5. Run the self-check and write the file.

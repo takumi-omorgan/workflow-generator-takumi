@@ -42,8 +42,9 @@ just summarises the alternatives that were considered.
   server-side"*).
 - **Recommended:** `Design/prd-normalized.md` for the constraints
   context.
-- **Recommended:** `Design/mvp.md` for product principles and v1 scope
-  context — useful when an option's pros/cons depend on what v1 is.
+- **Recommended:** `Design/mvp.md` for product principles and MVP
+  scope context — useful when an option's pros/cons depend on what
+  the MVP includes.
 
 ## Output
 
@@ -103,6 +104,11 @@ When the input is multiple topics:
    Trivial does not mean skip the ADR; it means write it briefly.
 4. Render every file. Report back the list of numbers and titles
    created.
+5. After all files are rendered, run `bin/sync-adr-index` to refresh
+   the index in `Design/adr/README.md`. This keeps the index table
+   aligned with what is on disk (ADR-023). If the script reports
+   changes, include `Design/adr/README.md` in the next commit
+   alongside the new ADRs.
 
 ## How `[TBD]` fields are handled
 
@@ -122,6 +128,11 @@ Per file:
 - [ ] Consequences covers all four bullets ("None new" is allowed).
 - [ ] Date is today's date in `YYYY-MM-DD`.
 - [ ] No `{{...}}` template placeholders remain.
+
+After the batch:
+
+- [ ] `bin/sync-adr-index` ran cleanly. `Design/adr/README.md` is
+  staged alongside the new ADRs.
 
 ## Handoff
 

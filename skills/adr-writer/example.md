@@ -21,7 +21,7 @@ From the Pace Drift build-out plan:
 
 Plus context: `Design/prd-normalized.md` (constraints: web-only,
 laptop-first, single-user, local session) and `Design/mvp.md`
-(principles: local session only, no server-side persistence in v1).
+(principles: local session only, no server-side persistence).
 
 ## 2. Confirmation turn
 
@@ -29,7 +29,7 @@ The skill shows the numbered list back and asks one question:
 
 > Two ADRs to draft: (1) GPX parsing location, (2) test framework.
 > Anything to remove, reframe, or add before I draft? For the parsing
-> question, the constraint "no server-side persistence in v1" leans
+> question, the constraint "no server-side persistence" leans
 > toward browser-side, but I want to make sure the trade-offs are
 > spelled out — confirm?
 
@@ -54,7 +54,7 @@ The MVP constraints from Design/prd-normalized.md and Design/mvp.md
 are relevant:
 
 - Single-user, local session.
-- No server-side persistence in v1.
+- No server-side persistence.
 - Laptop-first; users open a recent race file from their machine.
 - Verbatim data — no AI smoothing or interpretation.
 
@@ -81,7 +81,7 @@ but still well within browser memory.
 - Cons: adds infrastructure to run and pay for; uploads the user's
   race file to a third party (privacy regression); breaks the
   static-site deployment model; offline use requires extra work;
-  contradicts the "no server-side persistence in v1" principle even
+  contradicts the "no server-side persistence" principle even
   if uploads are not stored.
 
 ## Decision
@@ -98,11 +98,11 @@ static site.
   to run; offline use works once the page is loaded; user files stay
   on the user's machine.
 - Harder: very large GPX files (multi-day ultras with high-frequency
-  recording) may hit browser memory limits — out of scope for v1 but
-  noted.
+  recording) may hit browser memory limits — out of scope for the
+  MVP but noted.
 - Maintain: the parsing library choice must remain browser-compatible.
 - Deferred: any feature that genuinely needs a server (saved history,
-  multi-race comparison, sharing) is out of v1 scope and would
+  multi-race comparison, sharing) is out of MVP scope and would
   re-open this decision.
 ```
 

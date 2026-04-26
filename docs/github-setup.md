@@ -1,7 +1,7 @@
 # GitHub Setup Guide
 
 How to set up GitHub for a **new target project** that uses the Claude Code
-Workflow Kit. The kit is GitHub-first in v1
+Workflow Kit. The kit is GitHub-first
 ([ADR-004](../Design/adr/adr-004-github-first-workflow-model.md)); this
 guide is the practical configuration that makes that decision real.
 

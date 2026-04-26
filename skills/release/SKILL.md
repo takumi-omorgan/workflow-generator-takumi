@@ -111,6 +111,11 @@ Before anything else, verify:
   `skills/changelog/` when running in the kit repo). Abort if missing
   with: *"/release requires the /changelog skill. Install it first
   (ADR-016, Issue #18)."*
+- **ADR index is in sync.** If `Design/adr/` exists, run
+  `bin/sync-adr-index --check` (or `.claude/bin/sync-adr-index --check`
+  in target projects). Refuse if it reports drift (exit 1) — the
+  release should not capture a stale index. The user must run
+  `bin/sync-adr-index`, commit the update, and retry. (ADR-023.)
 
 If any check fails, stop and report the specific failure. Do not
 attempt to fix the environment.

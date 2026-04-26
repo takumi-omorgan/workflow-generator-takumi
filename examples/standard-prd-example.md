@@ -70,7 +70,7 @@ varies in quality each time.
 - No GitHub release publishing — output is a markdown file, not an API
   call.
 - No PR-description summarization or LLM rewriting.
-- No CI/CD integration in v1.
+- No CI/CD integration.
 
 ## Success criteria
 - I can run `release-notes v0.4.0..v0.5.0 -o CHANGELOG.md` and the
@@ -109,9 +109,9 @@ and writes both planning artifacts.
 
 - **Principles:** Stdin/stdout-friendly. No installer. No LLM. One
   command, one purpose.
-- **In v1:** all five functional capabilities — tag-range argument,
+- **In scope:** all five functional capabilities — tag-range argument,
   `gh` PR fetch, label grouping, markdown output, `-o FILE` flag.
-- **Not in v1:**
+- **Out of scope:**
   - Product-level: GitHub release publishing; LLM rewriting; CI/CD
     integration.
   - Deferred-by-MVP-scoping: cross-repo aggregation; per-author

@@ -3,8 +3,8 @@
 ## What this is
 
 A single-command CLI that prints the keyboard shortcut for a named
-action in a named app, offline. Bundled data covers VS Code, Slack,
-and Chrome in v1.
+action in a named app, offline. Bundled data covers three apps:
+VS Code, Slack, and Chrome.
 
 ## Technology stack
 

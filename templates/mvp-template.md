@@ -3,8 +3,9 @@
   Filled by: the prd-to-mvp skill, or a human after PRD intake
   Output in a target project: Design/mvp.md (recommended) or similar
   The MVP statement is a scoping document. It turns a PRD into an
-  explicit yes/no list: what v1 must do, what it must not do, and how
-  you'll know you've succeeded. Keep it short — one page is healthy.
+  explicit yes/no list: what the first release must do, what it must
+  not do, and how you'll know you've succeeded. Keep it short — one
+  page is healthy.
 -->
 
 # {{PRODUCT_NAME}} — MVP
@@ -22,8 +23,9 @@ they can Z."}}
 
 ## Product goal
 
-{{Two or three sentences: what success looks like for v1. Resist the
-urge to list every future feature — this is the goal of the MVP only.}}
+{{Two or three sentences: what success looks like for the first
+release. Resist the urge to list every future feature — this is the
+goal of the MVP only.}}
 
 ## Target users
 
@@ -50,15 +52,15 @@ Name the alternatives and why they fall short.}}
 
 ## MVP scope
 
-### In v1
+### In scope
 
 - {{Capability 1 the MVP must ship.}}
 - {{Capability 2.}}
 - {{Capability 3.}}
 
-### Not in v1
+### Out of scope
 
-- {{Thing that is explicitly out of scope for v1.}}
+- {{Thing that is explicitly excluded from this release.}}
 - {{Another non-goal — tempting but deferred.}}
 - {{Include anything users commonly assume is in scope but is not.}}
 
@@ -75,9 +77,9 @@ The MVP succeeds if a user can:
 2. {{End-to-end outcome 2.}}
 3. {{End-to-end outcome 3.}}
 
-## Out of scope (deferred)
+## Deferred to later
 
-- {{Feature or capability intentionally pushed to Phase 2.}}
+- {{Feature or capability intentionally pushed to a later phase.}}
 - {{Include why it's deferred if the reason is not obvious.}}
 
 ## Acceptance criteria for this document
@@ -85,6 +87,6 @@ The MVP succeeds if a user can:
 This MVP statement is acceptable when it:
 
 - names a clear product and user,
-- lists what is in and out of v1 without ambiguity,
+- lists what is in and out of scope without ambiguity,
 - and can drive the build-out plan, ADRs, and issue backlog without
   further interpretation.

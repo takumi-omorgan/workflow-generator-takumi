@@ -21,13 +21,13 @@ approval, and creates them along with a Project board.
 
 ## MVP scope
 
-### In v1
+### In scope
 
 - Upload a GPX file.
 - Compute pace drift against a target pace.
 - Render a pace drift chart.
 
-### Not in v1
+### Out of scope
 
 - User accounts.
 - Multi-file comparisons.

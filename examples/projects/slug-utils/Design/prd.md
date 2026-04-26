@@ -29,7 +29,7 @@ does exactly two things well.
 - No framework-specific wrappers (React hooks, etc.).
 - No configuration object "just in case". One function, one
   signature, one behaviour.
-- No performance commitments in v1.
+- No performance commitments.
 
 ## Target user
 

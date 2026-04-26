@@ -2,9 +2,9 @@
 
 How to install the Claude Code Workflow Kit into a **new** software project.
 
-> **Before you start:** v1 of the kit is for **new projects only**. It does
+> **Before you start:** the kit is for **new projects only**. It does
 > not adapt or migrate existing repositories. If you want to add the
-> workflow to an existing codebase, this release is not the right fit —
+> workflow to an existing codebase, this kit is not the right fit —
 > see [What this kit does not support](#what-this-kit-does-not-support) below and
 > [ADR-002](../Design/adr/adr-002-new-project-only-scope.md).
 
@@ -248,7 +248,7 @@ The kit intentionally does **not** include:
   small team working on a single project at a time.
 - **Non-GitHub providers.** The workflow is GitHub-first
   ([ADR-004](../Design/adr/adr-004-github-first-workflow-model.md)).
-  GitLab, Bitbucket, and others are not supported in v1.
+  GitLab, Bitbucket, and others are not supported.
 - **Non-Claude AI tools.** The skills target Claude Code specifically
   ([ADR-006](../Design/adr/adr-006-claude-code-execution-model.md)).
 

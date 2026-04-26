@@ -323,6 +323,11 @@ accept one).
       explicitly marked with a `<!-- TODO: ... -->` comment.
 - [ ] Every referenced ADR either resolves to a file in
       `Design/adr/` or is explicitly marked TODO.
+- [ ] **ADR index is in sync.** Run `bin/sync-adr-index --check`. If
+      it reports drift (exit 1), the branch added or modified an
+      ADR without updating `Design/adr/README.md`. Run
+      `bin/sync-adr-index`, commit the index update on the same
+      branch, and re-show before opening the PR. (ADR-023.)
 - [ ] The user explicitly confirmed the body with `yes`.
 
 If any fail, fix and re-show before calling `gh`.

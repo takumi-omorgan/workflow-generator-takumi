@@ -40,7 +40,7 @@ and re-writing it every project.
 
 ## MVP scope
 
-### In v1
+### In scope
 
 - `slugify(input: string): string` — produces lowercase ASCII slugs
   with hyphen separators.
@@ -51,7 +51,7 @@ and re-writing it every project.
 - Characters with no obvious ASCII mapping are dropped silently.
 - A comprehensive test suite that covers the documented behaviour.
 
-### Not in v1
+### Out of scope
 
 - A configuration / options object on either function.
 - Non-Latin transliteration strategies (pinyin, Cyrillic, Greek).
@@ -72,7 +72,7 @@ The MVP succeeds if a user can:
 3. Call `unslugify("hello-world")` and get `"Hello world"`.
 4. Call `slugify("Café Déjà Vu")` and get `"cafe-deja-vu"`.
 
-## Out of scope (deferred)
+## Deferred to later
 
 - Configurable separators — every real consumer we've seen uses `-`.
 - A `transliterate` function exported standalone — wait for a real
@@ -85,6 +85,6 @@ The MVP succeeds if a user can:
 This MVP statement is acceptable when it:
 
 - names a clear product and user,
-- lists what is in and out of v1 without ambiguity,
+- lists what is in and out of scope without ambiguity,
 - and can drive the build-out plan, ADRs, and issue backlog without
   further interpretation.

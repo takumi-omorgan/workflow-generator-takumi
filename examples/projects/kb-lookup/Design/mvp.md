@@ -14,9 +14,9 @@ in a named app, offline, in under a second.
 ## Product goal
 
 Ship a single `kb` command that answers *"what's the shortcut for X in
-Y?"* without leaving the keyboard. v1 succeeds when a user can install
-the tool and get a correct shortcut for any bundled app/action pair in
-one command.
+Y?"* without leaving the keyboard. The MVP succeeds when a user can
+install the tool and get a correct shortcut for any bundled app/action
+pair in one command.
 
 ## Target users
 
@@ -34,14 +34,14 @@ command that prints one answer is strictly faster.
 
 ## Product principles
 
-1. Offline always. If it needs the network, it doesn't belong in v1.
+1. Offline always. If it needs the network, it doesn't belong in this release.
 2. One command, one answer. No interactive prompts, no menus.
 3. Platform-aware output — show the modifier keys the user sees.
 4. Bundled data beats user-supplied data until real users ask for it.
 
 ## MVP scope
 
-### In v1
+### In scope
 
 - `kb <app> <action>` command that prints one shortcut to stdout.
 - Bundled shortcut data for three apps: VS Code, Slack, Chrome.
@@ -49,7 +49,7 @@ command that prints one answer is strictly faster.
 - `kb <app>` with no action prints all shortcuts for that app.
 - Clear error message when app or action is unknown.
 
-### Not in v1
+### Out of scope
 
 - User-contributed or user-edited shortcut data.
 - Fuzzy matching across app names.
@@ -70,10 +70,11 @@ The MVP succeeds if a user can:
 2. Look up a shortcut for any bundled app/action with one command.
 3. See platform-correct modifier keys without extra configuration.
 
-## Out of scope (deferred)
+## Deferred to later
 
 - Adding more apps beyond the initial three — defer until real demand.
-- User-editable shortcut data — belongs in a v2 scoped around editing.
+- User-editable shortcut data — belongs in a future release scoped
+  around editing.
 - A `--search` flag that greps across apps — useful but not essential.
 
 ## Acceptance criteria for this document
@@ -81,6 +82,6 @@ The MVP succeeds if a user can:
 This MVP statement is acceptable when it:
 
 - names a clear product and user,
-- lists what is in and out of v1 without ambiguity,
+- lists what is in and out of scope without ambiguity,
 - and can drive the build-out plan, ADRs, and issue backlog without
   further interpretation.

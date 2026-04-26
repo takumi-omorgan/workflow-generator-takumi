@@ -41,15 +41,15 @@ The user runs `prd-to-mvp`. The normalized PRD has clear product-level
 non-goals from the user's "Not doing" list (no standalone app, no
 analytics, no DM reminders, no AI rewriting) and clear constraints
 from the user's "Things I care about" list (Slack-native, AWS Lambda,
-verbatim posts, single-team for v1).
+verbatim posts, single-team only).
 
 ### `Design/mvp.md` (abbreviated)
 
 - **Principles:** Slack-only. Verbatim, never paraphrased. Single
   team. Cron-shaped, not interactive.
-- **In v1:** listen to #team-eng for stand-up posts up to a cutoff;
+- **In scope:** listen to #team-eng for stand-up posts up to a cutoff;
   group by author; post a single summary to #team-leads at 10:00.
-- **Not in v1:**
+- **Out of scope:**
   - Product-level: standalone app; analytics or trends; DM reminders;
     AI rewriting.
   - Deferred-by-MVP-scoping: multi-team support; threaded-reply

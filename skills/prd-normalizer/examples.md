@@ -28,7 +28,7 @@ Me — a solo runner analyzing my own races after the fact on a laptop.
 ## Goal
 Provide a single-race pace-drift view that loads a GPX, takes a target
 pace or target splits, and shows where I was ahead or behind. Success
-for v1 is "I stop eyeballing it in Strava."
+for the first release is "I stop eyeballing it in Strava."
 
 ## User stories / scenarios
 - As a runner, I drop a GPX file into the app so that I can analyze a
@@ -52,7 +52,7 @@ for v1 is "I stop eyeballing it in Strava."
 - No multi-race comparison.
 - No social features, sharing, or feeds.
 - No training plans or coaching suggestions.
-- No mobile-optimized view for v1.
+- No mobile-optimized view in the first release.
 
 ## Success signals
 - A GPX from a recent race loads in under a few seconds.
@@ -75,8 +75,8 @@ product name field, and no one-line description. One batched question:
    pace drifted from target splits, from a single GPX file"* work?
 
 User confirms both. The input also mentions "web … on a laptop" and
-"no mobile-optimized view for v1" — enough to populate "constraints
-and preferences" without another question.
+"no mobile-optimized view in the first release" — enough to populate
+"constraints and preferences" without another question.
 
 ### Output — `Design/prd-normalized.md`
 
@@ -106,7 +106,7 @@ Me — a solo runner analyzing my own races after the fact on a laptop.
 ## Goal
 Provide a single-race pace-drift view that loads a GPX, takes a target
 pace or target splits, and shows where I was ahead or behind. Success
-for v1 is "I stop eyeballing it in Strava."
+for the first release is "I stop eyeballing it in Strava."
 
 ## User stories / scenarios
 - As a runner, I drop a GPX file into the app so that I can analyze a
@@ -132,7 +132,7 @@ for v1 is "I stop eyeballing it in Strava."
 - No training plans or coaching suggestions.
 
 ## Constraints and preferences
-- Web-only, laptop-first for v1. No mobile-optimized view yet.
+- Web-only, laptop-first. No mobile-optimized view yet.
 - Single-user, local-session use. No backend persistence implied.
 
 ## Success signals
@@ -146,10 +146,10 @@ for v1 is "I stop eyeballing it in Strava."
 - What happens with a GPX that has pauses or GPS dropouts?
 ```
 
-Note the transformation: "No mobile-optimized view for v1" was an MVP
-scope decision disguised as a non-goal. Moved to "constraints and
-preferences" as a product-level shape note. `prd-to-mvp` will decide
-the v1 cut.
+Note the transformation: "No mobile-optimized view in the first
+release" was an MVP scope decision disguised as a non-goal. Moved to
+"constraints and preferences" as a product-level shape note.
+`prd-to-mvp` will decide the in-scope cut.
 
 ### Self-check trace
 
@@ -200,7 +200,7 @@ Not doing:
 
 Stuff I haven't figured out:
 - What happens if someone posts in a thread vs. the main channel?
-- Should it handle multiple teams or just us for v1? Probably just us.
+- Should it handle multiple teams or just us to start? Probably just us.
 - What about time zones? Half the team is in London, half in NYC.
 ```
 
@@ -294,7 +294,7 @@ scrolling back through #team-eng to assemble her report.
 - Slack-native. No web UI.
 - Runs on existing AWS Lambda infrastructure.
 - Must preserve posts verbatim; no paraphrasing.
-- Single-team for v1.
+- Single-team only.
 
 ## Success signals
 - Priya stops manually scrolling to assemble her morning report.

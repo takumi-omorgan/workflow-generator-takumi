@@ -49,17 +49,17 @@ with no sign-up and no data leaving their machine.
 A recreational runner who wants post-race pace insight in under a minute.
 
 ## Product principles
-1. Local session only — no server-side persistence in v1.
+1. Local session only — no server-side persistence.
 2. Verbatim data — no AI smoothing or interpretation.
 3. One runner, one race, one view.
 
 ## MVP scope
-### In v1
+### In scope
 - Load a GPX from disk.
 - Compute pace drift against a target pace.
 - Render a single-page drift visualisation.
 
-### Not in v1
+### Out of scope
 - Multi-race comparison.
 - Saved history across sessions.
 - Sharing / export.
@@ -113,8 +113,8 @@ The skill:
    - `PRIMARY_USER = "A recreational runner who wants post-race pace insight in under a minute."`
    - `CURRENT_PHASE = "MVP — Phase 1: GPX parsing and drift computation."`
    - `CURRENT_MILESTONE = "MVP"`
-   - `IN_V1_BULLETS = ["Load a GPX from disk.", "Compute pace drift against a target pace.", "Render a single-page drift visualisation."]`
-   - `NOT_IN_V1_BULLETS = ["Multi-race comparison.", "Saved history across sessions.", "Sharing / export."]`
+   - `IN_SCOPE_BULLETS = ["Load a GPX from disk.", "Compute pace drift against a target pace.", "Render a single-page drift visualisation."]`
+   - `OUT_OF_SCOPE_BULLETS = ["Multi-race comparison.", "Saved history across sessions.", "Sharing / export."]`
    - `INSTALL_COMMAND = "pnpm install"`
    - `DEV_COMMAND = "pnpm dev"`
    - `TEST_COMMAND = "pnpm test"`
@@ -160,13 +160,13 @@ Active milestone: `MVP`.
 <!-- workflow-docs:end:status -->
 
 <!-- workflow-docs:start:scope -->
-## What is in v1
+## What is in scope
 
 - Load a GPX from disk.
 - Compute pace drift against a target pace.
 - Render a single-page drift visualisation.
 
-### Not in v1
+### Out of scope
 
 - Multi-race comparison.
 - Saved history across sessions.
@@ -232,7 +232,7 @@ source):
 <!-- workflow-docs:start:constraints -->
 ## Constraints
 
-- Local session only — no server-side persistence in v1.
+- Local session only — no server-side persistence.
 - Verbatim data — no AI smoothing or interpretation.
 - One runner, one race, one view.
 <!-- workflow-docs:end:constraints -->

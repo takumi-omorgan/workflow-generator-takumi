@@ -114,9 +114,9 @@ write these files; tolerate minor formatting drift.
 2. Pull **product principles** (`## Product principles`) to mention in
    issue bodies when a principle is directly relevant to a work item —
    keep this terse, do not copy the whole list into every issue.
-3. Pull the **In v1 / Not in v1** lists to sanity-check the backlog.
-   If a drafted issue title maps to something on the "Not in v1" list,
-   warn the user during the approval step.
+3. Pull the **In scope / Out of scope** lists to sanity-check the
+   backlog. If a drafted issue title maps to something on the "Out of
+   scope" list, warn the user during the approval step.
 
 ### From `Design/adr/`
 
@@ -306,9 +306,9 @@ one or a clear explanation of why they did not.
   exist here — only ADRs and the kit's own issues do. The skill will
   correctly stop at the "missing plan files" check. This is expected
   behaviour; the skill is designed to run in target projects.
-- **Draft maps to a "Not in v1" item:** warn at the approval step but
-  allow creation — the user may intentionally be planning a future
-  milestone.
+- **Draft maps to an "Out of scope" item:** warn at the approval step
+  but allow creation — the user may intentionally be planning a
+  future milestone.
 - **`--force` on a repo with pre-existing matches:** proceed, but
   remind the user in the preflight summary that duplicates will be
   created.

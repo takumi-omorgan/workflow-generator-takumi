@@ -26,8 +26,8 @@
   entirely by the workflow-docs skill if no source data is available):
     {{CURRENT_PHASE}}         Short line describing what is active now.
     {{CURRENT_MILESTONE}}     Example: "MVP", "v0.2"
-    {{IN_V1_BULLETS}}         Bulleted "In v1" list from Design/mvp.md.
-    {{NOT_IN_V1_BULLETS}}     Bulleted "Not in v1" list from Design/mvp.md.
+    {{IN_SCOPE_BULLETS}}      Bulleted "In scope" list from Design/mvp.md.
+    {{OUT_OF_SCOPE_BULLETS}}  Bulleted "Out of scope" list from Design/mvp.md.
     {{KEY_ADR_BULLETS}}       One bullet per ADR, newest first.
 
   The workflow-docs skill wraps each generated section in marker fences
@@ -66,13 +66,13 @@ Active milestone: `{{CURRENT_MILESTONE}}`.
 <!-- workflow-docs:end:status -->
 
 <!-- workflow-docs:start:scope -->
-## What is in v1
+## What is in scope
 
-{{IN_V1_BULLETS}}
+{{IN_SCOPE_BULLETS}}
 
-### Not in v1
+### Out of scope
 
-{{NOT_IN_V1_BULLETS}}
+{{OUT_OF_SCOPE_BULLETS}}
 <!-- workflow-docs:end:scope -->
 
 <!-- workflow-docs:start:how-to-run -->

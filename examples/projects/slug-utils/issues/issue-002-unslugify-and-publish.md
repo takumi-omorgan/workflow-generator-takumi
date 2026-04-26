@@ -13,7 +13,7 @@ Related ADR: `Design/adr/adr-001-public-api-surface.md`
 
 ## Goal
 
-Finish the v1 API surface and make `npm publish --dry-run` succeed
+Finish the in-scope API surface and make `npm publish --dry-run` succeed
 with correct `files`, `exports`, and types declarations.
 
 ## Why it matters

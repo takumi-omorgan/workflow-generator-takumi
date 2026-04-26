@@ -54,8 +54,8 @@ This skill exists to cover the "no PRD yet" path from
    able to do. Bulleted. No prioritization yet.
 6. **Non-goals** — things explicitly out of scope. Include anything the
    user commonly assumes is in scope but is not.
-7. **Success signals** — how the user will know v1 is working. Keep
-   concrete; avoid vanity metrics.
+7. **Success signals** — how the user will know the first release is
+   working. Keep concrete; avoid vanity metrics.
 8. **Open questions** — what the user does not yet know. It is fine —
    and expected — for this section to be non-empty.
 

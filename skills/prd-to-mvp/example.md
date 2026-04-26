@@ -22,17 +22,18 @@ three open questions. See the prd-normalizer example for the full text.
 Batched, one turn:
 
 1. Project size — weekend, one-month, multi-month?
-2. Of the four core capabilities, the v1 cut feels like all four
-   (load GPX, accept target, compute drift, render chart + table).
-   That's the whole product. Confirm?
-3. Target input format is `[TBD]` in the open questions. For v1, pick
-   one — single overall pace? Per-kilometer splits? Per-mile splits?
+2. Of the four core capabilities, the in-scope cut feels like all
+   four (load GPX, accept target, compute drift, render chart +
+   table). That's the whole product. Confirm?
+3. Target input format is `[TBD]` in the open questions. For the
+   first release, pick one — single overall pace? Per-kilometer
+   splits? Per-mile splits?
 4. Phase shape — does *foundation → UI → validation* in three phases
    match how you'd build it, or do you want to combine?
 
-User answers: weekend project; yes all four capabilities are v1; pick
-single overall target pace for v1 (per-split as Phase 2 work); three
-phases is fine.
+User answers: weekend project; yes all four capabilities are in
+scope; pick single overall target pace for the first release
+(per-split as Phase 2 work); three phases is fine.
 
 ## 3. Output — `Design/mvp.md`
 
@@ -53,8 +54,9 @@ loaded from a single GPX file.
 ## Product goal
 
 Replace the manual "scroll through Strava and eyeball it" workflow
-with a single-race drift view. Success for v1 is "I stop opening
-Strava to answer the where-did-I-fade question after a race."
+with a single-race drift view. Success for the first release is "I
+stop opening Strava to answer the where-did-I-fade question after a
+race."
 
 ## Target users
 
@@ -73,12 +75,12 @@ should and I usually give up.
 
 1. One race at a time. The product never grows multi-race comparison.
 2. Verbatim data. No AI smoothing or interpretation of the GPX.
-3. Local session only. No accounts, no server-side persistence in v1.
+3. Local session only. No accounts or server-side persistence.
 4. Laptop-first. Mobile is a deliberate non-goal.
 
 ## MVP scope
 
-### In v1
+### In scope
 
 - Load and parse a single GPX file dropped into the page.
 - Accept one target pace (e.g. "4:30/km") as input.
@@ -86,7 +88,7 @@ should and I usually give up.
 - Render a drift chart across the course.
 - Render a split-by-split table.
 
-### Not in v1
+### Out of scope
 
 Product-level non-goals from the PRD:
 - User accounts or authentication.
@@ -97,7 +99,7 @@ Product-level non-goals from the PRD:
 
 Deferred by this MVP scoping:
 - Per-kilometer or per-mile target splits (single overall pace only
-  in v1).
+  in the first release).
 - Mobile-optimized view.
 - Handling of GPX files with paused recording or GPS dropouts.
 
@@ -117,7 +119,7 @@ The MVP succeeds if a user can:
 3. Stop opening Strava to answer "where did I fade?" for the rest of
    their race season.
 
-## Out of scope (deferred)
+## Deferred to later
 
 - Per-split target input — Phase 2 once the single-pace flow is shipped.
 - Mobile view — only if the laptop-first version is actually used
@@ -129,7 +131,7 @@ The MVP succeeds if a user can:
 This MVP statement is acceptable when it:
 
 - names a clear product and user — yes,
-- lists what is in and out of v1 without ambiguity — yes,
+- lists what is in and out of scope without ambiguity — yes,
 - and can drive the build-out plan, ADRs, and issue backlog without
   further interpretation — yes (see Design/build-out-plan.md).
 
@@ -146,10 +148,10 @@ unresolved (Phase 2 decision).
 
 ## Objective
 
-Ship the v1 of Pace Drift defined in Design/mvp.md: a static web app
+Ship the MVP of Pace Drift defined in Design/mvp.md: a static web app
 that renders a drift chart and split table from one GPX file and one
 target pace. The plan covers everything from repo bootstrap to a
-locally-runnable v1.
+locally-runnable first release.
 
 ## Build strategy
 
@@ -162,8 +164,8 @@ locally-runnable v1.
 
 ## Scope
 
-- In scope: the five in-v1 capabilities from Design/mvp.md.
-- Out of scope: every item in the "Not in v1" list of Design/mvp.md.
+- In scope: the five in-scope capabilities from Design/mvp.md.
+- Out of scope: every item in the "Out of scope" list of Design/mvp.md.
 - Assumptions: a TypeScript browser app is acceptable; user has a
   local toolchain (Node, browser); user has at least one real GPX
   file to test against.
@@ -216,10 +218,10 @@ pace-drift/
 
 ### Phase 3 — Validation and polish
 
-- **Goal:** confidence the v1 is correct on real race data.
+- **Goal:** confidence the MVP is correct on real race data.
 - **Deliverables:** dry-run on at least two real races; README; basic
   error messages for unparseable GPX.
-- **Exit criteria:** v1 success criteria from Design/mvp.md hold on
+- **Exit criteria:** MVP success criteria from Design/mvp.md hold on
   two distinct GPX files.
 
 ## Milestone recommendation
@@ -258,8 +260,8 @@ pace-drift/
 - Unit tests for parser and drift modules — happy path, edge cases
   (empty file, single point), and known-bad inputs.
 - Manual dry-runs on at least two real-race GPX files in Phase 3 —
-  the only honest way to validate the v1 success criteria.
-- No integration tests are needed in v1; there is no backend.
+  the only honest way to validate the MVP success criteria.
+- No integration tests are needed for the MVP; there is no backend.
 
 ## Risks and mitigations
 
@@ -267,7 +269,7 @@ pace-drift/
 
 Different recorders produce slightly different GPX. *Mitigation:*
 Phase 3 dry-runs on files from at least two different sources
-(watch, phone) before declaring v1 done.
+(watch, phone) before declaring the MVP done.
 
 ### Risk 2 — Drift math is wrong but plausible-looking
 
@@ -298,13 +300,14 @@ question.
 ## 5. Self-check trace
 
 - [x] Every core capability from the normalized PRD (4 of them) is
-      classified in-v1; no ambiguity.
+      classified in scope; no ambiguity.
 - [x] MVP success criteria are user outcomes ("drop a GPX and see the
       chart in seconds"), not implementation tasks.
-- [x] The "Not in v1" list separates the five product-level non-goals
-      from the three deferred items, with each labelled by source.
-- [x] Phase 1 exit criteria cover the in-v1 capabilities related to
-      parsing and computation; Phase 2 covers the UI capabilities;
+- [x] The "Out of scope" list separates the five product-level
+      non-goals from the three deferred items, with each labelled by
+      source.
+- [x] Phase 1 exit criteria cover the in-scope capabilities related
+      to parsing and computation; Phase 2 covers the UI capabilities;
       together they cover all five.
 - [x] No `{{...}}` placeholders remain in either rendered file.
 

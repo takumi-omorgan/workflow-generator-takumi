@@ -36,23 +36,24 @@ applies. It asks two identity-field questions (product name, one-line
 description) and writes `Design/prd-normalized.md` — the canonical
 11-field shape that downstream skills consume.
 
-A small relocation happens: the draft's *"No mobile-optimized view for
-v1"* item moves out of non-goals and into "Constraints and preferences"
-because it is an MVP-scope decision, not a product-level non-goal.
-That distinction matters for the next step.
+A small relocation happens: the draft's *"No mobile-optimized view in
+the first release"* item moves out of non-goals and into "Constraints
+and preferences" because it is an MVP-scope decision, not a
+product-level non-goal. That distinction matters for the next step.
 
 → Full input/output trace: [`skills/prd-normalizer/examples.md`](../skills/prd-normalizer/examples.md) (Example 1).
 
 ## Step 3 — `prd-to-mvp`
 
 The user runs `prd-to-mvp`. The skill reads `Design/prd-normalized.md`,
-proposes a v1 / deferred split, asks four batched questions (project
-size, capability cut, target-input format, phase shape), and writes
-two files in one run:
+proposes an in-scope / out-of-scope split, asks four batched questions
+(project size, capability cut, target-input format, phase shape), and
+writes two files in one run:
 
-- `Design/mvp.md` — five in-v1 capabilities, eight out-of-v1 items
-  separated by source (product-level non-goals vs. deferred-by-MVP
-  scoping), four product principles, three end-to-end success criteria.
+- `Design/mvp.md` — five in-scope capabilities, eight out-of-scope
+  items separated by source (product-level non-goals vs.
+  deferred-by-MVP scoping), four product principles, three end-to-end
+  success criteria.
 - `Design/build-out-plan.md` — three phases (Foundation → UI →
   Validation), three milestones, twelve initial backlog issues, and a
   closing **"Decisions needing ADRs"** list with two items.

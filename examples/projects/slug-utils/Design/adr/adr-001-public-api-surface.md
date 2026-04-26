@@ -35,7 +35,7 @@ export function slugify(input: string, options?: SlugifyOptions): string;
 - Pros: leaves a growth path for features we might want later
   (separators, casing).
 - Cons: directly contradicts MVP scope ("No configuration object
-  'just in case'"). Invites future scope creep into v1.
+  'just in case'"). Invites future scope creep into the initial release.
 
 ## Decision
 
@@ -43,13 +43,13 @@ Go with **Option A**. The MVP explicitly forbids an options object
 and commits to predictable behaviour. If a real user later needs
 configuration, we add it behind a new exported function
 (`slugifyWith(options)`) rather than mutating the existing
-signature. That keeps the "two functions" guarantee of v1 intact
-for anyone who imported it early.
+signature. That keeps the "two functions" guarantee of the initial
+release intact for anyone who imported it early.
 
 ## Consequences
 
-- The library has a bright line between v1 (string in, string out)
-  and any future extension (separate function).
+- The library has a bright line between the initial release (string
+  in, string out) and any future extension (separate function).
 - Readers of the source can trace the entire control flow from two
   fixed entry points.
 - Changing the separator or casing later requires a new exported

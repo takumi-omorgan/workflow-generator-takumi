@@ -53,7 +53,7 @@ If no prompt file exists yet, stop and tell the user to run
   as a fallback, `notes/issue*-prompt.md`. Ask the user which to use.
   Do nothing else until they answer.
 
-No other flags are defined for v1. Edge-case behaviour (branch exists,
+No other flags are defined. Edge-case behaviour (branch exists,
 dirty tree, plan denied) is handled interactively — see the
 **Edge cases** section rather than multiplying flags.
 
@@ -136,6 +136,11 @@ confirming the working tree is clean.
   conversation. Do not invent them.
 - **Tests live in the same commit as the code they cover**, not in a
   separate "add tests" commit (see **Test-alongside**).
+- **ADR index sync.** Before any commit that includes a file under
+  `Design/adr/adr-*.md` (new, modified, or status-changed), run
+  `bin/sync-adr-index` and stage `Design/adr/README.md` alongside the
+  ADR files. Per ADR-023; keeps the index in sync with the
+  filesystem on every commit that touches ADRs.
 
 Example for this very issue:
 

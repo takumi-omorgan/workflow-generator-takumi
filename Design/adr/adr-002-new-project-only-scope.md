@@ -1,8 +1,13 @@
 
 # ADR-002: Limit v1 to new-project setup only
 
-**Status:** accepted
+**Status:** superseded by [ADR-022](adr-022-drop-version-qualifiers-from-kit-scope.md)
 **Date:** 2026-04-12
+
+> **Note (2026-04-26):** Superseded by ADR-022 to drop the "v1"
+> qualifier from kit-scope language. The substantive decision is
+> unchanged: the kit is scoped to new projects only. Per project rule,
+> the original text below is preserved as the historical record.
 
 ## Context
 

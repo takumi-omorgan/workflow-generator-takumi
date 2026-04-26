@@ -144,5 +144,19 @@ Milestones M1–M5 shipped. The kit is feature-complete for the
 
 ## License
 
-Not yet specified. A `LICENSE` file will be added before the kit is
-announced externally — see `notes/feature-ideas.md` for open questions.
+The kit is released under the [MIT License](LICENSE) (see
+[ADR-025](Design/adr/adr-025-license.md) for the rationale).
+
+The MIT license covers the **kit itself**: the templates, skills,
+scripts, and documentation shipped in this repository. It does not
+propagate to projects you build with the kit.
+
+When you run the kit, you author your own content — your
+`Design/mvp.md`, your `Design/prd.md`, your individual ADRs, your
+prompts, and the source code, tests, and build artifacts of the
+project you are building. **That work is yours.** You choose its
+license (or none) independently of the kit's.
+
+The installer can scaffold a starter `LICENSE` into a target project
+with `--license=mit --license-holder="Your Name"`, but does not do
+so by default — license choice is the project author's call.

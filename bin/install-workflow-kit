@@ -238,6 +238,24 @@ for skill_dir in "$KIT_ROOT/skills"/*/; do
   cp -R "$skill_dir" "$dest"
 done
 
+# 1b. Copy bin/sync-adr-index into the target's .claude/bin/ so target
+#     projects can keep their Design/adr/README.md in sync. Per ADR-023.
+SYNC_SRC="$KIT_ROOT/bin/sync-adr-index"
+SYNC_DEST_DIR="$TARGET_DIR/.claude/bin"
+SYNC_DEST="$SYNC_DEST_DIR/sync-adr-index"
+if [ -f "$SYNC_SRC" ]; then
+  mkdir -p "$SYNC_DEST_DIR"
+  if [ -f "$SYNC_DEST" ] && [ "$FORCE" -ne 1 ]; then
+    info "skip .claude/bin/sync-adr-index (exists)"
+  else
+    info "copy .claude/bin/sync-adr-index"
+    cp "$SYNC_SRC" "$SYNC_DEST"
+    chmod +x "$SYNC_DEST"
+  fi
+else
+  warn "kit bin/sync-adr-index not found; skipping ADR-index sync helper"
+fi
+
 # 2. Seed prompts/_template.md. Prefer the canonical kit location; fall
 #    back to notes/issue-prompt.md (the historical home, per ADR-008).
 PROMPT_TEMPLATE_SRC=""

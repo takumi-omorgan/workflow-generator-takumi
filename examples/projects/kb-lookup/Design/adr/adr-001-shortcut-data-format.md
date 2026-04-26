@@ -38,7 +38,7 @@ to offline operation, so remote lookups are off the table.
 Go with **Option A**: one JSON file per app, stored under
 `kb_lookup/data/<app>.json` and loaded via `importlib.resources`.
 Comments-in-data are a "nice to have" not worth a runtime dependency
-in v1. The per-app file layout also keeps future app-additions to
+in scope. The per-app file layout also keeps future app-additions to
 small, reviewable PRs — consistent with the MVP's "bundled data beats
 user-supplied data" principle.
 

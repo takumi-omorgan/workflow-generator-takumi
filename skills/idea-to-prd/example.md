@@ -24,7 +24,7 @@ and asks the user a batched set of questions. For this idea, the
 batch looks like:
 
 1. Who is this for — just you, or other runners too?
-2. Web only, or does a mobile view matter for v1?
+2. Web only, or does a mobile view matter for the first release?
 3. What would make this feel "done" to you — a single race view that
    loads a GPX and shows a drift chart, or something richer?
 4. Anything you want to rule out up front beyond social and training
@@ -35,11 +35,11 @@ both were clear enough from the rough idea to draft without input.
 
 ## 3. User's answers
 
-1. Just me for v1; other runners is a Phase 2 idea.
+1. Just me to start; other runners is a Phase 2 idea.
 2. Web only. I'll open it on my laptop after a race.
 3. Drop a GPX, pick a target pace or target splits, see a drift chart
    and a split-by-split table. That's it.
-4. No accounts, no saved history, no multi-race compare in v1.
+4. No accounts, no saved history, no multi-race compare in the first release.
 
 ## 4. Output — `Design/prd.md` in the target project
 
@@ -62,7 +62,7 @@ Me — a solo runner analyzing my own races after the fact on a laptop.
 
 Provide a single-race pace-drift view that loads a GPX, takes a target
 pace or target splits, and shows where I was ahead or behind. Success
-for v1 is "I stop eyeballing it in Strava."
+for the first release is "I stop eyeballing it in Strava."
 
 ## User stories / scenarios
 
@@ -89,7 +89,7 @@ for v1 is "I stop eyeballing it in Strava."
 - No multi-race comparison.
 - No social features, sharing, or feeds.
 - No training plans or coaching suggestions.
-- No mobile-optimized view for v1.
+- No mobile-optimized view in the first release.
 
 ## Success signals
 
@@ -100,7 +100,7 @@ for v1 is "I stop eyeballing it in Strava."
 ## Open questions
 
 - Target input format — single pace vs. per-kilometer vs. per-mile?
-  Probably all three eventually, but pick one for v1.
+  Probably all three eventually, but pick one for the first release.
 - Units — metric only, or both? I run in km but some races are marked
   in miles.
 - What happens with a GPX that has pauses or GPS dropouts?
@@ -110,7 +110,7 @@ for v1 is "I stop eyeballing it in Strava."
 
 - Eight-section standard-PRD shape — `prd-normalizer`'s standard-PRD
   path can consume it without special-casing.
-- No MVP scoping language — no "in v1 / not in v1" split, no
+- No MVP scoping language — no "in scope / out of scope" split, no
   prioritization. That is `prd-to-mvp`'s job.
 - No ADR-style decisions — only product intent. That is `adr-writer`'s
   job.

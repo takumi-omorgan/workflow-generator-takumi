@@ -20,7 +20,7 @@ host platform.
 ## Why it matters
 
 This is the MVP's headline capability (see `Design/mvp.md` → "MVP
-scope → In v1"). Without it, the loader from #1 has no user.
+scope → In scope"). Without it, the loader from #1 has no user.
 
 ## Tasks
 
