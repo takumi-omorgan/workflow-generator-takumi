@@ -2,6 +2,24 @@
 
 All notable changes to this project.
 
+## v3.1.0 — PRD template for offline drafting (2026-04-26)
+
+Range: `v3.0.0..v3.1.0`
+
+**MINOR** per [ADR-026](Design/adr/adr-026-kit-versioning-policy.md): a new template is an additive change. Existing target projects adopt it without modifying anything they already have.
+
+### Features
+
+- Ship [`templates/prd-template.md`](templates/prd-template.md) — a canonical PRD shape mirroring `prd-normalizer`'s 11 fields one-to-one, so users can draft a PRD offline (by hand or via any external LLM) and hand the result to `prd-normalizer` as a near-pass-through ([`cd675e7`](https://github.com/olivermorgan2/workflow-generator/commit/cd675e7), [#32](https://github.com/olivermorgan2/workflow-generator/issues/32), [ADR-027](Design/adr/adr-027-prd-template.md)).
+
+### Docs
+
+- Wire the new template into `templates/README.md`, `skills/prd-normalizer/SKILL.md`, and `skills/idea-to-prd/SKILL.md` so the standard-PRD intake path now has an explicit drafting starting point ([`9e78182`](https://github.com/olivermorgan2/workflow-generator/commit/9e78182), [#32](https://github.com/olivermorgan2/workflow-generator/issues/32), [ADR-027](Design/adr/adr-027-prd-template.md)).
+
+### Process
+
+- Mark feature-ideas #16 (PRD template for external-LLM drafting) `shipped`, link to ADR-027. Audit-trail prompt for the work landed under `prompts/issue-032-prd-template.md` ([`fb30bed`](https://github.com/olivermorgan2/workflow-generator/commit/fb30bed)).
+
 ## v3.0.0 — kit hygiene and licensing (2026-04-26)
 
 Range: `v2.0.0..v3.0.0`
