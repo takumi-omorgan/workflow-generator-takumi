@@ -462,9 +462,10 @@ Best written after the skills and structural decisions are settled, so the docs 
 
 ### 18. License selection and `LICENSE` file
 
-**Status:** idea
+**Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-19
+**ADR:** [ADR-025](../Design/adr/adr-025-license.md)
 
 **Context / trigger:** The repo has no `LICENSE` file and the README currently says "not yet specified" (added 2026-04-19 alongside v2.0.0). GitHub visibly flags missing licenses on the repo homepage, and without one the default copyright applies — downstream users technically cannot redistribute, modify, or fork the kit. For a kit whose whole purpose is to be installed into other projects, this is a soft blocker on external adoption. Separately: target projects scaffolded via the installer also ship without a license, pushing the same problem one layer down.
 
@@ -506,6 +507,56 @@ Best written after the skills and structural decisions are settled, so the docs 
 **Consequences to think through:** Easier: users see a pristine, minimal repo; internal ADRs, prompts, feature-ideas, and working notes stay in the development process, not in the distribution. Harder: one more repo to set up, one sync Action to maintain, tag-alignment between repos needs discipline (broken sync = version skew between dev tags and public tags). Maintenance: the sync Action is small (~50 lines) but any change to the public-paths list requires updating it. Ecosystem impact: external issues and stars accrue only on the public repo; this repo's issue tracker stays internal.
 
 **Dependency note:** Blocked by #18 (License) — the public repo needs a license before external release. Interacts with the plugin-distribution future entry — if the kit later ships as a Claude Code plugin, the public repo becomes the plugin source rather than a clone-install target.
+
+---
+
+### 20. Auto-sync `Design/adr/README.md` index
+
+**Status:** shipped
+**Target:** v-next
+**Captured:** 2026-04-26
+**ADR:** [ADR-023](../Design/adr/adr-023-auto-sync-adr-index.md)
+
+**Context / trigger:** The ADR index in `Design/adr/README.md` has drifted out of sync with the filesystem repeatedly — at one point listing only ADR-001 through ADR-006 while the directory contained 21 ADRs. Index drift means readers can't find ADRs by title or check status without scanning the directory directly. Status transitions (e.g., supersession) compound the problem: ADR-002 was superseded by ADR-022 and the index needed a manual update for the new row. Today, every ADR add or status change requires the author to also edit the README.
+
+**Sketch of the idea:** A `bin/sync-adr-index` regenerator that scans `Design/adr/adr-*.md`, parses title and status from each, and rewrites a marker-fenced (`<!-- adr-index:start -->` / `<!-- adr-index:end -->`) region of `Design/adr/README.md`. Editorial text outside the fence is preserved. The script is idempotent and ships with the kit so target projects get the same behaviour. The ADR-touching skills (`adr-writer`, `claude-issue-executor`, `pr-review-packager`, `release`) call it before commit/PR/tag. Optional belt-and-braces: a git pre-commit hook installed by `install-workflow-kit` that runs the script if any `Design/adr/adr-*.md` is staged.
+
+**Options in mind:**
+- **Skill-level only** — only adr-writer regenerates. Simple, but skips manual-edit and out-of-band cases.
+- **Script + skill integrations** — recommended. Deterministic, reusable, idempotent. Catches the common Claude-driven paths.
+- **Script + skill integrations + git hook** — adds a backstop for manual commits where Claude isn't involved. Hooks are bypassable (`--no-verify`) and fragile across machines, so this is belt-and-braces, not load-bearing.
+- **Generated whole-file README** — fully regenerated each run; manual editorial cannot live in the file. Rejected: the index already coexists with explanatory prose.
+
+**Open questions:** Should the script also detect and warn about supersession cycles or orphaned `superseded by ADR-NNN` references? Should it sort by ADR number only, or group by status (accepted, superseded, deprecated)? Does the optional git hook get installed by default or behind a flag?
+
+**Consequences to think through:** Easier: index drift becomes structurally impossible for skill-driven flows; ADR adds and status changes don't need a separate manual edit. Harder: a small script to maintain; if its parser breaks the regeneration is wrong silently (mitigation: idempotent + diffable + run in CI). Maintenance: marker fences must stay intact in the README. The script is shell-only, no new runtime deps.
+
+**Dependency note:** Touches several existing skills (`adr-writer`, `claude-issue-executor`, `pr-review-packager`, `release`) and `bin/install-workflow-kit`. No prior ADR blocks this; it implements a hygiene rule on top of ADR-005 (documentation architecture).
+
+---
+
+### 21. Replace MVP "v1" vocabulary with version-neutral language
+
+**Status:** shipped
+**Target:** v-next
+**Captured:** 2026-04-26
+**ADR:** [ADR-024](../Design/adr/adr-024-mvp-vocabulary-versus-v1.md)
+
+**Context / trigger:** The kit's MVP scoping framework uses "In v1 / Not in v1" as the canonical headings — appearing in `templates/mvp-template.md`, `templates/readme-template.md`, the `prd-to-mvp` / `idea-to-prd` / `prd-normalizer` skills, `issue-planner`, `workflow-docs`, and example projects. ADR-022 just removed kit-self "v1" qualifiers because they were misleading after the kit shipped v2.0.0. The same wording survives in the MVP framework with a different meaning ("the target project's first release"), and a reader can reasonably ask whether the two uses should align. There is also a collision risk: a target project at its own v2 still has "In v1" headings in its MVP doc.
+
+**Sketch of the idea:** Decide whether to keep the current MVP vocabulary as-is (it's a deliberate scoping device, not a kit-version leak) or rebrand to version-neutral phrasing — e.g., `In MVP / Not in MVP`, `In scope / Out of scope`, `Initial release / Deferred`. A rebrand touches ~7 skills, 3 templates, the example projects, and any CHANGELOG/README references; backwards compat for already-installed kits would need a migration note.
+
+**Options in mind:**
+- **Keep "In v1 / Not in v1"** — recommended. The framing is well-understood, integrates with PRD → MVP → issue planning naming, and parallels common SaaS/product practice. The "v1" here is the project's first cut, not a kit version.
+- **`In MVP / Not in MVP`** — clearest about *what* it is (MVP scope), no version-shaped collision. Slight redundancy ("MVP" already in the file/section names).
+- **`In scope / Out of scope`** — most generic, works for non-MVP scoping too. Loses the "first cut, more later" connotation that "v1" gives.
+- **`Initial release / Deferred`** — explicit about the temporal axis. Wordier in headings.
+
+**Open questions:** If we rebrand, do we migrate existing target-project MVP docs or just change going forward? Does the term need to match whatever appears in the PRD template (currently uses "v1" too)? Is there a survey of how downstream users actually use these headings before changing?
+
+**Consequences to think through:** Keep: zero migration work, vocabulary is stable, but the cosmetic confusion-with-kit-version persists for new readers. Rebrand: cleaner separation, but touches a lot of files; existing example-project text needs updating; old installed kits drift from the new convention until rebuilt.
+
+**Dependency note:** Standalone. If accepted, sequence after ADR-022 (already shipped) so the kit-self cleanup is the precedent for the MVP-vocab cleanup.
 
 ---
 
