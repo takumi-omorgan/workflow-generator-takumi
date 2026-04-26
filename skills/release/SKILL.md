@@ -202,7 +202,13 @@ gh release create vX.Y.Z \
     --notes-file "$NOTES" \
     [--draft] [--prerelease]
 
-# 5. Optional: update build-out plan phase status.
+# 5. Upload bootstrap-workflow-kit as a release asset (per ADR-029).
+# Only if bin/bootstrap-workflow-kit exists in the repo.
+if [ -f bin/bootstrap-workflow-kit ]; then
+  gh release upload vX.Y.Z bin/bootstrap-workflow-kit
+fi
+
+# 6. Optional: update build-out plan phase status.
 # Only if --milestone-phase=N was passed and Design/build-out-plan.md exists.
 ```
 

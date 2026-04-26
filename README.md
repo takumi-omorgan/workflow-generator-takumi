@@ -98,18 +98,12 @@ for the full list of non-goals.
 
 > **Skip this section if you already have Git, the GitHub CLI, and
 > Claude Code installed and `gh` authenticated.** This setup runs
-> once per machine, not once per project.
+> once per machine, not once per project — and there is no
+> long-lived kit clone to maintain.
 
 Install Git, GitHub CLI, and Claude Code, then authenticate `gh`.
 Verification commands are in
 [`docs/install.md`](docs/install.md#1-prerequisites).
-
-Clone this kit once, anywhere outside your projects. You reuse this
-clone for every new project you start:
-
-```bash
-git clone git@github.com:olivermorgan2/workflow-generator.git ~/src/workflow-generator
-```
 
 ### Per new project
 
@@ -129,18 +123,37 @@ both the GitHub repo and the local folder.
    cd my-project
    ```
 
-3. Run the installer from your kit clone. It scaffolds the folders,
-   copies the skills into `.claude/skills/`, renders `CLAUDE.md`
-   from the template, and makes the initial commit:
+3. Run the kit's bootstrap installer. It fetches the kit at a pinned
+   version from GitHub, scaffolds the folders, copies the skills
+   into `.claude/skills/`, renders `CLAUDE.md` from the template,
+   makes the initial commit, and discards the temporary kit copy
+   when done:
 
    ```bash
-   ~/src/workflow-generator/bin/install-workflow-kit --project-name=my-project
+   bash <(curl -fsSL https://github.com/olivermorgan2/workflow-generator/releases/download/v3.2.0/bootstrap-workflow-kit) \
+     --project-name=my-project
    ```
 
    Add `--with-docs` if you want the kit's reference docs copied
-   into `docs/workflow-kit/` alongside the project. See `--help` for
-   the full flag list. The installer is idempotent — re-running it
-   on an already-installed project skips existing files.
+   into `docs/workflow-kit/` alongside the project. See `--help`
+   for the full flag list. The installer is idempotent —
+   re-running it on an already-installed project skips existing
+   files.
+
+   Prefer to inspect the script before running, or pipe-to-bash
+   makes you nervous? Download it first, then run:
+
+   ```bash
+   gh release download v3.2.0 -p bootstrap-workflow-kit \
+     -R olivermorgan2/workflow-generator
+   chmod +x bootstrap-workflow-kit
+   ./bootstrap-workflow-kit --project-name=my-project
+   ```
+
+   See the [explicit-fetch alternative](docs/install.md#explicit-fetch-alternative)
+   in `docs/install.md` for an even more transparent three-line form
+   (no bootstrap script — `gh repo clone` directly into a temp dir
+   and run the installer).
 
    > **Note — hidden folders.** `.claude/` starts with a dot, so it
    > is hidden by default in macOS Finder and Windows Explorer.
@@ -164,20 +177,29 @@ installer does)? The manual steps are preserved in
 ### Worked example
 
 Installing the kit into a new project called `invoice-tracker`,
-starting from `~/src` with the kit already cloned at
-`~/src/workflow-generator`:
+starting from `~/src`:
 
 ```bash
 cd ~/src                                                       # step 1
 gh repo create invoice-tracker --public --clone                # step 2
 cd invoice-tracker
-~/src/workflow-generator/bin/install-workflow-kit \
+bash <(curl -fsSL https://github.com/olivermorgan2/workflow-generator/releases/download/v3.2.0/bootstrap-workflow-kit) \
   --project-name=invoice-tracker                               # step 3
 ls .claude/skills                                              # verify
 # → adr-writer  idea-to-prd  prd-normalizer  prd-to-mvp
 claude                                                         # step 4
 # then inside Claude Code: /idea-to-prd
 ```
+
+Pinning the kit version is recommended — `v3.2.0` in the URL above
+locks the install to that release, so re-scaffolding produces the
+same result. To check for newer versions, see the
+[releases page](https://github.com/olivermorgan2/workflow-generator/releases).
+
+> **Working on the kit itself, or contributing to it?** You'll want
+> a long-lived local clone, not the bootstrap flow. See
+> [Contributor / kit-developer setup](docs/install.md#contributor--kit-developer-setup)
+> in `docs/install.md`.
 
 Full step-by-step guide, including the manual install path,
 `CLAUDE.md` details, and troubleshooting:

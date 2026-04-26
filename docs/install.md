@@ -69,45 +69,82 @@ git init
 
 ## 3. Install the kit into the target project
 
-You have two options:
+You have three options, in order of preference:
 
-- **Automated install** (recommended) — run `bin/install-workflow-kit` from
-  the kit clone. See [3A](#3a-automated-install-recommended) below.
-- **Manual install** — a small, explicit copy flow. See
-  [3B](#3b-manual-install-alternative) below. The manual flow is the
-  documented fallback and remains fully supported.
+- **Bootstrap install** (recommended for users) — one command pulls the
+  kit at a pinned version from GitHub, runs the installer, and discards
+  the temporary kit copy. See [3A](#3a-bootstrap-install-recommended)
+  below.
+- **Explicit fetch** — three explicit lines that do the same thing as
+  the bootstrap script, more transparently. See
+  [3B](#3b-explicit-fetch-alternative) below.
+- **Manual install** — full do-it-yourself copy flow. See
+  [3C](#3c-manual-install) below.
 
-Either path produces the same target-project layout described in
-[`docs/repo-structure.md`](repo-structure.md).
+All three produce the same target-project layout described in
+[`docs/repo-structure.md`](repo-structure.md). Per ADR-029, the kit is
+designed for **per-project remote install** — there is no long-lived
+local kit clone to maintain. Contributors who edit the kit itself want
+a different setup; see
+[Contributor / kit-developer setup](#contributor--kit-developer-setup)
+near the end of this doc.
 
-### 3A. Automated install (recommended)
+### 3A. Bootstrap install (recommended)
 
-Once you have cloned the kit (see [3B.1](#3b1-clone-the-kit-somewhere-outside-the-target-project)
-for the one-time clone step), the installer scaffolds the target project in
-a single command. It is implemented per
-[ADR-009](../Design/adr/adr-009-installer-script.md) and
-[ADR-010](../Design/adr/adr-010-optional-with-docs-flag.md).
+The bootstrap script (per ADR-029) ships as an asset on every tagged
+release. It fetches the kit at the pinned version, runs the installer
+against the current directory (or `--target=PATH`), and cleans up the
+temporary kit copy on exit.
 
 ```bash
 cd my-project                                              # target project root
-~/src/workflow-generator/bin/install-workflow-kit \
+bash <(curl -fsSL https://github.com/olivermorgan2/workflow-generator/releases/download/v3.2.0/bootstrap-workflow-kit) \
   --project-name=my-project
 ```
 
-What it does, in order:
+Prefer to inspect the script before running, or pipe-to-bash makes
+you nervous? Download it first:
 
-1. Creates `Design/adr/`, `prompts/`, `notes/`, and `.claude/skills/` in
-   the target project.
+```bash
+gh release download v3.2.0 -p bootstrap-workflow-kit \
+  -R olivermorgan2/workflow-generator
+chmod +x bootstrap-workflow-kit
+./bootstrap-workflow-kit --project-name=my-project
+```
+
+What the bootstrap does, in order:
+
+1. Resolves the target version (env var `WORKFLOW_KIT_VERSION`, then
+   `gh release view`, then `git ls-remote --tags`).
+2. Creates a temporary directory, traps cleanup on exit.
+3. Fetches the kit (`gh repo clone --depth=1 --branch=vX.Y.Z` if `gh`
+   is available; falls back to `git clone --depth=1` over HTTPS).
+4. Verifies the fetched tree contains `bin/install-workflow-kit`.
+5. Forwards all CLI args to that installer.
+
+Environment variables:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `WORKFLOW_KIT_VERSION` | latest tag | Pin to a specific tag, e.g. `v3.2.0`. |
+| `WORKFLOW_KIT_REPO` | `olivermorgan2/workflow-generator` | Override for forks. |
+
+The installer's behaviour itself is unchanged from ADR-009:
+
+1. Creates `Design/adr/`, `prompts/`, `notes/`, and `.claude/skills/`
+   in the target project.
 2. Copies every skill from the kit's `skills/` into `.claude/skills/`.
-3. Seeds `prompts/_template.md` so new per-issue prompts stay consistent
-   (ADR-008).
-4. Renders `CLAUDE.md` from `templates/claude-md-template.md` (ADR-007).
-   You are prompted for any `{{UPPER_SNAKE}}` placeholder not provided on
-   the command line, unless `--non-interactive` is set.
-5. `git init`s the target if it is not already a git repo, then creates
-   an initial commit `chore: install workflow kit (project-local)`.
+3. Copies `bin/sync-adr-index` into `.claude/bin/` (ADR-023).
+4. Seeds `prompts/_template.md` so new per-issue prompts stay
+   consistent (ADR-008).
+5. Renders `CLAUDE.md` from `templates/claude-md-template.md`
+   (ADR-007). You are prompted for any `{{UPPER_SNAKE}}` placeholder
+   not provided on the command line, unless `--non-interactive` is set.
+6. `git init`s the target if it is not already a git repo, then
+   creates an initial commit `chore: install workflow kit
+   (project-local)`.
 
-Useful flags:
+Useful installer flags (forwarded by the bootstrap):
 
 | Flag | What it does |
 |---|---|
@@ -120,73 +157,93 @@ Useful flags:
 | `--non-interactive` | Never prompt; fall back to defaults |
 | `-h`, `--help` | Show full usage |
 
-The script is idempotent: running it again on an already-installed target
+The installer is idempotent: re-running on an already-installed target
 skips files that already exist and makes no commit if nothing changed.
-Pass `--force` if you want to re-render `CLAUDE.md` or re-copy the skills.
+Pass `--force` to re-render `CLAUDE.md` or re-copy the skills.
 
-If the automated path does not fit your setup — e.g. you want to tweak a
-step, or your project already has a conflicting layout — fall through to
-the [manual install](#3b-manual-install-alternative).
+### 3B. Explicit fetch alternative
 
-### 3B. Manual install (alternative)
-
-The manual flow is the explicit, do-it-yourself version of what the
-installer does. Use it when you want full visibility, or as a diagnostic
-reference if the installer misbehaves.
-
-#### 3B.1 Clone the kit somewhere outside the target project
+The bootstrap script is convenient, but if you want to see exactly
+what is happening, this three-line form does the same thing — fetch
+the kit at a pinned version into a temp dir, run the installer,
+clean up:
 
 ```bash
-git clone git@github.com:olivermorgan2/workflow-generator.git ~/src/workflow-generator
+TMPKIT="$(mktemp -d)" && \
+  gh repo clone olivermorgan2/workflow-generator "$TMPKIT" -- \
+    --depth=1 --branch=v3.2.0 && \
+  "$TMPKIT/bin/install-workflow-kit" --project-name=my-project && \
+  rm -rf "$TMPKIT"
 ```
 
-You only need one clone of the kit per machine. You can reuse it for
-every new project.
+Replace `v3.2.0` with whichever release you want to pin. Replace the
+installer flags with whatever your project needs (see the table in
+[3A](#3a-bootstrap-install-recommended)).
 
-#### 3B.2 From inside the target project, copy the skills
+If `gh` is not installed, swap the clone line for plain git over
+HTTPS:
+
+```bash
+git clone --depth=1 --branch=v3.2.0 \
+  https://github.com/olivermorgan2/workflow-generator.git "$TMPKIT"
+```
+
+### 3C. Manual install
+
+The manual flow is the explicit, do-it-yourself version of what the
+installer does. Use it when you want full visibility, or as a
+diagnostic reference if the installer misbehaves.
+
+#### 3C.1 Fetch the kit at a pinned version
+
+```bash
+TMPKIT="$(mktemp -d)"
+gh repo clone olivermorgan2/workflow-generator "$TMPKIT" -- --depth=1 --branch=v3.2.0
+# or:  git clone --depth=1 --branch=v3.2.0 https://github.com/olivermorgan2/workflow-generator.git "$TMPKIT"
+```
+
+#### 3C.2 From inside the target project, copy the skills
 
 ```bash
 cd my-project                                   # target project root
-mkdir -p .claude/skills Design/adr prompts notes
-cp -R ~/src/workflow-generator/skills/* .claude/skills/
-cp ~/src/workflow-generator/prompts/_template.md prompts/_template.md
+mkdir -p .claude/skills .claude/bin Design/adr prompts notes
+cp -R "$TMPKIT/skills/"* .claude/skills/
+cp "$TMPKIT/bin/sync-adr-index" .claude/bin/
+chmod +x .claude/bin/sync-adr-index
+cp "$TMPKIT/prompts/_template.md" prompts/_template.md
 ```
 
-The `prompts/` folder holds one filled session brief per GitHub issue
-(`issue-NNN-short-title.md`), copied from `_template.md`. Freeform
-working notes stay in `notes/`. See [ADR-008](../Design/adr/adr-008-dedicated-prompts-folder.md).
+The `prompts/` folder holds one filled session brief per GitHub
+issue (`issue-NNN-short-title.md`), copied from `_template.md`.
+Freeform working notes stay in `notes/`. See
+[ADR-008](../Design/adr/adr-008-dedicated-prompts-folder.md).
 
-This is the step that makes the install **project-local**: the skills now
-live under the target project's own `.claude/skills/`, tracked in the
-target project's git history. The kit clone is no longer required for
-those skills to work.
+This is the step that makes the install **project-local**: the
+skills now live under the target project's own `.claude/skills/`,
+tracked in the target project's git history. The temporary kit
+clone is no longer required for those skills to work.
 
-The `prompts/` folder is where per-issue session briefs live (ADR-008).
-Seed it with the reusable template from the kit:
+#### 3C.3 Render the starter `CLAUDE.md`
+
+`CLAUDE.md` at the project root is Claude Code's primary rules file
+for the project. Copy the template and fill in the project-specific
+fields by hand:
 
 ```bash
-cp ~/src/workflow-generator/notes/issue-prompt.md prompts/_template.md
+cp "$TMPKIT/templates/claude-md-template.md" CLAUDE.md
 ```
 
-#### 3B.3 Render the starter `CLAUDE.md`
+The template uses `{{PLACEHOLDER}}` tokens (ADR-007). Open
+`CLAUDE.md` and replace each one with real values, starting with
+`{{PROJECT_NAME}}`. The automated installer above does this
+substitution for you.
 
-`CLAUDE.md` at the project root is Claude Code's primary rules file for
-the project. Copy the template and fill in the project-specific fields by
-hand:
-
-```bash
-cp ~/src/workflow-generator/templates/claude-md-template.md CLAUDE.md
-```
-
-The template uses `{{PLACEHOLDER}}` tokens (ADR-007). Open `CLAUDE.md`
-and replace each one with real values, starting with `{{PROJECT_NAME}}`.
-The automated installer above does this substitution for you.
-
-#### 3B.4 Commit the install
+#### 3C.4 Commit the install and clean up
 
 ```bash
 git add .claude CLAUDE.md Design prompts notes
 git commit -m "chore: install workflow kit (project-local)"
+rm -rf "$TMPKIT"
 ```
 
 ---
@@ -237,6 +294,34 @@ Run the chosen skill inside the target project using Claude Code. For
 how to invoke skills, use plan mode, and follow the approve-then-implement
 loop, see [`claude-code-guide.md`](claude-code-guide.md). Each skill's
 own `SKILL.md` remains the authoritative spec for its inputs and outputs.
+
+---
+
+## Contributor / kit-developer setup
+
+The flows above are for **users** of the kit — people scaffolding
+their own projects. If you are working on the kit itself
+(adding skills, fixing templates, drafting ADRs), you want a
+long-lived local clone of the kit's source, not the bootstrap flow.
+
+```bash
+gh repo clone olivermorgan2/workflow-generator ~/src/workflow-generator
+cd ~/src/workflow-generator
+~/dotfiles/claude-config/bin/link-skills           # one-time, dogfooding
+```
+
+`link-skills` symlinks the kit's `skills/<name>/` directories into
+its own `.claude/skills/<name>/`, so the kit can use its own skills
+while you develop them. This convention is documented in `CLAUDE.md`
+under "Developing the kit on itself (dogfooding)" and in the
+dogfooding playbook at
+`~/dotfiles/claude-config/docs/dogfooding-playbook.md`.
+
+The contributor clone is **not** the same as the legacy "clone once
+and use it forever" install model. Per ADR-029, end-user installs
+go through the bootstrap flow and never need a long-lived kit
+clone — the contributor clone exists only because the kit's source
+is what contributors edit.
 
 ---
 
