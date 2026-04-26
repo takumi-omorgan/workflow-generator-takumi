@@ -1,6 +1,10 @@
 # Install Guide
 
-How to install the Claude Code Workflow Kit into a **new** software project.
+How to install the Claude Code Workflow Kit into a **new** project. The
+kit is project-agnostic (per [ADR-028](../Design/adr/adr-028-workflow-agnostic-framing.md))
+— software, research, content, curriculum, or any other structured
+project that fits the kit's three assumptions: a git repo, GitHub, and
+Claude Code.
 
 > **Before you start:** the kit is for **new projects only**. It does
 > not adapt or migrate existing repositories. If you want to add the
@@ -244,7 +248,7 @@ The kit intentionally does **not** include:
   Pointing it at an established codebase will not produce useful output.
 - **A global install.** Every target project gets its own copy of the
   skills. This is a design choice, not a limitation (see ADR-001).
-- **Team/multi-repo features.** The kit is scoped to a solo developer or
+- **Team/multi-repo features.** The kit is scoped to a solo author or
   small team working on a single project at a time.
 - **Non-GitHub providers.** The workflow is GitHub-first
   ([ADR-004](../Design/adr/adr-004-github-first-workflow-model.md)).

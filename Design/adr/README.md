@@ -42,6 +42,7 @@ fences is preserved.
 | [ADR-025](adr-025-license.md) | License the kit under MIT | accepted |
 | [ADR-026](adr-026-kit-versioning-policy.md) | Versioning policy for the kit | accepted |
 | [ADR-027](adr-027-prd-template.md) | Ship a PRD template for offline / external-LLM drafting | accepted |
+| [ADR-028](adr-028-workflow-agnostic-framing.md) | Reframe the kit as workflow-agnostic, not software-only | accepted |
 
 <!-- adr-index:end -->
 

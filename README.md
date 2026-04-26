@@ -1,51 +1,111 @@
 # Claude Code Workflow Kit
 
-A GitHub-distributed toolkit of Claude Code skills, templates, and workflow
-docs that helps a solo developer or small team set up a GitHub-first software
-delivery workflow for a **new** software project. The kit takes a user from a
-rough idea, a standard PRD, or a custom PRD to an implementation-ready backlog
-of ADRs, GitHub issues, and Claude Code prompts.
+A toolkit of Claude Code skills, templates, and workflow docs that
+gives **any structured project** — software or otherwise — a
+disciplined, GitHub-first delivery flow. The kit takes a user from a
+rough idea (or an existing PRD) to an implementation-ready backlog of
+ADRs, GitHub issues, and Claude Code session prompts, then drives the
+work to a tagged release.
+
+The kit is project-agnostic. Software is one strong use case; it is
+not the only one. See [What this is good for](#what-this-is-good-for)
+for the range of project shapes the kit fits.
 
 ## Who this is for
 
-- A solo technical founder, indie hacker, or experienced developer starting a
-  **new** project who wants to move fast without reinventing a workflow.
-- A small team or consultant that wants a reusable, low-ceremony operating
-  system for GitHub-based delivery with Claude Code.
+- A solo founder, indie hacker, researcher, writer, designer, or
+  experienced developer starting a **new** project who wants
+  explicit decisions, planning, and incremental work without
+  reinventing a workflow each time.
+- A small team or consultant that wants a reusable, low-ceremony
+  operating system for GitHub-based delivery with Claude Code.
+
+## What this is good for
+
+The kit's primitives — define the problem (PRD), scope the first cut
+(MVP), record decisions (ADRs), break work into issues, drive
+execution through disciplined Claude Code sessions, review via PR —
+work for any structured project, not only code. Examples that fit
+cleanly:
+
+- **Software** — CLIs, libraries, web apps, services, scripts. The
+  obvious case; most of the kit's examples gallery shows this shape.
+- **Research projects** — papers, dissertations, technical reports.
+  PRD = research proposal; MVP = first complete draft; ADRs =
+  methodological decisions; issues = chapter sections.
+- **Technical writing and books** — chapter scope, structural
+  decisions, draft cycles.
+- **Curriculum design** — course outlines, module plans, pedagogy
+  decisions captured as ADRs.
+- **Content projects** — newsletters, podcasts, video series.
+  Editorial choices become ADRs; episode plans become issues.
+- **Design system docs** — token decisions, component scope, layout
+  rules, accessibility commitments.
+- **Internal-policy documents** — HR handbooks, security procedures,
+  compliance manuals. Anywhere decisions need to be recorded and
+  revisited.
+
+The kit's vocabulary leans software (`product`, `user stories`,
+`capabilities`, `MVP`). For non-software projects, the metaphor still
+maps: a research paper has a "product" (the paper) and "users"
+(audience); a curriculum has "capabilities" (what students can do
+after); a book has "user stories" (reader-shaped journeys).
+
+### What the kit assumes
+
+- A **git repository** for the project.
+- **GitHub** for issues, milestones, labels, and PRs (per ADR-004).
+- **Claude Code** as the LLM driver.
+
+### What the kit does **not** assume
+
+- A specific programming language or stack — markdown-only repos
+  work fine.
+- A test runner, package manager, or deployment pipeline.
+- That deliverables are code at all.
 
 ## Who this is **not** for
 
-- Anyone trying to retrofit this workflow onto an **existing** repository.
-- Teams that need non-GitHub providers (GitLab, Bitbucket) or non-Claude AI
-  tooling.
-- Anyone looking for a hosted UI or a SaaS product — this is a kit you
-  install into your own project.
+- Anyone trying to retrofit this workflow onto an **existing**
+  repository — the kit is designed for new projects (per ADR-002,
+  superseded scope clarification in ADR-022).
+- Teams that need non-GitHub providers (GitLab, Bitbucket) or
+  non-Claude AI tooling.
+- Anyone looking for a hosted UI or a SaaS product — this is a kit
+  you install into your own project.
 
-See [`docs/install.md`](docs/install.md#what-this-kit-does-not-support) for the
-full list of non-goals.
+See [`docs/install.md`](docs/install.md#what-this-kit-does-not-support)
+for the full list of non-goals.
 
 ## At a glance
 
 - **New projects only** — does not adapt existing repos.
-- **Project-local install** — each new project gets its own copy of the
-  skills under `.claude/skills/`. No global install required.
+- **Project-local install** — each new project gets its own copy of
+  the skills under `.claude/skills/`. No global install required.
 - **GitHub-first** — issues, labels, milestones, PRs, `main + feature`
   branch model aligned with [GitHub Flow](https://docs.github.com/en/get-started/using-github/github-flow).
-- **Plan-first execution** — Claude Code proposes a plan, you approve,
-  then it implements.
+- **Plan-first execution** — Claude Code proposes a plan, you
+  approve, then it implements (per ADR-006 / ADR-014).
 - **Three starting paths** — rough idea, standard PRD, or custom PRD.
-- **Full end-to-end flow** — see [`docs/workflow-guide.md`](docs/workflow-guide.md)
-  for idea → PRD → MVP → ADRs → issues → PRs → release in one pass.
+- **Full lifecycle** — covers initial scaffolding *and* ongoing
+  development: new ADRs as decisions arise, issue-by-issue work
+  through the executor, PR packaging, changelog, and tagged
+  releases.
 
 ## Quick start
 
 ### One-time setup (per machine)
 
-Install Git, GitHub CLI, and Claude Code, then authenticate `gh`. Verification
-commands are in [`docs/install.md`](docs/install.md#1-prerequisites).
+> **Skip this section if you already have Git, the GitHub CLI, and
+> Claude Code installed and `gh` authenticated.** This setup runs
+> once per machine, not once per project.
 
-Clone this kit once, anywhere outside your projects. You reuse this clone
-for every new project you start:
+Install Git, GitHub CLI, and Claude Code, then authenticate `gh`.
+Verification commands are in
+[`docs/install.md`](docs/install.md#1-prerequisites).
+
+Clone this kit once, anywhere outside your projects. You reuse this
+clone for every new project you start:
 
 ```bash
 git clone git@github.com:olivermorgan2/workflow-generator.git ~/src/workflow-generator
@@ -53,13 +113,13 @@ git clone git@github.com:olivermorgan2/workflow-generator.git ~/src/workflow-gen
 
 ### Per new project
 
-Throughout these steps, replace `my-project` with the name you want for
-your new project (e.g. `invoice-tracker`). That name becomes both the
-GitHub repo and the local folder.
+Throughout these steps, replace `my-project` with the name you want
+for your new project (e.g. `invoice-tracker`). That name becomes
+both the GitHub repo and the local folder.
 
-1. `cd` into the directory where you want the new project folder to live
-   (e.g. `cd ~/src`). The next command creates the project folder inside
-   your current working directory.
+1. `cd` into the directory where you want the new project folder to
+   live (e.g. `cd ~/src`). The next command creates the project
+   folder inside your current working directory.
 
 2. Create the project on GitHub, clone it locally, and `cd` into it.
    `my-project` here is a placeholder — use your own name:
@@ -70,40 +130,42 @@ GitHub repo and the local folder.
    ```
 
 3. Run the installer from your kit clone. It scaffolds the folders,
-   copies the skills into `.claude/skills/`, renders `CLAUDE.md` from the
-   template, and makes the initial commit:
+   copies the skills into `.claude/skills/`, renders `CLAUDE.md`
+   from the template, and makes the initial commit:
 
    ```bash
    ~/src/workflow-generator/bin/install-workflow-kit --project-name=my-project
    ```
 
-   Add `--with-docs` if you want the kit's reference docs copied into
-   `docs/workflow-kit/` alongside the project.
-   See `--help` for the full flag list. The installer is idempotent —
-   re-running it on an already-installed project skips existing files.
+   Add `--with-docs` if you want the kit's reference docs copied
+   into `docs/workflow-kit/` alongside the project. See `--help` for
+   the full flag list. The installer is idempotent — re-running it
+   on an already-installed project skips existing files.
 
-   > **Note — hidden folders.** `.claude/` starts with a dot, so it is
-   > hidden by default in macOS Finder and Windows Explorer. Verify the
-   > install from the terminal instead: `ls .claude/skills` should show
-   > the skill directories (`idea-to-prd`, `prd-normalizer`, `prd-to-mvp`,
-   > `adr-writer`, …).
+   > **Note — hidden folders.** `.claude/` starts with a dot, so it
+   > is hidden by default in macOS Finder and Windows Explorer.
+   > Verify the install from the terminal: `ls .claude/skills`
+   > should show the skill directories (`idea-to-prd`,
+   > `prd-normalizer`, `prd-to-mvp`, `adr-writer`, …).
 
-4. Open Claude Code in the project and run the skill that matches what you
-   have in hand:
+4. Open Claude Code in the project and run the skill that matches
+   what you have in hand:
 
    | You have… | Run |
    |---|---|
    | A rough idea | `/idea-to-prd` |
    | A standard or custom PRD | `/prd-normalizer`, then `/prd-to-mvp` |
+   | A PRD already drafted (by hand or via any external LLM) using `templates/prd-template.md` | `/prd-normalizer` |
 
-Prefer the manual copy flow (or need to see exactly what the installer
-does)? The manual steps are preserved in
+Prefer the manual copy flow (or need to see exactly what the
+installer does)? The manual steps are preserved in
 [`docs/install.md`](docs/install.md#3b-manual-install-alternative).
 
 ### Worked example
 
-Installing the kit into a new project called `invoice-tracker`, starting
-from `~/src` with the kit already cloned at `~/src/workflow-generator`:
+Installing the kit into a new project called `invoice-tracker`,
+starting from `~/src` with the kit already cloned at
+`~/src/workflow-generator`:
 
 ```bash
 cd ~/src                                                       # step 1
@@ -119,8 +181,50 @@ claude                                                         # step 4
 
 Full step-by-step guide, including the manual install path,
 `CLAUDE.md` details, and troubleshooting:
-[`docs/install.md`](docs/install.md). For the end-to-end flow from idea
-to shipped release, see [`docs/workflow-guide.md`](docs/workflow-guide.md).
+[`docs/install.md`](docs/install.md). For the end-to-end flow from
+idea to shipped release, see
+[`docs/workflow-guide.md`](docs/workflow-guide.md).
+
+## Ongoing development
+
+The kit isn't only for initial scaffolding. After the first
+`prd-to-mvp` and ADR-writing pass, the same skills cover the
+project's lifetime:
+
+- **New decisions arise during the project.** Use `/adr-writer` to
+  draft a new ADR for any architectural or methodological choice
+  you make as work progresses. Status starts at `proposed`; the
+  human review and approval makes it `accepted`. Existing accepted
+  ADRs are never edited in place — to change a decision, write a
+  new ADR that supersedes the old one (per ADR-022's convention).
+- **The ADR index keeps itself in sync.** `bin/sync-adr-index`
+  regenerates the table in `Design/adr/README.md` from the ADR
+  files on disk. The four ADR-touching skills run it automatically;
+  manual edits inside the marker fences are overwritten on the next
+  sync (per ADR-023).
+- **Plan-first issue execution.** For each GitHub issue, run
+  `/prepare-issue <NN>` to scaffold a session prompt under
+  `prompts/issue-NNN-short-title.md`, then run
+  `/claude-issue-executor` to drive a disciplined session: plan
+  proposed and approved before any edit, branch from `main`,
+  incremental commits referencing the ADR and issue, tests
+  alongside, evaluation summary at the end (per ADR-006 / ADR-014).
+- **PR packaging.** `/pr-review-packager` reads
+  `templates/pr-template.md`, fills `Closes #N` and ADR references
+  from the branch and commit history, shows the body for approval,
+  and opens the PR via `gh pr create` (per ADR-015).
+- **Releases.** `/changelog` produces grouped release notes from
+  `git log`; `/release` tags a semver release, generates the notes,
+  and publishes a GitHub Release (per ADR-016 / ADR-017).
+  Versioning follows ADR-026's MAJOR/MINOR/PATCH classification.
+- **Documentation that stays current.** `/workflow-docs`
+  regenerates `README.md` and `Design/ai-summary.md` from the
+  project's PRD, MVP, ADRs, and `CLAUDE.md`. Re-run after any
+  meaningful change; manual edits outside the marker fences are
+  preserved (per ADR-018).
+
+The full flow from idea to release is documented end-to-end in
+[`docs/workflow-guide.md`](docs/workflow-guide.md).
 
 ## What is in this repo
 
@@ -133,14 +237,23 @@ to shipped release, see [`docs/workflow-guide.md`](docs/workflow-guide.md).
 | `examples/` | Planning-path walkthroughs and a gallery of end-to-end [worked projects](examples/README.md) |
 | `notes/` | Working notes for building the kit |
 
-See [`docs/repo-structure.md`](docs/repo-structure.md) for the full map of
-what lives in the kit versus what gets generated inside a target project.
+See [`docs/repo-structure.md`](docs/repo-structure.md) for the full
+map of what lives in the kit versus what gets generated inside a
+target project.
 
 ## Status
 
-Milestones M1–M5 shipped. The kit is feature-complete for the
-"new project only" scope; further work is tracked in
-`notes/feature-ideas.md` and as issues under future milestones.
+Latest release: see the
+[releases page](https://github.com/olivermorgan2/workflow-generator/releases).
+The kit is in active development. Versioning follows
+[ADR-026](Design/adr/adr-026-kit-versioning-policy.md): MAJOR for
+breaking changes (placeholder/heading renames, removed skills),
+MINOR for additive changes (new skills, new templates, new flags),
+PATCH for docs and bug fixes.
+
+Ongoing work and proposed features are tracked in
+[`notes/feature-ideas.md`](notes/feature-ideas.md) and as issues
+under future milestones.
 
 ## License
 
