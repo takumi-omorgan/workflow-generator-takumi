@@ -25,6 +25,7 @@ for the documentation-and-template architecture.
 | [`prd-template.md`](prd-template.md) | Product Requirements Document | `Design/prd.md` | external LLM / human; consumed by `prd-normalizer` |
 | [`mvp-template.md`](mvp-template.md) | MVP statement | `Design/mvp.md` | `prd-to-mvp` skill (Issue #7) / human |
 | [`build-out-plan-template.md`](build-out-plan-template.md) | Phased build-out plan | `Design/build-out-plan.md` | `prd-to-mvp` skill (Issue #7) / human |
+| [`licenses/`](licenses/) | License-text templates (currently `mit.txt`) with `{{YEAR}}` and `{{COPYRIGHT_HOLDER}}` placeholders | `LICENSE` at target project root | `bin/install-workflow-kit --license=mit` (ADR-030) |
 
 ## Conventions
 

@@ -38,7 +38,12 @@ NO_COMMIT=0
 NO_GIT_INIT=0
 NON_INTERACTIVE=0
 PROJECT_NAME=""
+LICENSE_ID=""
+LICENSE_HOLDER=""
 declare -a CLI_VALUES=()
+
+# Supported license SPDX identifiers (templates/licenses/<id>.txt must exist).
+SUPPORTED_LICENSES="mit"
 
 # ---------------------------------------------------------------------------
 # Output helpers
@@ -81,6 +86,13 @@ OPTIONS
                            to sensible defaults (basename for project name;
                            remaining placeholders are left unfilled and
                            reported).
+  --license=ID             Scaffold a starter LICENSE in the target project
+                           using the named license. Supported: mit. By
+                           default no LICENSE is scaffolded — license choice
+                           is the project author's call (ADR-025).
+  --license-holder=NAME    Copyright holder for the rendered LICENSE.
+                           Used only when --license is set. Falls back to
+                           --project-name, then to the target's basename.
   -h, --help               Show this message and exit.
 
 EXAMPLES
@@ -98,8 +110,16 @@ EXAMPLES
   # Re-run on a half-installed project, overwriting CLAUDE.md
   install-workflow-kit --force
 
+  # Scaffold an MIT LICENSE attributed to the user
+  install-workflow-kit \
+    --project-name=demo \
+    --license=mit \
+    --license-holder="Jane Doe"
+
 SEE ALSO
-  docs/install.md, docs/repo-structure.md, Design/adr/adr-009-installer-script.md
+  docs/install.md, docs/repo-structure.md,
+  Design/adr/adr-009-installer-script.md,
+  Design/adr/adr-025-license.md, Design/adr/adr-030-installer-license-flag.md
 EOF
 }
 
@@ -120,6 +140,10 @@ while [ $# -gt 0 ]; do
     --no-commit)       NO_COMMIT=1; shift ;;
     --no-git-init)     NO_GIT_INIT=1; shift ;;
     --non-interactive) NON_INTERACTIVE=1; shift ;;
+    --license=*)        LICENSE_ID="${1#*=}"; shift ;;
+    --license)          LICENSE_ID="${2:?--license requires a value}"; shift 2 ;;
+    --license-holder=*) LICENSE_HOLDER="${1#*=}"; shift ;;
+    --license-holder)   LICENSE_HOLDER="${2:?--license-holder requires a value}"; shift 2 ;;
     -h|--help)         usage; exit 0 ;;
     --)                shift; break ;;
     -*)                err "unknown option: $1"; usage >&2; exit 2 ;;
@@ -140,6 +164,22 @@ if [ ! -f "$KIT_ROOT/templates/claude-md-template.md" ]; then
   exit 1
 fi
 
+# Validate --license value if set.
+if [ -n "$LICENSE_ID" ]; then
+  case " $SUPPORTED_LICENSES " in
+    *" $LICENSE_ID "*) : ;;
+    *)
+      err "unknown license: '$LICENSE_ID'. Supported: $SUPPORTED_LICENSES."
+      err "(see Design/adr/adr-030-installer-license-flag.md to extend.)"
+      exit 2
+      ;;
+  esac
+  if [ ! -f "$KIT_ROOT/templates/licenses/$LICENSE_ID.txt" ]; then
+    err "license template missing: $KIT_ROOT/templates/licenses/$LICENSE_ID.txt"
+    exit 1
+  fi
+fi
+
 # Create target directory if it doesn't exist.
 mkdir -p "$TARGET_DIR"
 TARGET_DIR="$(cd -P "$TARGET_DIR" >/dev/null 2>&1 && pwd)"
@@ -153,6 +193,7 @@ info "kit root:   $KIT_ROOT"
 info "target:     $TARGET_DIR"
 info "with-docs:  $([ "$WITH_DOCS" -eq 1 ] && echo yes || echo no)"
 info "force:      $([ "$FORCE" -eq 1 ] && echo yes || echo no)"
+info "license:    ${LICENSE_ID:-none}"
 
 # ---------------------------------------------------------------------------
 # Placeholder handling
@@ -363,6 +404,36 @@ if [ "$WITH_DOCS" -eq 1 ]; then
     cp -R "$KIT_ROOT/docs/." "$TARGET_DIR/docs/workflow-kit/"
   else
     warn "kit docs/ not found at $KIT_ROOT/docs; --with-docs had nothing to copy"
+  fi
+fi
+
+# 5. Optional: scaffold a starter LICENSE if --license is set.
+#    Default behaviour (no --license) writes nothing — license choice
+#    is the project author's call (ADR-025, ADR-030).
+if [ -n "$LICENSE_ID" ]; then
+  LICENSE_DEST="$TARGET_DIR/LICENSE"
+  if [ -f "$LICENSE_DEST" ] && [ "$FORCE" -ne 1 ]; then
+    info "skip LICENSE (exists; pass --force to overwrite)"
+  else
+    # Resolve the holder: explicit --license-holder, else --project-name,
+    # else target's basename.
+    holder="$LICENSE_HOLDER"
+    if [ -z "$holder" ]; then
+      holder="$(ph_get "PROJECT_NAME" 2>/dev/null || true)"
+    fi
+    if [ -z "$holder" ]; then
+      holder="$(basename "$TARGET_DIR")"
+    fi
+    year="$(date +%Y)"
+
+    info "render LICENSE from templates/licenses/$LICENSE_ID.txt (holder: $holder, year: $year)"
+    license_tmp="$(mktemp -t install-workflow-kit-license.XXXXXX)"
+    cp "$KIT_ROOT/templates/licenses/$LICENSE_ID.txt" "$license_tmp"
+    # Escape for sed: replace |, &, \ in the holder. Year is digits-only.
+    holder_esc="$(printf '%s' "$holder" | sed -e 's/[\\&|]/\\&/g')"
+    sed -e "s|{{YEAR}}|${year}|g" -e "s|{{COPYRIGHT_HOLDER}}|${holder_esc}|g" \
+      "$license_tmp" > "$license_tmp.new" && mv "$license_tmp.new" "$LICENSE_DEST"
+    rm -f "$license_tmp"
   fi
 fi
 

@@ -155,7 +155,19 @@ Useful installer flags (forwarded by the bootstrap):
 | `--force` | Overwrite existing `CLAUDE.md` and re-copy skills |
 | `--no-commit` | Skip the initial commit |
 | `--non-interactive` | Never prompt; fall back to defaults |
+| `--license=ID` | Scaffold a starter `LICENSE` in the target. Supported: `mit`. Default: no `LICENSE` is written (license choice is the project author's call, per ADR-025). |
+| `--license-holder=NAME` | Copyright holder for the rendered `LICENSE` (only used when `--license` is set). Falls back to `--project-name`, then to the target's basename. |
 | `-h`, `--help` | Show full usage |
+
+> **License scaffolding example.** Add an MIT LICENSE attributed to
+> "Jane Doe" alongside the rest of the install:
+>
+> ```bash
+> bash <(curl -fsSL https://github.com/olivermorgan2/workflow-generator/releases/download/v3.2.0/bootstrap-workflow-kit) \
+>   --project-name=my-project \
+>   --license=mit \
+>   --license-holder="Jane Doe"
+> ```
 
 The installer is idempotent: re-running on an already-installed target
 skips files that already exist and makes no commit if nothing changed.
