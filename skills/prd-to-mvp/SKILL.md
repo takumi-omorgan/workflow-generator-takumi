@@ -36,6 +36,13 @@ decisions and `issue-planner` (later issue) for the GitHub backlog.
 - **Required:** `Design/prd-normalized.md`.
 - **Optional:** user preference on project size — weekend project,
   one-month, multi-month — to guide how aggressive the scope cut is.
+- **Optional flag:** `--granularity={coarse|standard|fine}` — phase-
+  count target band, per [ADR-036](../../Design/adr/adr-036-granularity-control.md).
+  `coarse` aims for 1–3 phases, `standard` (default) for 5–8, `fine`
+  for 8–12. Bands are targets, not hard caps; the skill picks the
+  actual count and justifies it inline. Precedence (highest first):
+  explicit flag > `**Granularity:**` line in an existing
+  `Design/build-out-plan.md` > default `standard`.
 
 ## Outputs
 
@@ -50,26 +57,42 @@ cover every in-scope capability of the MVP.
 
 ## Scoping protocol
 
-1. Read `Design/prd-normalized.md` end to end.
-2. Propose an in-scope / out-of-scope split for every core capability
+1. **Resolve granularity tier.** If `--granularity=<tier>` was passed,
+   validate the value is one of `coarse|standard|fine` and use it.
+   Else, if `Design/build-out-plan.md` already exists and contains a
+   `**Granularity:** <tier>` line with a valid value, read it. Else
+   default to `standard`. Reject invalid tiers with a one-line error
+   naming the three valid values and stop. The resolved tier sets
+   the target phase-count band for step 6: `coarse` 1–3, `standard`
+   5–8, `fine` 8–12.
+2. Read `Design/prd-normalized.md` end to end.
+3. Propose an in-scope / out-of-scope split for every core capability
    and user story. Default to aggressive cuts; over-scoping is the
    more common failure.
-3. Ask the user to confirm or adjust the split — one batched turn
+4. Ask the user to confirm or adjust the split — one batched turn
    (≤ 5 questions). Include the project-size question if the user
    has not stated a preference.
-4. Render `Design/mvp.md` from `templates/mvp-template.md`. Derive
+5. Render `Design/mvp.md` from `templates/mvp-template.md`. Derive
    3–5 product principles from the normalized PRD's constraints,
    non-goals, and goal — principles that will resolve future scope
    arguments.
-5. Draft `Design/build-out-plan.md` from
-   `templates/build-out-plan-template.md`. Sequence into 2–4 phases
-   (per ADR-032). Each phase has: goal, scope bullets, ADR
-   dependencies, deliverables, exit criterion. For small projects
-   where the whole MVP fits in one delivery cut, emit a single
-   `## Phase 1` block — every downstream skill treats a single-phase
-   plan identically to a flat plan, so this is the back-compat path.
-   Ask the user once whether the phase count and shape feel right.
-6. Surface a **"Decisions needing ADRs"** list as the final section
+6. Draft `Design/build-out-plan.md` from
+   `templates/build-out-plan-template.md`. Write the resolved tier
+   into the `**Granularity:**` line under the header. Sequence into
+   N phases per the resolved band — `coarse` 1–3, `standard` 5–8
+   (default), `fine` 8–12. The band is a target, not a hard cap;
+   pick the actual count for *this* project and include a one-line
+   inline justification in the rendered plan (e.g. *"3 phases
+   chosen — within the standard band — because the GitHub-integration
+   work cleanly splits from the storage and ingestion layers"*).
+   Each phase has: goal, scope bullets, ADR dependencies,
+   deliverables, exit criterion. For small projects where the whole
+   MVP fits in one delivery cut (typically `coarse` with 1 phase),
+   emit a single `## Phase 1` block — every downstream skill treats
+   a single-phase plan identically to a flat plan, so this is the
+   back-compat path. Ask the user once whether the phase count and
+   shape feel right.
+7. Surface a **"Decisions needing ADRs"** list as the final section
    of `build-out-plan.md` (or a short separate note). Each item is one
    architectural question with a one-line context pointer. This list
    is the input to `adr-writer`.
@@ -97,7 +120,7 @@ The normalized PRD may contain `[TBD]` markers (see `prd-normalizer`).
 
 ## Self-check before finishing
 
-Do not write either file until all five hold:
+Do not write either file until all six hold:
 
 - [ ] Every core capability from the normalized PRD is classified
   (in scope or out of scope). None left ambiguous.
@@ -108,6 +131,10 @@ Do not write either file until all five hold:
   sources are not conflated — readers can see why each item is out.
 - [ ] Build-out-plan phase 1's exit criteria collectively cover every
   in-scope capability.
+- [ ] The `**Granularity:**` line in the rendered `build-out-plan.md`
+  is set to one of `coarse | standard | fine` — never left as the
+  `{{GRANULARITY}}` placeholder — and the actual phase count is
+  inside the band.
 - [ ] No `{{...}}` template placeholders remain in either rendered
   file.
 
