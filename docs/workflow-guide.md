@@ -240,7 +240,77 @@ design reviews.
 
 ---
 
-## 3. When you don't need an ADR
+## 3. Across sessions: `Design/state.md`, `/resume`, `/pause`
+
+Long-running projects span many Claude Code sessions. Without a
+canonical "where are we?" pointer, every fresh session reconstructs
+state from `gh` calls and prompt files. ADR-035 closes that gap with
+a single committed artefact, `Design/state.md`, plus two skills.
+
+### The artefact
+
+`Design/state.md` is a small (under ~100 lines), committed pointer
+holding five zones, each wrapped in marker fences so individual
+skills can rewrite their zone idempotently without disturbing the
+others:
+
+| Zone | Holds | Updated by |
+|---|---|---|
+| `phase` | Current phase name (per ADR-032) or `single` | `/pause` |
+| `in-flight` | Issue number, prompt, branch, status | `/prepare-issue`, `/claude-issue-executor`, `/pr-review-packager`, `/pause` |
+| `recent` | Rolling list of the last 5 merged PRs | `/pr-review-packager`, `/pause` |
+| `blockers` | One line per blocker, or `none` | `/pause` |
+| `continue-here` | One paragraph naming the next concrete action | `/prepare-issue`, `/pr-review-packager`, `/pause` |
+
+The format spec is [`templates/state-template.md`](../templates/state-template.md).
+The kit ships the template; each target project instantiates its
+own `Design/state.md` (typically by running `/pause` for the first
+time).
+
+### Reading it: `/resume`
+
+- **Run:** `/resume` at the start of a fresh session.
+- **What you see:** a one-message brief — phase, in-flight issue,
+  last five PRs, blockers, "continue here" — with no `gh` calls on
+  the happy path.
+- **Fallback:** if `Design/state.md` is missing, empty, or looks
+  suspect (in-flight issue already merged, file mtime stale),
+  `/resume` falls back to `gh pr list` / `gh issue list` and
+  recommends running `/pause` to seed the file.
+
+### Refreshing it: `/pause`
+
+- **Run:** `/pause` (or `/pause --handoff`) before a context reset,
+  end of day, after a non-trivial detour, or to seed the file the
+  first time you adopt ADR-035.
+- **What you see:** each zone is recomputed from current truth
+  (build-out plan for phase, prompt + branch for in-flight, `gh pr
+  list --state merged` for recent, you for blockers and continue-
+  here) and written back. With `--handoff`, an additional richer
+  `notes/handoff-YYYY-MM-DD.md` is written for context-window-
+  exhausting handoffs.
+- **What you produce:** a refreshed `Design/state.md` ready to
+  commit.
+
+### Conflict-resolution rule
+
+`Design/state.md` is committed, so parallel branches can produce
+merge conflicts in it. ADR-035's rule: **the most recently merged
+PR's version wins for the conflicting zone.** If the result looks
+suspect after the merge, `/resume` re-derives from `gh` and points
+you at `/pause` to refresh.
+
+### Optional CI line-cap check
+
+`bin/check-state-cap` exits 1 if `Design/state.md` exceeds the
+line cap (default 100). Wire it into CI alongside `bin/sync-adr-index`
+if you want a guard rail; it exits 0 silently when the file is
+absent, so adopting it is no-op for projects that have not yet
+turned on ADR-035.
+
+---
+
+## 4. When you don't need an ADR
 
 Not every change is an architectural decision. Bug fixes, chores,
 dependency bumps, CI/CD tweaks, and doc-only changes generally do not
@@ -284,7 +354,7 @@ ADR" table.
 
 ---
 
-## 4. Where to go deeper
+## 5. Where to go deeper
 
 | You want to… | Go to |
 |---|---|
