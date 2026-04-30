@@ -88,6 +88,21 @@ Turn the MVP plus ADRs into a tracked GitHub backlog.
 The skill is GitHub-first: issues live on GitHub, not in local files.
 The Project board gives you a kanban view of the backlog.
 
+**Phased vs single-phase plans (per ADR-032).** When
+`Design/build-out-plan.md` contains multiple `## Phase N: <name>`
+blocks, `/issue-planner` creates one GitHub milestone per phase and
+assigns each issue to its phase's milestone; `/release` defaults to
+one tag per phase. When the plan has only one Phase block — or no
+Phase headings at all — every downstream skill behaves identically
+to the pre-ADR-032 flat path: one milestone for the whole project,
+one release at the end. The single-phase fallback is the right shape
+for small projects (weekend or one-week scope); multi-phase shape
+fits multi-month builds where each phase delivers standalone value.
+See [`examples/projects/phased-podcast-pipeline/`](../examples/projects/phased-podcast-pipeline/)
+for a worked 3-phase example, or [`examples/projects/kb-lookup/`](../examples/projects/kb-lookup/)
+and [`examples/projects/slug-utils/`](../examples/projects/slug-utils/)
+for the single-phase shape.
+
 **What unblocks next:** a list of issue numbers you can work through
 one at a time.
 
