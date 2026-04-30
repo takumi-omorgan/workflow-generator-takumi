@@ -27,5 +27,8 @@ project-locally (see ADR-001).
 | [`resume/`](resume/SKILL.md) | Brief a fresh session by reading `Design/state.md` (with `gh` fallback) — no writes | Issue #44 |
 | [`pause/`](pause/SKILL.md) | Refresh `Design/state.md` to current truth and optionally write `notes/handoff-YYYY-MM-DD.md` for context-window-exhausting handoffs | Issue #44 |
 | [`check-plan/`](check-plan/SKILL.md) | Validate ADRs and issue prompts against version-locked checklists; chained as a pre-commit gate from `adr-writer` and `prepare-issue` (`--skip-check` opts out) | Issue #43 |
+| [`audit-milestone/`](audit-milestone/SKILL.md) | Verify a GitHub milestone is complete — issues closed, ADRs linked to merged PRs, phase exit criteria met. Pass/fail with gap list; advisory, does not block close | Issue #46 |
+| [`milestone-summary/`](milestone-summary/SKILL.md) | Generate `Design/milestones/N-summary.md` for a closed or near-closing milestone — what shipped, ADRs adopted, deferred work — from git log, the GitHub milestone, and accepted ADRs | Issue #46 |
+| [`complete-milestone/`](complete-milestone/SKILL.md) | Close a GitHub milestone, archive `Design/state.md` per ADR-035, and optionally chain `/release --milestone-phase`. Chains audit + summary; never blocks on audit gaps | Issue #46 |
 
 See ADR-001 for why skills live project-locally under `.claude/skills/`.

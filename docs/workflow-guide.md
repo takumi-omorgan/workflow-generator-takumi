@@ -40,7 +40,7 @@ you are sitting inside the target project's root with Claude Code open.
 
 One pass = one feature shipped. Steps (a) through (c) are usually done
 once per MVP scoping round. Steps (d) through (g) loop per issue. Steps
-(h) and (i) close out a release.
+(h) through (j) close out a milestone and a release.
 
 ### 2.a From idea or PRD to MVP
 
@@ -257,9 +257,43 @@ git pull
 **Loop back to step 2.d** for the next issue. Keep going until the
 milestone's issues are all merged.
 
-### 2.h Tagged release
+### 2.h Close out the milestone
 
-Once a milestone's issues are all merged to `main`, cut a release.
+Before cutting a release, close the GitHub milestone the merged
+issues belong to. ADR-037 ships three composable skills for this,
+chained in order:
+
+| Step | Run | Produces |
+|---|---|---|
+| 1. Verify the milestone is finishable | `/audit-milestone <N>` | Pass/fail report — open issues, ADRs without merged PRs, phases still `in-progress` |
+| 2. Draft the retrospective | `/milestone-summary <N>` | `Design/milestones/<N>-<slug>.md` filled from `git log`, the GitHub milestone, and accepted ADRs in the date range; `lessons` zone left for you to author |
+| 3. Close and (optionally) release | `/complete-milestone <N> [--release]` | GitHub milestone closed; `Design/state.md` archived (in-flight cleared, recent prepended, continue-here updated); chains `/release --milestone-phase=N` if `--release` is set |
+
+The audit is **advisory**, not gating — gaps surface clearly but
+the user has the final say. The summary file's `lessons` zone is
+**user-authored** and preserved verbatim across re-runs (even with
+`--overwrite`). All three skills run standalone or in any subset;
+`/complete-milestone` chains the previous two as a convenience.
+
+**One milestone == one release (default).** Per ADR-032,
+`/issue-planner` creates one GitHub milestone per phase, and
+`/release` defaults to one tag per phase via `--milestone-phase=N`.
+Pass `--release` to `/complete-milestone` to chain `/release` after
+the close, or omit it to close the milestone without cutting a tag
+(e.g. when bundling multiple phases into one release).
+
+For a worked walkthrough — including the fail case where Phase 2 has
+an open issue and an ADR without a merged PR — see
+[`skills/audit-milestone/example.md`](../skills/audit-milestone/example.md).
+
+**What unblocks next:** a closed milestone with an archived state
+pointer and a retrospective on disk; either a release just cut (if
+`--release` chained) or a clean state to run `/release` separately.
+
+### 2.i Tagged release
+
+Once a milestone is closed (or as a standalone step on a single-phase
+project), cut a release.
 
 | Step | Run | Produces |
 |---|---|---|
@@ -274,7 +308,7 @@ can also mark the milestone phase complete in your build-out plan.
 can read and that future `/changelog` runs will pick up as the lower
 bound.
 
-### 2.i Docs sync
+### 2.j Docs sync
 
 Before closing out the release, regenerate the docs that summarise the
 current state of the project.
