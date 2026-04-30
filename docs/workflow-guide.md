@@ -141,6 +141,27 @@ This is the plan-first execution model (ADR-006). The evaluation
 summary is your quality gate — it lists files changed, test results,
 and any manual verification steps. Do not skip reading it.
 
+**Plan-mode rhythm (per ADR-039).** For significant sessions, the
+executor pauses at the start and asks you to enter Claude Code plan
+mode — the harness-level lock that gates all mutating tools — before
+proposing the plan. The full rhythm:
+
+1. The executor reports *"Significant — toggle plan mode when ready."*
+2. You toggle plan mode (`shift+tab shift+tab`).
+3. The executor proposes the plan inside plan mode.
+4. You approve and exit plan mode (`shift+tab` once).
+5. Optionally, toggle auto-accept edits (`shift+tab` again) so the
+   execution phase runs without per-tool approval prompts.
+6. The executor implements; if a new significant boundary appears
+   mid-session it pauses and re-flags before crossing it.
+
+Plan mode is requested automatically when the session crosses the
+"significant" threshold defined in
+[`skills/claude-issue-executor/SKILL.md`](../skills/claude-issue-executor/SKILL.md)
+(edits a `skills/*/SKILL.md`, modifies 3+ files, edits `templates/*`,
+etc.). Trivial sessions (single typo, ADR status flip, doc tweak)
+skip plan mode and rely on the chat plan-gate alone.
+
 **Branch naming:** the skill creates branches following the kit's
 convention (see [GitHub Flow](https://docs.github.com/en/get-started/using-github/github-flow)) —
 e.g. `add-auth-middleware` or `NN-add-auth-middleware`.
