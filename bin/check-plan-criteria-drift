@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+# check-plan-criteria-drift — flag when /check-plan's criteria.md
+# may have drifted out of sync with the templates it validates.
+#
+# Implements ADR-034's "Maintain" line: a CI sanity check that
+# template edits are accompanied by criteria edits in the same PR.
+# The check is mtime-based — coarse on purpose. A real drift would
+# be a template edit on the same branch as no criteria edit; this
+# script catches the common case where the user forgot to revisit
+# criteria.md after editing a template.
+#
+# Behaviour:
+#   - If skills/check-plan/criteria.md is absent, exit 0 silently
+#     (the kit may not have shipped /check-plan yet, or this is a
+#     target project that hasn't installed it).
+#   - If templates/adr-template.md or prompts/_template.md is newer
+#     than criteria.md, warn (and exit 1 under --check).
+#   - Otherwise pass silently.
+#
+# Exit codes:
+#   0  no drift, or criteria absent (skipped)
+#   1  drift detected (a template is newer than criteria.md)
+#   2  invocation error (unknown flag)
+#
+# Usage:
+#   bin/check-plan-criteria-drift           # plain mode: warn-then-pass
+#   bin/check-plan-criteria-drift --check   # strict mode for CI: exit 1 on drift
+
+set -euo pipefail
+
+CHECK_ONLY=0
+for arg in "$@"; do
+  case "$arg" in
+    --check) CHECK_ONLY=1 ;;
+    -h|--help)
+      sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'
+      exit 0
+      ;;
+    *)
+      printf 'check-plan-criteria-drift: unknown argument: %s\n' "$arg" >&2
+      exit 2
+      ;;
+  esac
+done
+
+CRITERIA="skills/check-plan/criteria.md"
+ADR_TEMPLATE="templates/adr-template.md"
+PROMPT_TEMPLATE="prompts/_template.md"
+
+if [ ! -f "$CRITERIA" ]; then
+  exit 0
+fi
+
+# stat -f for BSD (macOS); fall back to GNU stat with -c.
+mtime_of() {
+  if stat -f '%m' "$1" >/dev/null 2>&1; then
+    stat -f '%m' "$1"
+  else
+    stat -c '%Y' "$1"
+  fi
+}
+
+CRITERIA_MTIME=$(mtime_of "$CRITERIA")
+
+DRIFTED=()
+
+for tpl in "$ADR_TEMPLATE" "$PROMPT_TEMPLATE"; do
+  if [ ! -f "$tpl" ]; then
+    continue
+  fi
+  TPL_MTIME=$(mtime_of "$tpl")
+  if [ "$TPL_MTIME" -gt "$CRITERIA_MTIME" ]; then
+    DRIFTED+=("$tpl")
+  fi
+done
+
+if [ "${#DRIFTED[@]}" -eq 0 ]; then
+  exit 0
+fi
+
+printf 'check-plan-criteria-drift: criteria may be stale\n' >&2
+printf '  the following template(s) are newer than %s:\n' "$CRITERIA" >&2
+for tpl in "${DRIFTED[@]}"; do
+  printf '    - %s\n' "$tpl" >&2
+done
+printf '  review skills/check-plan/criteria.md and update the matching\n' >&2
+printf '  checklist (ADR criteria for adr-template, PROMPT criteria for\n' >&2
+printf '  _template) per ADR-034. Touch criteria.md once verified.\n' >&2
+
+if [ "$CHECK_ONLY" = 1 ]; then
+  exit 1
+fi
+exit 0
