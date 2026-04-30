@@ -73,6 +73,30 @@ Flags:
 If neither `--version` nor `--bump` is supplied, the skill computes a
 **suggestion** (see below) and presents it for confirmation.
 
+## Default release boundary (per ADR-032)
+
+The default release unit is **one phase**. When
+`Design/build-out-plan.md` has multiple `### Phase N: <name>` blocks
+and `--milestone-phase` was not passed explicitly, infer the target
+phase from:
+
+1. The set of GitHub milestones closed since the previous tag — if
+   exactly one phase milestone is newly closed, that phase is the
+   release boundary.
+2. The set of merged PRs in the range — group by their milestone; if
+   they all belong to one phase milestone, use it.
+3. Otherwise, prompt the user once for the phase number (or `none`
+   to release as a multi-phase bundle).
+
+Confirm the inferred phase explicitly in the plan output. Single-phase
+projects (one Phase block, or no Phase headings) skip this inference
+entirely and behave as before — one release covers the whole project.
+
+To group multiple phases into one release (e.g. v1.0.0 covers Phases
+1, 2, and 3), pass `--milestone-phase=` blank or accept the
+"multi-phase bundle" option at the prompt. The build-out-plan rows
+for every phase in the bundle are updated to `released <tag>`.
+
 ## Suggested-version heuristic
 
 When no version is supplied, propose a bump by inspecting everything
