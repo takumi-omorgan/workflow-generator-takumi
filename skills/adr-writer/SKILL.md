@@ -52,6 +52,14 @@ just summarises the alternatives that were considered.
   ADR Context sections where they apply. When absent, behaviour is
   unchanged — small projects skip this artefact and the skill works
   from PRD + MVP alone.
+- **Optional:** `Design/decisions.md` (per [ADR-033](../../Design/adr/adr-033-clarify-step.md))
+  for informal-but-settled context surfaced by `/clarify` before ADR
+  drafting. When present, read it for additional Context-section
+  background and to avoid re-deciding questions already settled
+  there. If a topic in the input batch already appears as a decision,
+  prefer drafting an ADR that supersedes it (per the
+  graduate-to-ADR criterion in `skills/clarify/SKILL.md`) over
+  re-litigating. When absent, behaviour is unchanged.
 
 ## Output
 
