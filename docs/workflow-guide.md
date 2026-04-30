@@ -147,8 +147,20 @@ This is a deliberate handoff — the prompt is written but execution
 starts separately, so you get a review checkpoint between planning and
 building.
 
+**Auto-chain (per ADR-038).** Since ADR-038, this step is *optional*:
+`/claude-issue-executor <issue-number>` will auto-invoke
+`/prepare-issue` itself when no `prompts/issue-NNN-*.md` exists for
+the issue, logging the prep step prominently. You can still run
+`/prepare-issue` explicitly if you want a review checkpoint between
+prompt generation and execution — that is the recommended path for
+significant work. **Stale prompts** (the issue body or any linked ADR
+has been updated since the prompt was last written) trigger a
+regeneration prompt with confirmation; the executor never silently
+ignores a stale prompt.
+
 **What unblocks next:** a prompt file you can kick off whenever you
-have time to build.
+have time to build — or skip this step and let the executor
+auto-chain.
 
 ### 2.e Prompt to implementation
 
@@ -186,6 +198,22 @@ Plan mode is requested automatically when the session crosses the
 (edits a `skills/*/SKILL.md`, modifies 3+ files, edits `templates/*`,
 etc.). Trivial sessions (single typo, ADR status flip, doc tweak)
 skip plan mode and rely on the chat plan-gate alone.
+
+**`--no-prompt` mode (per ADR-038).** Genuinely-trivial issues —
+typo fixes, dependency bumps, doc tweaks, ADR status flips — don't
+earn ADR-shaped ceremony. Pass `--no-prompt` to skip prompt
+generation entirely; the executor reads the issue body directly and
+leaves a one-line breadcrumb in the first commit's message
+(`issue executed without prompt per ADR-038`) for the audit trail.
+The criteria for when `--no-prompt` is appropriate are exactly the
+**Trivial checklist** in ADR-039 (single source of truth — see
+`skills/claude-issue-executor/SKILL.md`). The executor *auto-detects*
+candidates conservatively: zero `ADR-NNN` references in the issue
+body **and** label in `chore` / `docs` / `bugfix-trivial`. When both
+hold, it suggests `--no-prompt` and asks for confirmation; explicit
+`--no-prompt` overrides the auto-detect without asking. Plan-mode
+rhythm still applies — `--no-prompt` skips the prompt step, not the
+significance gate.
 
 **Branch naming:** the skill creates branches following the kit's
 convention (see [GitHub Flow](https://docs.github.com/en/get-started/using-github/github-flow)) —
