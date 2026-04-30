@@ -24,5 +24,7 @@ project-locally (see ADR-001).
 | [`changelog/`](changelog/SKILL.md) | Generate grouped release notes from git history between two refs | Issue #18 |
 | [`release/`](release/SKILL.md) | Tag a semver release, call `/changelog` for notes, publish a GitHub Release | Issue #19 |
 | [`workflow-docs/`](workflow-docs/SKILL.md) | Generate README.md and Design/ai-summary.md from project artifacts | Issue #20 |
+| [`resume/`](resume/SKILL.md) | Brief a fresh session by reading `Design/state.md` (with `gh` fallback) — no writes | Issue #44 |
+| [`pause/`](pause/SKILL.md) | Refresh `Design/state.md` to current truth and optionally write `notes/handoff-YYYY-MM-DD.md` for context-window-exhausting handoffs | Issue #44 |
 
 See ADR-001 for why skills live project-locally under `.claude/skills/`.
