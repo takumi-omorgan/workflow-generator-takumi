@@ -45,6 +45,13 @@ just summarises the alternatives that were considered.
 - **Recommended:** `Design/mvp.md` for product principles and MVP
   scope context — useful when an option's pros/cons depend on what
   the MVP includes.
+- **Optional:** `Design/planning.md` (per [ADR-031](../../Design/adr/adr-031-deeper-planning-workflow.md))
+  for requirements decomposition, risks, assumptions, and the
+  "Decisions needing ADRs" list. When present, use it as the input
+  batch source and reference its requirement IDs (`R1`, `R2`, …) in
+  ADR Context sections where they apply. When absent, behaviour is
+  unchanged — small projects skip this artefact and the skill works
+  from PRD + MVP alone.
 
 ## Output
 

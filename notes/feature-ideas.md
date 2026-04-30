@@ -765,6 +765,35 @@ Best written after the skills and structural decisions are settled, so the docs 
 
 ---
 
+### 30. Require Claude Code plan mode (harness-level) for significant tasks in `claude-issue-executor`
+
+**Status:** idea
+**Target:** v-next
+**Captured:** 2026-04-30
+
+**Context / trigger:** Today `claude-issue-executor` enforces "plan-first" via a chat-level protocol: it proposes a written plan and waits for explicit user approval before any mutating tool call. That's a *convention* the executor follows, not a *guarantee* the harness enforces. Claude Code also ships a harder mechanism — plan mode (toggled with shift+tab shift+tab) — that locks the assistant out of all mutating tools at the harness level until the user explicitly exits plan mode with approval. The two are complementary, but the kit currently only uses the soft one. During the v-next planning batch implementation, the user noted this gap and asked for the harder enforcement to become standard for "significant tasks."
+
+**Sketch of the idea:** Update `skills/claude-issue-executor/SKILL.md` (and possibly `prepare-issue` or other gating skills) so plan mode is either entered automatically based on a documented "significant" checklist, OR the user is explicitly asked at session start whether to enter plan mode. The "significant" checklist: modifies 3+ files; edits a `skills/*/SKILL.md`; edits a `templates/*` file; edits `bin/*`; modifies `.claude/settings*.json`; or any other "blast radius beyond a single small fix" property. Trivial work (single typo, single-line doc tweak, status-line edit) explicitly opts out — plan mode is friction-positive there. Document the checklist in the skill and in the workflow guide so the criterion is shared between human and assistant.
+
+**Options in mind:**
+- **Auto-enter plan mode for significant tasks** — `claude-issue-executor` evaluates the checklist against the prompt's Scope section and enters plan mode without asking. Strongest enforcement, lowest friction once trusted.
+- **Ask the user at session start** — `claude-issue-executor` opens the session by asking "Enter Claude Code plan mode for this task? (yes / no / decide for me based on scope)". Most transparent, preserves user control, accepts the friction of one extra interaction.
+- **Hybrid: ask only when the checklist is borderline** — auto-enter for clearly-significant work, auto-skip for clearly-trivial work, ask only when the prompt's scope is ambiguous. Best of both, hardest to specify.
+- **Update `claude-issue-executor` only** — the executor is the orchestrator; one place to teach the rule. Recommended.
+- **Update both `claude-issue-executor` and `prepare-issue`** — `prepare-issue` is read-only with respect to GitHub, but writes a prompt file; arguably "significant" enough to gate. Likely overkill.
+- **A standalone `/plan-mode-on` reminder skill** invoked from other skills — explicit but adds a layer.
+- **No skill change, document the convention in the workflow guide only** — relies on author discipline. Lightest, but exactly the gap this entry exists to close.
+
+**Open questions:** Where does the "significant" checklist live canonically — in `skills/claude-issue-executor/SKILL.md`, in `docs/workflow-guide.md`, or both with one as the source of truth? Does plan-mode entry happen *before* the chat plan gate (harness lock first, then proposed plan within the lock), or *as* the chat plan gate (the proposed plan IS the plan-mode plan)? How does this interact with `--no-prompt` mode from #29 — trivial issues should not pay plan-mode friction. Should the rule apply to `pr-review-packager` too? Probably yes for the `gh pr create` step.
+
+**Consequences to think through:** Easier — harness-level enforcement removes a class of "I forgot to wait" failures; mistakes stop being convention-bound. Harder — plan mode adds friction even for medium-sized tasks; new contributors need to learn when it kicks in. Maintenance — the "significant" checklist must stay current as the kit grows; drift makes the rule fuzzy. Cross-skill coupling — multiple skills now reference the same checklist.
+
+**Alignment note for the ADR:** This entry interacts with #29 (prompt-step tightening). The `--no-prompt` mode from #29 is precisely the trivial-issue case that *shouldn't* trigger plan mode. The two ADRs should be drafted with consistent criteria — the trivial-issue checklist should be a single source of truth referenced from both.
+
+**Dependency note:** Touches `claude-issue-executor` (ADR-014). Pairs with #29. Independent of #22-#28 but useful at any point — could land before any of them.
+
+---
+
 ## Future Entries
 
 Features for consideration in later versions. Ordered by theme.
