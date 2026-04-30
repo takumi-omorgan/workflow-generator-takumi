@@ -55,6 +55,20 @@ Pick the skill that matches what you have in hand:
 Run them in sequence if you have a rough idea: `/idea-to-prd` →
 `/prd-normalizer` (if you later want to reshape it) → `/prd-to-mvp`.
 
+**Granularity (per ADR-036).** `prd-to-mvp` and `/planning` accept
+an optional `--granularity={coarse|standard|fine}` flag that sets a
+target band for phase count: `coarse` aims for 1–3 phases, `standard`
+(the default) for 5–8, `fine` for 8–12. Bands are *targets*, not hard
+caps — the skill picks the actual count for your project and includes
+an inline justification in the rendered build-out-plan. The choice is
+recorded as a `**Granularity:**` line in `Design/build-out-plan.md`,
+so re-runs are consistent without you having to remember the flag.
+Precedence (highest first): explicit flag, then the stored value in
+the build-out-plan, then the default `standard`. Pick `coarse` for
+weekend or one-week projects, `standard` for typical multi-month
+builds, `fine` for large multi-quarter scope where each phase warrants
+its own milestone.
+
 **What unblocks next:** a written MVP statement that scopes the first
 release. You now know what decisions you need to lock in.
 
@@ -102,6 +116,17 @@ See [`examples/projects/phased-podcast-pipeline/`](../examples/projects/phased-p
 for a worked 3-phase example, or [`examples/projects/kb-lookup/`](../examples/projects/kb-lookup/)
 and [`examples/projects/slug-utils/`](../examples/projects/slug-utils/)
 for the single-phase shape.
+
+**Anti-pattern: tuning granularity to dodge scope.** The
+`--granularity` flag (documented in step 2.a) is a knob for *how
+many phases your scope decomposes into*, not a knob for shipping a
+large project faster. If you find yourself reaching for `coarse` on
+a multi-month project so the build-out plan looks shorter, the right
+move is to cut MVP scope (re-run `prd-to-mvp` with a tighter scope
+question), not to compress the build-out into fewer phases. Phases
+are how the work is *paced*; scope is what is *delivered*. Don't
+confuse the two. ADR-036's "Consequences" section calls this out as
+the explicit anti-pattern this section guards against.
 
 **What unblocks next:** a list of issue numbers you can work through
 one at a time.
