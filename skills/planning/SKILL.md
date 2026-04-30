@@ -60,6 +60,16 @@ project produces a doc with more ceremony than content.
 - **Optional:** an existing `Design/planning.md` — used as the
   starting point for re-runs. The skill preserves editorial text
   outside the marker fences.
+- **Optional flag:** `--granularity={coarse|standard|fine}` — phase-
+  count target band, per [ADR-036](../../Design/adr/adr-036-granularity-control.md).
+  Same precedence as `prd-to-mvp`: explicit flag > `**Granularity:**`
+  line in `Design/build-out-plan.md` > default `standard`. The flag
+  affects this skill only when no build-out-plan exists yet — the
+  declared phase order in an existing build-out-plan is canonical
+  (per ADR-031), so the flag does not re-decompose phases. If the
+  flag and the stored value disagree, the skill prints a one-line
+  warning that the new tier will only take effect on the next
+  `prd-to-mvp` run.
 
 ## Output
 
@@ -76,40 +86,56 @@ without clobbering hand-written commentary.
 1. **Validate inputs.** Confirm `Design/prd-normalized.md` and
    `Design/mvp.md` exist. If either is missing, stop and tell the
    user to run `prd-normalizer` and / or `prd-to-mvp` first.
-2. **Detect re-run.** If `Design/planning.md` already exists, read
+2. **Resolve granularity tier.** If `--granularity=<tier>` was
+   passed, validate the value is one of `coarse|standard|fine`. Reject
+   invalid tiers with a one-line error and stop. If
+   `Design/build-out-plan.md` exists and contains a `**Granularity:**`
+   line:
+   - When no flag was passed, read the stored value and use it.
+   - When a flag was passed and disagrees with the stored value,
+     prefer the flag for this run and print a one-line warning that
+     the build-out-plan still records the old tier and will need a
+     `prd-to-mvp` re-run to update on disk.
+   Else default to `standard`. The resolved tier informs sequencing
+   rationale (step 7) but does not re-decompose phases when a
+   build-out-plan already declares them — ADR-031 makes the
+   build-out-plan canonical for phase order.
+3. **Detect re-run.** If `Design/planning.md` already exists, read
    it and use the marker-fenced sections as starting points. Editorial
    text outside the fences is preserved verbatim.
-3. **Read the inputs end to end.** PRD, MVP, and build-out plan if
+4. **Read the inputs end to end.** PRD, MVP, and build-out plan if
    present. Note in-scope capabilities, product principles, and the
    declared phase order.
-4. **Decompose requirements.** For each in-scope capability, draft
+5. **Decompose requirements.** For each in-scope capability, draft
    2–5 concrete requirements with stable IDs (`R1`, `R2`, …). Group
    by capability heading so traceability is obvious.
-5. **Surface risks.** Walk through the requirements and identify
+6. **Surface risks.** Walk through the requirements and identify
    risks that could derail delivery. Each risk gets impact,
    likelihood, and a one-line mitigation. Default to honesty over
    completeness — risks that don't matter are easy to drop later.
-6. **Record assumptions.** List things the plan depends on (tools,
+7. **Record assumptions.** List things the plan depends on (tools,
    access, prior decisions, external services). Each assumption
    carries an "if this is wrong" pointer so it's obvious when one
    breaks.
-7. **Justify sequencing.** For each phase in the build-out plan,
+8. **Justify sequencing.** For each phase in the build-out plan,
    write a short paragraph explaining why it has to come before the
    next. This is the section `issue-planner` reads when deciding
    issue order. If no build-out plan exists yet, ask the user for
-   the phase order before writing this section.
-8. **Capture open research questions.** List questions whose
+   the phase order before writing this section. Reference the
+   resolved granularity tier (from step 2) inline when explaining
+   why this project landed at this phase count.
+9. **Capture open research questions.** List questions whose
    answers are needed before specific ADRs can be drafted. Each
    question carries an owner and a target answer date.
-9. **List decisions needing ADRs.** Synthesise the architectural
-   questions surfaced by the planning round into a flat list of
-   decision topics. This list is the input to `adr-writer`.
-10. **Self-check** (see below).
-11. **Render** `Design/planning.md` from
+10. **List decisions needing ADRs.** Synthesise the architectural
+    questions surfaced by the planning round into a flat list of
+    decision topics. This list is the input to `adr-writer`.
+11. **Self-check** (see below).
+12. **Render** `Design/planning.md` from
     `templates/planning-template.md`. Substitute every
     `{{PLACEHOLDER}}`. Preserve any editorial text outside marker
     fences from the prior version.
-12. **Print** the path to the rendered file and the count of items
+13. **Print** the path to the rendered file and the count of items
     per section so the user can spot gaps quickly.
 
 ## How re-runs work
@@ -130,7 +156,9 @@ guards against.
 - **PRD or MVP missing.** Stop. Tell the user to run the upstream
   skills first. Do not invent inputs.
 - **Build-out plan missing.** Continue, but prompt the user for the
-  phase order before writing the sequencing-rationale section.
+  phase order before writing the sequencing-rationale section. The
+  resolved granularity tier (default `standard` if no flag) informs
+  the prompt — e.g. "5–8 phases for `standard`, 1–3 for `coarse`".
 - **Existing `planning.md` malformed.** Stop. Show the user which
   marker fences are missing or unclosed and ask whether to
   regenerate from scratch (with confirmation) or fix manually.
@@ -139,6 +167,13 @@ guards against.
 - **No risks worth recording.** Allowed. Leave the section with a
   single bullet "No material risks identified at planning time."
   Do not pad.
+- **`--granularity` invalid.** Stop in step 2 with a one-line error
+  naming the three valid values (`coarse`, `standard`, `fine`). Do
+  not write any output.
+- **`--granularity` disagrees with the build-out-plan's stored tier.**
+  The flag wins for this run; print a one-line warning that the
+  build-out-plan still records the old tier and a `prd-to-mvp` re-run
+  is needed to update it on disk.
 
 ## Self-check before writing
 
