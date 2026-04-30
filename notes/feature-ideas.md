@@ -767,9 +767,10 @@ Best written after the skills and structural decisions are settled, so the docs 
 
 ### 30. Require Claude Code plan mode (harness-level) for significant tasks in `claude-issue-executor`
 
-**Status:** idea
+**Status:** adr-drafted
 **Target:** v-next
 **Captured:** 2026-04-30
+**ADR:** [ADR-039](../Design/adr/adr-039-plan-mode-for-significant-tasks.md)
 
 **Context / trigger:** Today `claude-issue-executor` enforces "plan-first" via a chat-level protocol: it proposes a written plan and waits for explicit user approval before any mutating tool call. That's a *convention* the executor follows, not a *guarantee* the harness enforces. Claude Code also ships a harder mechanism — plan mode (toggled with shift+tab shift+tab) — that locks the assistant out of all mutating tools at the harness level until the user explicitly exits plan mode with approval. The two are complementary, but the kit currently only uses the soft one. During the v-next planning batch implementation, the user noted this gap and asked for the harder enforcement to become standard for "significant tasks."
 

@@ -53,6 +53,7 @@ fences is preserved.
 | [ADR-036](adr-036-granularity-control.md) | Granularity / density control for phased plans | accepted |
 | [ADR-037](adr-037-milestone-lifecycle.md) | Milestone lifecycle commands (audit, summary, complete) | accepted |
 | [ADR-038](adr-038-tighten-prompt-step.md) | Tighten the prompt step — auto-chain executor and `--no-prompt` mode | accepted |
+| [ADR-039](adr-039-plan-mode-for-significant-tasks.md) | Require Claude Code plan mode for significant tasks in `claude-issue-executor` | accepted |
 
 <!-- adr-index:end -->
 
