@@ -279,7 +279,11 @@ lockstep.
 ## Session protocol — end to end
 
 1. **Parse invocation.** Resolve the prompt path. If no arg was given,
-   list candidates and ask.
+   list candidates and ask. Then **classify the session against the
+   significance checklist** (see **Plan-mode rhythm** above): if
+   clearly-significant, request the user toggle plan mode before
+   continuing; if borderline, ask once; if clearly-trivial, proceed
+   with the chat plan-gate alone.
 2. **Preflight.** Confirm the working tree is clean. If dirty, stop and
    ask the user to commit, stash, or discard. Confirm the current branch
    is `main` or agree with the user to switch.
@@ -289,7 +293,11 @@ lockstep.
 6. **Wait for approval.** No edits until explicit yes.
 7. **Create the branch** from `main`.
 8. **Implement, commit incrementally.** Each commit is one logical
-   change with the required message format. Tests land with code.
+   change with the required message format. Tests land with code. If
+   a new significant boundary appears mid-session (scope expands
+   beyond what was classified at start, e.g. an unforeseen
+   `skills/*/SKILL.md` edit or a new `templates/*` change), pause and
+   re-flag for plan-mode entry. Do not silently cross the boundary.
 9. **Verify.** Run the project's tests if any exist. Run any
    verification step called out in the prompt's "Evaluation & testing
    requirements" section.
