@@ -293,6 +293,64 @@ ADR-038 carries a mandatory content-boundary review obligation that
 serves as the enforcement point for keeping the two checklists in
 lockstep.
 
+## `--no-prompt` mode
+
+Per [ADR-038](../../Design/adr/adr-038-tighten-prompt-step.md), the
+executor accepts a `--no-prompt` flag that **skips prompt generation
+entirely** and runs from the issue body alone. The prompt artefact is
+not written. A one-line breadcrumb — `issue executed without prompt
+per ADR-038` — is appended to the first commit's message so the
+audit trail survives.
+
+### When `--no-prompt` is appropriate
+
+The criteria for `--no-prompt` are exactly the **Trivial checklist**
+above (lines beginning *"A session is **trivial** if it is one of:"*).
+That checklist is the **single source of truth**; the `--no-prompt`
+mode does not duplicate it. If the trivial checklist evolves, this
+mode's criteria evolve in lockstep — see the **Alignment-review
+obligation** section just above.
+
+### Auto-detect (with confirmation)
+
+When the user invokes `/claude-issue-executor <issue-number>` (no
+explicit `--no-prompt`), the executor auto-detects candidates
+*conservatively*:
+
+- The issue has **zero `ADR-NNN` references** in its body, AND
+- The issue has at least one of the labels `chore`, `docs`, or
+  `bugfix-trivial`.
+
+When both conditions hold, the executor *suggests* `--no-prompt`
+mode and asks for confirmation: *"Issue looks trivial — skip prompt
+generation? (yes / no)"*. On `yes`, proceed without prompt. On `no`,
+fall back to the standard auto-chain path. The suggestion never
+short-circuits silently.
+
+### Override
+
+Explicit `--no-prompt` overrides auto-detection — no confirmation is
+asked. This is for the user who already knows the issue is trivial
+and wants the lowest-ceremony path. The breadcrumb is still left in
+the commit message.
+
+### Interactions
+
+- **Plan-mode rhythm** (ADR-039) still applies. `--no-prompt`
+  affects the *prompt* step, not the plan-mode gate. A trivial
+  issue with `--no-prompt` typically also classifies as
+  clearly-trivial against the significance checklist, so plan mode
+  is not requested. But if the executor is ever invoked with
+  `--no-prompt` on something that *is* significant (e.g. a multi-
+  file refactor mislabelled `chore`), the significance gate still
+  fires — the two are independent.
+- **`/check-plan`** (ADR-034) does not run when `--no-prompt` is
+  set, because there is no rendered prompt to check. The skip is
+  noted in the evaluation summary alongside the breadcrumb.
+- **`Design/state.md`** updates (ADR-035) still happen. The
+  `state:in-flight` zone records `Status: verified` (or `executing`
+  mid-session) regardless of whether a prompt was generated.
+
 ## Session protocol — end to end
 
 1. **Resolve the prompt (auto-chain `prepare-issue` per
