@@ -27,6 +27,7 @@ for the documentation-and-template architecture.
 | [`build-out-plan-template.md`](build-out-plan-template.md) | Phased build-out plan | `Design/build-out-plan.md` | `prd-to-mvp` skill (Issue #7) / human |
 | [`planning-template.md`](planning-template.md) | Deeper planning artefact (decomposition, risks, assumptions, sequencing, research questions) — opt-in for non-trivial projects | `Design/planning.md` | `planning` skill (ADR-031, Issue #40) / human |
 | [`decisions-template.md`](decisions-template.md) | Append-only decisions log capturing informal-but-settled context (gray areas resolved before ADR drafting) — opt-in, below-ADR-weight by design | `Design/decisions.md` | `clarify` skill (ADR-033, Issue #42) / human |
+| [`state-template.md`](state-template.md) | Session-continuity pointer (current phase, in-flight issue, recent work, blockers, continue-here) — committed, capped at ~100 lines | `Design/state.md` | `prepare-issue` / `claude-issue-executor` / `pr-review-packager` / `pause` (ADR-035, Issue #44) |
 | [`licenses/`](licenses/) | License-text templates (currently `mit.txt`) with `{{YEAR}}` and `{{COPYRIGHT_HOLDER}}` placeholders | `LICENSE` at target project root | `bin/install-workflow-kit --license=mit` (ADR-030) |
 
 ## Conventions
