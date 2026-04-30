@@ -26,5 +26,6 @@ project-locally (see ADR-001).
 | [`workflow-docs/`](workflow-docs/SKILL.md) | Generate README.md and Design/ai-summary.md from project artifacts | Issue #20 |
 | [`resume/`](resume/SKILL.md) | Brief a fresh session by reading `Design/state.md` (with `gh` fallback) — no writes | Issue #44 |
 | [`pause/`](pause/SKILL.md) | Refresh `Design/state.md` to current truth and optionally write `notes/handoff-YYYY-MM-DD.md` for context-window-exhausting handoffs | Issue #44 |
+| [`check-plan/`](check-plan/SKILL.md) | Validate ADRs and issue prompts against version-locked checklists; chained as a pre-commit gate from `adr-writer` and `prepare-issue` (`--skip-check` opts out) | Issue #43 |
 
 See ADR-001 for why skills live project-locally under `.claude/skills/`.
