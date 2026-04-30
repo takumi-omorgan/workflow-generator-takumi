@@ -20,11 +20,21 @@
   phase by every downstream skill. Small projects can keep using the
   flat structure unchanged. See docs/workflow-guide.md for the
   fallback semantics.
+
+  Granularity (per ADR-036). The `**Granularity:**` line below records
+  the tier chosen by `prd-to-mvp` / `/planning` and is the canonical
+  store for re-runs: explicit `--granularity=<tier>` flag wins, else
+  the value below is read, else default `standard`. Allowed values:
+  `coarse` (1–3 phases), `standard` (5–8, default), `fine` (8–12).
+  Bands are targets, not hard caps — the planning skill picks the
+  actual count and justifies it inline. Absence of the line is
+  treated as `standard` for backwards compatibility.
 -->
 
 # {{PRODUCT_NAME}} — Build-Out Plan
 
 **Last updated:** {{YYYY-MM-DD}}
+**Granularity:** {{GRANULARITY}}
 
 ## Objective
 
