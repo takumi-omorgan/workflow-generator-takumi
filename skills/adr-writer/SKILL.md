@@ -60,6 +60,14 @@ just summarises the alternatives that were considered.
   prefer drafting an ADR that supersedes it (per the
   graduate-to-ADR criterion in `skills/clarify/SKILL.md`) over
   re-litigating. When absent, behaviour is unchanged.
+- **Optional flag:** `--skip-check` — opt out of the `/check-plan`
+  pre-write gate (per [ADR-034](../../Design/adr/adr-034-plan-checker.md)).
+  Default is on (gate runs); the flag is documented as opt-out for
+  rapid iteration on known-good drafts only. When set, the skill
+  writes each ADR despite any deterministic-criteria failures and
+  appends a one-line breadcrumb to the commit message —
+  `chore: ADR drafted with --skip-check per ADR-034` — so the
+  bypass is auditable.
 
 ## Output
 
@@ -115,6 +123,17 @@ Repeat for every topic in the input batch:
    single-phase projects. The line is opt-in — when set,
    `bin/sync-adr-index` surfaces a Phase column in
    `Design/adr/README.md`.
+7. **Pre-write check (per [ADR-034](../../Design/adr/adr-034-plan-checker.md)).**
+   Unless `--skip-check` was passed, invoke `/check-plan` against
+   the in-memory rendered ADR. On pass, proceed to disk write. On
+   fail, surface the failures (each citing its criterion ID — e.g.
+   `ADR-C3`) to the user, ask how to revise, apply the revision in
+   memory, and re-invoke `/check-plan` for round 2. After 3 failed
+   rounds, yield: surface the remaining failures and stop without
+   writing the ADR. Warnings are surfaced but do not block.
+   `--skip-check` short-circuits the gate for the current
+   invocation only and writes despite failures, leaving a
+   breadcrumb in the commit message.
 
 ## Drafting protocol — batch
 
@@ -123,12 +142,17 @@ When the input is multiple topics:
 1. Confirm the list with the user in one batched turn — show the
    numbered topics and ask for any to be removed, reframed, or added.
 2. For each topic in confirmed order, run the single-decision
-   protocol.
+   protocol — including the per-ADR `/check-plan` gate (step 7).
+   Each ADR is checked independently; one failure does not block
+   the others. ADRs that pass the gate are written; ADRs that fail
+   the gate after 3 rounds are surfaced in the batch report and not
+   written (unless `--skip-check` was set, in which case all are
+   written with breadcrumbs).
 3. For trivial decisions (the "obvious answer" case), keep the ADR
    short — two options, one-paragraph Decision, terse Consequences.
    Trivial does not mean skip the ADR; it means write it briefly.
 4. Render every file. Report back the list of numbers and titles
-   created.
+   created and any that were yielded by the gate.
 5. After all files are rendered, run `bin/sync-adr-index` to refresh
    the index in `Design/adr/README.md`. This keeps the index table
    aligned with what is on disk (ADR-023). If the script reports
@@ -153,6 +177,8 @@ Per file:
 - [ ] Consequences covers all four bullets ("None new" is allowed).
 - [ ] Date is today's date in `YYYY-MM-DD`.
 - [ ] No `{{...}}` template placeholders remain.
+- [ ] `/check-plan` passed (deterministic criteria), or
+  `--skip-check` was explicitly set with a recorded breadcrumb.
 
 After the batch:
 
