@@ -203,6 +203,79 @@ are read-only ones needed to answer follow-up questions from the user.
 This rule is load-bearing. Skipping it violates ADR-006 and defeats the
 purpose of the skill.
 
+See **Plan-mode rhythm (per ADR-039)** below for harness-level
+enforcement that runs alongside this rule.
+
+## Plan-mode rhythm (per ADR-039)
+
+The chat plan-gate above is **convention** — the assistant follows the
+8-step rule because the skill says so. Claude Code also ships a
+**harness-level** mechanism: plan mode (toggled with
+`shift+tab shift+tab`) locks the assistant out of all mutating tools
+until the user explicitly exits plan mode with approval. The two are
+complementary: the chat plan-gate operates *inside* plan mode when the
+user has entered it, so both run together rather than competing.
+
+This section defines when the executor requests plan-mode entry and
+how it routes sessions of different sizes. The rules below implement
+[ADR-039](../../Design/adr/adr-039-plan-mode-for-significant-tasks.md).
+
+### Significant checklist
+
+A session is **significant** if it meets any of:
+
+- modifies 3+ files, OR
+- edits any `skills/*/SKILL.md`, OR
+- edits any `templates/*` file, OR
+- edits `bin/*` (scripts, installer), OR
+- modifies `.claude/settings*.json` or other harness config, OR
+- otherwise carries blast radius beyond a single small fix.
+
+### Trivial checklist
+
+A session is **trivial** if it is one of:
+
+- single typo,
+- single-line doc tweak,
+- status-line / config-default tweak,
+- single-file rename within scratch space,
+- `feature-ideas.md` status flip,
+- ADR status flip (proposed → accepted),
+- single-PR scope with no design decisions and no ADR linkage.
+
+This list is the **single source of truth shared with ADR-038's
+`--no-prompt` mode**. When either ADR's checklist evolves, both must
+move together — ADR-038's mandatory content-boundary review is the
+enforcement point.
+
+### Hybrid path
+
+When the executor parses the invocation and reads the prompt's Scope
+section, it classifies the session against the two checklists and
+routes to one of three branches:
+
+- **Clearly-significant** → the assistant *requests* the user toggle
+  plan mode and waits. The assistant cannot enter plan mode itself —
+  only the user can press `shift+tab shift+tab`. After the user
+  toggles, the assistant proposes the plan inside plan mode (the chat
+  plan-gate's 8-step rule above runs here, with the harness-level
+  lock providing belt-and-braces enforcement). The user approves and
+  exits plan mode (`shift+tab` once); optionally enables auto-accept
+  edits (`shift+tab` again) for the execution phase.
+- **Clearly-trivial** → the executor proceeds with the chat plan-gate
+  alone. No plan-mode request is made; the friction of toggling is
+  not warranted for the work in question.
+- **Borderline** → the executor asks once: *"Significant? yes / no /
+  decide for me based on scope."* Proceed accordingly.
+
+### Alignment-review obligation
+
+When the trivial checklist above is amended, ADR-038's
+`--no-prompt` criteria must be reviewed and aligned in the same change.
+ADR-038 carries a mandatory content-boundary review obligation that
+serves as the enforcement point for keeping the two checklists in
+lockstep.
+
 ## Session protocol — end to end
 
 1. **Parse invocation.** Resolve the prompt path. If no arg was given,
