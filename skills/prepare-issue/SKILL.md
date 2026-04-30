@@ -142,6 +142,21 @@ noted.
 11. **Write the file** only after explicit confirmation. Report the
     absolute path and a one-line summary of what was filled vs. left
     as TODO.
+12. **Update `Design/state.md` if present.** Per
+    [ADR-035](../../Design/adr/adr-035-state-md-session-continuity.md),
+    rewrite two zones:
+    - `state:in-flight` → set `Issue: #NNN`, `Prompt:` to the just-
+      written path, `Branch: n/a` (executor will set it later),
+      `Status: prepared`.
+    - `state:continue-here` → one short paragraph naming the next
+      action: `"Run /claude-issue-executor prompts/issue-NNN-…md"`.
+    Marker fences (`<!-- state:<zone>:start --> / :end -->`) bound
+    each zone; rewrite only the bytes between the fences. Other
+    zones (`phase`, `recent`, `blockers`) are left untouched. If
+    `Design/state.md` is absent, skip silently — this is normal in
+    a kit repo or a project that has not adopted ADR-035. If the
+    file exists but its marker fences are broken, do not attempt to
+    repair; tell the user and suggest `/pause` to refresh.
 
 ## Short-title derivation
 
@@ -221,6 +236,11 @@ appear in the issue body.
   before overwriting. Default no.
 - **Multi-line label list** → join with `, `.
 - **No milestone** → fill with the string `none`.
+- **`Design/state.md` missing** → skip the state-update step
+  silently. Consistent with how the build-out-plan read is handled.
+- **`Design/state.md` marker fences broken** → do not rewrite. Tell
+  the user which zone is malformed and suggest `/pause` to refresh
+  the file in place.
 
 ## Review-before-write checkpoint
 

@@ -301,9 +301,18 @@ lockstep.
 9. **Verify.** Run the project's tests if any exist. Run any
    verification step called out in the prompt's "Evaluation & testing
    requirements" section.
-10. **Evaluation summary.** Print the final summary (see **Evaluation
+10. **Update `Design/state.md` if present.** Per
+    [ADR-035](../../Design/adr/adr-035-state-md-session-continuity.md),
+    rewrite the `state:in-flight` zone: keep `Issue` and `Prompt`,
+    set `Branch` to the current branch, set `Status: verified`. The
+    `recent` zone is **not** touched here — it tracks merged PRs and
+    is the responsibility of `/pr-review-packager`. If the file is
+    absent, skip silently. If marker fences are broken, do not
+    rewrite; report the broken zone in the evaluation summary's
+    follow-ups list and suggest `/pause`.
+11. **Evaluation summary.** Print the final summary (see **Evaluation
     summary** below).
-11. **Suggest handoff.** Tell the user the next step is
+12. **Suggest handoff.** Tell the user the next step is
     `/pr-review-packager` to package a PR. Do not invoke it.
 
 ## Evaluation summary

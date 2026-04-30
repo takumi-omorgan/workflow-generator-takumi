@@ -204,7 +204,24 @@ noted.
     ```
     Pass-through flags are the `--label`, `--milestone`, `--reviewer`,
     `--assignee`, `--draft` values the user provided at invocation.
-15. **Report.** Print the PR URL returned by `gh`, plus a one-line
+15. **Update `Design/state.md` if present.** Per
+    [ADR-035](../../Design/adr/adr-035-state-md-session-continuity.md),
+    close out the issue in the state file:
+    - prepend a one-line entry to the `state:recent` zone of the
+      form `#<PR> — ADR-NNN — <commit-summary first sentence>`
+      (use `none` for the ADR token if no ADR was resolved). If the
+      zone now has more than five entries, drop the oldest so the
+      rolling list stays at five.
+    - rewrite the `state:in-flight` zone to `Issue: none`,
+      `Prompt: n/a`, `Branch: n/a`, `Status: none`.
+    - rewrite the `state:continue-here` zone to one short paragraph
+      pointing at the just-opened PR, e.g. `"Review and merge #<PR>;
+      then pick the next issue from the queue."`.
+    Marker fences bound each zone; rewrite only the bytes between
+    the fences. If `Design/state.md` is absent, skip silently. If
+    marker fences are broken, do not rewrite; surface the broken
+    zone in the final report and suggest `/pause`.
+16. **Report.** Print the PR URL returned by `gh`, plus a one-line
     summary of what was filled vs. what was left as TODO. Done.
 
 ## Issue-link extraction — detailed rules
