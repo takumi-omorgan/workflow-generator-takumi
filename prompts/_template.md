@@ -19,6 +19,25 @@
 
   Section reference (keep this order): Context, ADR, GitHub Issue, Goal,
   Requirements, Acceptance criteria, Scope, Evaluation, Instructions.
+
+  Content boundary (ADR-038, audited in notes/adr-038-alignment-review.md).
+  The prompt is per-issue and immutable — written once by `/prepare-issue`,
+  consumed once by `/claude-issue-executor`. Project- or session-scoped
+  artefacts are read-only context here; do not duplicate their content into
+  the prompt:
+    - Design/planning.md (ADR-031): project-wide decomposition, risks,
+      sequencing rationale. Reference; do not restate.
+    - Design/build-out-plan.md `## Phase N` blocks (ADR-032): phase scope,
+      deliverables, exit criteria. Reference by phase name.
+    - Design/decisions.md (ADR-033): informal-but-settled decisions
+      below ADR weight. Reference when a decision constrains this issue.
+    - Design/state.md (ADR-035): session-mutable pointer (in-flight
+      issue, recent PRs, blockers). Never mirror it here.
+    - skills/check-plan/criteria.md (ADR-034): structural validation
+      rules. Orthogonal to this prompt's Acceptance criteria (which
+      capture end-state outcomes, not validation rules).
+    - /milestone-summary outputs (ADR-037): cross-issue retrospectives.
+      Out of scope for a per-issue prompt.
 -->
 
 You are working in my `{{PROJECT_NAME}}` repository.
