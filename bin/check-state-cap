@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# check-state-cap — sanity-check that Design/state.md stays under the
+# line cap mandated by ADR-035.
+#
+# Implements ADR-035's "Maintain" line: a CI sanity check that the
+# session-continuity pointer does not silently grow into a stale
+# mirror of GitHub. The cap is intentionally loose (default 100 lines);
+# the goal is a guard rail, not a hard ceiling.
+#
+# Behaviour:
+#   - If Design/state.md does not exist, exit 0 silently. The kit
+#     repo itself does not ship the file (it is a target-project
+#     artefact) and many projects will not have adopted ADR-035 yet.
+#   - If the file exists, count lines. Pass if at or below the cap;
+#     fail if over. Print the actual count either way under --check.
+#
+# Exit codes:
+#   0  file absent OR file present and at/below cap
+#   1  file present and over cap
+#   2  invocation error (unknown flag)
+#
+# Usage:
+#   bin/check-state-cap              # silent pass / one-line fail
+#   bin/check-state-cap --check      # always print line-count summary
+#   bin/check-state-cap --cap=120    # override the default cap
+
+set -euo pipefail
+
+CAP=100
+VERBOSE=0
+for arg in "$@"; do
+  case "$arg" in
+    --check) VERBOSE=1 ;;
+    --cap=*) CAP="${arg#--cap=}" ;;
+    -h|--help)
+      sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'
+      exit 0
+      ;;
+    *)
+      printf 'check-state-cap: unknown argument: %s\n' "$arg" >&2
+      exit 2
+      ;;
+  esac
+done
+
+STATE_FILE="Design/state.md"
+
+if [ ! -f "$STATE_FILE" ]; then
+  if [ "$VERBOSE" = 1 ]; then
+    printf 'check-state-cap: %s not present — skipping\n' "$STATE_FILE"
+  fi
+  exit 0
+fi
+
+LINES=$(wc -l < "$STATE_FILE" | tr -d ' ')
+
+if [ "$LINES" -le "$CAP" ]; then
+  if [ "$VERBOSE" = 1 ]; then
+    printf 'check-state-cap: %s is %s lines (cap %s) — ok\n' "$STATE_FILE" "$LINES" "$CAP"
+  fi
+  exit 0
+fi
+
+printf 'check-state-cap: %s is %s lines, over cap %s\n' "$STATE_FILE" "$LINES" "$CAP" >&2
+printf 'check-state-cap: prune the oldest entry from the state:recent zone, or run /pause to refresh\n' >&2
+exit 1
