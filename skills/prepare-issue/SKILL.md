@@ -53,6 +53,14 @@ and is still accurate, skip this skill and re-use the existing file.
 - **Implicit repo context:** the current working directory must be
   inside a git repo whose `origin` is the GitHub repo containing the
   issue. `gh` infers the repo from git remotes.
+- **Optional flag:** `--skip-check` — opt out of the `/check-plan`
+  pre-write gate (per [ADR-034](../../Design/adr/adr-034-plan-checker.md)).
+  Default is on (gate runs); the flag is documented as opt-out for
+  rapid iteration on known-good drafts only. When set, the skill
+  writes the prompt despite any deterministic-criteria failures and
+  appends a one-line breadcrumb to the prompt body —
+  `<!-- /check-plan was skipped via --skip-check per ADR-034 -->` —
+  so the bypass is auditable.
 
 ## Output
 
@@ -135,14 +143,27 @@ noted.
    markdown block. Ask explicitly: "Write this to
    `prompts/issue-NNN-short-title.md`? (yes / edit / cancel)".
    **Do not write the file before this confirmation.**
-10. **Handle the file-exists case.** Before writing, check whether
+10. **Pre-write check (per [ADR-034](../../Design/adr/adr-034-plan-checker.md)).**
+    Unless `--skip-check` was passed, after the user confirms with
+    `yes`, invoke `/check-plan` against the in-memory filled
+    prompt. On pass, proceed to step 11 (file-exists check). On
+    fail, surface the failures (each citing its criterion ID — e.g.
+    `PROMPT-C1`) to the user, ask how to revise, apply the
+    revision in memory, re-show the updated prompt for confirmation,
+    and re-invoke `/check-plan` for round 2. After 3 failed rounds,
+    yield: surface the remaining failures and stop without writing
+    the file. Warnings are surfaced but do not block.
+    `--skip-check` short-circuits the gate and the skill proceeds
+    to step 11 with a one-line breadcrumb appended to the prompt
+    body.
+11. **Handle the file-exists case.** Before writing, check whether
     `prompts/issue-NNN-short-title.md` already exists. If it does,
     show a diff between the existing file and the new content and
     ask explicitly whether to overwrite. Default to "no".
-11. **Write the file** only after explicit confirmation. Report the
+12. **Write the file** only after explicit confirmation. Report the
     absolute path and a one-line summary of what was filled vs. left
     as TODO.
-12. **Update `Design/state.md` if present.** Per
+13. **Update `Design/state.md` if present.** Per
     [ADR-035](../../Design/adr/adr-035-state-md-session-continuity.md),
     rewrite two zones:
     - `state:in-flight` → set `Issue: #NNN`, `Prompt:` to the just-
@@ -241,6 +262,17 @@ appear in the issue body.
 - **`Design/state.md` marker fences broken** → do not rewrite. Tell
   the user which zone is malformed and suggest `/pause` to refresh
   the file in place.
+- **`/check-plan` gate fails** → the gate runs *after* user-confirm
+  but *before* disk write, so a failed check leaves the working
+  tree clean. Iterate up to 3 rounds in step 10, then yield without
+  writing.
+- **`/check-plan` gate yields** (3 rounds exceeded) → stop. Surface
+  remaining failures to the user as items to fix manually. The
+  in-memory prompt is discarded; nothing is written.
+- **`--skip-check`** → bypass the gate entirely for this invocation.
+  Append the documented breadcrumb to the prompt body before
+  writing, and proceed to step 11. The flag is single-use; future
+  `/prepare-issue` invocations re-enable the gate.
 
 ## Review-before-write checkpoint
 
@@ -261,6 +293,9 @@ filled prompt looks clean.
 - [ ] The filename is `prompts/issue-NNN-<short-title>.md` with
   `NNN` zero-padded to three digits.
 - [ ] The user explicitly confirmed the write.
+- [ ] `/check-plan` passed (deterministic criteria), or
+  `--skip-check` was explicitly set with a recorded breadcrumb in
+  the prompt body.
 
 If any fail, fix and re-show before writing.
 
