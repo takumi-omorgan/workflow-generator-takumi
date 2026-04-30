@@ -563,7 +563,8 @@ Best written after the skills and structural decisions are settled, so the docs 
 
 ### 22. More detailed planning workflow
 
-**Status:** adr-drafted
+**Status:** shipped
+**Shipped:** v3.3.0
 **Target:** v-next
 **Captured:** 2026-04-30
 **ADR:** [ADR-031](../Design/adr/adr-031-deeper-planning-workflow.md)
@@ -588,7 +589,8 @@ Best written after the skills and structural decisions are settled, so the docs 
 
 ### 23. Implementation phases in PRD review and planning
 
-**Status:** adr-drafted
+**Status:** shipped
+**Shipped:** v3.3.0
 **Target:** v-next
 **Captured:** 2026-04-30
 **ADR:** [ADR-032](../Design/adr/adr-032-implementation-phases.md)
@@ -613,7 +615,8 @@ Best written after the skills and structural decisions are settled, so the docs 
 
 ### 24. `discuss-phase` style clarification step before ADRs
 
-**Status:** adr-drafted
+**Status:** shipped
+**Shipped:** v3.3.0
 **Target:** v-next
 **Captured:** 2026-04-30
 **ADR:** [ADR-033](../Design/adr/adr-033-clarify-step.md)
@@ -638,7 +641,8 @@ Best written after the skills and structural decisions are settled, so the docs 
 
 ### 25. Plan-checker quality gate for ADRs and issue prompts
 
-**Status:** adr-drafted
+**Status:** shipped
+**Shipped:** v3.3.0
 **Target:** v-next
 **Captured:** 2026-04-30
 **ADR:** [ADR-034](../Design/adr/adr-034-plan-checker.md)
@@ -663,7 +667,8 @@ Best written after the skills and structural decisions are settled, so the docs 
 
 ### 26. `STATE.md` and session-continuity artefacts for long projects
 
-**Status:** adr-drafted
+**Status:** shipped
+**Shipped:** v3.3.0
 **Target:** v-next
 **Captured:** 2026-04-30
 **ADR:** [ADR-035](../Design/adr/adr-035-state-md-session-continuity.md)
@@ -688,7 +693,8 @@ Best written after the skills and structural decisions are settled, so the docs 
 
 ### 27. Granularity / density control for phased plans
 
-**Status:** adr-drafted
+**Status:** shipped
+**Shipped:** v3.3.0
 **Target:** v-next
 **Captured:** 2026-04-30
 **ADR:** [ADR-036](../Design/adr/adr-036-granularity-control.md)
@@ -713,7 +719,8 @@ Best written after the skills and structural decisions are settled, so the docs 
 
 ### 28. Milestone lifecycle commands (audit, summary, complete)
 
-**Status:** adr-drafted
+**Status:** shipped
+**Shipped:** v3.3.0
 **Target:** v-next
 **Captured:** 2026-04-30
 **ADR:** [ADR-037](../Design/adr/adr-037-milestone-lifecycle.md)
@@ -738,7 +745,8 @@ Best written after the skills and structural decisions are settled, so the docs 
 
 ### 29. Tighten the prompt step: auto-chain into executor, allow `--no-prompt` for trivial issues
 
-**Status:** adr-drafted
+**Status:** shipped
+**Shipped:** v3.3.0
 **Target:** v-next
 **Captured:** 2026-04-30
 **ADR:** [ADR-038](../Design/adr/adr-038-tighten-prompt-step.md)
@@ -767,7 +775,8 @@ Best written after the skills and structural decisions are settled, so the docs 
 
 ### 30. Require Claude Code plan mode (harness-level) for significant tasks in `claude-issue-executor`
 
-**Status:** adr-drafted
+**Status:** shipped
+**Shipped:** v3.3.0
 **Target:** v-next
 **Captured:** 2026-04-30
 **ADR:** [ADR-039](../Design/adr/adr-039-plan-mode-for-significant-tasks.md)
