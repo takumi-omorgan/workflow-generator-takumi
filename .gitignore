@@ -20,3 +20,7 @@
 *.bak
 *.bak.*
 *.tmp
+
+# Personal SSH key material — must not land in the kit repo
+mac-connect
+mac-connect.pub

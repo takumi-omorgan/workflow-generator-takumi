@@ -45,7 +45,7 @@ These change the target project's layout or core artifacts. Decide first — oth
 
 ### 1. `CLAUDE.md` starter template
 
-**Status:** adr-drafted
+**Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-16
 **ADR:** [ADR-007](../Design/adr/adr-007-claude-md-starter-template.md)
@@ -66,7 +66,7 @@ These change the target project's layout or core artifacts. Decide first — oth
 
 ### 2. Dedicated `prompts/` folder for issue session briefs
 
-**Status:** adr-drafted
+**Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-16
 **ADR:** [ADR-008](../Design/adr/adr-008-dedicated-prompts-folder.md)
@@ -96,7 +96,7 @@ How projects get set up. Depends on knowing the final layout from Layer 1.
 
 ### 3. Installer script
 
-**Status:** adr-drafted
+**Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-16
 **ADR:** [ADR-009](../Design/adr/adr-009-installer-script.md)
@@ -117,7 +117,7 @@ How projects get set up. Depends on knowing the final layout from Layer 1.
 
 ### 4. Optional `--with-docs` flag on install
 
-**Status:** adr-drafted
+**Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-16
 **ADR:** [ADR-010](../Design/adr/adr-010-optional-with-docs-flag.md)
@@ -153,7 +153,7 @@ These form a chain: issues are created → prompts are prepared → sessions are
 
 ### 5. `issue-planner` skill
 
-**Status:** adr-drafted
+**Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-17
 **ADR:** [ADR-011](../Design/adr/adr-011-issue-planner-skill.md)
@@ -174,7 +174,7 @@ These form a chain: issues are created → prompts are prepared → sessions are
 
 ### 6. GitHub Projects integration
 
-**Status:** adr-drafted
+**Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-17
 **ADR:** [ADR-012](../Design/adr/adr-012-github-projects-integration.md)
@@ -198,7 +198,7 @@ These form a chain: issues are created → prompts are prepared → sessions are
 
 ### 7. `/prepare-issue` skill for auto-filling issue prompts
 
-**Status:** adr-drafted
+**Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-16
 **ADR:** [ADR-013](../Design/adr/adr-013-prepare-issue-skill.md)
@@ -222,7 +222,7 @@ These form a chain: issues are created → prompts are prepared → sessions are
 
 ### 8. `claude-issue-executor` skill
 
-**Status:** adr-drafted
+**Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-17
 **ADR:** [ADR-014](../Design/adr/adr-014-claude-issue-executor-skill.md)
@@ -249,7 +249,7 @@ Post-implementation: packaging PRs, generating changelogs, cutting releases.
 
 ### 9. `pr-review-packager` skill
 
-**Status:** adr-drafted
+**Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-17
 **ADR:** [ADR-015](../Design/adr/adr-015-pr-review-packager-skill.md)
@@ -270,7 +270,7 @@ Post-implementation: packaging PRs, generating changelogs, cutting releases.
 
 ### 10. Auto-generated changelog / release notes skill
 
-**Status:** adr-drafted
+**Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-16
 **ADR:** [ADR-016](../Design/adr/adr-016-changelog-and-release-notes-skill.md)
@@ -291,7 +291,7 @@ Post-implementation: packaging PRs, generating changelogs, cutting releases.
 
 ### 11. `/release` skill for version tagging and GitHub Releases
 
-**Status:** adr-drafted
+**Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-17
 **ADR:** [ADR-017](../Design/adr/adr-017-release-skill.md)
@@ -321,7 +321,7 @@ Best written after the skills and structural decisions are settled, so the docs 
 
 ### 12. `workflow-docs` skill
 
-**Status:** adr-drafted
+**Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-17
 **ADR:** [ADR-018](../Design/adr/adr-018-workflow-docs-skill.md)
@@ -342,7 +342,7 @@ Best written after the skills and structural decisions are settled, so the docs 
 
 ### 13. Write `docs/claude-code-guide.md`
 
-**Status:** adr-drafted
+**Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-16
 **ADR:** [ADR-019](../Design/adr/adr-019-claude-code-guide.md)
@@ -363,7 +363,7 @@ Best written after the skills and structural decisions are settled, so the docs 
 
 ### 14. End-to-end workflow guide doc
 
-**Status:** adr-drafted
+**Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-16
 **ADR:** [ADR-020](../Design/adr/adr-020-workflow-guide.md)
@@ -394,7 +394,7 @@ Best written after the skills and structural decisions are settled, so the docs 
 
 ### 15. Example / starter projects gallery
 
-**Status:** adr-drafted
+**Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-16
 **ADR:** [ADR-021](../Design/adr/adr-021-example-projects.md)
