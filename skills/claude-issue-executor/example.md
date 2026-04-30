@@ -18,6 +18,32 @@ User types:
 /claude-issue-executor notes/issue17-prompt.md
 ```
 
+### Sidebar — Plan-mode rhythm (per ADR-039)
+
+Before stepping into preflight, the executor classifies this session
+against the **significance checklist** in `SKILL.md`. Issue #17 ships
+a new skill (`skills/pr-review-packager/SKILL.md`) — that's a
+`skills/*/SKILL.md` edit, so the session is **clearly-significant**.
+The hybrid path runs:
+
+1. Assistant reports the classification and *requests* plan-mode entry:
+   *"Significant — touches `skills/pr-review-packager/SKILL.md`. Toggle
+   plan mode (`shift+tab shift+tab`) when ready."*
+2. User toggles plan mode.
+3. Assistant proposes the plan inside plan mode (the chat plan-gate's
+   8-step rule operates here, with the harness lock providing
+   belt-and-braces enforcement). See step 4 below.
+4. User approves and exits plan mode (`shift+tab`); optionally enables
+   auto-accept edits (`shift+tab` again) for the execution phase.
+5. Assistant executes (steps 6–9 below). If a new significant boundary
+   appears mid-session — say, an unforeseen `templates/*` change — the
+   assistant pauses and re-flags before crossing it.
+
+A trivial session (single typo, ADR status flip, `feature-ideas.md`
+status flip) skips this sidebar entirely; the chat plan-gate alone
+suffices. Borderline sessions trigger a one-line *"Significant?"*
+question instead.
+
 ## 2. Preflight
 
 The skill checks, in order:
