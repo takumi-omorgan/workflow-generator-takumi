@@ -54,6 +54,12 @@ cleanly and tell the user which prerequisite skill to run.
   for it.
 - **Optional:** `Design/adr/` — used to attach ADR references to
   issues when a draft matches an ADR title or topic.
+- **Optional:** `Design/planning.md` (per [ADR-031](../../Design/adr/adr-031-deeper-planning-workflow.md))
+  — when present, the sequencing-rationale section informs phase
+  ordering of the issue backlog and the requirement IDs (`R1`,
+  `R2`, …) are referenced in issue bodies for traceability. When
+  absent, behaviour is unchanged — phase order comes from
+  `build-out-plan.md` alone.
 
 ## Outputs
 
