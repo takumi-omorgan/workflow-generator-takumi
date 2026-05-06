@@ -15,7 +15,12 @@ and produces an evaluation summary at the end.
 This skill is the enforcement mechanism for the execution model decided
 in [ADR-006](../../Design/adr/adr-006-claude-code-execution-model.md) and
 the orchestration contract decided in
-[ADR-014](../../Design/adr/adr-014-claude-issue-executor-skill.md).
+[ADR-014](../../Design/adr/adr-014-claude-issue-executor-skill.md). It
+is also the **producer** in the cross-skill design-question
+carry-forward chain decided in
+[ADR-040](../../Design/adr/adr-040-cross-skill-design-question-carry-forward.md)
+— see [`docs/workflow-guide.md` §6](../../docs/workflow-guide.md#6-cross-skill-carry-forward-adr-040)
+for the canonical schema.
 
 ## When to use this skill
 
@@ -89,7 +94,10 @@ mode rhythm (ADR-039) gates the regenerated prompt as well.
 - A series of focused commits on that branch, each referencing the ADR
   and issue from the prompt.
 - Tests alongside implementation, where the project has a test runner.
-- An evaluation summary printed at the end of the session.
+- An evaluation summary printed at the end of the session **and
+  persisted to `notes/eval-issue-NNN.md`** (per ADR-040). The
+  persisted file is the canonical input to `/pr-review-packager`
+  for the carry-forward chain — see [`docs/workflow-guide.md` §6](../../docs/workflow-guide.md#6-cross-skill-carry-forward-adr-040).
 
 This skill does **not** push, does **not** open a PR, and does **not**
 merge. Those belong to `/pr-review-packager` and the user's own review.
@@ -404,8 +412,11 @@ the commit message.
     rewrite; report the broken zone in the evaluation summary's
     follow-ups list and suggest `/pause`.
 12. **Evaluation summary.** Print the final summary (see **Evaluation
-    summary** below). For `--no-prompt` runs, the summary explicitly
-    notes the bypass for the audit trail.
+    summary** below) **and write the same content to
+    `notes/eval-issue-NNN.md`** (zero-padded issue number). The
+    persisted file is what `/pr-review-packager` reads for the
+    cross-skill carry-forward (per ADR-040). For `--no-prompt` runs,
+    the summary explicitly notes the bypass for the audit trail.
 13. **Suggest handoff.** Tell the user the next step is
     `/pr-review-packager` to package a PR. Do not invoke it.
 
@@ -421,12 +432,57 @@ Print a single structured message that covers:
 - **Follow-ups** — anything noted during the session that is out of
   scope for this issue but worth capturing (e.g. "this also enables
   issue #18"). Do not silently defer requirements that were in scope.
+  When a design question affects an upcoming issue, add a structured
+  `### design-questions` subsection here per the rule below.
 - **Commands the user should run** to reproduce the verification
   themselves. Concrete shell lines, not prose.
 - **Next step** — `/pr-review-packager` once the session is reviewed.
 
-The format mirrors the "evaluation summary" step in every
-`notes/issueN-prompt.md` — see those files for reference.
+The same content is written to `notes/eval-issue-NNN.md` (per
+ADR-040) so `/pr-review-packager` can read it deterministically.
+The on-disk format mirrors the printed format exactly.
+
+### `### design-questions` (per ADR-040)
+
+When the executor session raises a design question that affects an
+upcoming issue, append a structured `design-questions` block under
+`## Follow-ups` of the eval summary. The canonical schema, field
+semantics, and `target-issue` quoting rule live in
+[`docs/workflow-guide.md` §6](../../docs/workflow-guide.md#6-cross-skill-carry-forward-adr-040)
+— do not restate them here. The reader's-aid example below shows
+the on-disk shape only:
+
+````markdown
+### design-questions
+
+```yaml
+- title: <one-line problem statement>
+  target-issue: "#<N>"
+  context: |
+    <one-paragraph context note>
+```
+````
+
+**When to populate.** Add an entry only when *all three* hold: the
+question concerns a load-bearing constraint, a specific upcoming
+issue depends on the answer, and this issue's commits do not fully
+resolve it. (Full rule in §6 of the workflow guide — when adding a
+new entry, follow §6's rule, not a restatement here.)
+
+**When NOT to populate.** Skip the entry — even if a design
+question came up — when *any* of the following hold: (1) the
+question was self-resolved by this issue's commits; (2) no
+upcoming filed-or-planned issue depends on the answer (capture in
+`notes/feature-ideas.md` instead); (3) the question is purely
+implementation tactics with no cross-issue coupling; (4) the
+answer is already in an ADR or `Design/decisions.md`.
+
+If borderline, **omit** the entry. False positives cost more than
+false negatives — see §6's rationale.
+
+**Empty case.** If there are no entries, **omit the entire
+`### design-questions` block**. Do not emit `design-questions: []`
+or an empty heading.
 
 ## Edge cases
 
@@ -470,7 +526,12 @@ Before finishing the session, confirm:
 - [ ] Every commit message includes `ADR-NNN` and `#issue` from the
   prompt.
 - [ ] Tests, if applicable to the project, landed with the code.
-- [ ] An evaluation summary was printed.
+- [ ] An evaluation summary was printed **and persisted to
+  `notes/eval-issue-NNN.md`** (per ADR-040).
+- [ ] If the session raised a cross-issue design question matching
+  the §6 when-to-populate rule, a `### design-questions` block
+  was added to the persisted eval summary; otherwise the block was
+  omitted (per ADR-040).
 - [ ] `/pr-review-packager` was suggested, not auto-invoked.
 
 If any box is unchecked, the skill has drifted — say so in the

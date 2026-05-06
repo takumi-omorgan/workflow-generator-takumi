@@ -15,7 +15,14 @@ finished body in chat for approval, and only then calls
 This skill completes the implementation pipeline:
 `/prepare-issue` → `claude-issue-executor` → **`/pr-review-packager`**.
 See [ADR-015](../../Design/adr/adr-015-pr-review-packager-skill.md) for
-the decision record.
+the decision record. The skill is also the **preserver** in the
+cross-skill design-question carry-forward chain decided in
+[ADR-040](../../Design/adr/adr-040-cross-skill-design-question-carry-forward.md)
+— it reads the executor's `notes/eval-issue-NNN.md` and emits
+`## Notes for #N` sections in the PR body so the carry-forward
+survives in PR history. See
+[`docs/workflow-guide.md` §6](../../docs/workflow-guide.md#6-cross-skill-carry-forward-adr-040)
+for the canonical schema.
 
 ## When to use this skill
 
@@ -83,7 +90,7 @@ gate, and anything destructive.
 
 ## Data sources and how the skill reads them
 
-The skill consults four sources, in this order:
+The skill consults five sources, in this order:
 
 1. **Current branch and git history.**
    - `git symbolic-ref --short HEAD` → current branch name. A detached
@@ -103,6 +110,16 @@ The skill consults four sources, in this order:
    does not encode the issue number.
 4. **ADR files.** For each `ADR-NNN` token found, glob
    `Design/adr/adr-<NNN>-*.md` and resolve the full filename.
+5. **Eval-summary file** (per ADR-040, optional). Once the issue
+   number is resolved (step 6 of the execution protocol), read
+   `notes/eval-issue-NNN.md` (zero-padded). Parse the
+   `### design-questions` YAML block under `## Follow-ups` if
+   present. Group entries by `target-issue`; each unique
+   `target-issue` becomes one `## Notes for #M` section in the
+   rendered PR body. If the file is absent or has no
+   `### design-questions` block, skip silently — most issues have
+   no entries. Schema source of truth:
+   [`docs/workflow-guide.md` §6](../../docs/workflow-guide.md#6-cross-skill-carry-forward-adr-040).
 
 `gh` is the only allowed tool for creating the PR. Do not call the
 REST/GraphQL API directly.
@@ -143,6 +160,21 @@ noted.
    If no hit is found, leave `{{ISSUE_NUMBER}}` as
    `<!-- TODO: fill in issue number -->` and flag it during the
    approval gate rather than blocking.
+6.5. **Scan for design-questions (per ADR-040).** With the issue
+    number resolved, read `notes/eval-issue-NNN.md` (zero-padded).
+    If the file is absent, skip silently and continue to step 7.
+    If present, locate the `### design-questions` heading under
+    `## Follow-ups` and parse the fenced YAML block beneath. Each
+    entry is a `(title, target-issue, context)` triple. Group
+    entries by `target-issue`; preserve in-block order within a
+    group. The result is a map from target-issue number to a list
+    of entries, used in step 11 to emit `## Notes for #M` sections.
+    A malformed YAML block surfaces a one-line warning to the user
+    at the approval gate but does not abort the skill — the rest of
+    the PR body still renders. The canonical schema and field
+    semantics live in
+    [`docs/workflow-guide.md` §6](../../docs/workflow-guide.md#6-cross-skill-carry-forward-adr-040).
+
 7. **Extract ADR references.** Scan the same sources (branch name,
    commit subjects, most recent prompt file) for `ADR-(\d+)` tokens
    (case-insensitive). Deduplicate, preserve first-seen order. For
@@ -178,6 +210,27 @@ noted.
     | `{{Bullet the substantive changes, not every file touched.}}` block | the grouped bullets from step 8 |
     | `{{Paste test-runner output: total / passed / failed / skipped.}}` | left as a placeholder `<!-- TODO: paste test-runner output or delete the code fence and write "no code changes — docs only" -->` |
     | `{{Steps a reviewer should run to convince themselves the change works.}}` | `<!-- TODO: list verification steps, or write "none needed" -->` |
+
+    **After the rendered template body, append `## Notes for #M`
+    sections (per ADR-040)**, one per unique `target-issue` from
+    step 6.5, in ascending issue-number order. Each section has the
+    form:
+
+    ```markdown
+    ## Notes for #<M>
+
+    Carried forward from this issue's eval summary
+    (`notes/eval-issue-NNN.md`). The next executor session for #<M>
+    should address these in its plan.
+
+    - **<title 1>**: <context paragraph 1>
+    - **<title 2>**: <context paragraph 2>
+    ```
+
+    If step 6.5 produced no entries, no `## Notes for #M` sections
+    are emitted (skip silently — most PRs have none). The section
+    title format `## Notes for #<M>` is the kit-canonical anchor
+    that `prepare-issue` later scans for; do not vary it.
 
     Strip the template's HTML comments that instruct the author (they
     are not part of the rendered body the skill produces).
@@ -345,6 +398,12 @@ accept one).
       ADR without updating `Design/adr/README.md`. Run
       `bin/sync-adr-index`, commit the index update on the same
       branch, and re-show before opening the PR. (ADR-023.)
+- [ ] If `notes/eval-issue-NNN.md` exists and contains a
+      `### design-questions` block with entries, the corresponding
+      `## Notes for #M` sections were emitted in the PR body, one
+      per unique `target-issue` (per ADR-040). When the file is
+      absent or has no entries, no Notes sections are emitted —
+      verify by checking the rendered body before approval.
 - [ ] The user explicitly confirmed the body with `yes`.
 
 If any fail, fix and re-show before calling `gh`.

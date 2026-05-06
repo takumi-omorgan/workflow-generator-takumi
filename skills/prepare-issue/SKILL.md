@@ -14,7 +14,14 @@ Claude Code session.
 
 This skill automates the biggest point of friction between "issue
 exists on GitHub" and "Claude Code session is briefed" — see
-[ADR-013](../../Design/adr/adr-013-prepare-issue-skill.md).
+[ADR-013](../../Design/adr/adr-013-prepare-issue-skill.md). It is
+also the **consumer** in the cross-skill design-question
+carry-forward chain decided in
+[ADR-040](../../Design/adr/adr-040-cross-skill-design-question-carry-forward.md)
+— it scans recently-merged PRs for `## Notes for #N` sections and
+embeds them in the generated prompt. See
+[`docs/workflow-guide.md` §6](../../docs/workflow-guide.md#6-cross-skill-carry-forward-adr-040)
+for the canonical schema.
 
 ## When to use this skill
 
@@ -61,6 +68,12 @@ and is still accurate, skip this skill and re-use the existing file.
   appends a one-line breadcrumb to the prompt body —
   `<!-- /check-plan was skipped via --skip-check per ADR-034 -->` —
   so the bypass is auditable.
+- **Optional flag:** `--pr-scan-limit <N>` — number of recently-merged
+  PRs to scan for cross-issue carry-forward notes (per ADR-040).
+  Default is 30, which covers ~2-3 milestones at typical kit
+  cadence. Override only when working in a repo with unusually high
+  or low PR cadence. The scanned window is surfaced to the user at
+  the review-before-write checkpoint.
 
 ## Output
 
@@ -74,7 +87,7 @@ and is still accurate, skip this skill and re-use the existing file.
 
 ## Data sources and how the skill reads them
 
-The skill consults three sources, in priority order:
+The skill consults four sources, in priority order:
 
 1. **GitHub issue** (required) — via
    `gh issue view <N> --json title,body,labels,milestone,url`.
@@ -87,6 +100,17 @@ The skill consults three sources, in priority order:
 3. **Build-out plan** (optional) — `Design/build-out-plan.md`, if it
    exists. Grep it for mentions of the issue number or the issue's
    core noun phrase and pull a short contextual paragraph.
+4. **Recently-merged PRs** (optional, per ADR-040) — via
+   `gh pr list --state merged --limit <N> --json number,body,mergedAt`
+   where `<N>` is the `--pr-scan-limit` value (default 30). For each
+   PR's body, scan for `^## Notes for #<NNN>` sections where `NNN`
+   matches the new issue's number. Collect matches as
+   `(pr-number, notes-body, merged-at)` tuples. Most issues have
+   zero matches; a small minority have one. The scanned window is
+   surfaced to the user at the review-before-write checkpoint so
+   they can extend the limit if a known carry-forward source fell
+   outside the default. Schema source of truth:
+   [`docs/workflow-guide.md` §6](../../docs/workflow-guide.md#6-cross-skill-carry-forward-adr-040).
 
 `gh` is the only allowed tool for GitHub reads. Do not call the
 REST/GraphQL API directly.
@@ -133,6 +157,22 @@ noted.
    "Context" section or the "Why it matters" section where it fits
    naturally. If the file does not exist, skip silently — this is
    normal in a freshly-initialized kit repo.
+6.5. **Scan recently-merged PRs for carry-forward notes (per
+   ADR-040).** Run
+   `gh pr list --state merged --limit <N> --json number,body,mergedAt`
+   where `<N>` is the `--pr-scan-limit` value (default 30). For each
+   returned PR's body, look for sections matching
+   `^## Notes for #<NNN>` where `NNN` is the new issue's number.
+   Collect matches as `(pr-number, notes-body, merged-at)` tuples,
+   ordered newest-first by `mergedAt`. Most issues have zero
+   matches and the step is effectively a no-op; the rare match
+   feeds the "Design questions carried forward from PR #M"
+   subsection emitted by the template-fill rules. If `gh pr list`
+   fails (auth, rate limit), surface the error verbatim, ask
+   whether to proceed without the scan, and log the skip in the
+   review-before-write output. Surface the scanned window to the
+   user at the approval gate, e.g. *"Scanned 30 most-recent merged
+   PRs (#42 → #71); found 1 'Notes for #69' section in PR #65."*
 7. **Derive the short title.** See "Short-title derivation" below.
 8. **Fill the template.** Read `prompts/_template.md` and substitute
    every `{{PLACEHOLDER}}` with the extracted value. For placeholders
@@ -238,6 +278,31 @@ rather than inventing content.
 the `- File:` / `- Decision:` pair for each, in the order they first
 appear in the issue body.
 
+**Carry-forward subsection (per ADR-040).** When step 6.5 found one
+or more matching `## Notes for #<NNN>` sections in recently-merged
+PRs, insert a `## Design questions carried forward from PR #M`
+subsection into the rendered prompt **immediately before the
+`Requirements` section**. One subsection per source PR (newest-first
+by `mergedAt`). The subsection embeds the matched Notes verbatim and
+adds an explicit instruction to the executor:
+
+```markdown
+## Design questions carried forward from PR #<M>
+
+The following questions were raised by issue #<source-issue>'s eval
+summary and preserved in PR #<M>'s body. Address each in the plan
+you propose:
+
+<verbatim ## Notes for #<NNN> body from PR #M>
+```
+
+When step 6.5 returned zero matches, **omit the subsection
+entirely** — most issues will not have any. Do not emit an empty
+heading. The schema and field semantics of the underlying
+`design-questions` entries live in
+[`docs/workflow-guide.md` §6](../../docs/workflow-guide.md#6-cross-skill-carry-forward-adr-040)
+— this skill consumes the rendered Notes-for-#N format only.
+
 ## Edge cases
 
 - **Invalid or non-numeric argument** → ask for the issue number and
@@ -273,6 +338,21 @@ appear in the issue body.
   Append the documented breadcrumb to the prompt body before
   writing, and proceed to step 11. The flag is single-use; future
   `/prepare-issue` invocations re-enable the gate.
+- **No PR-scan matches (per ADR-040)** → the
+  `## Design questions carried forward from PR #M` subsection is
+  omitted entirely from the rendered prompt. This is the common
+  case; do not emit an empty heading. Surface "no carry-forward
+  notes found" in the review-before-write output.
+- **`gh pr list` errors during scan (auth, rate limit, network)** →
+  surface the error verbatim, ask the user whether to proceed
+  without the scan or to abort. Log the skip in the
+  review-before-write output so the operator knows the prompt was
+  rendered without the scan. Do not retry silently.
+- **Multiple PRs contain `## Notes for #<NNN>` sections for the same
+  issue** → emit one `## Design questions carried forward from PR #M`
+  subsection per source PR, in newest-first `mergedAt` order. This
+  is rare but not pathological; it can happen when an upstream issue
+  was split across two PRs both of which raised carry-forward notes.
 
 ## Review-before-write checkpoint
 
@@ -296,6 +376,12 @@ filled prompt looks clean.
 - [ ] `/check-plan` passed (deterministic criteria), or
   `--skip-check` was explicitly set with a recorded breadcrumb in
   the prompt body.
+- [ ] PR scan ran (or was skipped with the reason logged in the
+  review-before-write output). When matches were found, the
+  `## Design questions carried forward from PR #M` subsection(s)
+  were inserted immediately before `Requirements`, in newest-first
+  `mergedAt` order (per ADR-040). When no matches were found, no
+  carry-forward subsection was emitted.
 
 If any fail, fix and re-show before writing.
 
