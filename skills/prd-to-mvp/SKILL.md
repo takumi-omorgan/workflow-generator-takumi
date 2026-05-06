@@ -1,6 +1,7 @@
 ---
 name: prd-to-mvp
 description: Scope a normalized PRD into an MVP statement and a build-out plan
+permission-category: 1  # substitutable — local doc creation (Design/mvp.md, Design/build-out-plan.md), per workflow-guide §7
 ---
 
 # prd-to-mvp

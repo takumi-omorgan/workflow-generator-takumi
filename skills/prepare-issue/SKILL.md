@@ -1,6 +1,7 @@
 ---
 name: prepare-issue
 description: Auto-fill an issue prompt from a GitHub issue number, linked ADRs, and the build-out plan, then write it to prompts/issue-NNN-short-title.md
+permission-category: 1  # substitutable — reads gh non-mutating; writes prompt file locally, per workflow-guide §7
 ---
 
 # prepare-issue

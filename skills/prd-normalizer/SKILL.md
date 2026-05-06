@@ -1,6 +1,7 @@
 ---
 name: prd-normalizer
 description: Normalize a standard or custom PRD into a single canonical form
+permission-category: 1  # substitutable — local doc rewrite, per workflow-guide §7
 ---
 
 # prd-normalizer

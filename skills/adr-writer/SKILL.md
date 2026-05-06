@@ -1,6 +1,7 @@
 ---
 name: adr-writer
 description: Draft one or more ADRs from architectural decision topics, using the repo's ADR template
+permission-category: 1  # substitutable — drafts ADRs locally; user accepts manually, per workflow-guide §7
 ---
 
 # adr-writer

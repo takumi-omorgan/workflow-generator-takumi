@@ -1,6 +1,7 @@
 ---
 name: idea-to-prd
 description: Turn a rough idea into a lightweight PRD draft suitable for prd-normalizer
+permission-category: 1  # substitutable — drafts a PRD locally, per workflow-guide §7
 ---
 
 # idea-to-prd

@@ -1,6 +1,7 @@
 ---
 name: audit-milestone
 description: Verify a GitHub milestone is complete — all issues closed, all referenced ADRs linked to merged PRs, all phase exit criteria met. Returns pass/fail with a gap list. Warns on failure but does not block /complete-milestone.
+permission-category: 1  # substitutable — read-only gh queries; advisory pass/fail report, per workflow-guide §7
 ---
 
 # audit-milestone

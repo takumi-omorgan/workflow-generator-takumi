@@ -1,6 +1,7 @@
 ---
 name: complete-milestone
 description: Close a GitHub milestone, archive milestone-scoped state in Design/state.md per ADR-035, and optionally chain /release with --milestone-phase. Chains /audit-milestone and /milestone-summary; never blocks on audit gaps.
+permission-category: 3  # non-substitutable — closes GitHub milestone via gh; chains /release with --release, per workflow-guide §7
 ---
 
 # complete-milestone

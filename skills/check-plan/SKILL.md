@@ -1,6 +1,7 @@
 ---
 name: check-plan
 description: Validate an ADR or issue prompt against version-locked criteria, return pass/fail with specific revisions, and iterate with the user up to 3 rounds. Chained from adr-writer and prepare-issue as a pre-commit gate; --skip-check opts out.
+permission-category: 1  # substitutable — validates ADR or prompt; advisory only, per workflow-guide §7
 ---
 
 # check-plan

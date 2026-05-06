@@ -1,6 +1,7 @@
 ---
 name: resume
 description: Brief a fresh Claude Code session by reading Design/state.md and emitting a single short summary of phase, in-flight issue, recent work, blockers, and the next concrete action. Falls back to `gh` if state.md is missing, empty, or suspect.
+permission-category: 1  # substitutable — reads state.md and emits a summary; falls back to gh reads (non-mutating), per workflow-guide §7
 ---
 
 # resume

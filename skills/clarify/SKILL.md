@@ -1,6 +1,7 @@
 ---
 name: clarify
 description: Surface unresolved implementation questions ("gray areas") between MVP scoping and ADR drafting, conduct deep-dive resolution per question, and append settled decisions to Design/decisions.md
+permission-category: 1  # substitutable — local conversation; appends to Design/decisions.md, per workflow-guide §7
 ---
 
 # clarify

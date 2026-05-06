@@ -1,6 +1,7 @@
 ---
 name: issue-planner
 description: Turn Design/mvp.md and Design/build-out-plan.md into a reviewed batch of GitHub issues, plus a Project board
+permission-category: 3  # non-substitutable — gh issue create is public-visibility; existing approval gate is correct, per workflow-guide §7
 ---
 
 # issue-planner
