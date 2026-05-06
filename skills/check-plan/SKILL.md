@@ -183,16 +183,26 @@ path-match result. If neither matches, stop per step 2 above.
 
 ## How chained mode works
 
-`adr-writer` and `prepare-issue` invoke `/check-plan` as their final
+In chained mode, the calling skill runs `/check-plan`'s criteria
+directly — Claude Code does not invoke slash-commands from inside
+another skill's execution. The "invoke `/check-plan`" verb in
+caller specs is shorthand for: load `skills/check-plan/criteria.md`,
+run the appropriate table (ADR or Prompt) against the in-memory
+artefact, and produce the same pass/fail/yield report this skill
+emits in standalone mode. `criteria.md` is the single source of
+truth — chained callers reference its IDs (e.g. `ADR-C3`,
+`PROMPT-C1`) rather than duplicating check logic.
+
+`adr-writer` and `prepare-issue` use `/check-plan` as their final
 gate before disk write. The flow:
 
 1. Producer renders the artefact in memory.
-2. Producer invokes `/check-plan` with the rendered text and the
-   would-be path.
+2. Producer runs the chained check (per the paragraph above) on the
+   rendered text and would-be path.
 3. On pass, producer proceeds to disk write.
 4. On fail, producer surfaces the failures, asks the user how to
-   revise, applies the revision in memory, and re-invokes (round
-   counter +1).
+   revise, applies the revision in memory, and re-runs the check
+   (round counter +1).
 5. After 3 failed rounds OR an unrecoverable revision, the producer
    either yields (and stops with the working tree clean) or, if the
    user passed `--skip-check`, writes anyway and leaves a one-line

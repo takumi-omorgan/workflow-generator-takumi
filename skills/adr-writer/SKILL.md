@@ -124,16 +124,17 @@ Repeat for every topic in the input batch:
    `bin/sync-adr-index` surfaces a Phase column in
    `Design/adr/README.md`.
 7. **Pre-write check (per [ADR-034](../../Design/adr/adr-034-plan-checker.md)).**
-   Unless `--skip-check` was passed, invoke `/check-plan` against
-   the in-memory rendered ADR. On pass, proceed to disk write. On
-   fail, surface the failures (each citing its criterion ID — e.g.
-   `ADR-C3`) to the user, ask how to revise, apply the revision in
-   memory, and re-invoke `/check-plan` for round 2. After 3 failed
-   rounds, yield: surface the remaining failures and stop without
-   writing the ADR. Warnings are surfaced but do not block.
-   `--skip-check` short-circuits the gate for the current
-   invocation only and writes despite failures, leaving a
-   breadcrumb in the commit message.
+   Unless `--skip-check` was passed, run the ADR criteria from
+   `skills/check-plan/criteria.md` against the in-memory rendered
+   ADR (chained mode — see `check-plan/SKILL.md` § "How chained mode
+   works"). On pass, proceed to disk write. On fail, surface the
+   failures (each citing its criterion ID — e.g. `ADR-C3`) to the
+   user, ask how to revise, apply the revision in memory, and re-run
+   the check for round 2. After 3 failed rounds, yield: surface the
+   remaining failures and stop without writing the ADR. Warnings are
+   surfaced but do not block. `--skip-check` short-circuits the gate
+   for the current invocation only and writes despite failures,
+   leaving a breadcrumb in the commit message.
 
 ## Drafting protocol — batch
 

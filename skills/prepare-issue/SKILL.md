@@ -145,17 +145,18 @@ noted.
    **Do not write the file before this confirmation.**
 10. **Pre-write check (per [ADR-034](../../Design/adr/adr-034-plan-checker.md)).**
     Unless `--skip-check` was passed, after the user confirms with
-    `yes`, invoke `/check-plan` against the in-memory filled
-    prompt. On pass, proceed to step 11 (file-exists check). On
-    fail, surface the failures (each citing its criterion ID — e.g.
-    `PROMPT-C1`) to the user, ask how to revise, apply the
-    revision in memory, re-show the updated prompt for confirmation,
-    and re-invoke `/check-plan` for round 2. After 3 failed rounds,
-    yield: surface the remaining failures and stop without writing
-    the file. Warnings are surfaced but do not block.
-    `--skip-check` short-circuits the gate and the skill proceeds
-    to step 11 with a one-line breadcrumb appended to the prompt
-    body.
+    `yes`, run the Prompt criteria from `skills/check-plan/criteria.md`
+    against the in-memory filled prompt (chained mode — see
+    `check-plan/SKILL.md` § "How chained mode works"). On pass,
+    proceed to step 11 (file-exists check). On fail, surface the
+    failures (each citing its criterion ID — e.g. `PROMPT-C1`) to
+    the user, ask how to revise, apply the revision in memory,
+    re-show the updated prompt for confirmation, and re-run the
+    check for round 2. After 3 failed rounds, yield: surface the
+    remaining failures and stop without writing the file. Warnings
+    are surfaced but do not block. `--skip-check` short-circuits
+    the gate and the skill proceeds to step 11 with a one-line
+    breadcrumb appended to the prompt body.
 11. **Handle the file-exists case.** Before writing, check whether
     `prompts/issue-NNN-short-title.md` already exists. If it does,
     show a diff between the existing file and the new content and
