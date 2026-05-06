@@ -152,8 +152,8 @@ stray blank lines.
 When the `roadmap` section appears, render a compact table sourced
 from `Design/build-out-plan.md`'s `### Phase N: <name>` blocks:
 
-| # | Phase | Goal | Exit criterion |
-|---|-------|------|----------------|
+| # | Phase | Goal | Exit criteria |
+|---|-------|------|---------------|
 | 1 | Foundation | one-line goal | observable exit |
 | 2 | Core feature | one-line goal | observable exit |
 | 3 | Polish | one-line goal | observable exit |

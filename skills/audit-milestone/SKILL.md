@@ -124,7 +124,7 @@ Use these fixed phrases so the report is parseable:
 | ADR referenced but missing | *"ADR-NNN referenced in issue #NN but `Design/adr/adr-NNN-*.md` not found. Add the ADR or correct the reference."* |
 | ADR without merged PR | *"ADR-NNN referenced but no merged PR mentions it. Confirm the implementation PR was merged with `(ADR-NNN, #NN)` in its title or body."* |
 | Phase still in-progress | *"Phase N (<name>) status is `<status>` in `Design/build-out-plan.md`. Run `/release --milestone-phase=N` to mark it `released vX.Y.Z`, or update the row manually."* |
-| Phase missing exit criterion | *"Phase N (<name>) has no `**Exit criteria:**` line in `Design/build-out-plan.md`. Add one before auditing."* |
+| Phase missing exit criteria | *"Phase N (<name>) has no `**Exit criteria:**` line in `Design/build-out-plan.md`. Add one before auditing."* |
 
 ## Edge cases
 
