@@ -281,41 +281,70 @@ mutation. The user sees the full plan and types `yes` exactly once to
 execute every step.
 
 1. **Run prerequisites check.** Stop on any failure.
-2. **Detect the last tag.** Record it (or note "first release").
-3. **Determine the target version.**
+2. **Run project-shape detection** (per [ADR-042](../../Design/adr/adr-042-project-shape-detection-in-release.md)
+   — see "Project-shape detection" section above). Score the four
+   signals; record `shape = product` (default) or `shape = workflow`
+   (when ≥2 signals fire). Apply `--force-product-shape` or
+   `--force-workflow-shape` if set, recording the override for the
+   release plan to surface. Reject mutually-exclusive flag combos
+   here with the documented error message.
+3. **Detect the last tag.** Record it (or note "first release").
+4. **Determine the target version.**
    - If `--version` is set, use it.
    - Else if `--bump` is set, apply it to the last tag.
    - Else compute the suggested bump and present it for confirmation.
-4. **Refuse if `vX.Y.Z` already exists** as a local or remote tag
+5. **Refuse if `vX.Y.Z` already exists** as a local or remote tag
    (`git tag -l vX.Y.Z` or `git ls-remote --tags origin vX.Y.Z`).
    Suggest the next patch and exit; do not prompt for overwrite.
-5. **Invoke `/changelog` for release notes:**
+6. **Invoke `/changelog` for release notes:**
    ```
    /changelog --since-last-release --output=- --github-release=vX.Y.Z
    ```
    Capture the markdown from stdout. If `/changelog` reports no
    commits since the last tag, stop cleanly with "No changes since
    `<last-tag>`. Nothing to release." and do not create a tag.
-6. **Assemble the release plan and render it for review:**
+7. **Assemble the release plan and render it for review:**
    - Target version and tag (`vX.Y.Z`).
+   - **Project shape:** `product` or `workflow`. When the value came
+     from an override flag rather than auto-detection, label it
+     `<shape> (overridden from <auto-detected-shape>)` so the user
+     sees auto-detection was bypassed.
    - Last tag (or "first release").
    - Suggested-bump rationale, if applicable.
-   - Release-notes preview (the `/changelog` output verbatim).
+   - **Release-notes preview** (the `/changelog` output verbatim).
+     When `shape = workflow`, the preview is preceded by the
+     workflow-shape clarifier banner — the banner ships with the
+     notes into the temp file consumed by `git tag` and
+     `gh release create`. The literal banner text:
+
+     ```
+     > This is a workflow tag for documentation drift-tracking; the
+     > project is not a software product (see PRD for project shape).
+     > The version number is for snapshot ordering, not semantic
+     > versioning of an API.
+     ```
+
+     For `shape = product`, no banner; the changelog renders verbatim
+     as it always has (existing behaviour, unchanged).
    - Annotated tag message:
      ```
      Release X.Y.Z
 
      <first non-heading line from release notes>
      ```
+     For `shape = workflow`, the first non-heading line is the
+     opening line of the clarifier banner — that's intentional, it
+     labels the tag itself as a workflow-shape release for anyone
+     reading `git show vX.Y.Z` later.
    - GitHub Release config: draft? prerelease? title = `vX.Y.Z`.
    - The exact commands that will run, in order.
-7. **Approval gate.** Ask: *"Type `yes` to create and push the tag
+8. **Approval gate.** Ask: *"Type `yes` to create and push the tag
    and publish the release. Any other response cancels."* Accept only
    the literal string `yes` (case-insensitive, trimmed). Any other
    input — including `y`, `ok`, `sure` — cancels.
-8. **On `yes`, execute in order** (see [Execution sequence](#execution-sequence)).
-9. **On any other input, cancel** and report "Release cancelled. No
-   changes made."
+9. **On `yes`, execute in order** (see [Execution sequence](#execution-sequence)).
+10. **On any other input, cancel** and report "Release cancelled. No
+    changes made."
 
 ## Execution sequence
 
@@ -323,8 +352,24 @@ After approval (skip in `--dry-run`):
 
 ```bash
 # 1. Write release notes to a temp file so `gh` and the tag share text.
+#    For shape=workflow, prepend the clarifier banner so the banner
+#    ships with the notes into both the annotated tag and the
+#    GitHub Release body. For shape=product, the file contains only
+#    the rendered changelog (existing behaviour).
 NOTES=$(mktemp -t release-notes)
 /changelog --since-last-release --output="$NOTES" --github-release=vX.Y.Z
+if [ "$shape" = "workflow" ]; then
+  CLARIFIER=$(mktemp)
+  cat > "$CLARIFIER" <<'BANNER'
+> This is a workflow tag for documentation drift-tracking; the
+> project is not a software product (see PRD for project shape).
+> The version number is for snapshot ordering, not semantic
+> versioning of an API.
+
+BANNER
+  cat "$NOTES" >> "$CLARIFIER"
+  mv "$CLARIFIER" "$NOTES"
+fi
 
 # 2. Annotated tag. First line of notes becomes the tag summary.
 SUMMARY=$(head -n 1 "$NOTES")
@@ -361,7 +406,9 @@ Then:
 
 With `--dry-run`:
 
-- Run steps 1–6 of the release flow.
+- Run steps 1–7 of the release flow (including project-shape
+  detection, so the dry-run preview shows whether the workflow-shape
+  clarifier would have been emitted).
 - Present the plan as normal.
 - Instead of the approval prompt, print:
   *"Dry-run. Would execute:"* followed by the full command sequence
@@ -384,6 +431,11 @@ With `--dry-run`:
 | `gh` not authenticated | Abort. Tell the user to run `gh auth login`. |
 | User declines approval | Cancel. Report "Release cancelled. No changes made." Exit 0. |
 | `gh release create` fails after tag is pushed | Report failure. The tag is already pushed. Tell the user the tag stands and they can retry the release with `gh release create vX.Y.Z --notes-file …` manually. Do **not** delete the tag. |
+| Both `--force-product-shape` and `--force-workflow-shape` passed | Abort with *"--force-product-shape and --force-workflow-shape are mutually exclusive."* No mutations. |
+| Project-shape detection scores 0 signals | `shape = product`. Standard product-release framing. No clarifier banner. |
+| Project-shape detection scores ≥2 signals but operator passed `--force-product-shape` | Use `shape = product`. The plan reports the override as `product (overridden from workflow)` so the user sees auto-detection was bypassed. |
+| Project-shape detection scores 0 or 1 signals but operator passed `--force-workflow-shape` | Use `shape = workflow`. The plan reports the override as `workflow (overridden from product)`. The clarifier banner is emitted. |
+| `Design/prd.md` and `Design/build-out-plan.md` both missing | Three of the four signals score zero (PRD-language, build-strategy, success-criteria-shape). Only the package-manifest signal can fire. Threshold not met → `shape = product`. The user can pass `--force-workflow-shape` if the project genuinely is non-product but lacks the kit's PRD/build-out artefacts. |
 
 ## Invariants
 
@@ -397,9 +449,14 @@ With `--dry-run`:
 ## Self-check before presenting the plan
 
 - [ ] Prerequisites passed.
+- [ ] **Project-shape detection ran**, and the resulting `shape`
+      value (and any override) is reported in the plan.
 - [ ] Target version is valid semver and the tag does not already
       exist.
 - [ ] `/changelog` produced non-empty notes.
+- [ ] **For `shape = workflow`**, the clarifier banner is shown in
+      the release-notes preview and will be prepended to the temp
+      file consumed by the tag and the GitHub Release.
 - [ ] The annotated tag message, GitHub Release config, and command
       sequence are all shown in the plan.
 - [ ] The approval prompt is present and explicit.
