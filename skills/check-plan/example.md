@@ -151,3 +151,89 @@ one-line breadcrumb in the prompt body:
 ```
 
 The user is the auditor in that mode.
+
+---
+
+## 4. Two surfaces, one source of truth (per ADR-043)
+
+The skill's evaluation logic is implemented as `bin/check-plan` so
+that skills with chain points (`adr-writer`, `prepare-issue`) can
+invoke it deterministically as a subprocess rather than chaining
+to the slash-command. Both surfaces produce identical pass/fail
+output for the same input — the slash-command is a wrapper that
+adds artefact-type detection, structured rendering for the
+operator, and the iterative-with-user revision loop.
+
+### Same input, both surfaces
+
+```bash
+bin/check-plan --criteria-set adr \
+  --input Design/adr/adr-041-auto-mode-permission-contract.md
+```
+
+Output:
+
+```
+PASS  ADR-C1  Context, Decision, Consequences sections present and non-empty
+PASS  ADR-C2  Options considered has 4 Option blocks
+PASS  ADR-C3  Every Option block has Pros: and Cons: lines
+PASS  ADR-C4  Decision names Option A
+PASS  ADR-C5  All ADR-NNN tokens resolve to files in Design/adr/
+WARN  ADR-C6  Semantic-conflict check deferred (best-effort substring per ADR-034 not implemented in v1)
+```
+
+Exit 0 (no deterministic failures; warnings surfaced).
+
+The slash-command equivalent — `/check-plan
+Design/adr/adr-041-auto-mode-permission-contract.md` — runs the
+same evaluation under the hood (it invokes `bin/check-plan`
+internally) and renders the identical results, framed for the
+operator with the file name and a short summary.
+
+### JSON for skill consumption
+
+```bash
+bin/check-plan --criteria-set adr \
+  --input Design/adr/adr-041-auto-mode-permission-contract.md \
+  --format json
+```
+
+Returns a JSON envelope:
+
+```json
+{
+  "criteria-set": "adr",
+  "result": "pass",
+  "criteria": [
+    {"id":"ADR-C1","severity":"deterministic","status":"pass","message":"Context, Decision, Consequences sections present and non-empty","remediation":""},
+    {"id":"ADR-C2","severity":"deterministic","status":"pass","message":"Options considered has 4 Option blocks","remediation":""},
+    {"id":"ADR-C3","severity":"deterministic","status":"pass","message":"Every Option block has Pros: and Cons: lines","remediation":""},
+    {"id":"ADR-C4","severity":"deterministic","status":"pass","message":"Decision names Option A","remediation":""},
+    {"id":"ADR-C5","severity":"deterministic","status":"pass","message":"All ADR-NNN tokens resolve to files in Design/adr/","remediation":""},
+    {"id":"ADR-C6","severity":"warning","status":"warn","message":"Semantic-conflict check deferred (best-effort substring per ADR-034 not implemented in v1)","remediation":"Reviewer should manually check the Decision against accepted ADRs in the same area; revisit when a structural rule lands."}
+  ]
+}
+```
+
+`adr-writer` and `prepare-issue` consume this JSON shape from
+their chain points; the iterative-with-user revision loop sits in
+the producer skill, not in `bin/check-plan` (which is non-
+interactive by construction — see ADR-043 *Implementation shape*
+4).
+
+### Stdin support
+
+`bin/check-plan --input -` reads the artefact from stdin, which
+is how chained producers invoke it without writing a temp file:
+
+```bash
+producer_renders_adr_in_memory | \
+  bin/check-plan --criteria-set adr --input - --format json
+```
+
+### Reserved criteria-set names
+
+`changelog`, `milestone-summary`, and `pr-body` are reserved
+criteria-set names but their evaluators are not yet implemented.
+Invoking them returns exit 2 with a clear message; the
+implementing follow-up issues are tracked separately.

@@ -20,6 +20,19 @@ This skill is the quality gate decided in
 opt-out (default on), with `--skip-check` available on the chained
 producers for known-good rapid iteration.
 
+**Two surfaces, one source of truth (per ADR-043).** This skill's
+deterministic criteria evaluation is implemented as a kit script —
+[`bin/check-plan`](../../bin/check-plan) — that takes
+`--criteria-set <adr|prompt>` and `--input <path-or-->` and emits
+structured pass/fail output. The slash-command surface described
+below is the operator-facing wrapper: it detects artefact type,
+invokes `bin/check-plan`, and runs the iterative-with-user
+revision loop on top of the structured result. Skills with chain
+points (`adr-writer`, `prepare-issue`) invoke `bin/check-plan`
+directly as a subprocess rather than chaining to the slash-command
+— see [`docs/workflow-guide.md` §7](../../docs/workflow-guide.md#7-auto-mode-permission-contract-adr-041)
+for the cat-1 classification.
+
 ## When to use this skill
 
 - **Standalone, ad-hoc.** Run on any ADR or prompt already on disk
@@ -99,20 +112,28 @@ otherwise noted.
    - Else stop with `"Cannot determine artefact type from path or
      body. Pass an ADR under Design/adr/ or a prompt under prompts/."`
      Never guess silently.
-3. **Load criteria.** Read `skills/check-plan/criteria.md`. Parse
-   the `## ADR criteria` and `## Prompt criteria` tables. Select the
-   table matching the detected type. If `criteria.md` is missing,
-   stop with `"skills/check-plan/criteria.md not found. The
-   checklist must exist before this skill can run."`
-4. **Run criteria.** For each row in the selected table:
-   - Apply the check described in the *What to check* column.
-   - On fail, record `(ID, determinism, fix hint)`.
-   - On pass with warning conditions met, record a warning entry
-     (only for `determinism=warning` rows that *could* fail
-     deterministically were the check stricter — see criteria.md).
+3. **Invoke `bin/check-plan`** with the detected criteria-set and
+   the artefact (path or stdin), requesting JSON output:
+   ```
+   bin/check-plan --criteria-set <adr|prompt> --input <path-or--> --format json
+   ```
+   The script reads the canonical criteria list from
+   `skills/check-plan/criteria.md`, evaluates each criterion, and
+   emits a JSON envelope with one entry per criterion (id,
+   severity, status, message, remediation). The slash-command
+   surface does not duplicate the evaluation logic — it consumes
+   the structured output. If `bin/check-plan` exits 2 (invocation
+   error) or is missing, surface the stderr message verbatim and
+   stop. If `criteria.md` is missing, `bin/check-plan` itself
+   surfaces a clear error.
+4. **Parse the result.** Each criterion entry has a `status`
+   (`pass` / `fail` / `warn`) and a `severity` (`deterministic` /
+   `warning`). The wrapper does not re-evaluate criteria; it
+   simply renders the structured result for the user and
+   determines triage.
 5. **Triage results.**
-   - 0 deterministic failures → pass. Surface warnings if any.
-   - ≥1 deterministic failures → fail.
+   - exit 0 (no deterministic failures) → pass. Surface warnings if any.
+   - exit 1 (≥1 deterministic failures) → fail.
 6. **Standalone mode.** Print the report and stop.
 7. **Chained mode — iterate.** Return the result to the caller.
    The caller (`adr-writer` or `prepare-issue`) presents the failures
@@ -184,16 +205,20 @@ path-match result. If neither matches, stop per step 2 above.
 
 ## How chained mode works
 
-`adr-writer` and `prepare-issue` invoke `/check-plan` as their final
-gate before disk write. The flow:
+`adr-writer` and `prepare-issue` invoke **`bin/check-plan`** as
+their final gate before disk write (per ADR-043 — slash-commands
+are not invokable from inside another skill's execution, so the
+chain point uses the programmatic surface). The flow:
 
 1. Producer renders the artefact in memory.
-2. Producer invokes `/check-plan` with the rendered text and the
-   would-be path.
-3. On pass, producer proceeds to disk write.
-4. On fail, producer surfaces the failures, asks the user how to
-   revise, applies the revision in memory, and re-invokes (round
-   counter +1).
+2. Producer pipes the rendered text into `bin/check-plan
+   --criteria-set <adr|prompt> --input - --format json` and parses
+   the JSON envelope.
+3. On exit 0, producer proceeds to disk write.
+4. On exit 1, producer surfaces the failures (each with its
+   criterion id and remediation), asks the user how to revise,
+   applies the revision in memory, and re-invokes `bin/check-plan`
+   for the next round (round counter +1).
 5. After 3 failed rounds OR an unrecoverable revision, the producer
    either yields (and stops with the working tree clean) or, if the
    user passed `--skip-check`, writes anyway and leaves a one-line
