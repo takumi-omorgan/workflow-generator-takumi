@@ -318,6 +318,92 @@ else
   warn "no prompts/_template.md or notes/issue-prompt.md found in the kit; prompts/ created empty"
 fi
 
+# 2b. Copy runtime templates (consumed by skills running in the target).
+#     Allowlist — claude-md-template.md is install-time only and is rendered
+#     into CLAUDE.md in step 3, not copied; templates/licenses/ is handled
+#     by the --license flag in step 5; templates/*.target files are
+#     install-shaped seeds copied to non-templates/ destinations below.
+RUNTIME_TEMPLATES=(
+  adr-template.md
+  ai-summary-template.md
+  build-out-plan-template.md
+  decisions-template.md
+  issue-template.md
+  milestone-summary-template.md
+  mvp-template.md
+  planning-template.md
+  pr-template.md
+  prd-template.md
+  readme-template.md
+  state-template.md
+)
+mkdir -p "$TARGET_DIR/templates"
+info "copying runtime templates into templates/"
+for tmpl in "${RUNTIME_TEMPLATES[@]}"; do
+  src="$KIT_ROOT/templates/$tmpl"
+  dest="$TARGET_DIR/templates/$tmpl"
+  if [ ! -f "$src" ]; then
+    warn "  kit template missing: templates/$tmpl"
+    continue
+  fi
+  if [ -f "$dest" ] && [ "$FORCE" -ne 1 ]; then
+    info "  skip (exists): templates/$tmpl"
+    continue
+  fi
+  info "  copy:          templates/$tmpl"
+  cp "$src" "$dest"
+done
+
+# 2c. Seed .github/pull_request_template.md from the kit's PR template.
+#     Referenced by the CLAUDE.md template's GitHub conventions section.
+PR_TEMPLATE_SRC="$KIT_ROOT/.github/pull_request_template.md"
+PR_TEMPLATE_DEST="$TARGET_DIR/.github/pull_request_template.md"
+if [ -f "$PR_TEMPLATE_SRC" ]; then
+  mkdir -p "$TARGET_DIR/.github"
+  if [ -f "$PR_TEMPLATE_DEST" ] && [ "$FORCE" -ne 1 ]; then
+    info "skip .github/pull_request_template.md (exists)"
+  else
+    info "copy .github/pull_request_template.md"
+    cp "$PR_TEMPLATE_SRC" "$PR_TEMPLATE_DEST"
+  fi
+else
+  warn "kit .github/pull_request_template.md not found; skipping"
+fi
+
+# 2d. Seed a minimal target-project .gitignore from templates/gitignore.target.
+#     The kit's own .gitignore is wrong for targets — it ignores
+#     .claude/skills/ because the kit doesn't ship those. Targets need a
+#     different default that does NOT ignore .claude/skills/, since that's
+#     where the installed kit lives.
+GITIGNORE_SRC="$KIT_ROOT/templates/gitignore.target"
+GITIGNORE_DEST="$TARGET_DIR/.gitignore"
+if [ -f "$GITIGNORE_SRC" ]; then
+  if [ -f "$GITIGNORE_DEST" ] && [ "$FORCE" -ne 1 ]; then
+    info "skip .gitignore (exists)"
+  else
+    info "copy .gitignore from templates/gitignore.target"
+    cp "$GITIGNORE_SRC" "$GITIGNORE_DEST"
+  fi
+else
+  warn "kit templates/gitignore.target not found; .gitignore not seeded"
+fi
+
+# 2e. Seed Design/adr/README.md so bin/sync-adr-index has the marker
+#     fences to populate on first run. Without this, sync-adr-index
+#     errors out with "no Design/adr/README.md found".
+ADR_README_SRC="$KIT_ROOT/templates/adr-readme-template.md"
+ADR_README_DEST="$TARGET_DIR/Design/adr/README.md"
+if [ -f "$ADR_README_SRC" ]; then
+  if [ -f "$ADR_README_DEST" ] && [ "$FORCE" -ne 1 ]; then
+    info "skip Design/adr/README.md (exists)"
+  else
+    info "copy Design/adr/README.md from templates/adr-readme-template.md"
+    cp "$ADR_README_SRC" "$ADR_README_DEST"
+  fi
+else
+  warn "kit templates/adr-readme-template.md not found; Design/adr/README.md not seeded"
+fi
+
 # 3. Render CLAUDE.md. Skipped if it already exists unless --force.
 CLAUDE_DEST="$TARGET_DIR/CLAUDE.md"
 if [ -f "$CLAUDE_DEST" ] && [ "$FORCE" -ne 1 ]; then
@@ -461,9 +547,12 @@ if [ "$NO_COMMIT" -ne 1 ] && in_git_repo; then
   git -C "$TARGET_DIR" add \
     CLAUDE.md \
     .claude \
+    .github \
+    .gitignore \
     Design \
     prompts \
-    notes 2>/dev/null || true
+    notes \
+    templates 2>/dev/null || true
   if [ "$WITH_DOCS" -eq 1 ] && [ -d "$TARGET_DIR/docs/workflow-kit" ]; then
     git -C "$TARGET_DIR" add docs/workflow-kit 2>/dev/null || true
   fi
