@@ -152,12 +152,15 @@ noted.
    found anywhere, set the `## ADR` body to `none`.
 8. **Derive the change summary.** From the commit subjects, group by
    conventional-commit verb prefix: `feat`, `fix`, `docs`, `refactor`,
-   `chore`, `test`, `perf`, `ci`, `build`, `style`. Any commit without
-   a recognised prefix goes under a final `other` group. Within each
-   group, keep one bullet per commit, preserving commit order
+   `chore`, `infra`, `test`, `perf`, `ci`, `build`, `style`. Any commit
+   without a recognised prefix goes under a final `other` group. Within
+   each group, keep one bullet per commit, preserving commit order
    (oldest-first) and stripping the trailing `(ADR-NNN, #N)` suffix
    for readability. If there is only one group, omit the group
-   heading and just list the bullets.
+   heading and just list the bullets. Note: `infra` is recognised
+   because it is a kit-conventional label (per `CLAUDE.md`'s "GitHub
+   conventions" section) and the kit's own canonical-shape encourages
+   `infra(scope):` prefixes for infra-labeled work.
 9. **Derive the PR title.** Use the newest commit subject on the
    branch, stripped of the trailing `(ADR-NNN, #N)` suffix. If the
    title still ends with something like `(#NN)`, strip that too. The
@@ -276,19 +279,19 @@ Given commit subjects from `git log <base>..HEAD --format="%s"`
 (oldest-first):
 
 1. For each subject, identify the conventional-commit verb prefix by
-   matching `^(feat|fix|docs|refactor|chore|test|perf|ci|build|style)(\([^)]*\))?:\s*`.
+   matching `^(feat|fix|docs|refactor|chore|infra|test|perf|ci|build|style)(\([^)]*\))?:\s*`.
    Everything after the `:` is the bullet text. If no prefix matches,
    the whole subject is the bullet text and the group is `other`.
 2. Strip a trailing ` (ADR-NNN, #N)` or ` (#N)` suffix from each
    bullet.
 3. Group bullets by prefix. Group order in the output:
-   `feat`, `fix`, `refactor`, `perf`, `docs`, `test`, `ci`, `build`,
-   `chore`, `style`, `other`.
+   `feat`, `fix`, `refactor`, `perf`, `docs`, `infra`, `test`, `ci`,
+   `build`, `chore`, `style`, `other`.
 4. If only one group has any bullets, omit the group heading and emit
    just the bullets.
 5. If multiple groups have bullets, emit each as a short subheading
-   in bold (`**Features**`, `**Fixes**`, `**Docs**`, etc.) followed
-   by the bullets.
+   in bold (`**Features**`, `**Fixes**`, `**Docs**`, `**Infra**`,
+   etc.) followed by the bullets.
 
 One bullet per commit. Do not attempt to merge related commits — the
 user can edit during the approval gate.

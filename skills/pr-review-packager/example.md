@@ -138,12 +138,13 @@ The skill reports:
 
 ### Multiple commits, mixed types
 
-Branch `issue-22-workflow-guide` with three commits:
+Branch `issue-22-workflow-guide` with four commits:
 
 ```
 feat(docs): add workflow guide skeleton (ADR-020, #22)
 fix(docs): fix heading levels (#22)
 docs: add cross-links to ADRs (#22)
+infra(ci): pin actions/checkout to a tagged sha (#22)
 ```
 
 The change summary becomes:
@@ -157,7 +158,14 @@ The change summary becomes:
 
 **Docs**
 - add cross-links to ADRs
+
+**Infra**
+- pin actions/checkout to a tagged sha
 ```
+
+`infra` is recognised because it is a kit-conventional label per
+`CLAUDE.md`'s "GitHub conventions" section. Without it, the
+`infra(ci):` commit would land in the generic "Other" group.
 
 ### Branch name does not encode the issue
 
