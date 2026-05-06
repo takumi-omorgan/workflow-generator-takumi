@@ -367,6 +367,14 @@ Given commit subjects from `git log <base>..HEAD --format="%s"`
    `infra` is included alongside the strict conventional-commit verbs
    to match the kit's canonical label set advertised in
    `templates/claude-md-template.md`.
+
+   The mandatory literal `:` after the optional `(scope)` group is the
+   verb-boundary anchor: subjects like `infrastructure: foo` do not
+   match because the character at the position immediately after the
+   verb (`s`, in this case) is neither `(` nor `:`. Likewise for any
+   prefix that happens to start with one of the listed verbs but has
+   trailing letters before `(`/`:` (e.g. `featureset: foo`,
+   `chorelist: foo`).
 2. Strip a trailing ` (ADR-NNN, #N)` or ` (#N)` suffix from each
    bullet.
 3. Group bullets by prefix. Group order in the output:
