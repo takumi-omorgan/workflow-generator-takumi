@@ -184,19 +184,32 @@ noted.
    markdown block. Ask explicitly: "Write this to
    `prompts/issue-NNN-short-title.md`? (yes / edit / cancel)".
    **Do not write the file before this confirmation.**
-10. **Pre-write check (per [ADR-034](../../Design/adr/adr-034-plan-checker.md)).**
+10. **Pre-write check (per [ADR-034](../../Design/adr/adr-034-plan-checker.md)
+    + [ADR-043](../../Design/adr/adr-043-programmatic-check-plan.md)).**
     Unless `--skip-check` was passed, after the user confirms with
-    `yes`, invoke `/check-plan` against the in-memory filled
-    prompt. On pass, proceed to step 11 (file-exists check). On
-    fail, surface the failures (each citing its criterion ID — e.g.
-    `PROMPT-C1`) to the user, ask how to revise, apply the
-    revision in memory, re-show the updated prompt for confirmation,
-    and re-invoke `/check-plan` for round 2. After 3 failed rounds,
-    yield: surface the remaining failures and stop without writing
-    the file. Warnings are surfaced but do not block.
-    `--skip-check` short-circuits the gate and the skill proceeds
-    to step 11 with a one-line breadcrumb appended to the prompt
-    body.
+    `yes`, pipe the in-memory filled prompt into the kit's
+    programmatic check-plan surface:
+    ```
+    <rendered-prompt> | bin/check-plan --criteria-set prompt --input - --format json
+    ```
+    Parse the JSON envelope. On exit 0, proceed to step 11 (file-
+    exists check). On exit 1, surface the failures (each citing
+    its criterion ID — e.g. `PROMPT-C1` — and the `remediation`
+    field from the JSON) to the user, ask how to revise, apply
+    the revision in memory, re-show the updated prompt for
+    confirmation, and re-invoke `bin/check-plan` for round 2.
+    After 3 failed rounds, yield: surface the remaining failures
+    and stop without writing the file. Warnings (`status: warn`)
+    are surfaced but do not block. `--skip-check` short-circuits
+    the gate and the skill proceeds to step 11 with a one-line
+    breadcrumb appended to the prompt body.
+
+    The programmatic surface (per ADR-043) is what skills with
+    chain points invoke — slash-commands aren't invokable from
+    inside another skill's execution. The slash-command surface
+    `/check-plan` remains for direct operator use; both share the
+    same eval module via `skills/check-plan/criteria.md` as the
+    single canonical criteria list.
 11. **Handle the file-exists case.** Before writing, check whether
     `prompts/issue-NNN-short-title.md` already exists. If it does,
     show a diff between the existing file and the new content and

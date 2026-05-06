@@ -124,17 +124,30 @@ Repeat for every topic in the input batch:
    single-phase projects. The line is opt-in — when set,
    `bin/sync-adr-index` surfaces a Phase column in
    `Design/adr/README.md`.
-7. **Pre-write check (per [ADR-034](../../Design/adr/adr-034-plan-checker.md)).**
-   Unless `--skip-check` was passed, invoke `/check-plan` against
-   the in-memory rendered ADR. On pass, proceed to disk write. On
-   fail, surface the failures (each citing its criterion ID — e.g.
-   `ADR-C3`) to the user, ask how to revise, apply the revision in
-   memory, and re-invoke `/check-plan` for round 2. After 3 failed
-   rounds, yield: surface the remaining failures and stop without
-   writing the ADR. Warnings are surfaced but do not block.
-   `--skip-check` short-circuits the gate for the current
+7. **Pre-write check (per [ADR-034](../../Design/adr/adr-034-plan-checker.md)
+   + [ADR-043](../../Design/adr/adr-043-programmatic-check-plan.md)).**
+   Unless `--skip-check` was passed, pipe the in-memory rendered
+   ADR into the kit's programmatic check-plan surface:
+   ```
+   <rendered-adr> | bin/check-plan --criteria-set adr --input - --format json
+   ```
+   Parse the JSON envelope. On exit 0, proceed to disk write. On
+   exit 1, surface the failures (each citing its criterion ID —
+   e.g. `ADR-C3` — and the `remediation` field from the JSON) to
+   the user, ask how to revise, apply the revision in memory, and
+   re-invoke `bin/check-plan` for round 2. After 3 failed rounds,
+   yield: surface the remaining failures and stop without writing
+   the ADR. Warnings (`status: warn`) are surfaced but do not
+   block. `--skip-check` short-circuits the gate for the current
    invocation only and writes despite failures, leaving a
    breadcrumb in the commit message.
+
+   The programmatic surface (per ADR-043) is what skills with
+   chain points invoke — slash-commands aren't invokable from
+   inside another skill's execution. The slash-command surface
+   `/check-plan` remains for direct operator use; both share the
+   same eval module via `skills/check-plan/criteria.md` as the
+   single canonical criteria list.
 
 ## Drafting protocol — batch
 
