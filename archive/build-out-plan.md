@@ -1,5 +1,23 @@
+# Build-Out Plan (archived)
 
-# 
+> **Archived — historical only.** This is the original build-out
+> plan for the Claude Code Workflow Kit, written before any
+> implementation work began. It defined the M1–M5 milestone
+> structure that drove the initial build, the eight core skills
+> shipped in v1, and the phase-by-phase exit criteria. Most of its
+> content has since been superseded by the shipped artefacts and
+> the ADRs accepted along the way.
+>
+> For current direction, read these instead:
+>
+> - [`README.md`](../README.md) — positioning and what the kit is today
+> - [`docs/workflow-guide.md`](../docs/workflow-guide.md) — the action-oriented walkthrough
+> - [`docs/skills.md`](../docs/skills.md) — the functional skill reference
+> - [`Design/adr/`](../Design/adr/) — accepted decisions
+>
+> This file is kept only as audit trail for the kit's original plan.
+
+---
 
 ## Objective
 

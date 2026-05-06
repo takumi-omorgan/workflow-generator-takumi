@@ -18,9 +18,8 @@ gets its own fresh install; nothing is installed globally.
 workflow-generator/
   README.md                  ← overview and quick start for the kit itself
   CLAUDE.md                  ← rules for Claude Code when working in this repo
-  generic-project-workflow.md ← reference workflow the kit implements
-  Claude Code Workflow Kit MVP Spec.md
-  Claude Code Workflow Kit — Build-Out Plan.md
+  CHANGELOG.md
+  LICENSE
   Design/
     adr/                     ← accepted ADRs that govern the kit
       README.md

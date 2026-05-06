@@ -1,3 +1,24 @@
+# MVP Spec (archived)
+
+> **Archived — historical only.** This is the original MVP spec for
+> the Claude Code Workflow Kit, written before the kit was built. It
+> framed the initial scope and the first six ADRs (ADR-001 through
+> ADR-006) but is no longer the authoritative source. The kit has
+> since grown well beyond the eight core skills described here — it
+> now ships 19 skills, with milestone-lifecycle, session-continuity,
+> and quality-gate additions — and several structural decisions have
+> evolved through later ADRs.
+>
+> For current direction, read these instead:
+>
+> - [`README.md`](../README.md) — positioning and what the kit is today
+> - [`docs/workflow-guide.md`](../docs/workflow-guide.md) — the action-oriented walkthrough
+> - [`docs/skills.md`](../docs/skills.md) — the functional skill reference
+> - [`Design/adr/`](../Design/adr/) — accepted decisions
+>
+> This file is kept only as audit trail for the kit's original framing.
+
+---
 
 ## Product name
 

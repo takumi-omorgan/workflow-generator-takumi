@@ -1,15 +1,25 @@
-# Generic Software Project Workflow — Design Document
+# Generic Software Project Workflow — Design Document (archived)
 
-> A reusable workflow template for setting up and running software projects with AI-assisted development (Claude Code), GitHub-based project management, and structured design documentation. This document is intended to be refined with an external AI before implementation.
+> **Archived — historical only.** This is the original methodology
+> design document for the Claude Code Workflow Kit, written before
+> the kit was built and refined with an external AI. The kit's
+> skills operationalise the discipline described here, but the doc
+> is no longer the authoritative reference and parts of it are now
+> superseded by ADR decisions.
+>
+> For current direction, read these instead:
+>
+> - [`README.md`](../README.md) — positioning and what the kit is today
+> - [`docs/workflow-guide.md`](../docs/workflow-guide.md) — the action-oriented walkthrough
+> - [`docs/skills.md`](../docs/skills.md) — the functional skill reference
+> - [`Design/adr/`](../Design/adr/) — accepted decisions
+>
+> This file is kept only as audit trail for the kit's original
+> methodology framing.
 
-> **Note (post-v3.3.0):** This document is the **original design reference** that
-> predates much of the kit's implementation. For the current, action-oriented
-> walkthrough — including v-next features like `/clarify`, `/check-plan`,
-> `/planning`, `Design/state.md` + `/resume` + `/pause`, the `--granularity`
-> flag, milestone lifecycle skills (`/audit-milestone`, `/milestone-summary`,
-> `/complete-milestone`), `--no-prompt` mode, and plan-mode rhythm — see
-> [`docs/workflow-guide.md`](docs/workflow-guide.md) instead. This file is kept
-> as historical context for how the workflow was originally conceived.
+---
+
+> A reusable workflow template for setting up and running software projects with AI-assisted development (Claude Code), GitHub-based project management, and structured design documentation.
 
 ---
 

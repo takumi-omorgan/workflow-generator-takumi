@@ -42,7 +42,7 @@ Ordered by severity (high → low) then capture date.
 
 ### `notes/` folder cleanup — promote templates out, refresh references
 
-**Status:** unfiled
+**Status:** superseded — see `refactoring-ideas.md` → entry #8 "Finish the legacy `notes/issue-prompt.md` removal across the kit" (captured 2026-05-06)
 **Severity:** low
 **Captured:** 2026-05-06
 **Source:** dogfooding
@@ -54,7 +54,9 @@ Ordered by severity (high → low) then capture date.
 
 **Repro:** `grep -rln "notes/issue-prompt" --include="*.md"` from repo root.
 
-**Proposed fix:** Do (1) and (2) in one PR. Deferred — user is mid-flight on the referencing files.
+**Proposed fix (now superseded):** Do (1) and (2) in one PR. Deferred — user is mid-flight on the referencing files.
+
+**Why superseded (2026-05-06):** Step (1) is no longer the right move. Comparing the legacy `notes/issue-prompt.md` (78 lines) against the current `prompts/_template.md` (111 lines) showed the legacy file is a stale earlier evolution — pre-ADR-008, unaware of ADR-031/032/033/035 and the content-boundary rules. The two legacy files have been deleted rather than promoted; the docs-update work in step (2) carries forward via the feature-ideas entry above.
 
 ---
 

@@ -60,7 +60,7 @@ You are working in my `workflow-kit` repository.
 Context:
 - A GitHub-first, project-local toolkit that takes a new project from idea to MVP to release.
 - Follow the rules in `CLAUDE.md`.
-- The workflow model is described in `generic-project-workflow.md`.
+- The workflow model is described in `docs/workflow-guide.md`.
 
 ADR:
 - File: `Design/adr/adr-015-pr-review-packager-skill.md`

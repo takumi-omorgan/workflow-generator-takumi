@@ -267,7 +267,7 @@ The template uses `{{PLACEHOLDER}}` slots. Map each slot as follows.
 |------------------------------------|------------------------------------------------------------------------|
 | `{{PROJECT_NAME}}`                 | Git repo name (from `git remote get-url origin` or `basename $PWD`).   |
 | `{{ONE_LINE_PROJECT_DESCRIPTION}}` | First line of the project's `README.md` if available; else TODO.       |
-| `{{WORKFLOW_DOC_PATH}}`            | `generic-project-workflow.md` if it exists; else `docs/workflow-guide.md` if it exists; else TODO. |
+| `{{WORKFLOW_DOC_PATH}}`            | `docs/workflow-guide.md` if it exists; else TODO.                      |
 | `{{ADR_FILE}}`                     | Filename of the first resolved ADR (e.g. `adr-013-prepare-issue-skill.md`). |
 | `{{ADR_ONE_LINE_SUMMARY}}`         | First sentence of the `## Decision` section of that ADR.               |
 | `{{ISSUE_TITLE}}`                  | Issue title verbatim.                                                  |

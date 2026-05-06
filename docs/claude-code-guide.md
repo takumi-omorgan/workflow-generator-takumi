@@ -6,9 +6,10 @@ the pitfalls that bite new users.
 
 This guide covers the **interaction patterns**. For the end-to-end
 process (idea → ADR → issue → PR → release) see
-[`../generic-project-workflow.md`](../generic-project-workflow.md).
+[`workflow-guide.md`](workflow-guide.md).
 For what each skill does, read its own `SKILL.md` under
-[`../skills/`](../skills/README.md).
+[`../skills/`](../skills/README.md), or use the functional reference in
+[`skills.md`](skills.md).
 
 ## What this guide is
 
@@ -282,15 +283,14 @@ avoid it.
 
 ## Where to go next
 
-- [`../generic-project-workflow.md`](../generic-project-workflow.md) —
-  the full lifecycle this guide plugs into.
+- [`workflow-guide.md`](workflow-guide.md) — the end-to-end
+  walkthrough this guide plugs into (idea → MVP → backlog →
+  per-issue loop → release, plus the steady-state iteration loop).
+- [`skills.md`](skills.md) — functional reference for every skill in
+  the kit, grouped by what they do.
 - [`issue-prompt-guide.md`](issue-prompt-guide.md) — how to fill the
   reusable session prompt that build skills consume.
-- [`../skills/README.md`](../skills/README.md) — index of all
-  installed skills with links to each `SKILL.md`.
+- [`../skills/README.md`](../skills/README.md) — source-tree index of
+  all installed skills with links to each `SKILL.md`.
 - [`github-setup.md`](github-setup.md) — GitHub labels, branches,
   and PR conventions the skills assume.
-- `docs/workflow-guide.md` — a shorter, task-oriented companion to
-  `generic-project-workflow.md` (not yet written; coming in a
-  follow-up issue). Until it lands, `generic-project-workflow.md` is
-  the reference.
