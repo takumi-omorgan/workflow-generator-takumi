@@ -121,6 +121,10 @@ ask the user which they meant. Do not guess.
 
 - ...
 
+## Security
+
+- ...
+
 ## Other
 
 - ...
@@ -136,8 +140,22 @@ _No changes in this range._
 ```
 
 Within a section, entries are ordered by commit date, newest first.
-Duplicate subjects (exact match after trimming) are de-duplicated,
-keeping the newest entry.
+
+**Duplicate detection.** Group commits whose subjects describe the
+same underlying change. Two commits are duplicates if any of the
+following holds:
+
+- Their stripped subjects match exactly.
+- They reference the same PR (same trailing `(#N)`).
+- Their stripped subjects share the same `<verb>(<scope>):` prefix
+  (or the first 2-3 noun-phrase tokens if no verb prefix is present)
+  AND ≥75% of their remaining tokens overlap. The remaining-token
+  comparison is token-set, lowercased, ignoring filler words ("via",
+  "with", "for", "the", "a", "an").
+
+Render a duplicate group as a single entry. The newest commit's
+stripped subject is the canonical text; all contributing short SHAs
+are listed in the parenthetical.
 
 ## Data source: how git log is parsed
 
@@ -157,22 +175,58 @@ If `--include-merges` is set, drop `--no-merges`.
 
 For each record:
 
-1. **Extract verb prefix.** Match the subject against
-   `^(feat|fix|docs|refactor|chore|test|build|perf|style|ci)(\([^)]+\))?:\s*`.
-   The captured verb determines the section. No match → "Other".
-2. **Strip the prefix.** Keep the rest of the subject as the entry
-   text. For squashed merge commits whose subject is
-   `<verb>(<scope>): <what> (#N)`, the trailing `(#N)` is preserved
-   and then moved into the issue-link slot during rendering (see
-   below).
-3. **Extract ADR tokens.** Case-insensitive match
+1. **Extract issue tokens.** Match `#(\d+)` in subject and body.
+   Deduplicate per commit. The trailing `(#N)` that squash merges
+   append is typically the primary PR reference. If the subject has
+   the kit's two-suffix shape `<title> (#issue) (#PR)`, the second
+   `(#N)` is the PR number.
+2. **Extract ADR tokens.** Case-insensitive match
    `ADR-?(\d{1,4})` in subject and body. Zero-pad to three digits.
    Deduplicate per commit.
-4. **Extract issue tokens.** Match `#(\d+)` in subject and body.
-   Deduplicate per commit. The trailing `(#N)` that squash merges
-   append is the primary source when it is the only issue reference.
+3. **Categorize the commit (label-primary, verb-fallback).** See
+   "Categorization" below. This determines the section.
+4. **Strip the verb prefix from the subject** (if present). Keep
+   the rest as the entry text. The trailing `(#N)` references are
+   moved into the issue-link slot during rendering.
 
-### Verb-to-section mapping
+### Categorization
+
+Categorize each commit using a three-step rule, in order:
+
+1. **Label-primary.** If the commit references a PR via a trailing
+   `(#N)`, fetch the PR's labels:
+
+   ```
+   gh pr view N --json labels --jq '.labels[].name'
+   ```
+
+   Apply the label-to-section map below. If the PR has multiple
+   labels, pick the highest-priority match (priority order: `bug` >
+   `security` > `feature` > `refactor` > `design` > `docs` >
+   `infra` > `chore`). If `gh` is unavailable, the lookup fails, or
+   the PR returns no labels, fall through to step 2.
+
+2. **Verb-fallback.** Match the subject against
+   `^(feat|fix|docs|refactor|chore|test|build|perf|style|ci)(\([^)]+\))?:\s*`.
+   The captured verb determines the section. No match → fall through
+   to step 3.
+
+3. **Other.** Lands in the Other section.
+
+### Label-to-section mapping
+
+| Label      | Section       |
+|------------|---------------|
+| `feature`  | Features      |
+| `bug`      | Fixes         |
+| `security` | Security      |
+| `docs`     | Docs          |
+| `refactor` | Refactoring   |
+| `design`   | Refactoring   |
+| `infra`    | Chores        |
+| `chore`    | Chores        |
+
+### Verb-to-section mapping (fallback)
 
 | Verb prefix | Section       |
 |-------------|---------------|
@@ -188,20 +242,34 @@ For each record:
 | `ci`        | Chores        |
 | (none)      | Other         |
 
+Why label-primary: GitHub squash merges produce commit subjects that
+are PR titles, often without conventional-commit verb prefixes (e.g.
+`Add config loader with documented precedence (#2) (#13)`). Such
+commits land in "Other" under verb-only categorization despite being
+ordinary `feature` PRs. Label-based categorization reads the canonical
+intent (the PR's labels) and recovers the proper section. The verb
+fallback covers direct-to-main commits and pre-PR-era history.
+
 ## Squash-merge handling
 
 This repo uses GitHub squash merges. A squash produces a commit
 whose subject is the PR title and whose body is the concatenation of
-the squashed commit messages. Two concrete patterns show up in this
-repo's own history:
+the squashed commit messages. Three concrete patterns show up:
 
 1. Squash of a conventional-commit PR:
    `feat(skills): add /prepare-issue skill (ADR-013, #15)` — parsed
-   normally; the trailing `(#15)` populates the issue link.
-2. Manual merge commit written like `Merge #15: /prepare-issue skill
+   normally; the trailing `(#15)` populates the issue link. Both
+   label-primary and verb-fallback agree on the section.
+2. Squash of a kit-shape PR with two-suffix `(#issue) (#PR)`:
+   `Add config loader with documented precedence (#2) (#13)` — has
+   no verb prefix. **Categorized via label-primary** (step 1 above)
+   using the PR's labels (e.g. `feature` → Features). Verb-fallback
+   would route it to "Other".
+3. Manual merge commit written like `Merge #15: /prepare-issue skill
    (ADR-013)` — excluded by `--no-merges` by default. If
-   `--include-merges` is set, it lands in "Other" (no verb prefix)
-   unless the subject also starts with a verb.
+   `--include-merges` is set, it lands in "Other" (no verb prefix
+   and the merge commit isn't a PR with labels) unless the subject
+   also starts with a verb.
 
 The parser must not choke on:
 
@@ -218,7 +286,7 @@ The parser must not choke on:
 Per entry:
 
 ```
-- <subject-without-verb-prefix> ([<short-sha>](<commit-url>)[, [#N](<issue-url>)][, ADR-NNN])
+- <subject-without-verb-prefix> ([<short-sha>](<commit-url>)[, [<short-sha-2>](<commit-url>)...][, [#N](<issue-url>)][, ADR-NNN])
 ```
 
 - `<commit-url>`: `<origin-web-url>/commit/<full-sha>` where
@@ -231,6 +299,11 @@ Per entry:
 - ADR tokens are rendered as plain `ADR-013`, `ADR-016` — not linked,
   because ADR files live in the repo and their paths are already
   canonical.
+- **Grouped commits.** When dedup grouped multiple commits into one
+  entry (per "Duplicate detection" above), list each contributing
+  short SHA as a linked reference, in commit-date order (newest
+  first). The canonical text comes from the newest commit's
+  stripped subject.
 
 If `<subject-without-verb-prefix>` ends with `(#N)` and that `#N` is
 already rendered as a linked issue, strip the trailing `(#N)` from the
@@ -259,13 +332,24 @@ overrides all of this verbatim.
    bare SHAs.
 4. **Collect commits.** Run the `git log` command in the "Data
    source" section. Parse with the `\x1e`/`\x1f` split.
-5. **Classify and group.** Apply the verb map. Extract ADR and
+5. **Fetch PR labels for label-based categorization.** For every
+   unique `(#N)` extracted from the commit range, run
+   `gh pr view N --json labels --jq '.labels[].name'` and cache
+   the result. If `gh` is not installed or auth fails, skip this
+   step and proceed to verb-fallback categorization only — emit a
+   one-line warning to stderr
+   (`gh unavailable; falling back to verb-prefix categorization`)
+   so the user sees why the categorization may be coarser.
+6. **Classify and group.** Apply the categorization rule from "Data
+   source" (label-primary, verb-fallback, Other). Extract ADR and
    issue tokens. Build one list per section.
-6. **Deduplicate.** Within each section, drop later entries with an
-   identical stripped subject. Preserve the newest.
-7. **Render markdown.** Emit the title, then each non-empty section
+7. **Deduplicate.** Within each section, group commits per
+   "Duplicate detection". Render each group as one entry, newest
+   subject as canonical text, all SHAs as linked references in
+   newest-first order.
+8. **Render markdown.** Emit the title, then each non-empty section
    in fixed order.
-8. **Write to target.** stdout (default), file (`--output`), or
+9. **Write to target.** stdout (default), file (`--output`), or
    GitHub Release (`--github-release`). For `--github-release`:
    - Run `gh release view TAG` to check existence.
    - If exists: `gh release edit TAG --notes-file -` with the
@@ -274,8 +358,8 @@ overrides all of this verbatim.
      *"Release TAG does not exist. Create it now via
      `gh release create TAG --notes-file -`? (yes/no)"*. On yes,
      create; on no, stop without writing.
-9. **Report.** One-line summary to stdout: the number of entries
-   per section and the destination.
+10. **Report.** One-line summary to stdout: the number of entries
+    per section and the destination.
 
 ## Edge cases
 
@@ -285,12 +369,27 @@ overrides all of this verbatim.
 - **Empty range** (`<from>..<to>` contains zero commits) → emit the
   `_No changes in this range._` body under the title. Still a
   successful run.
-- **Unconventional commits** (no verb prefix) → land in "Other",
-  full subject preserved.
+- **Unconventional commits with no PR reference** (no verb prefix
+  AND no `(#N)` to look up) → land in "Other", full subject
+  preserved.
+- **PR with no labels** → label step returns an empty list; fall
+  through to verb-fallback. If verb also misses, "Other".
+- **PR with multiple labels** → pick the highest-priority match
+  per the priority order in "Categorization" (`bug` > `security` >
+  `feature` > `refactor` > `design` > `docs` > `infra` > `chore`).
+  Labels not in the priority list are ignored for categorization.
+- **`gh` not installed or auth fails (categorization step)** →
+  warn once on stderr and proceed with verb-fallback only. The
+  changelog still renders; some entries that would otherwise be
+  Features/Fixes get the coarser categorization or land in "Other".
+- **`gh pr view N` for a non-existent PR** (e.g. the `(#N)` was an
+  issue reference, not a PR) → no labels returned; fall through to
+  verb-fallback for that commit. Don't error.
 - **Commits with neither ADR nor issue token** → entry is just the
   subject and a linked short SHA. Nothing else.
 - **Merge commits with `--include-merges`** → subject kept verbatim;
-  fall through the verb map (usually to "Other").
+  no PR lookup attempted (merge commits are not PRs); fall through
+  the verb map (usually to "Other").
 - **`gh` not installed** and `--github-release` was passed → stop
   with a clear error telling the user to install `gh` or remove the
   flag.
@@ -309,6 +408,11 @@ overrides all of this verbatim.
 - [ ] Every `#N` in rendered entries is a linked reference (or the
   origin URL could not be detected, in which case it is plain).
 - [ ] No `<from>..<to>` placeholders remain in the title.
+- [ ] Every commit with a `(#N)` PR reference was either label-
+  categorized or fell through to verb-fallback for a documented
+  reason (no labels, gh unavailable, etc).
+- [ ] No commit appears under more than one section (sanity check
+  on the dedup-then-categorize pipeline).
 - [ ] When `--output=FILE` is used, the parent directory of `FILE`
   exists.
 - [ ] When `--github-release=TAG` is used, `gh` is installed and

@@ -159,3 +159,93 @@ All checks pass. The skill reports back:
 
 > Rendered 5 entries across 2 sections for range `dc2869d..HEAD`.
 > Output written to stdout.
+
+## 9. Label-based categorization + similarity dedup
+
+Two real cases this skill handles that pre-v3.4 verb-only logic
+got wrong. Both surfaced during the v3.3.0 baseline eval (md-notes
+fixture).
+
+### Squash-merge subject without verb prefix → categorized via PR labels (F29)
+
+Input commit (squash merge of a `feature`-labeled PR):
+
+```
+8b51b44 Add config loader with documented precedence (#2) (#13)
+```
+
+- Verb prefix: none. Verb-fallback would route to "Other".
+- Issue tokens: `#2` (issue), `#13` (PR — second `(#N)` in the
+  kit's two-suffix shape).
+- Label step: `gh pr view 13 --json labels --jq '.labels[].name'`
+  returns `feature`. Label-to-section: `feature` → Features.
+- **Final section: Features** (correctly recovered from PR labels).
+
+Rendered:
+
+```markdown
+## Features
+
+- Add config loader with documented precedence ([8b51b44](...), [#2](...))
+```
+
+Versus pre-v3.4 behavior, which routed it to "Other" because the
+PR title doesn't carry a `feat(...)` prefix.
+
+### Two near-identical commits → grouped into one entry (F27)
+
+Input commits in the same range:
+
+```
+38bc68e scaffold normalized PRD (via /idea-to-prd + /prd-normalizer)
+d9430fc scaffold normalized PRD via /prd-normalizer
+```
+
+- Both stripped subjects share the verb-noun prefix
+  `scaffold normalized PRD` and ≥75% of remaining tokens (token-set
+  similarity after dropping fillers `via`, `the`).
+- Treated as duplicates per "Duplicate detection". Newest commit
+  (`38bc68e` by commit date) provides the canonical text.
+- Both SHAs listed in the rendered entry.
+
+Rendered:
+
+```markdown
+## Features
+
+- scaffold normalized PRD (via /idea-to-prd + /prd-normalizer) ([38bc68e](...), [d9430fc](...))
+```
+
+Versus pre-v3.4 behavior, which emitted both as separate entries
+in the same section because exact-match dedup didn't catch the
+near-identical pair.
+
+### Combined: label categorization + similarity dedup over a real release range
+
+Putting both behaviors together on md-notes' `v0.1.0` release range
+(7 commits across direct-to-main work + 2 squash merges, with
+`feature` and `infra` labels on the PRs):
+
+```markdown
+# Changelog v0.0.0..v0.1.0
+
+## Features
+
+- scaffold normalized PRD (via /idea-to-prd + /prd-normalizer) ([38bc68e](...), [d9430fc](...))
+- scaffold MVP and single-phase build-out plan (via /prd-to-mvp) ([6139a12](...))
+- draft 5 proposed ADRs (via /adr-writer) ([4c90ebb](...))
+- Add config loader with documented precedence ([8b51b44](...), [#2](...))
+
+## Infra
+
+- Bootstrap Go scaffold and CI ([434bc5e](...), [#1](...))
+
+## Chores
+
+- accept ADR-001..ADR-005 after human review ([f416b81](...), ADR-001, ADR-005)
+```
+
+Pre-v3.4, the same range produced "Features" with two PRD-scaffold
+duplicates (F27) and an "Other" section holding the two squash-
+merged PRs that should have been Features and Infra (F29). After
+v3.4: 3 sections, no duplicates, no "Other" inversion.
