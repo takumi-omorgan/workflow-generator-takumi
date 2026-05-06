@@ -930,6 +930,40 @@ Fallback: if the operator wants the standard product-release framing on a border
 
 ---
 
+### 35. Centralize commit taxonomy across labels, classifier, group order, and examples
+
+**Status:** idea
+**Target:** v-next
+**Captured:** 2026-05-06
+**Origin:** PR #76 review feedback (issue #63 fix for the `infra` verb classifier). Reviewer observed: "Long term, consider centralizing commit taxonomy definitions to avoid future drift between labels, regexes, rendering order, and examples."
+
+**Context / trigger:** Adding `infra` as a recognised commit verb required edits across four separate surfaces, each of which can drift independently:
+
+1. `templates/claude-md-template.md` line 161 — the canonical label set listed in the kit's CLAUDE.md template (`feature, bug, design, infra, security, docs`).
+2. `skills/pr-review-packager/SKILL.md` § *Change-summary derivation* regex — the verb classifier that decides which group a commit lands in.
+3. Same SKILL.md, group-output order — which group appears where in the rendered PR body.
+4. `skills/pr-review-packager/example.md` — worked examples that demonstrate the categorization.
+
+PR #76's fix touched 3 of the 4 (the example.md polish was lost when the duplicate PR #68 was closed in favour of #76). This is the same drift-class problem that ADRs 040 (cross-skill design-questions schema), 041 (auto-mode permission contract), and 043 (programmatic `/check-plan`) closed for other shared schemas — multiple surfaces deriving from one canonical truth, with PR review as the only enforcement until a structural rule lands.
+
+**Sketch of the idea:** Define a single canonical commit-taxonomy artefact that the four consuming surfaces derive from rather than maintain in parallel. Likely shape: a markdown table at `templates/commit-taxonomy.md` (or `skills/pr-review-packager/taxonomy.md`) listing each verb with its label-name, regex match shape, group-output position, and display subheading. The CLAUDE.md template's label list, `pr-review-packager`'s regex, group order, and example.md walkthroughs all reference or derive from this single file. New verbs are added in exactly one place; drift becomes structurally impossible rather than convention-dependent.
+
+**Options in mind:**
+
+1. **Pure documentation reference** — the taxonomy file is the spec; consumers cite it but don't parse it. PR review enforces alignment.
+2. **Programmatic surface (bin/-script-invocation precedent per ADR-043)** — `bin/check-commit-taxonomy` parses the file and emits structured taxonomy data. `pr-review-packager` invokes it as a subprocess (same pattern as `bin/check-plan`). CLAUDE.md template references it textually. Drift is caught at runtime by the script.
+3. **Hybrid** — markdown taxonomy file + thin parser. The slash-command surfaces remain doc-driven; the bin/ script provides programmatic access for skills.
+
+**Open questions:** Where does the canonical file live — `templates/` (user-facing; relevant when authoring CLAUDE.md) or `skills/pr-review-packager/` (alongside other classifier internals)? Does the centralization belong as a new ADR, or as an extension of ADR-041 (which already classifies verbs implicitly via category-3 PR creation)? Should this also subsume ADR-040's PR-body section grammar question (deferred from issue #72) — both touch "what canonical structures does the kit enforce in PR bodies" — or remain separate?
+
+**Consequences to think through:** Easier — adding a new verb (e.g. a future `security(scope):` if security commits emerge as their own group) becomes a one-file change; CLAUDE.md template and pr-review-packager pick it up automatically; example.md regenerates trivially; PR review enforcement reduces to "did the taxonomy file get updated". Harder — new shared artefact to maintain; new parsing logic in `pr-review-packager` if option 2 or 3; cross-reference burden across the docs that cite the file. Maintenance — the canonical file sits at the boundary between user-facing kit docs and skill-internal classifier logic, so its location affects who is expected to edit it.
+
+**Alignment note for the ADR:** New ADR. Cross-references ADR-041 (permission contract — same drift class, same single-source-of-truth pattern), ADR-043 (programmatic surface precedent), and §6 of `docs/workflow-guide.md` (cross-skill carry-forward — another canonical-schema example). Decision call before drafting: option 1 vs 2 vs 3 above.
+
+**Dependency note:** Best landed *after* #34 (programmatic `/check-plan`) ships, so the `bin/`-script-invocation precedent is established and option 2/3 can lean on it. Touches `templates/claude-md-template.md`, `skills/pr-review-packager/SKILL.md`, `skills/pr-review-packager/example.md`, and (if option 2/3) adds `bin/check-commit-taxonomy`.
+
+---
+
 ## Future Entries
 
 Features for consideration in later versions. Ordered by theme.
