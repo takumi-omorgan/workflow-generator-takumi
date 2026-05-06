@@ -141,17 +141,20 @@ _No changes in this range._
 
 Within a section, entries are ordered by commit date, newest first.
 
-**Duplicate detection.** Group commits whose subjects describe the
-same underlying change. Two commits are duplicates if any of the
-following holds:
+**Duplicate detection.** Within each section, group commits whose
+subjects describe the same underlying change. Two commits in the
+same section are duplicates if any of the following holds:
 
 - Their stripped subjects match exactly.
 - They reference the same PR (same trailing `(#N)`).
 - Their stripped subjects share the same `<verb>(<scope>):` prefix
-  (or the first 2-3 noun-phrase tokens if no verb prefix is present)
   AND ≥75% of their remaining tokens overlap. The remaining-token
   comparison is token-set, lowercased, ignoring filler words ("via",
-  "with", "for", "the", "a", "an").
+  "with", "for", "the", "a", "an"). Commits without a verb prefix
+  are not grouped via this heuristic — they can still group via the
+  exact-match or same-PR rules above. This avoids false-positive
+  merges when distinct commits share a noun-phrase head with similar
+  wording.
 
 Render a duplicate group as a single entry. The newest commit's
 stripped subject is the canonical text; all contributing short SHAs
@@ -201,8 +204,8 @@ Categorize each commit using a three-step rule, in order:
    ```
 
    Apply the label-to-section map below. If the PR has multiple
-   labels, pick the highest-priority match (priority order: `bug` >
-   `security` > `feature` > `refactor` > `design` > `docs` >
+   labels, pick the highest-priority match (priority order:
+   `security` > `bug` > `feature` > `refactor` > `design` > `docs` >
    `infra` > `chore`). If `gh` is unavailable, the lookup fails, or
    the PR returns no labels, fall through to step 2.
 
@@ -215,14 +218,16 @@ Categorize each commit using a three-step rule, in order:
 
 ### Label-to-section mapping
 
+Listed in priority order (top wins on multi-label PRs):
+
 | Label      | Section       |
 |------------|---------------|
-| `feature`  | Features      |
-| `bug`      | Fixes         |
 | `security` | Security      |
-| `docs`     | Docs          |
+| `bug`      | Fixes         |
+| `feature`  | Features      |
 | `refactor` | Refactoring   |
 | `design`   | Refactoring   |
+| `docs`     | Docs          |
 | `infra`    | Chores        |
 | `chore`    | Chores        |
 
@@ -375,7 +380,7 @@ overrides all of this verbatim.
 - **PR with no labels** → label step returns an empty list; fall
   through to verb-fallback. If verb also misses, "Other".
 - **PR with multiple labels** → pick the highest-priority match
-  per the priority order in "Categorization" (`bug` > `security` >
+  per the priority order in "Categorization" (`security` > `bug` >
   `feature` > `refactor` > `design` > `docs` > `infra` > `chore`).
   Labels not in the priority list are ignored for categorization.
 - **`gh` not installed or auth fails (categorization step)** →

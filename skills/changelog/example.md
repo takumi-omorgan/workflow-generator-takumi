@@ -197,28 +197,39 @@ PR title doesn't carry a `feat(...)` prefix.
 Input commits in the same range:
 
 ```
-38bc68e scaffold normalized PRD (via /idea-to-prd + /prd-normalizer)
-d9430fc scaffold normalized PRD via /prd-normalizer
+8c1adef fix(prd-normalizer): handle missing exit criteria field
+2b9d33a fix(prd-normalizer): handle missing exit criteria gracefully
 ```
 
-- Both stripped subjects share the verb-noun prefix
-  `scaffold normalized PRD` and ≥75% of remaining tokens (token-set
-  similarity after dropping fillers `via`, `the`).
-- Treated as duplicates per "Duplicate detection". Newest commit
-  (`38bc68e` by commit date) provides the canonical text.
-- Both SHAs listed in the rendered entry.
+- Both subjects share the same `fix(prd-normalizer):` verb-scope
+  prefix. Verb-fallback routes both to the same section (Fixes), so
+  they meet the within-section precondition for dedup.
+- Remaining tokens after stripping the prefix —
+  `handle missing exit criteria field` vs
+  `handle missing exit criteria gracefully` — overlap 4/5 = 80%
+  after lowercasing and filler-word removal, above the 75%
+  threshold.
+- Treated as duplicates per "Duplicate detection" rule 3 (same
+  verb/scope prefix + ≥75% remaining-token overlap, within section).
+  Newest commit (`8c1adef` by commit date) provides the canonical
+  text. Both SHAs listed in the rendered entry.
 
 Rendered:
 
 ```markdown
-## Features
+## Fixes
 
-- scaffold normalized PRD (via /idea-to-prd + /prd-normalizer) ([38bc68e](...), [d9430fc](...))
+- handle missing exit criteria field ([8c1adef](...), [2b9d33a](...))
 ```
 
-Versus pre-v3.4 behavior, which emitted both as separate entries
-in the same section because exact-match dedup didn't catch the
-near-identical pair.
+Versus pre-v3.4 behavior, which emitted both as separate entries in
+the same section because exact-match dedup didn't catch the
+near-identical pair. The strict same-verb/scope rule (rather than a
+noun-phrase fallback) was deliberate: it avoids false-positive
+merges between distinct commits that happen to share a noun-phrase
+head and similar wording. Direct-to-main commits without verb
+prefixes are not grouped by the heuristic — they can still dedup via
+exact-match or same-PR rules.
 
 ### Combined: label categorization + similarity dedup over a real release range
 
