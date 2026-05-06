@@ -1,6 +1,7 @@
 ---
 name: claude-issue-executor
 description: Drive a disciplined implementation session from a prepared issue prompt — plan-first, branch, incremental commits, tests alongside, evaluation summary
+permission-category: 2  # operator-acknowledged-bypass — significant-task plan-mode gate per workflow-guide §7
 ---
 
 # claude-issue-executor
@@ -243,7 +244,11 @@ user has entered it, so both run together rather than competing.
 
 This section defines when the executor requests plan-mode entry and
 how it routes sessions of different sizes. The rules below implement
-[ADR-039](../../Design/adr/adr-039-plan-mode-for-significant-tasks.md).
+[ADR-039](../../Design/adr/adr-039-plan-mode-for-significant-tasks.md)
+and instance the **category-2** rule of the kit-wide auto-mode
+permission contract — see
+[`docs/workflow-guide.md` §7](../../docs/workflow-guide.md#7-auto-mode-permission-contract-adr-041)
+for the canonical contract.
 
 ### Significant checklist
 
@@ -293,6 +298,44 @@ routes to one of three branches:
 - **Borderline** → the executor asks once: *"Significant? yes / no /
   decide for me based on scope."* Proceed accordingly.
 
+### Auto-mode behaviour (per ADR-041)
+
+The executor is **category 2** in the kit-wide auto-mode permission
+contract — *operator-acknowledged-bypass*. Auto-mode may proceed
+through the plan-mode gate but the bypass must be explicit and
+operator-acknowledged, never silent.
+
+When a session starts under auto-mode (operator has pre-authorized
+auto-mode for the session via an explicit toggle), the executor
+**asks once** at session start, before classifying the session
+against the significance checklist:
+
+> *"Enter plan mode for this task? yes / no / decide-from-scope."*
+
+- **`yes`** — request plan-mode entry as normal. The clearly-
+  significant branch of the Hybrid path applies regardless of how
+  the checklist would have classified the session.
+- **`decide-from-scope`** — fall through to the Hybrid path's
+  classifier. Clearly-significant requests plan mode; clearly-
+  trivial skips it; borderline asks the per-Hybrid-path question.
+- **`no`** — the executor writes a one-line acknowledgement in
+  chat output, **before any mutating edit**:
+
+  > *"Plan mode bypassed by operator (cat-2 operator-acknowledged
+  > bypass per workflow-guide §7)."*
+
+  The acknowledgement is mandatory. Without it the bypass is
+  silent and the cat-2 contract is violated. The executor then
+  proceeds with the chat plan-gate alone (the 8-step rule above),
+  which still requires explicit user approval before any mutating
+  edit.
+
+The ask-once rule applies *only* under auto-mode. When the
+operator is interacting normally (no auto-mode toggle), the
+Hybrid path runs as before — there is no ask-once question to
+answer because operator approval at the plan gate is already
+explicit.
+
 ### Alignment-review obligation
 
 When the trivial checklist above is amended, ADR-038's
@@ -300,6 +343,14 @@ When the trivial checklist above is amended, ADR-038's
 ADR-038 carries a mandatory content-boundary review obligation that
 serves as the enforcement point for keeping the two checklists in
 lockstep.
+
+The cat-2 contract text in
+[`docs/workflow-guide.md` §7](../../docs/workflow-guide.md#7-auto-mode-permission-contract-adr-041)
+and the significance checklist above must also move together: when
+either is amended, review the other in the same change. PR review
+is the enforcement point until ADR-034's plan-checker grows a
+structural rule for it (deferred to issue #72 per ADR-040 /
+ADR-041).
 
 ## `--no-prompt` mode
 
