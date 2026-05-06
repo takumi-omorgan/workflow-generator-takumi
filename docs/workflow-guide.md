@@ -162,6 +162,14 @@ ignores a stale prompt.
 have time to build — or skip this step and let the executor
 auto-chain.
 
+**Cross-issue carry-forward (per ADR-040).** When a recently-merged
+PR contains a `## Notes for #<this-issue>` section (left by the
+upstream issue's `pr-review-packager`), `prepare-issue` embeds it in
+the generated prompt as a *Design questions carried forward from PR
+#M* subsection. This is how cross-issue design-coherence questions
+reach the executor as deterministic context rather than depending on
+chain-aware authoring — see §6.
+
 ### 2.e Prompt to implementation
 
 Open a fresh Claude Code session and hand it the prompt.
@@ -221,6 +229,12 @@ e.g. `add-auth-middleware` or `NN-add-auth-middleware`.
 
 **What unblocks next:** a working, tested branch ready for PR.
 
+**Carry-forward output (per ADR-040).** When the executor's eval
+summary surfaces a design question that affects an upcoming issue,
+it records the question as a structured `design-questions:` entry in
+`notes/eval-issue-NNN.md`. The packager picks this up at PR time —
+see §6 for the schema, when-to-populate rule, and downstream flow.
+
 ### 2.f Branch to PR
 
 Package the branch into a reviewable pull request.
@@ -237,6 +251,13 @@ For work that is not yet done, open as a draft PR (`gh pr create
 when implementation and tests are complete.
 
 **What unblocks next:** a PR you can self-review and merge.
+
+**Carry-forward propagation (per ADR-040).** When the executor's
+`notes/eval-issue-NNN.md` contains `design-questions:` entries, the
+packager emits a `## Notes for #N` section in the PR body for each
+unique target-issue, so the carried-forward context survives in PR
+history and reaches `prepare-issue` deterministically when the
+target issue is later prepared — see §6.
 
 ### 2.g Merge, then loop back
 
@@ -456,3 +477,141 @@ If the flow above doesn't match the skills you have installed, check
 [`skills/README.md`](../skills/README.md) for the current inventory —
 some skills land in later milestones and the guide lists the full v-next
 set.
+
+## 6. Cross-skill carry-forward (ADR-040)
+
+The implementation skill chain — `claude-issue-executor` →
+`pr-review-packager` → `prepare-issue` — runs as a unit when a
+session's eval summary raises a design question whose answer
+belongs in an upcoming issue. ADR-040 codifies this carry-forward as
+a kit guarantee: structured data flows producer → preserver →
+consumer regardless of session author or chain-aware authoring.
+This section is the canonical schema and rule set; the three skill
+specs cross-reference it without restating.
+
+### Canonical schema (version 1)
+
+The carry-forward unit is one or more entries in a
+`design-questions` block. The block lives under `## Follow-ups` of
+the executor's eval summary file (`notes/eval-issue-NNN.md`) as a
+fenced YAML code block under a `### design-questions` subheading:
+
+````markdown
+### design-questions
+
+```yaml
+- title: <one-line problem statement>
+  target-issue: "#<N>"
+  context: |
+    <one-paragraph context note explaining the design question and
+    why it affects the target issue specifically>
+```
+````
+
+Field semantics:
+
+- **`title`** — a one-line problem statement, written so a reader of
+  the target issue's prompt can grasp the question without opening
+  the source PR.
+- **`target-issue`** — the issue number whose plan or implementation
+  the question affects. Quoted (`"#5"`) so YAML does not lex the `#`
+  as a comment marker. Reference one issue per entry; create
+  separate entries if a single design question affects multiple
+  upcoming issues.
+- **`context`** — a one-paragraph block (YAML literal `|` so embedded
+  newlines and markdown are preserved). Captures *why* the question
+  matters for the target issue — the cross-issue coupling, not the
+  question's general background.
+
+The block is **omitted entirely** when the eval summary has no
+entries (do not emit `design-questions: []`). This keeps clean
+sessions clean.
+
+### When to populate
+
+Add a `design-questions` entry when *all three* of the following
+hold for a question raised during the executor session:
+
+1. The question concerns a **load-bearing constraint** that another
+   upcoming issue will need to resolve (architecture, contract,
+   shared schema, naming convention, file location, behaviour at a
+   skill boundary).
+2. The constraint is **shared with at least one specific upcoming
+   issue** that is already filed or planned (i.e. you can name the
+   target issue number — even if loosely).
+3. The answer is **not fully determined by this issue's commits** —
+   the upstream issue's executor saw the question but did not have
+   the scope to answer it.
+
+### When NOT to populate
+
+Skip the `design-questions` entry — even if a design question came
+up — when *any* of the following hold:
+
+1. **Self-resolved.** The question was raised mid-session but the
+   executor's commits resolve it within the current issue's scope.
+   No follow-up reaches the target issue.
+2. **No upcoming dependent issue.** The question is interesting but
+   no specific filed-or-planned issue depends on the answer. Capture
+   in `notes/feature-ideas.md` instead, where it will surface again
+   when an issue is filed against it.
+3. **Tactics, not architecture.** The question is purely about
+   implementation tactics within one issue (whether to use map vs.
+   filter, exact log message wording, internal helper-function
+   factoring). These belong in the issue's commits or `## Follow-ups`
+   prose, not the structured carry-forward.
+4. **Already covered by an ADR or `Design/decisions.md`.** The
+   question has a documented answer — link to it from the issue's
+   prompt instead. Carrying it forward as if undecided would create
+   a duplicate authority.
+
+If a question is borderline, prefer **omitting** the carry-forward
+entry. False positives cost more (PR-body noise on every downstream
+issue, prompt clutter for unaffected executors) than false
+negatives (one extra round-trip when the question resurfaces in the
+target issue's session).
+
+### File and section names — single source of truth
+
+| Stage | File / location | Format |
+|---|---|---|
+| Producer | `notes/eval-issue-NNN.md` (executor session output) | `### design-questions` heading + fenced YAML block under `## Follow-ups` |
+| Preserver | PR body | One `## Notes for #<N>` section per unique `target-issue`; entries rendered as `- **<title>**: <context paragraph>` bullets |
+| Consumer | Generated prompt | One `## Design questions carried forward from PR #M` subsection inserted before `## Requirements`, embedding the PR's Notes verbatim with an instruction to the executor to address each in its plan |
+
+The three formats share the same canonical content (the YAML
+fields) but render in the surface most natural for each stage:
+machine-readable on the producer, human-readable on the preserver
+and consumer. The **issue numbers are kit-wide** — `#69`, `#70`
+etc. — there is no per-skill or per-stage renumbering.
+
+### Schema versioning
+
+The schema above is **version 1**. When it evolves (new fields,
+renamed fields, semantic changes to existing fields), update **§6
+first** as the canonical spec, then update the three SKILL.md
+cross-references in lockstep within the same change. Spec drift
+between §6 and any one SKILL.md silently breaks the carry-forward
+loop; PR review is the enforcement point until ADR-034's
+plan-checker grows a structural rule for it (deferred per ADR-040's
+"Maintain" paragraph).
+
+### `--no-prompt` interaction (per ADR-038)
+
+ADR-038's `--no-prompt` mode skips `prepare-issue` entirely on
+genuinely-trivial issues (typo fixes, ADR status flips, dependency
+bumps). Such issues by definition do not raise cross-issue design
+questions, so bypassing the consumer stage is acceptable: a
+`--no-prompt` invocation on a trivial issue with `## Notes for #N`
+in a recently-merged PR will not embed those notes. If you find
+yourself in that situation, reclassify the issue as non-trivial and
+run `prepare-issue` explicitly.
+
+### Pointers
+
+- ADR: [`Design/adr/adr-040-cross-skill-design-question-carry-forward.md`](../Design/adr/adr-040-cross-skill-design-question-carry-forward.md)
+- Producer skill: [`skills/claude-issue-executor/SKILL.md`](../skills/claude-issue-executor/SKILL.md)
+- Preserver skill: [`skills/pr-review-packager/SKILL.md`](../skills/pr-review-packager/SKILL.md)
+- Consumer skill: [`skills/prepare-issue/SKILL.md`](../skills/prepare-issue/SKILL.md)
+- Worked round-trip example: [`skills/pr-review-packager/example.md`](../skills/pr-review-packager/example.md) §7
+
