@@ -668,6 +668,7 @@ in the same PR that ships the skill.
 | 1 | `/audit-milestone` | Read-only `gh` queries; advisory pass/fail report |
 | 1 | `/changelog` | Renders to stdout / file / Release-body draft (publishing is `/release`'s job) |
 | 1 | `/check-plan` | Validates an ADR or prompt against criteria; advisory only |
+| 1 | `bin/check-plan` | Programmatic equivalent of `/check-plan` (ADR-043); read-only against the criteria list, no mutating side effects; invoked by chained skills under auto-mode |
 | 1 | `/clarify` | Local conversation; appends to `Design/decisions.md` |
 | 1 | `/idea-to-prd` | Drafts a PRD locally |
 | 1 | `/milestone-summary` | Writes `Design/milestones/N-summary.md` locally |
