@@ -325,6 +325,19 @@ project), cut a release.
 once you are happy with the tag and bump (patch / minor / major). It
 can also mark the milestone phase complete in your build-out plan.
 
+**Project-shape detection (per ADR-042).** `/release` auto-detects
+whether the project is software-shaped or workflow-shaped (research
+projects, books, curricula, content projects, design system docs,
+internal-policy documents, etc.) by scanning for non-product
+indicators in the PRD, build-out plan, and repo root. When two or
+more signals fire, the release body leads with a workflow-shape
+clarifier banner instead of standard product framing. The
+**canonical signal list** lives in
+[`skills/release/SKILL.md` § Project-shape detection](../skills/release/SKILL.md)
+— that file is the single source of truth; do not maintain a
+parallel list here. Operators on borderline projects can override
+auto-detection with `--force-product-shape` or `--force-workflow-shape`.
+
 **What unblocks next:** a tagged, published release that stakeholders
 can read and that future `/changelog` runs will pick up as the lower
 bound.
