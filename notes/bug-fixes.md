@@ -40,11 +40,19 @@ Entries graduate to GitHub issues (or directly to PRs for trivial fixes).
 
 Ordered by severity (high → low) then capture date.
 
+_(none — all v3.4 entries filed; see Filed section below)_
+
+---
+
+## Filed
+
+_Move entries here when filed as gh issues. Includes issue # for cross-reference._
+
 ---
 
 ### Installer cluster — missing files in `bootstrap-workflow-kit`
 
-**Status:** unfiled
+**Status:** filed-#60
 **Severity:** high
 **Captured:** 2026-05-06
 **Source:** eval (md-notes + podcast-pipeline + research-tracker — all three fixtures)
@@ -73,7 +81,7 @@ Skills currently graceful-degrade by hand-rendering to canonical shapes, but the
 
 ### `/changelog` parser gaps (F27, F29)
 
-**Status:** unfiled
+**Status:** filed-#61
 **Severity:** medium
 **Captured:** 2026-05-06
 **Source:** eval (md-notes; F29 likely resolved on podcast-pipeline via label-based categorization — verify on next fixture or close out)
@@ -92,7 +100,7 @@ Skills currently graceful-degrade by hand-rendering to canonical shapes, but the
 
 ### F34 — `**Exit criterion:**` (singular) vs `**Exit criteria:**` (plural) field-name mismatch
 
-**Status:** unfiled
+**Status:** filed-#62
 **Severity:** low
 **Captured:** 2026-05-06
 **Source:** eval (podcast-pipeline + research-tracker — reproduced ×2 multi-phase fixtures, deterministic)
@@ -113,7 +121,7 @@ Skills currently graceful-degrade by hand-rendering to canonical shapes, but the
 
 ### F-NEW — `infra` label vs conventional-commit verb mismatch
 
-**Status:** unfiled
+**Status:** filed-#63
 **Severity:** low
 **Captured:** 2026-05-06
 **Source:** eval (research-tracker)
@@ -130,14 +138,6 @@ md-notes / podcast-pipeline didn't surface this because their issues all used co
 **Repro:** Open a PR with commit subject `infra(scope): add smoke-test example`. Run `/pr-review-packager`. Observe the change lands in "Other", and skill explicitly flags the verb mismatch in its audit-trail notes.
 
 **Proposed fix:** Pick one — either (a) add `infra` to `/pr-review-packager`'s recognized verb list (simpler; `infra` becomes a kit-conventional verb), or (b) drop `infra` from the kit's CLAUDE.md spec label set and remap kit-shape `infra` issues to `chore` or `refactor` (cleaner conventional-commit alignment, but breaks downstream cross-fixture consistency since md-notes + podcast-pipeline + research-tracker all used `infra` labels). Recommend (a) — fewer breaking changes; codifies an existing pattern.
-
----
-
-## Filed
-
-_Move entries here when filed as gh issues. Includes issue # for cross-reference._
-
-_(none yet)_
 
 ---
 
