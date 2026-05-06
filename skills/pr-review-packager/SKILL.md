@@ -1,6 +1,7 @@
 ---
 name: pr-review-packager
 description: Draft a pull-request body from templates/pr-template.md, auto-fill Closes #N and ADR references from branch and commit history, show the draft for approval, then open the PR via gh pr create
+permission-category: 3  # non-substitutable — gh pr create is public, hard-to-reverse, per workflow-guide §7
 ---
 
 # pr-review-packager
@@ -63,6 +64,34 @@ The skill is **read-only** with respect to `templates/pr-template.md`
 - Does not open the PR without explicit user approval of the rendered
   body. The approval gate from ADR-015's chosen option (Option B) is
   mandatory.
+
+## Auto-mode permission category (per ADR-041)
+
+This skill is **category 3** — *non-substitutable* — in the kit-wide
+auto-mode permission contract. See
+[`docs/workflow-guide.md` §7](../../docs/workflow-guide.md#7-auto-mode-permission-contract-adr-041)
+for the canonical contract.
+
+`gh pr create` is public-visibility and hard-to-reverse: a PR opened
+in error is visible to collaborators, may trigger CI runs and
+notifications, and requires explicit close-or-edit follow-up. This
+class of operation is **never** substituted by auto-mode regardless
+of mode.
+
+The contract requires: **explicit `yes` from the operator before
+`gh pr create` is called, regardless of whether auto-mode is
+active**. Steps 12–13 of the execution protocol below already
+implement this — the user sees the rendered title and body in chat
+and must reply `yes` before the skill calls `gh`. ADR-041 does not
+change this behaviour; it codifies the existing convention as a
+contract so future maintenance cannot regress it.
+
+If a future change ever proposes silencing the explicit-yes gate
+under auto-mode, it must be rejected at PR review as a cat-3
+violation. The same rule applies to any other operation the skill
+might add that touches public state (e.g. labelling, assigning
+reviewers as a side-effect of merge): each must gate behind an
+explicit-yes prompt that auto-mode does not satisfy.
 
 ## Inputs
 
