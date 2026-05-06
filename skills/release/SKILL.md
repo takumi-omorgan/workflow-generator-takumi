@@ -145,6 +145,83 @@ Before anything else, verify:
 If any check fails, stop and report the specific failure. Do not
 attempt to fix the environment.
 
+## Project-shape detection
+
+Per [ADR-042](../../Design/adr/adr-042-project-shape-detection-in-release.md).
+After Prerequisites check passes, scan the project for non-product
+indicators and classify the release as either *product-shape* (the
+default) or *workflow-shape*. The classification gates the framing of
+the release-body content.
+
+The kit applies to any structured project — software or otherwise (per
+[ADR-028](../../Design/adr/adr-028-workflow-agnostic-framing.md)). On
+non-product projects (research projects, books, curricula, content
+projects, design system docs, internal-policy documents), defaulting
+to product-shape framing — *"first tagged release of …"*, semver-shaped
+language, software-flavoured copy — actively misleads users. This
+detection step is the structural enforcement point that matches the
+release surface to the project's actual shape.
+
+### Detection signals
+
+`/release` scans for the following four indicators, in any order. Each
+satisfied signal contributes to the threshold count.
+
+1. **PRD language signal.** `Design/prd.md` or
+   `Design/prd-normalized.md` contains any of *"not [shipping|building]
+   a product"*, *"workflow"*, *"folder of markdown"*, or equivalent
+   language in the project's problem statement or success criteria.
+   Match is substring, case-insensitive, scanned over the whole PRD
+   body.
+2. **Build-strategy signal.** `Design/build-out-plan.md` "Build
+   strategy" section (or equivalent heading) contains *"There is no
+   compile / build / deploy step"* or equivalent. Match is substring,
+   case-insensitive.
+3. **Success-criteria-shape signal.** The PRD's "Success criteria"
+   section (or equivalent) contains user-outcome strings (e.g.
+   *"a researcher can …"*, *"a reader can …"*) rather than test-result
+   strings (e.g. *"all tests pass"*, *"100% coverage"*). Heuristic: at
+   least one bullet matches `^(a|an) [a-z]+ can `, or the section
+   contains zero `test` / `pass` / `coverage` / `build` mentions.
+4. **Package-manifest signal.** Repo root has *none* of:
+   `package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `Gemfile`,
+   `requirements.txt`, `setup.py`, `Pipfile`, `mix.exs`, `pom.xml`, or
+   `build.gradle`. Match is filesystem presence, case-sensitive.
+
+This signal list is the **single source of truth** for project-shape
+detection. Cross-references elsewhere (e.g. `docs/workflow-guide.md`
+§2.i) point back here rather than maintaining a parallel list. New
+signals are added here as the kit's PRD and build-out templates
+evolve; changes go through the normal ADR-amendment path if material.
+
+### Threshold
+
+**Two or more satisfied signals** trigger the workflow-shape path.
+Single-signal cases stay on the product-shape path; the threshold is
+deliberately conservative to avoid false-positives on borderline
+projects (e.g. a software project whose PRD happens to use the word
+"workflow" in passing).
+
+### Outcome
+
+After scanning, `/release` records one of two values:
+
+- `shape = product` — the default; standard product-release framing
+  applies (this is the existing behaviour, unchanged).
+- `shape = workflow` — when ≥2 signals fire; the release surface
+  classifies the project as non-product, and subsequent release-body
+  framing uses this value.
+
+The `shape` value is presented to the user in the release plan, so
+the classification is visible before the approval gate.
+
+If `Design/prd.md` / `Design/prd-normalized.md` / `Design/build-out-plan.md`
+are missing (e.g. on a fresh project that hasn't run `/idea-to-prd`
+or `/prd-to-mvp` yet), those signals score zero — they neither fire
+nor block. Only the package-manifest signal can fire on a project
+without PRD/build-out artefacts; one signal is below threshold, so
+such projects default to product-shape.
+
 ## Preceding-tag detection
 
 Detect the last tag with:
