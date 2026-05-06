@@ -615,3 +615,163 @@ run `prepare-issue` explicitly.
 - Consumer skill: [`skills/prepare-issue/SKILL.md`](../skills/prepare-issue/SKILL.md)
 - Worked round-trip example: [`skills/pr-review-packager/example.md`](../skills/pr-review-packager/example.md) §7
 
+## 7. Auto-mode permission contract (ADR-041)
+
+Auto-mode reduces ceremony by letting the assistant proceed without
+per-tool approval prompts. That is desirable for routine work and
+dangerous for hard-to-reverse work. ADR-041 codifies a kit-wide
+**permission contract** that names what auto-mode is allowed to
+substitute for, what it is not, and how operators authorize
+substitutions when the contract permits them. The contract turns
+F24-class regressions (silent bypass of significant-task plan mode)
+and F23-class regressions (strict-mode-vs-runtime mismatch in
+`/pr-review-packager`) from author-discipline failures into
+structural impossibilities.
+
+This section is the single source of truth. Every shipped skill's
+`SKILL.md` declares its `permission-category` in front-matter and
+cross-references this section without restating it. New skill
+operations must be classified at merge time.
+
+### The three categories
+
+**Category 1 — Substitutable.** Auto-mode may proceed without
+explicit operator approval. Local, reversible, low-blast-radius
+operations live here. Examples: file reads, repo scans, lint
+checks, format passes, ADR / `feature-ideas.md` status flips,
+single-typo fixes, generation of artefacts that another step
+reviews before publishing.
+
+**Category 2 — Operator-acknowledged-bypass.** Auto-mode may proceed
+but must explicitly state in the skill's chat output that the
+bypass is happening, citing this section. The bypass is
+operator-acknowledged, never silent. Examples: significant-task
+plan mode (ADR-039) when the operator has pre-authorized auto-mode
+for the session via an explicit toggle.
+
+**Category 3 — Non-substitutable.** Auto-mode never substitutes for
+explicit operator approval on these operations regardless of mode.
+Public-visibility or hard-to-reverse blast radius. Examples:
+`git push`, `gh pr create`, `gh release create`, `git tag`,
+creating GitHub issues or comments, closing GitHub milestones,
+running migrations, modifying `.claude/settings*.json`, modifying
+`bin/*` scripts.
+
+### Per-skill classification (canonical)
+
+Exhaustive at time of writing. New skills are added to this table
+in the same PR that ships the skill.
+
+| Cat | Skill | Gating operation |
+|---|---|---|
+| 1 | `/adr-writer` | Drafts ADRs locally; user accepts manually |
+| 1 | `/audit-milestone` | Read-only `gh` queries; advisory pass/fail report |
+| 1 | `/changelog` | Renders to stdout / file / Release-body draft (publishing is `/release`'s job) |
+| 1 | `/check-plan` | Validates an ADR or prompt against criteria; advisory only |
+| 1 | `/clarify` | Local conversation; appends to `Design/decisions.md` |
+| 1 | `/idea-to-prd` | Drafts a PRD locally |
+| 1 | `/milestone-summary` | Writes `Design/milestones/N-summary.md` locally |
+| 1 | `/pause` | Refreshes local `Design/state.md` |
+| 1 | `/planning` | Writes `Design/planning.md` locally |
+| 1 | `/prd-normalizer` | Local doc rewrite |
+| 1 | `/prd-to-mvp` | Local doc creation (`Design/mvp.md`, `Design/build-out-plan.md`) |
+| 1 | `/prepare-issue` | Reads `gh` and ADRs (non-mutating); writes prompt file locally |
+| 1 | `/resume` | Reads `Design/state.md` and emits a summary; falls back to `gh` reads |
+| 1 | `/workflow-docs` | Generates `README.md` and `Design/ai-summary.md` locally |
+| **2** | `/claude-issue-executor` | Significant-task plan-mode gate (ADR-039); local file edits and `git` commits but no push |
+| **3** | `/complete-milestone` | Closes a GitHub milestone via `gh`; chains `/release` when `--release` is passed |
+| **3** | `/issue-planner` | Calls `gh issue create` for each issue and creates a Project board |
+| **3** | `/pr-review-packager` | Calls `gh pr create` — public-visibility, hard-to-reverse |
+| **3** | `/release` | `git tag`, `git push`, `gh release create` — maximum public visibility |
+
+### Category 2 — significant-task plan mode (ADR-039 instance)
+
+The cat-2 reference instance is `/claude-issue-executor`'s
+significant-task plan-mode gate. The canonical "significant"
+checklist lives in
+[`skills/claude-issue-executor/SKILL.md`](../skills/claude-issue-executor/SKILL.md)
+and is the per-skill instance of this category. The two checklists
+(this category's framing and ADR-039's checklist) must move
+together: when the contract category text is amended, ADR-039's
+checklist is reviewed in the same change, and vice versa.
+**Alignment is enforced at PR review time** — there is no
+machine-checkable enforcement until ADR-034's plan-checker
+structural-rule framework ships (see §6 of this guide and the
+*Schema-drift enforcement* subsection below).
+
+The cat-2 contract requires the executor to *ask once* at session
+start under auto-mode rather than auto-classify silently:
+
+- *"Enter plan mode for this task? yes / no / decide-from-scope."*
+- `yes` / `decide-from-scope` → use the significance checklist as
+  documented.
+- `no` → write a one-line acknowledgement in chat output before any
+  mutating edit: *"Plan mode bypassed by operator (cat-2
+  operator-acknowledged bypass per workflow-guide §7)."* The
+  acknowledgement is mandatory; without it the bypass is silent and
+  the cat-2 contract is violated.
+
+### Category 3 — PR creation, releases, GitHub state changes
+
+The cat-3 reference instance is `/pr-review-packager`'s explicit-yes
+gate before `gh pr create`. The skill has always asked for explicit
+`yes` before opening a PR (steps 12–13 of its execution protocol);
+ADR-041 promotes that convention to a contract: **explicit `yes` is
+required regardless of mode; auto-mode never substitutes for it**.
+The same rule applies to `/release`, `/issue-planner`, and
+`/complete-milestone` — all four cat-3 skills require an explicit
+operator gate that auto-mode does not satisfy.
+
+If a future skill adds an operation in this category — anything
+public-visibility or hard-to-reverse — its `SKILL.md` MUST declare
+`permission-category: 3` in front-matter, cross-reference this
+section, and gate the operation behind an explicit-yes prompt that
+auto-mode cannot substitute for.
+
+### `--no-prompt` interaction (ADR-038)
+
+`--no-prompt` mode (see §2.e and ADR-038) skips prompt generation on
+genuinely-trivial issues. It is itself a **category-1
+operator-pre-authorization for the trivial-issue path**: the
+operator has named the issue trivial by passing the flag, and
+trivial issues by definition do not raise cross-issue design
+questions or touch hard-to-reverse operations.
+
+`--no-prompt` does **not** bypass category-3 operations. Even under
+`--no-prompt`, the executor cannot push, tag, or open a PR without
+explicit approval. The handoff to `/pr-review-packager` (cat-3) is
+unchanged; `--no-prompt` only affects the prompt artefact.
+
+**Future-proofing note.** If a future skill or mode introduces
+*non-trivial* prompt-generation bypass paths (e.g. CI-driven
+implementations, bulk migrations), that mode must be classified at
+the time it is added — likely category 2, since cross-issue
+continuity (§6 carry-forward) is too important to let auto-mode
+silently skip on non-trivial work. The current `--no-prompt` flag's
+cat-1 classification is correct because its eligibility criteria
+are exactly the trivial checklist — it cannot reach non-trivial
+work by construction.
+
+### Schema-drift enforcement
+
+The contract above (categories, classifications, cross-references)
+is enforced at **PR review** today. A skill spec that classifies a
+category-3 operation under auto-mode, or a front-matter
+`permission-category` line that drifts from the canonical table,
+must be caught at review time.
+
+Machine-checkable enforcement is deferred to issue #72 (ADR-034
+plan-checker), where the generic structural-rule framework will
+also subsume §6's design-questions schema-drift check (per
+ADR-040's *Maintain* paragraph). Building a single-purpose
+permission-contract checker before #72 lands the generic framework
+would create a throwaway artefact and pre-empt the better
+solution.
+
+### Pointers
+
+- ADR: [`Design/adr/adr-041-auto-mode-permission-contract.md`](../Design/adr/adr-041-auto-mode-permission-contract.md)
+- Cat-2 instance: [`skills/claude-issue-executor/SKILL.md`](../skills/claude-issue-executor/SKILL.md) — *Plan-mode rhythm* section
+- Cat-3 instance: [`skills/pr-review-packager/SKILL.md`](../skills/pr-review-packager/SKILL.md) — *Auto-mode permission category* section
+- Related: [ADR-039](../Design/adr/adr-039-plan-mode-for-significant-tasks.md) (per-skill rule that ADR-041 generalises), [ADR-038](../Design/adr/adr-038-tighten-prompt-step.md) (`--no-prompt` interaction), [ADR-040](../Design/adr/adr-040-cross-skill-design-question-carry-forward.md) (schema-drift home alignment)
+
