@@ -44,6 +44,7 @@ Do not use this skill to draft changelog content in isolation — that is
          [--draft]
          [--prerelease]
          [--dry-run]
+         [--force-product-shape | --force-workflow-shape]
          [--milestone-phase=N]
 ```
 
@@ -65,6 +66,16 @@ Flags:
 - `--dry-run` — walk through every step up to the approval gate and
   stop. Render the preview, print each command that would run, make
   no mutations.
+- `--force-product-shape` — force the product-shape release-body
+  framing regardless of what project-shape detection (see below)
+  would have inferred. Documented for operators whose project trips
+  the workflow-shape heuristic but is genuinely a software product.
+  Mutually exclusive with `--force-workflow-shape`; passing both is
+  an invocation error.
+- `--force-workflow-shape` — force the workflow-shape release-body
+  framing on a project whose detection signals were below threshold
+  but the operator wants the workflow-shape clarifier anyway.
+  Symmetric to `--force-product-shape`. Mutually exclusive with it.
 - `--milestone-phase=N` — optional. If set, after a successful release
   the skill updates the matching phase row in
   `Design/build-out-plan.md` from `in-progress` (or `planned`) to
@@ -221,6 +232,32 @@ or `/prd-to-mvp` yet), those signals score zero — they neither fire
 nor block. Only the package-manifest signal can fire on a project
 without PRD/build-out artefacts; one signal is below threshold, so
 such projects default to product-shape.
+
+### Overrides
+
+Two operator flags override the auto-detected `shape` value:
+
+- `--force-product-shape` — forces `shape = product` regardless of
+  signal count. Use on a project that trips the workflow-shape
+  heuristic but is genuinely a software product (e.g. a software
+  project whose PRD prose includes the word "workflow" enough times
+  to score the PRD-language signal, plus a docs-only sub-project
+  layout that scores the package-manifest signal).
+- `--force-workflow-shape` — forces `shape = workflow` regardless of
+  signal count. Use on a non-product project whose detection signals
+  are too sparse to trigger but the operator wants the workflow-
+  shape clarifier (e.g. a research-shaped project that does carry a
+  `requirements.txt` for analysis tooling, suppressing the package-
+  manifest signal).
+
+Override flags take effect immediately after detection runs and
+before the release plan is rendered. The release plan reports the
+override prominently so the user sees that auto-detection was
+overridden.
+
+The two flags are mutually exclusive. Passing both is a usage error
+— `/release` aborts with *"--force-product-shape and
+--force-workflow-shape are mutually exclusive."*
 
 ## Preceding-tag detection
 
