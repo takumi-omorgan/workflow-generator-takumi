@@ -213,8 +213,11 @@ noted.
    found anywhere, set the `## ADR` body to `none`.
 8. **Derive the change summary.** From the commit subjects, group by
    conventional-commit verb prefix: `feat`, `fix`, `docs`, `refactor`,
-   `chore`, `test`, `perf`, `ci`, `build`, `style`. Any commit without
-   a recognised prefix goes under a final `other` group. Within each
+   `chore`, `test`, `perf`, `ci`, `build`, `infra`, `style`. (`infra`
+   is included to match the kit's canonical label set in
+   `templates/claude-md-template.md` — `infra(scope):` commits go in
+   their own group rather than `other`.) Any commit without a
+   recognised prefix goes under a final `other` group. Within each
    group, keep one bullet per commit, preserving commit order
    (oldest-first) and stripping the trailing `(ADR-NNN, #N)` suffix
    for readability. If there is only one group, omit the group
@@ -358,19 +361,32 @@ Given commit subjects from `git log <base>..HEAD --format="%s"`
 (oldest-first):
 
 1. For each subject, identify the conventional-commit verb prefix by
-   matching `^(feat|fix|docs|refactor|chore|test|perf|ci|build|style)(\([^)]*\))?:\s*`.
+   matching `^(feat|fix|docs|refactor|chore|test|perf|ci|build|infra|style)(\([^)]*\))?:\s*`.
    Everything after the `:` is the bullet text. If no prefix matches,
    the whole subject is the bullet text and the group is `other`.
+   `infra` is included alongside the strict conventional-commit verbs
+   to match the kit's canonical label set advertised in
+   `templates/claude-md-template.md`.
+
+   The mandatory literal `:` after the optional `(scope)` group is the
+   verb-boundary anchor: subjects like `infrastructure: foo` do not
+   match because the character at the position immediately after the
+   verb (`s`, in this case) is neither `(` nor `:`. Likewise for any
+   prefix that happens to start with one of the listed verbs but has
+   trailing letters before `(`/`:` (e.g. `featureset: foo`,
+   `chorelist: foo`).
 2. Strip a trailing ` (ADR-NNN, #N)` or ` (#N)` suffix from each
    bullet.
 3. Group bullets by prefix. Group order in the output:
    `feat`, `fix`, `refactor`, `perf`, `docs`, `test`, `ci`, `build`,
-   `chore`, `style`, `other`.
+   `infra`, `chore`, `style`, `other`. (`infra` sits adjacent to
+   `build` and before `chore` — operational changes that aren't
+   features or fixes.)
 4. If only one group has any bullets, omit the group heading and emit
    just the bullets.
 5. If multiple groups have bullets, emit each as a short subheading
-   in bold (`**Features**`, `**Fixes**`, `**Docs**`, etc.) followed
-   by the bullets.
+   in bold (`**Features**`, `**Fixes**`, `**Docs**`, `**Infra**`,
+   etc.) followed by the bullets.
 
 One bullet per commit. Do not attempt to merge related commits — the
 user can edit during the approval gate.
