@@ -15,10 +15,10 @@ single
 
 ## In-flight issue
 
-- **Issue:** none
-- **Prompt:** n/a
-- **Branch:** n/a
-- **Status:** none
+- **Issue:** #84 (Phase 2 of 3 — body slimming for 4 over-budget skills)
+- **Prompt:** prompts/issue-084-phase2-body-slimming.md
+- **Branch:** issue-084-phase2-body-slimming
+- **Status:** verified
 
 <!-- state:in-flight:end -->
 
@@ -50,6 +50,6 @@ none
 
 ## Continue here
 
-PR #86 merged (squash `b74778e`); Phase 1 of issue #84 shipped. Issue #84 stays open for Phase 2 + Phase 3. Audit-harness tracking decision made (commit `aafd34b`): curated subset tracked under `notes/skills-audit-2026-05-07/`, regenerable outputs gitignored, convention documented in the directory README. **Next:** pick Phase 2 (body slimming — bring 4 over-budget skills `claude-issue-executor`/`pr-review-packager`/`release`/`prepare-issue` under 500L/5k tokens via one-level-deep sidecars; higher-leverage) or Phase 3 (sidecar consistency: `examples.md` → `example.md`, `complete-milestone`/`milestone-summary` policy; smallest). Both ship as separate PRs against #84. To start either: `/prepare-issue 84` and brief executor for the chosen phase only. Rich handoff context: `notes/handoff-2026-05-07.md`.
+Phase 2 of issue #84 is **fully shipped on branch** `issue-084-phase2-body-slimming` (6 commits: 4 per-skill lifts + CSV re-score + eval). Branch is unpushed. All 19 cohort skills now under both 500L and 5k-token thresholds. Eval at `notes/eval-issue-084.md` (overwrites Phase 1's; Phase 1 content preserved in git at `6aefd6d`). **Next:** run `/pr-review-packager` — it will halt at preflight asking for `git push -u origin issue-084-phase2-body-slimming` first (per kit's standing rule). After PR opens, partial-shipped flip on `notes/refactoring-ideas.md` entry #9 is post-merge bookkeeping (suggested format in eval doc); don't fully mark `shipped-#PR` until Phase 3 ships. Phase 3 (sidecar consistency: `examples.md` → `example.md` rename, `complete-milestone`/`milestone-summary` policy) is the smallest of the three and is the only remaining phase against #84.
 
 <!-- state:continue-here:end -->
