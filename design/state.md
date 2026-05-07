@@ -15,10 +15,10 @@ single
 
 ## In-flight issue
 
-- **Issue:** #80 — Rename design/ → design/ kit-wide for root-directory casing consistency
+- **Issue:** #80 — Rename `Design/` → `design/` kit-wide for root-directory casing consistency
 - **Prompt:** `prompts/issue-080-rename-design-directory-lowercase.md`
-- **Branch:** n/a
-- **Status:** prepared
+- **Branch:** `rename-design-directory-lowercase`
+- **Status:** verified
 
 <!-- state:in-flight:end -->
 
@@ -50,6 +50,6 @@ none
 
 ## Continue here
 
-PR #81 merged (squash, 3e2d290 on main). ADR-044 is now `accepted` with tightened 6-criterion mechanical-rewrite definition (per pre-merge review feedback). ADR-045 restored from /tmp to `design/adr/`. Prompt for #80 written and gate-passed at `prompts/issue-080-rename-design-directory-lowercase.md`. Next: `/claude-issue-executor prompts/issue-080-rename-design-directory-lowercase.md`. The executor session is **clearly significant** per ADR-039 (3+ files, all 19 SKILL.md, templates/, bin/, 16 ADR bodies) — it will request plan-mode entry before proposing the plan. After PR for #80 merges, mark refactoring-ideas entry #7 as `shipped`.
+#80 implemented on branch `rename-design-directory-lowercase` in 13 commits: two-step rename via `_design_tmp` (commits 1+2), bulk `sed Design/ → design/` batched by category (commits 3-10), ADR-005 + ADR-045 status flips + ADR-044/045 editorial restoration + index regen (commit 11), CHANGELOG bulk-rewrite + v4.0.0 (UNRELEASED) entry (commit 12), example-project Design/ rename (commit 13). 1,186 → 0 path-string occurrences across 179 files; 14 deliberately-restored editorial `Design/` references remain in ADR-044/045 prose (where the literal old name is the subject of the rename) and CHANGELOG migration snippet. Verification clean: `git ls-files | grep ^Design/` → 0; `find -type d -name Design` → empty; `bin/sync-adr-index --check` → 0; `bin/check-state-cap` → 0; check-plan pass count unchanged from main (24/45 — pre-existing C4 failures on older ADRs preserved). Next: `/pr-review-packager` to package the PR. After merge, mark refactoring-ideas entry #7 as `shipped`.
 
 <!-- state:continue-here:end -->
