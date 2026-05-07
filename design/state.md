@@ -15,10 +15,10 @@ single
 
 ## In-flight issue
 
-- **Issue:** none
-- **Prompt:** n/a
-- **Branch:** n/a
-- **Status:** none
+- **Issue:** #84 (Phase 3 of 3 — sidecar consistency; final phase)
+- **Prompt:** prompts/issue-084-phase3-sidecar-consistency.md
+- **Branch:** n/a (executor will create)
+- **Status:** prepared
 
 <!-- state:in-flight:end -->
 
@@ -50,6 +50,6 @@ none
 
 ## Continue here
 
-PR #87 merged (squash `d76eb05`); Phase 2 of issue #84 shipped. All 19 cohort skills now under both 500L and 5k-token thresholds. Issue #84 stays open for Phase 3 — the only remaining phase, smallest of the three. **Phase 3 scope:** rename `skills/prd-normalizer/examples.md` → `example.md` (cohort uses singular; one drift), and decide cohort policy on the two skills currently with no sidecar (`complete-milestone`, `milestone-summary`) — either add `example.md` to each (matches 17/19 default) or document in `docs/skills.md` why they're orchestration-only. Voice/structure-only; small docs/file-rename PR. To start: `/prepare-issue 84` and brief executor for Phase 3 only.
+Run `/claude-issue-executor prompts/issue-084-phase3-sidecar-consistency.md` to ship Phase 3 of issue #84 (final phase): rename `skills/prd-normalizer/examples.md` → `example.md` and decide Option A (add `example.md` to `complete-milestone` and `milestone-summary`) vs Option B (document the orchestration-only exception in `docs/skills.md` with cross-links). Plan-mode required per issue body — Option A vs Option B is the headline plan decision. After this PR ships, issue #84 closes; post-merge bookkeeping flips `notes/refactoring-ideas.md` entry #9 to fully `shipped-#PR`.
 
 <!-- state:continue-here:end -->
