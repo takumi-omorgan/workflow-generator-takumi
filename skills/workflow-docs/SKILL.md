@@ -148,7 +148,7 @@ markers — the file skips straight from the previous section to the
 next. The template is written so adjacent omitted sections leave no
 stray blank lines.
 
-### Roadmap section content (per ADR-032)
+### Roadmap section content
 
 When the `roadmap` section appears, render a compact table sourced
 from `design/build-out-plan.md`'s `### Phase N: <name>` blocks:
