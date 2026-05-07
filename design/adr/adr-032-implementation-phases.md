@@ -32,7 +32,7 @@ phases into and ADR-036's granularity knob has nothing to dial.
   read it need parsers extended; flat-plan projects need explicit
   single-phase fallback handling.
 
-### Option B: Separate `Design/phases.md` as a first-class doc
+### Option B: Separate `design/phases.md` as a first-class doc
 
 - Pros: cleaner separation between "what's in MVP" and "how it's
   phased."

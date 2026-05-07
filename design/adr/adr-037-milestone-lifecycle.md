@@ -56,12 +56,12 @@ implemented after ADR-032 has shipped:
   complete, all issues closed, and all referenced ADRs have linked
   PRs. Returns pass/fail with a gap list. Warns on failure but
   does not block `/complete-milestone` — the user decides.
-- `/milestone-summary`: generates `Design/milestones/N-summary.md`
+- `/milestone-summary`: generates `design/milestones/N-summary.md`
   capturing what shipped, ADRs adopted, lessons learned, and
   deferred work. Sourced from `git log`, the GitHub milestone, and
   accepted ADRs in the milestone's phase range.
 - `/complete-milestone`: closes the GitHub milestone, archives
-  milestone-scoped state in `Design/state.md` (per ADR-035), and
+  milestone-scoped state in `design/state.md` (per ADR-035), and
   optionally invokes `/release` (ADR-017) when the milestone maps
   to a release boundary.
 
@@ -78,7 +78,7 @@ project chooses to bundle milestones into a release.
   (phases) is real and exercised; coordination between
   `/complete-milestone` and `/release` needs documenting.
 - Maintain: tightly coupled to ADR-032's phase shape and ADR-035's
-  `state.md` format; format spec for `Design/milestones/N-summary.md`
+  `state.md` format; format spec for `design/milestones/N-summary.md`
   lives at `templates/milestone-summary-template.md`.
 - Deferred: implementation waits on ADR-032 shipping. Cross-milestone
   reporting (e.g. multiple milestones aggregated into one release

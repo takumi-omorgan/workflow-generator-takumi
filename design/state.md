@@ -15,10 +15,10 @@ single
 
 ## In-flight issue
 
-- **Issue:** none
-- **Prompt:** n/a
+- **Issue:** #80 — Rename design/ → design/ kit-wide for root-directory casing consistency
+- **Prompt:** `prompts/issue-080-rename-design-directory-lowercase.md`
 - **Branch:** n/a
-- **Status:** none
+- **Status:** prepared
 
 <!-- state:in-flight:end -->
 
@@ -50,6 +50,6 @@ none
 
 ## Continue here
 
-PR #81 is open against `main` from branch `accept-adr-044-immutability-exception` (4 commits: ADR-044 status flip + index, CLAUDE.md citation, prompt + state, eval summary). Review and merge #81; ADR-044 becomes the kit-wide authority for mechanical path-string rewrites. After #81 merges: (1) `git checkout main && git pull`, (2) `mv /tmp/adr-045-rename-design-directory-lowercase.md Design/adr/` to restore the ADR-045 draft, (3) `/prepare-issue 80` to draft the prompt for the rename itself, (4) executor → packager chain to ship #80.
+PR #81 merged (squash, 3e2d290 on main). ADR-044 is now `accepted` with tightened 6-criterion mechanical-rewrite definition (per pre-merge review feedback). ADR-045 restored from /tmp to `design/adr/`. Prompt for #80 written and gate-passed at `prompts/issue-080-rename-design-directory-lowercase.md`. Next: `/claude-issue-executor prompts/issue-080-rename-design-directory-lowercase.md`. The executor session is **clearly significant** per ADR-039 (3+ files, all 19 SKILL.md, templates/, bin/, 16 ADR bodies) — it will request plan-mode entry before proposing the plan. After PR for #80 merges, mark refactoring-ideas entry #7 as `shipped`.
 
 <!-- state:continue-here:end -->

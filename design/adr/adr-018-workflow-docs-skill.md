@@ -6,7 +6,7 @@
 
 ## Context
 
-`docs/repo-structure.md` references a skill that generates `README.md` and `Design/ai-summary.md` for target projects, but no source exists in `skills/`. Projects currently lack auto-generated documentation, so users either write these files by hand or skip them entirely. Both files are important: the README is the public entry point, and the AI summary gives Claude Code fast context on the project.
+`docs/repo-structure.md` references a skill that generates `README.md` and `design/ai-summary.md` for target projects, but no source exists in `skills/`. Projects currently lack auto-generated documentation, so users either write these files by hand or skip them entirely. Both files are important: the README is the public entry point, and the AI summary gives Claude Code fast context on the project.
 
 ## Options considered
 
@@ -27,7 +27,7 @@
 
 ## Decision
 
-Implement a single `/workflow-docs` skill that reads the PRD, MVP spec, ADRs, and `CLAUDE.md` to generate `README.md` and `Design/ai-summary.md` from templates. The skill is re-runnable so docs can be refreshed as the project evolves. Template variables are filled from project metadata; sections with no source data are omitted rather than left blank.
+Implement a single `/workflow-docs` skill that reads the PRD, MVP spec, ADRs, and `CLAUDE.md` to generate `README.md` and `design/ai-summary.md` from templates. The skill is re-runnable so docs can be refreshed as the project evolves. Template variables are filled from project metadata; sections with no source data are omitted rather than left blank.
 
 ## Consequences
 

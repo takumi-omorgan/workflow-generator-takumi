@@ -6,7 +6,7 @@
 ## Context
 
 The kit's source — `skills/`, `templates/`, `bin/`, `docs/`,
-`examples/`, `Design/`, `notes/`, top-level docs — currently ships
+`examples/`, `design/`, `notes/`, top-level docs — currently ships
 without a `LICENSE` file. The README states "License: not yet
 specified." Without an explicit license, default copyright applies:
 downstream users technically cannot redistribute, modify, or fork
@@ -27,8 +27,8 @@ casual readers all reach the same conclusion without effort.
 A separate question is the **boundary between the kit's license and
 the user's work product**. The kit ships templates, skills, and
 scripts. Users install these into their own projects and run them
-to scaffold and produce their own artifacts (`Design/mvp.md`,
-`Design/prd.md`, ADRs, prompts, source code, tests). The user's
+to scaffold and produce their own artifacts (`design/mvp.md`,
+`design/prd.md`, ADRs, prompts, source code, tests). The user's
 artifacts are the user's work — original content the user authored
 through the kit's prompting. The kit's license must apply to the
 kit's source, not propagate into anything users create with it.
@@ -93,16 +93,16 @@ Modifying the canonical MIT text would defeat the recognition
 benefit (Option F). The boundary is supported in plain text
 elsewhere where readers will find it; legally, MIT's terms already
 do not propagate to user-created original content (the user's
-filled-in `Design/mvp.md`, source code, etc., are their own
+filled-in `design/mvp.md`, source code, etc., are their own
 copyrightable work, not derivatives of the kit's empty templates).
 
 Specifically:
 
 - **Kit source under MIT:** all files shipped in this repository —
-  `skills/`, `templates/`, `bin/`, `docs/`, `Design/`,
+  `skills/`, `templates/`, `bin/`, `docs/`, `design/`,
   `examples/`, `notes/`, top-level `*.md`, `LICENSE`, etc.
 - **What the user produces by running the kit is the user's:**
-  rendered `Design/mvp.md`, `Design/prd.md`, individual ADRs the
+  rendered `design/mvp.md`, `design/prd.md`, individual ADRs the
   user authors, prompts under `prompts/`, working notes, and any
   source code, tests, or build artifacts of the project being
   built. The kit's MIT terms cover the empty templates and skills,

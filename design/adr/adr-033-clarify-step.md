@@ -22,7 +22,7 @@ sits below ADR weight.
 
 ## Options considered
 
-### Option A: New `/clarify` skill producing `Design/decisions.md` between `prd-to-mvp` and `adr-writer`
+### Option A: New `/clarify` skill producing `design/decisions.md` between `prd-to-mvp` and `adr-writer`
 
 - Pros: dedicated skill with narrow scope; opt-in (small projects
   skip it); clean handoff to `adr-writer` (decisions consumed as
@@ -52,12 +52,12 @@ sits below ADR weight.
 ## Decision
 
 Adopt **Option A**. Ship `/clarify` as an opt-in skill at
-`skills/clarify/` that reads `Design/prd-normalized.md`,
-`Design/mvp.md`, and `Design/planning.md` (when ADR-031 has
+`skills/clarify/` that reads `design/prd-normalized.md`,
+`design/mvp.md`, and `design/planning.md` (when ADR-031 has
 shipped), scouts the codebase if any, surfaces a checklist of
 unresolved implementation questions for user selection, conducts
 deep-dive resolution per question, and appends settled decisions to
-`Design/decisions.md`. The skill skips areas already locked by
+`design/decisions.md`. The skill skips areas already locked by
 accepted ADRs to avoid re-asking. `decisions.md` is below ADR
 weight by design — it captures informal-but-settled context that
 downstream agents (planner, executor) can rely on without asking

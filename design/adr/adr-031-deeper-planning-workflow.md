@@ -30,15 +30,15 @@ those follow-on ADRs depend on a stable contract.
 
 ## Options considered
 
-### Option A: New opt-in `/planning` skill producing `Design/planning.md`
+### Option A: New opt-in `/planning` skill producing `design/planning.md`
 
-- Pros: dedicated artefact between `Design/mvp.md` and ADRs;
+- Pros: dedicated artefact between `design/mvp.md` and ADRs;
   downstream skills (`adr-writer`, `issue-planner`) read it when
   present and ignore it when absent, so small projects are
   unaffected; clean handoff to ADR-032 (phases as a planning
   output) and ADR-033 (clarification can append to it).
 - Cons: one more skill and template to teach; another file in the
-  `Design/` tree.
+  `design/` tree.
 
 ### Option B: Extend `prd-to-mvp` to optionally emit a deeper planning section
 
@@ -57,10 +57,10 @@ those follow-on ADRs depend on a stable contract.
 ## Decision
 
 Adopt **Option A**. Ship a new opt-in `/planning` skill at
-`skills/planning/` that reads `Design/prd-normalized.md` and
-`Design/mvp.md`, prompts for requirements decomposition, risks,
+`skills/planning/` that reads `design/prd-normalized.md` and
+`design/mvp.md`, prompts for requirements decomposition, risks,
 assumptions, sequencing rationale, and open research questions,
-and writes `Design/planning.md` from a new
+and writes `design/planning.md` from a new
 `templates/planning-template.md`. Output is consumed by `adr-writer`
 (decisions hardened from the planning doc) and `issue-planner`
 (sequencing rationale informs phase ordering). The skill is opt-in;

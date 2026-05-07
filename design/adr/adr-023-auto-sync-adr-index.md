@@ -1,11 +1,11 @@
-# ADR-023: Auto-sync the ADR index in `Design/adr/README.md`
+# ADR-023: Auto-sync the ADR index in `design/adr/README.md`
 
 **Status:** accepted
 **Date:** 2026-04-26
 
 ## Context
 
-The ADR index in `Design/adr/README.md` repeatedly drifts from the
+The ADR index in `design/adr/README.md` repeatedly drifts from the
 filesystem. As of 2026-04-26 it listed only ADR-001 through ADR-006
 while the directory contained 21 ADRs; this was caught and backfilled
 manually. Status transitions cause similar drift — when ADR-002 was
@@ -60,11 +60,11 @@ that install the kit.
 
 Adopt **Option B** as the baseline. Build `bin/sync-adr-index`:
 
-- Scans `Design/adr/adr-*.md`. Parses the title from `# ADR-NNN: ...`
+- Scans `design/adr/adr-*.md`. Parses the title from `# ADR-NNN: ...`
   and the status from the first `**Status:**` line.
 - Rewrites only the region between marker fences
   `<!-- adr-index:start -->` and `<!-- adr-index:end -->` in
-  `Design/adr/README.md`. Editorial text outside the fence is
+  `design/adr/README.md`. Editorial text outside the fence is
   preserved.
 - Idempotent. Returns exit code `0` on no-op, `1` on changes written
   (so it can run as a CI/pre-commit drift check).
@@ -74,8 +74,8 @@ Adopt **Option B** as the baseline. Build `bin/sync-adr-index`:
 Wire it into the four ADR-touching skills as a final pre-commit step:
 `adr-writer` (after creating the ADR), `claude-issue-executor`,
 `pr-review-packager`, and `release` (each: if any
-`Design/adr/adr-*.md` is staged, run the script and re-stage
-`Design/adr/README.md`).
+`design/adr/adr-*.md` is staged, run the script and re-stage
+`design/adr/README.md`).
 
 The optional git pre-commit hook (Option C) is **deferred** to a
 follow-up ADR if drift recurs from manual commits in practice. Start
@@ -95,7 +95,7 @@ hygiene.
   Script is parser-driven, so a malformed ADR header will produce a
   noisy row rather than silently corrupt the index — acceptable
   trade-off.
-- Marker fences in `Design/adr/README.md` are now load-bearing;
+- Marker fences in `design/adr/README.md` are now load-bearing;
   removing or renaming them breaks regeneration. The fence comment
   itself is the warning to future editors.
 - CI can run `bin/sync-adr-index` as a drift check (exit 1 if it
@@ -104,5 +104,5 @@ hygiene.
   Option C ships. Acceptable for now; revisit if observed.
 - Target projects installed via `install-workflow-kit` inherit the
   script and the fenced README; the existing installer step that
-  copies `Design/adr/README.md` needs the fence preserved (no
+  copies `design/adr/README.md` needs the fence preserved (no
   regression risk — the fence is plain HTML comments).

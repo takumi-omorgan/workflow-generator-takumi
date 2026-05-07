@@ -67,7 +67,7 @@ prior version may need user-visible work to upgrade. Triggered by:
 - **Renaming a placeholder** in any `templates/*.md` (e.g.,
   `{{IN_V1_BULLETS}}` → `{{IN_SCOPE_BULLETS}}`).
 - **Renaming a heading parsed by a skill.** `workflow-docs` parses
-  `Design/mvp.md` headings; `issue-planner` parses MVP scope
+  `design/mvp.md` headings; `issue-planner` parses MVP scope
   sections; `prd-normalizer` reads PRD sections. Renaming any of
   those headings breaks parsers operating on existing files.
 - **Renaming or removing a marker fence** (e.g.,
@@ -80,7 +80,7 @@ prior version may need user-visible work to upgrade. Triggered by:
   alters which files appear in a target project, or that changes
   the meaning of a flag.
 - **Changing the canonical layout** documented in
-  `docs/repo-structure.md` (e.g., moving `Design/adr/` to a
+  `docs/repo-structure.md` (e.g., moving `design/adr/` to a
   different path).
 
 ### MINOR (additive)

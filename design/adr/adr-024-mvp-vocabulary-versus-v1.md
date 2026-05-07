@@ -25,7 +25,7 @@ appears throughout product surface:
   issue scope.
 - `skills/workflow-docs/` — extracts the lists for generated
   documentation.
-- `examples/projects/*/Design/mvp.md` and
+- `examples/projects/*/design/mvp.md` and
   `examples/projects/*/README.md` — concrete MVP docs use the
   headings.
 - `generic-project-workflow.md` — the reference workflow uses the
@@ -79,7 +79,7 @@ migration cost is one-off rather than recurring.
   goal of widest applicability is best served by neutral phrasing.
 - Cons: loses the temporal "first cut, more later" connotation that
   "v1" carries — recoverable in surrounding prose, the filename
-  (`Design/mvp.md`), and the skill name (`prd-to-mvp`).
+  (`design/mvp.md`), and the skill name (`prd-to-mvp`).
 
 ### Option D: Rebrand to "Initial release / Deferred"
 
@@ -92,14 +92,14 @@ migration cost is one-off rather than recurring.
 
 Adopt **Option C — `In scope / Out of scope`** for the MVP scoping
 framework's section headings, with one refinement: the filename
-(`Design/mvp.md`) and the skill name (`prd-to-mvp`) stay unchanged.
+(`design/mvp.md`) and the skill name (`prd-to-mvp`) stay unchanged.
 The "MVP" concept earns its keep at those layers and is stable; the
 heading-level phrasing goes neutral so the document reads correctly
 for every project shape.
 
 The temporal "first cut, more later" signal is preserved in:
 
-- The filename `Design/mvp.md`.
+- The filename `design/mvp.md`.
 - The skill name `prd-to-mvp`.
 - The intro prose of the generated MVP doc, which still frames
   scope as "the first release" or "what ships first" depending on
@@ -109,7 +109,7 @@ This decision applies to the kit's product surface (templates,
 skills, examples, reference workflow). Kit-self ADRs and docs are
 already covered by ADR-022.
 
-This decision **does not rename `Design/mvp.md`** to a more neutral
+This decision **does not rename `design/mvp.md`** to a more neutral
 filename. The filename is internal to the kit's convention, doesn't
 appear in target projects' public READMEs, and renaming would ripple
 into skill names (`prd-to-mvp` → `prd-to-scope`?) for negligible
@@ -136,7 +136,7 @@ and the reference workflow.
   `issue-planner`, `workflow-docs` — instructions, validation
   logic, and worked examples updated to use the new headings.
 - Example projects rebuilt: `examples/projects/kb-lookup/` and
-  `examples/projects/slug-utils/` — `Design/mvp.md`, `README.md`,
+  `examples/projects/slug-utils/` — `design/mvp.md`, `README.md`,
   PRD, and any in-project ADR/issue references rewritten to use
   the new headings.
 - Top-level example walkthroughs updated:
@@ -147,7 +147,7 @@ and the reference workflow.
   *target-project domain examples* (e.g., a hypothetical issue
   titled "Remove deprecated v1 API endpoints") are kept — those
   are real product use cases the kit doesn't need to neutralise.
-- Filenames stay: `Design/mvp.md` and the `prd-to-mvp` skill
+- Filenames stay: `design/mvp.md` and the `prd-to-mvp` skill
   name are unchanged.
 - No backwards-compat shim. The kit has not shipped externally;
   any existing internal target projects can be rebuilt from the

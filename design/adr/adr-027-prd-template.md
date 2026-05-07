@@ -84,7 +84,7 @@ template:
   **soft** (everything else, where `[TBD]` is acceptable).
 - Includes a leading HTML-comment header that explains how to use
   the template, which fields are hard-required, and where the
-  filled file should land in a target project (`Design/prd.md`).
+  filled file should land in a target project (`design/prd.md`).
 - Is **model-agnostic**: the template itself contains no
   instructions to any specific LLM. The header notes the template
   can be filled "by the user, or by an external LLM" without
@@ -126,7 +126,7 @@ artefact along that path, not a new path.
   template at the appropriate decision points.
 - Offline drafting becomes a first-class flow: any user — with any
   external LLM, or none — can fill the template directly into
-  `Design/prd.md` and run `prd-normalizer` from there.
+  `design/prd.md` and run `prd-normalizer` from there.
 - `prd-normalizer` operating on a faithfully-filled template is
   near-pass-through; it confirms the two identity fields and writes
   the canonical file through. This shortens the planning loop.

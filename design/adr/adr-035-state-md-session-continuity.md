@@ -1,4 +1,4 @@
-# ADR-035: `Design/state.md` and session-continuity artefacts
+# ADR-035: `design/state.md` and session-continuity artefacts
 
 **Status:** accepted
 **Date:** 2026-04-30
@@ -21,7 +21,7 @@ natural place to update it.
 
 ## Options considered
 
-### Option A: Single `Design/state.md` updated by existing skills, plus `/resume` and optional `/pause` skills
+### Option A: Single `design/state.md` updated by existing skills, plus `/resume` and optional `/pause` skills
 
 - Pros: lightweight; reuses skills already in the chain
   (`prepare-issue`, `claude-issue-executor`, `pr-review-packager`);
@@ -49,7 +49,7 @@ natural place to update it.
 
 ## Decision
 
-Adopt **Option A**. Ship `Design/state.md` as a lightweight
+Adopt **Option A**. Ship `design/state.md` as a lightweight
 committed artefact tracking: current phase (per ADR-032 if shipped,
 else single implicit phase); in-flight issue number; recently
 completed work (last 5 commits or merged PRs); known blockers; and

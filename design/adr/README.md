@@ -37,7 +37,7 @@ fences is preserved.
 | [ADR-020](adr-020-workflow-guide.md) | End-to-end workflow guide doc | accepted |
 | [ADR-021](adr-021-example-projects.md) | Example / starter projects gallery | accepted |
 | [ADR-022](adr-022-drop-version-qualifiers-from-kit-scope.md) | Drop version qualifiers from kit-scope decisions | accepted |
-| [ADR-023](adr-023-auto-sync-adr-index.md) | Auto-sync the ADR index in `Design/adr/README.md` | accepted |
+| [ADR-023](adr-023-auto-sync-adr-index.md) | Auto-sync the ADR index in `design/adr/README.md` | accepted |
 | [ADR-024](adr-024-mvp-vocabulary-versus-v1.md) | MVP scoping vocabulary — neutral "In scope / Out of scope" headings | accepted |
 | [ADR-025](adr-025-license.md) | License the kit under MIT | accepted |
 | [ADR-026](adr-026-kit-versioning-policy.md) | Versioning policy for the kit | accepted |
@@ -49,7 +49,7 @@ fences is preserved.
 | [ADR-032](adr-032-implementation-phases.md) | Implementation phases in PRD review and planning | accepted |
 | [ADR-033](adr-033-clarify-step.md) | Clarification step (`/clarify`) before ADR drafting | accepted |
 | [ADR-034](adr-034-plan-checker.md) | Plan-checker quality gate for ADRs and issue prompts | accepted |
-| [ADR-035](adr-035-state-md-session-continuity.md) | `Design/state.md` and session-continuity artefacts | accepted |
+| [ADR-035](adr-035-state-md-session-continuity.md) | `design/state.md` and session-continuity artefacts | accepted |
 | [ADR-036](adr-036-granularity-control.md) | Granularity / density control for phased plans | accepted |
 | [ADR-037](adr-037-milestone-lifecycle.md) | Milestone lifecycle commands (audit, summary, complete) | accepted |
 | [ADR-038](adr-038-tighten-prompt-step.md) | Tighten the prompt step — auto-chain executor and `--no-prompt` mode | accepted |

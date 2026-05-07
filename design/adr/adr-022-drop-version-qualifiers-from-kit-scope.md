@@ -83,7 +83,7 @@ kit's product surface.
 ## Consequences
 
 - ADR-002 is marked superseded by ADR-022; the index in
-  `Design/adr/README.md` reflects this.
+  `design/adr/README.md` reflects this.
 - Kit-self docs (`CLAUDE.md`, `docs/install.md`, `docs/github-setup.md`)
   no longer version-qualify scope statements. (Already applied in the
   same change as this ADR.)

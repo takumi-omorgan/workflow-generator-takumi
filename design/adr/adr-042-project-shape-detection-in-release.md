@@ -21,7 +21,7 @@ operator-authored Caveats section pattern mitigated the leak), and
 **escalated again on research-tracker** because that fixture's PRD
 explicitly disclaims being a product (PRD contains *"I'm not shipping
 a product"* language; success criteria are user-outcomes not
-test-pass; `Design/build-out-plan.md` is markdown-only with no
+test-pass; `design/build-out-plan.md` is markdown-only with no
 compile / build / deploy step).
 
 On a project that is not a product, `/release` should not pretend
@@ -91,11 +91,11 @@ preflight, with operator override.
 **Detection signals** (`/release` scans for non-product project
 indicators in this order):
 
-- `Design/prd.md` or `Design/prd-normalized.md` contains
+- `design/prd.md` or `design/prd-normalized.md` contains
   *"not [shipping|building] a product"* / *"workflow"* /
   *"folder of markdown"* / equivalent language in the project's
   problem statement or success criteria.
-- `Design/build-out-plan.md` Build strategy section says
+- `design/build-out-plan.md` Build strategy section says
   *"There is no compile / build / deploy step"* or equivalent.
 - Success criteria are user-outcome strings (e.g. *"a researcher
   can …"*) rather than test-result strings (e.g. *"all tests

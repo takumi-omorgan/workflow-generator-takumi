@@ -26,8 +26,8 @@ Generate the core workflow documents and templates directly into the target repo
 
 - `README.md`
 - `CLAUDE.md`
-- `Design/adr/`
-- `Design/ai-summary.md`
+- `design/adr/`
+- `design/ai-summary.md`
 - workflow docs
 - issue and PR templates where appropriate.
 

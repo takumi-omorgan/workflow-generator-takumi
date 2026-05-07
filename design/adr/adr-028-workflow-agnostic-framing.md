@@ -91,7 +91,7 @@ change is a stance clarification — no kit behaviour changes.
   README and a few docs change; existing example projects (CLI,
   library) remain valid because software is still in scope.
 - Cons: a rebrand might surface new issues (heading-level mismatch
-  between filename `Design/mvp.md` and a non-software MVP concept) —
+  between filename `design/mvp.md` and a non-software MVP concept) —
   judged minor and acceptable.
 
 ## Decision
@@ -123,7 +123,7 @@ This ADR explicitly does **not** rename:
 
 - The `prd-to-mvp` skill (it stays — "MVP" is widely understood
   beyond software).
-- The MVP template's filename `Design/mvp.md` (per ADR-024's
+- The MVP template's filename `design/mvp.md` (per ADR-024's
   filename-stays clause).
 - Any skill or template by reframing.
 

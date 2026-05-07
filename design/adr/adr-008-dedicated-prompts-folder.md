@@ -15,7 +15,7 @@ Filled issue prompts (`issue-N-prompt.md`) currently live in `notes/` alongside 
 - Pros: top-level visibility, easy to reference from CLAUDE.md and issue branches, clear separation from notes.
 - Cons: adds another root directory.
 
-### Option B: Design/prompts/
+### Option B: design/prompts/
 
 - Pros: groups all design-time artifacts together.
 - Cons: prompts are operational, not design artifacts; nesting adds friction.
