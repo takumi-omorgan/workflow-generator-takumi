@@ -5,10 +5,10 @@ Context:
   install into target projects to govern a disciplined development workflow.
 - Follow the rules in `CLAUDE.md`.
 - The workflow model is described in `generic-project-workflow.md` and
-  the ADRs under `Design/adr/`.
+  the ADRs under `design/adr/`.
 
 ADR:
-- File: `Design/adr/adr-026-kit-versioning-policy.md`
+- File: `design/adr/adr-026-kit-versioning-policy.md`
 - Decision: Document explicit semver rules for the kit's
   template-and-skill-shaped "API" — what counts as MAJOR / MINOR /
   PATCH for a product whose contract is files installed into target
@@ -35,7 +35,7 @@ classifications are mechanical and downstream users get an explicit
 upgrade contract.
 
 Requirements
-- Write `Design/adr/adr-026-kit-versioning-policy.md` covering:
+- Write `design/adr/adr-026-kit-versioning-policy.md` covering:
   - **Context:** the kit's "API" surface (templates, placeholders,
     skill-parsed headings, marker fences, installer flags); why
     standard semver intuition needs adaptation; the v3 trigger
@@ -87,7 +87,7 @@ Acceptance criteria
 - ADR index reflects ADR-026 as accepted.
 
 Scope and constraints
-- Primary folders to touch: `Design/adr/`.
+- Primary folders to touch: `design/adr/`.
 - No code changes. Pure documentation.
 - Out of scope: amending `/changelog` or `/release` to enforce the
   policy automatically. ADR-026 sets the contract; tool integration
@@ -109,10 +109,10 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-024-mvp-vocabulary-versus-v1.md` (for the
+   - `design/adr/adr-024-mvp-vocabulary-versus-v1.md` (for the
      classification example),
-   - `Design/adr/adr-016-changelog-and-release-notes-skill.md` and
-     `Design/adr/adr-017-release-skill.md` (for how the policy
+   - `design/adr/adr-016-changelog-and-release-notes-skill.md` and
+     `design/adr/adr-017-release-skill.md` (for how the policy
      ties into existing release tooling),
    - `templates/adr-template.md` (for structure).
 2. Propose a short, step-by-step PLAN:

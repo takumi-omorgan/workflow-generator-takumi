@@ -6,7 +6,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-034-plan-checker.md`
+- File: `design/adr/adr-034-plan-checker.md`
 - Decision: Ship `/check-plan` at `skills/check-plan/` as a single skill that takes an artefact path (ADR or issue prompt), detects type from path/frontmatter, runs a checklist tuned per type, returns pass/fail with specific revisions, and iterates with the user up to 3 rounds before yielding; `adr-writer` and `prepare-issue` chain it automatically as a pre-commit gate, with `--skip-check` opting out; the checker emits warnings (not hard errors) for dimensions it cannot verify deterministically; criteria live at `skills/check-plan/criteria.md`, version-locked to the templates.
 
 GitHub Issue:
@@ -38,15 +38,15 @@ Acceptance criteria
 
 Scope and constraints
 - Primary folders to touch: `skills/check-plan/` (new), `skills/adr-writer/SKILL.md`, `skills/prepare-issue/SKILL.md`, plus a small drift-detection script under `bin/` if a CI hook is included (matching the `bin/sync-adr-index` style).
-- Folders to avoid unless absolutely necessary: `Design/adr/` (do not edit accepted ADR-034), `examples/projects/`, `prompts/` (other than this issue's own prompt).
+- Folders to avoid unless absolutely necessary: `design/adr/` (do not edit accepted ADR-034), `examples/projects/`, `prompts/` (other than this issue's own prompt).
 - v1 scope is **ADRs and issue prompts only**. Per ADR-034 "Deferred", do not add criteria for `build-out-plan.md` or `planning.md` — those are explicitly deferred to a follow-up ADR.
-- Type detection (ADR vs prompt) must be unambiguous: ADRs live under `Design/adr/adr-NNN-*.md` and have a `**Status:**` line; prompts live under `prompts/issue-NNN-*.md` and follow `prompts/_template.md`'s section order. If both signals are absent or contradict, stop and ask — do not guess.
+- Type detection (ADR vs prompt) must be unambiguous: ADRs live under `design/adr/adr-NNN-*.md` and have a `**Status:**` line; prompts live under `prompts/issue-NNN-*.md` and follow `prompts/_template.md`'s section order. If both signals are absent or contradict, stop and ask — do not guess.
 - Iteration cap is hard at 3. After the third failed round, surface the remaining failures to the user as items to fix manually and stop the loop; do not silently bypass.
 - The chained gate in `adr-writer` and `prepare-issue` runs **after** the artefact would have been written and **before** the disk write — so a failed check leaves the working tree clean. `--skip-check` short-circuits the gate but is documented as opt-out, not opt-in.
 - Criteria document is the source of truth; SKILL.md should reference its sections by stable IDs, not paste the criteria verbatim, so updates to the criteria don't require SKILL.md edits.
 
 Evaluation & testing requirements
-- Demonstrate the ADR pass path: run `/check-plan` against a known-good ADR (e.g. `Design/adr/adr-035-state-md-session-continuity.md`) and confirm pass with no revisions requested.
+- Demonstrate the ADR pass path: run `/check-plan` against a known-good ADR (e.g. `design/adr/adr-035-state-md-session-continuity.md`) and confirm pass with no revisions requested.
 - Demonstrate the ADR fail path: run against a deliberately broken fixture (missing Decision section, or Decision references an option not in Options considered) and confirm specific revisions are surfaced.
 - Demonstrate the prompt pass path: run against a known-good prompt (e.g. `prompts/issue-044-design-state-md-plus-resume-and-pause-skills.md`) and confirm pass.
 - Demonstrate the prompt fail path: a fixture missing `Acceptance criteria` triggers a specific revision.
@@ -60,8 +60,8 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-034-plan-checker.md`
-   - `Design/adr/adr-013-prepare-issue-skill.md` (parent for prepare-issue contract)
+   - `design/adr/adr-034-plan-checker.md`
+   - `design/adr/adr-013-prepare-issue-skill.md` (parent for prepare-issue contract)
    - `templates/adr-template.md` and `prompts/_template.md` (the criteria's version-lock targets)
    - `skills/adr-writer/SKILL.md`, `skills/prepare-issue/SKILL.md`
    - `skills/clarify/SKILL.md` and `skills/planning/SKILL.md` (recent precedent for new-skill house style)

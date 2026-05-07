@@ -6,7 +6,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-040-cross-skill-design-question-carry-forward.md`
+- File: `design/adr/adr-040-cross-skill-design-question-carry-forward.md`
 - Decision: Adopt Option A — add three coordinated skill-spec hooks across the implementation chain (`claude-issue-executor` → `pr-review-packager` → `prepare-issue`), sharing one canonical `design-questions:` schema documented in the workflow guide.
 
 GitHub Issue:
@@ -38,7 +38,7 @@ Acceptance criteria
 
 Scope and constraints
 - Primary folders to touch: `skills/claude-issue-executor/`, `skills/pr-review-packager/`, `skills/prepare-issue/`, `docs/workflow-guide.md`
-- Folders to avoid unless absolutely necessary: `Design/adr/` (ADR-040 is accepted; do not edit), `bin/`, other `skills/*/` directories not listed above
+- Folders to avoid unless absolutely necessary: `design/adr/` (ADR-040 is accepted; do not edit), `bin/`, other `skills/*/` directories not listed above
 - Per ADR-039, this issue is **significant** (modifies 3+ `skills/*/SKILL.md` files plus the workflow guide). Plan mode (shift+tab shift+tab) should be entered before any mutating edit.
 
 Evaluation & testing requirements
@@ -50,8 +50,8 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-040-cross-skill-design-question-carry-forward.md`
-   - `Design/adr/adr-038-tighten-prompt-step.md` (this issue extends it)
+   - `design/adr/adr-040-cross-skill-design-question-carry-forward.md`
+   - `design/adr/adr-038-tighten-prompt-step.md` (this issue extends it)
    - `skills/claude-issue-executor/SKILL.md`, `skills/pr-review-packager/SKILL.md`, `skills/prepare-issue/SKILL.md`
    - `docs/workflow-guide.md`
    - `notes/adr-038-alignment-review.md` (content-boundary review for the prompt artefact)

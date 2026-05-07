@@ -6,7 +6,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-032-implementation-phases.md`
+- File: `design/adr/adr-032-implementation-phases.md`
 - Decision: Extend `templates/build-out-plan-template.md` with `## Phase N: <name>` sections (goal, scope, ADR deps, exit criterion). `prd-to-mvp` (or `/planning` from ADR-031) emits the phased plan; `adr-writer` lets ADRs declare a `phase:` frontmatter tag; `issue-planner` creates one GitHub milestone per phase; `workflow-docs` surfaces phases in the README roadmap; `/release` treats one phase as the default release unit. Single-phase projects keep working unchanged — a plan with no `## Phase` headings is treated as one implicit phase.
 
 GitHub Issue:
@@ -39,14 +39,14 @@ Acceptance criteria
 
 Scope and constraints
 - Primary folders to touch: `templates/`, `skills/prd-to-mvp/`, `skills/adr-writer/`, `skills/issue-planner/`, `skills/workflow-docs/`, `skills/release/`, `examples/`, `docs/`
-- Folders to avoid unless absolutely necessary: `Design/adr/` (never edit accepted ADRs in place per CLAUDE.md), `bin/`, `.github/`
+- Folders to avoid unless absolutely necessary: `design/adr/` (never edit accepted ADRs in place per CLAUDE.md), `bin/`, `.github/`
 - Coordination note: issue #40 / PR #49 (ADR-031) is also touching `skills/adr-writer/SKILL.md` and `skills/issue-planner/SKILL.md` as Optional input additions. Branch off `main` *after* PR #49 merges, OR be prepared to rebase. The two changes are additive and should not conflict semantically, but ordering avoids merge churn.
 - Single-phase fallback must be lossless: existing projects with flat build-out plans must continue producing identical issues, milestones, and release notes after this change lands.
 
 Evaluation & testing requirements
 - Manually invoke `prd-to-mvp` on a small sample and verify it emits a phased plan with sensible phase boundaries
 - Manually verify a flat plan (no `## Phase` headings) still produces a single milestone via `issue-planner` and a single release via `/release`
-- Verify the ADR index (`Design/adr/README.md`) shows phase tags after running `bin/sync-adr-index` against a phase-tagged ADR
+- Verify the ADR index (`design/adr/README.md`) shows phase tags after running `bin/sync-adr-index` against a phase-tagged ADR
 - Verify the worked example project under `examples/projects/` demonstrates a 3-phase build with phase-tagged ADRs and one milestone per phase
 - All existing tests must continue to pass.
 - If a change cannot be unit tested, document the manual verification.
@@ -54,7 +54,7 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-032-implementation-phases.md`
+   - `design/adr/adr-032-implementation-phases.md`
    - any existing modules under `templates/`, `skills/prd-to-mvp/`, `skills/adr-writer/`, `skills/issue-planner/`, `skills/workflow-docs/`, `skills/release/`, `examples/`
    - any existing tests related to the modules you will change
 2. Propose a short, step-by-step implementation PLAN for this issue, including:

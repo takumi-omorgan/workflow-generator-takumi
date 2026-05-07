@@ -85,7 +85,7 @@ _Move entries here when filed as gh issues. Includes issue # for cross-reference
 - `templates/readme-template.md`, `templates/ai-summary-template.md` — expected by `/workflow-docs`
 - `.github/pull_request_template.md` — referenced by `CLAUDE.md` template
 - `.gitignore` — minimal default missing
-- `Design/adr/README.md` — required (with marker fences) by `bin/sync-adr-index`; first run errors with *"sync-adr-index: no Design/adr/README.md found"*
+- `design/adr/README.md` — required (with marker fences) by `bin/sync-adr-index`; first run errors with *"sync-adr-index: no design/adr/README.md found"*
 
 Skills currently graceful-degrade by hand-rendering to canonical shapes, but the install-side fix removes the friction entirely.
 
@@ -129,7 +129,7 @@ Skills currently graceful-degrade by hand-rendering to canonical shapes, but the
 
 `/audit-milestone` currently tolerates the drift (matches semantically and flags), but a future regex tightening would break the contract.
 
-**Repro:** `grep -h "Exit crit" Design/build-out-plan.md` on any kit project with a multi-phase plan.
+**Repro:** `grep -h "Exit crit" design/build-out-plan.md` on any kit project with a multi-phase plan.
 
 **Proposed fix:** Align the producer (use plural in `/prd-to-mvp`'s build-out-plan template) OR the consumer (regex matches both forms in `/audit-milestone`). Two-character fix on either side. Producer-side is cleaner — singular is grammatically odd anyway when the field can hold a list.
 

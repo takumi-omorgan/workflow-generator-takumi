@@ -34,7 +34,7 @@ Acceptance criteria
 
 Scope and constraints
 - Primary folders to touch: `skills/pr-review-packager/`.
-- Folders to avoid unless absolutely necessary: `Design/adr/`, `templates/`, `bin/`, other `skills/*/`.
+- Folders to avoid unless absolutely necessary: `design/adr/`, `templates/`, `bin/`, other `skills/*/`.
 - Per ADR-039, this is **significant** because it edits `skills/*/SKILL.md`. Plan mode (`shift+tab shift+tab`) should be entered before any mutating edit. The edit itself is small (single verb addition + group-order placement), but the significance gate fires on file-class, not edit size.
 
 Evaluation & testing requirements

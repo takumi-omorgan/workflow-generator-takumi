@@ -6,7 +6,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-038-tighten-prompt-step.md`
+- File: `design/adr/adr-038-tighten-prompt-step.md`
 - Decision: Two changes to `claude-issue-executor` — (1) auto-chain `prepare-issue` when no prompt exists for the issue, and regenerate with confirmation when an existing prompt is stale relative to the issue body or its linked ADRs; (2) add a `--no-prompt` flag that runs from the issue body alone for trivial issues (auto-detected on `chore`/`docs`/`bugfix-trivial` labels with zero ADR refs; explicit flag overrides detection; commit-message breadcrumb `issue executed without prompt per ADR-038`). The ADR also imposes a mandatory alignment review against ADR-031/032/033/034/035/037 before implementation, with any resulting prompt-template boundary changes recorded in a follow-up amendment ADR.
 
 GitHub Issue:
@@ -16,7 +16,7 @@ GitHub Issue:
 - Labels: feature
 
 Goal
-Reduce ceremony for the common case (auto-chain `prepare-issue` so the prompt is a side-effect of starting work) while keeping the prompt artefact as the audit-trail anchor and the natural anchor for `/check-plan` (ADR-034) and `Design/state.md` (ADR-035), and remove ADR-shaped overhead from genuinely-trivial issues via `--no-prompt`.
+Reduce ceremony for the common case (auto-chain `prepare-issue` so the prompt is a side-effect of starting work) while keeping the prompt artefact as the audit-trail anchor and the natural anchor for `/check-plan` (ADR-034) and `design/state.md` (ADR-035), and remove ADR-shaped overhead from genuinely-trivial issues via `--no-prompt`.
 
 Why it matters
 Plan mode is good but synthesises from whatever's in front of it; without a prompt, quality varies by author and session. The prompt's cost is already near-zero thanks to `prepare-issue` — the friction is in the two-command split and in trivial issues paying ADR-shaped overhead. ADR-038 is also load-bearing for keeping the executor's significance checklist (ADR-039) in lockstep with the trivial-issue criteria documented here, per the alignment-review obligation.
@@ -24,7 +24,7 @@ Plan mode is good but synthesises from whatever's in front of it; without a prom
 Requirements
 
 **Phase 0 — alignment review (mandatory, blocks implementation).**
-- Audit `prompts/_template.md` against the artefacts produced by ADR-031 (`Design/planning.md`), ADR-032 (`## Phase N` blocks in `Design/build-out-plan.md`), ADR-033 (`Design/decisions.md`), ADR-034 (`/check-plan` criteria & contract), ADR-035 (`Design/state.md`), and ADR-037 (`/milestone-summary` outputs — currently only ADR-accepted, implementation pending in #46).
+- Audit `prompts/_template.md` against the artefacts produced by ADR-031 (`design/planning.md`), ADR-032 (`## Phase N` blocks in `design/build-out-plan.md`), ADR-033 (`design/decisions.md`), ADR-034 (`/check-plan` criteria & contract), ADR-035 (`design/state.md`), and ADR-037 (`/milestone-summary` outputs — currently only ADR-accepted, implementation pending in #46).
 - For each artefact, decide: does the prompt currently duplicate this content? If yes, trim the prompt's content boundary so each artefact has one canonical home and the prompt *links* rather than restates. If no, document why no change is needed.
 - Record the result either as an inline section in the issue body, a one-page audit note under `notes/adr-038-alignment-review.md`, or — if any of the prompt-template changes are architectural in shape — a *follow-up amendment ADR* (per ADR-038's "Record the resulting boundary changes in this ADR or a follow-up amendment ADR before implementing" line; accepted ADRs cannot be edited per `CLAUDE.md`).
 - The audit must complete and any resulting prompt-template trimming must land *before* the executor changes below are coded. Implementation is gated on it.
@@ -52,8 +52,8 @@ Acceptance criteria
 - Documented criteria for when `--no-prompt` is appropriate appear in `docs/workflow-guide.md`.
 
 Scope and constraints
-- Primary folders to touch: `skills/claude-issue-executor/SKILL.md`, `docs/workflow-guide.md`, plus a possible new ADR file `Design/adr/adr-NNN-*.md` if Phase 0 surfaces architectural prompt-boundary changes, plus `prompts/_template.md` if Phase 0 surfaces non-architectural trimming, plus a possible new audit note `notes/adr-038-alignment-review.md`.
-- Folders to avoid unless absolutely necessary: accepted ADRs in `Design/adr/` (do not edit ADR-038 or any other accepted ADR in place — use a follow-up amendment ADR), `bin/`, `examples/`, `templates/` (other than `_template.md` if Phase 0 requires it; treat trimming surgically).
+- Primary folders to touch: `skills/claude-issue-executor/SKILL.md`, `docs/workflow-guide.md`, plus a possible new ADR file `design/adr/adr-NNN-*.md` if Phase 0 surfaces architectural prompt-boundary changes, plus `prompts/_template.md` if Phase 0 surfaces non-architectural trimming, plus a possible new audit note `notes/adr-038-alignment-review.md`.
+- Folders to avoid unless absolutely necessary: accepted ADRs in `design/adr/` (do not edit ADR-038 or any other accepted ADR in place — use a follow-up amendment ADR), `bin/`, `examples/`, `templates/` (other than `_template.md` if Phase 0 requires it; treat trimming surgically).
 - The alignment review is mandatory and must precede any executor edits. A plan that begins by editing `claude-issue-executor/SKILL.md` is the wrong shape.
 - The `--no-prompt` criteria must be a single source of truth shared with the executor's trivial-checklist (ADR-039). Do not duplicate the criteria in two places; reference the trivial-checklist by anchor or extract a shared snippet that both sections include.
 - Auto-detection of trivial issues is *suggestive*, not authoritative — always confirm with the user before short-circuiting the prompt step.
@@ -75,9 +75,9 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-038-tighten-prompt-step.md`
-   - `Design/adr/adr-031-deeper-planning-workflow.md`, `adr-032-implementation-phases.md`, `adr-033-clarify-step.md`, `adr-034-plan-checker.md`, `adr-035-state-md-session-continuity.md`, `adr-037-milestone-lifecycle.md` (the alignment-review targets)
-   - `Design/adr/adr-039-plan-mode-for-significant-tasks.md` (sibling for trivial-checklist lockstep)
+   - `design/adr/adr-038-tighten-prompt-step.md`
+   - `design/adr/adr-031-deeper-planning-workflow.md`, `adr-032-implementation-phases.md`, `adr-033-clarify-step.md`, `adr-034-plan-checker.md`, `adr-035-state-md-session-continuity.md`, `adr-037-milestone-lifecycle.md` (the alignment-review targets)
+   - `design/adr/adr-039-plan-mode-for-significant-tasks.md` (sibling for trivial-checklist lockstep)
    - `prompts/_template.md` (the artefact under audit)
    - `skills/claude-issue-executor/SKILL.md` (the skill under modification)
    - `skills/prepare-issue/SKILL.md` (the auto-chained skill)

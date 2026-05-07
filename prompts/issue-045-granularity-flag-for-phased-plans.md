@@ -6,7 +6,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-036-granularity-control.md`
+- File: `design/adr/adr-036-granularity-control.md`
 - Decision: Both `prd-to-mvp` and `/planning` accept `--granularity={coarse|standard|fine}`, default `standard` (5-8 phases); the choice is recorded in `build-out-plan.md` metadata so re-runs and downstream skills are consistent. Bands are targets not hard caps; the planning skill picks the actual count within the band and justifies it inline.
 
 GitHub Issue:
@@ -36,7 +36,7 @@ Acceptance criteria
 
 Scope and constraints
 - Primary folders to touch: `skills/prd-to-mvp/SKILL.md`, `skills/planning/SKILL.md`, `templates/build-out-plan-template.md` (add the metadata field), `docs/workflow-guide.md`.
-- Folders to avoid unless absolutely necessary: `Design/adr/` (do not edit accepted ADR-036), `bin/`, `examples/projects/` (the worked examples are reference data; refresh only if the metadata shape requires it), `prompts/` (other than this issue's own prompt).
+- Folders to avoid unless absolutely necessary: `design/adr/` (do not edit accepted ADR-036), `bin/`, `examples/projects/` (the worked examples are reference data; refresh only if the metadata shape requires it), `prompts/` (other than this issue's own prompt).
 - Bands and the default must match ADR-036's Decision verbatim — `coarse` 1–3, `standard` 5–8 (default), `fine` 8–12. Do not silently use the ADR's Context-section figures (which mention 3–5 for coarse) — the Decision is canonical.
 - Do not introduce a `--phases=N` exact-count flag (rejected as Option B in the ADR). The three-tier knob is the contract.
 - Re-run reuse must be a *read* of `build-out-plan.md` metadata, not a flag passed through some other channel — the file is the canonical store.
@@ -52,8 +52,8 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-036-granularity-control.md`
-   - `Design/adr/adr-031-deeper-planning-workflow.md` and `Design/adr/adr-032-implementation-phases.md` (parents — depended on)
+   - `design/adr/adr-036-granularity-control.md`
+   - `design/adr/adr-031-deeper-planning-workflow.md` and `design/adr/adr-032-implementation-phases.md` (parents — depended on)
    - existing modules under `skills/prd-to-mvp/`, `skills/planning/`, `templates/build-out-plan-template.md`, `docs/workflow-guide.md`
    - any existing tests related to the modules you will change
 2. Propose a short, step-by-step implementation PLAN for this issue, including:

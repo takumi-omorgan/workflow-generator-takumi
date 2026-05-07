@@ -6,7 +6,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-041-auto-mode-permission-contract.md`
+- File: `design/adr/adr-041-auto-mode-permission-contract.md`
 - Decision: Adopt Option A — define a kit-wide auto-mode permission contract that classifies skill operations into three categories (substitutable, operator-acknowledged-bypass, non-substitutable), codified as a new section of the workflow guide and instanced by `claude-issue-executor` and `pr-review-packager`.
 
 GitHub Issue:
@@ -46,7 +46,7 @@ Acceptance criteria
 
 Scope and constraints
 - Primary folders to touch: `docs/workflow-guide.md`, `skills/claude-issue-executor/`, `skills/pr-review-packager/`, plus the front-matter of every shipped `skills/*/SKILL.md`
-- Folders to avoid unless absolutely necessary: `Design/adr/` (ADR-041 is accepted; do not edit), `bin/`, `templates/`, the bodies of `skills/*/SKILL.md` files not named in primary folders (front-matter only, per the per-skill-classification requirement)
+- Folders to avoid unless absolutely necessary: `design/adr/` (ADR-041 is accepted; do not edit), `bin/`, `templates/`, the bodies of `skills/*/SKILL.md` files not named in primary folders (front-matter only, per the per-skill-classification requirement)
 - Per ADR-039, this issue is **significant** (modifies 2 `skills/*/SKILL.md` bodies plus front-matter changes across all shipped skills plus the workflow guide). Plan mode (`shift+tab shift+tab`) should be entered before any mutating edit.
 - Address both carry-forward design questions in the plan you propose — they have direct scope implications for this issue (drift-checker decision affects scope; --no-prompt category coverage affects the contract content).
 
@@ -60,10 +60,10 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-041-auto-mode-permission-contract.md`
-   - `Design/adr/adr-039-plan-mode-for-significant-tasks.md` (this issue generalises ADR-039's per-skill rule)
-   - `Design/adr/adr-038-tighten-prompt-step.md` (--no-prompt interaction question)
-   - `Design/adr/adr-040-cross-skill-design-question-carry-forward.md` (drift-checker question; just shipped, fresh in repo)
+   - `design/adr/adr-041-auto-mode-permission-contract.md`
+   - `design/adr/adr-039-plan-mode-for-significant-tasks.md` (this issue generalises ADR-039's per-skill rule)
+   - `design/adr/adr-038-tighten-prompt-step.md` (--no-prompt interaction question)
+   - `design/adr/adr-040-cross-skill-design-question-carry-forward.md` (drift-checker question; just shipped, fresh in repo)
    - `docs/workflow-guide.md` (host of the new section; §6 is the most recent precedent for adding a top-level section)
    - `skills/claude-issue-executor/SKILL.md`, `skills/pr-review-packager/SKILL.md`
    - The front-matter of every shipped skill under `skills/*/SKILL.md` (read-only survey before editing)

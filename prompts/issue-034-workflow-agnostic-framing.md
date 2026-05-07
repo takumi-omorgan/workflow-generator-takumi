@@ -6,10 +6,10 @@ Context:
   workflow.
 - Follow the rules in `CLAUDE.md`.
 - The workflow model is described in `generic-project-workflow.md` and
-  the ADRs under `Design/adr/`.
+  the ADRs under `design/adr/`.
 
 ADR:
-- File: `Design/adr/adr-028-workflow-agnostic-framing.md`
+- File: `design/adr/adr-028-workflow-agnostic-framing.md`
 - Decision: reframe the kit as workflow-agnostic — applies to any
   structured project (research, curriculum, content, design,
   technical writing, software). No skill/template renaming. Stance
@@ -70,7 +70,7 @@ Acceptance criteria
 
 Scope and constraints
 - Primary folders to touch: `README.md`, `docs/install.md`,
-  `docs/repo-structure.md`, `Design/adr/`, `notes/`.
+  `docs/repo-structure.md`, `design/adr/`, `notes/`.
 - Folders to avoid: `templates/`, `skills/`, `examples/`, `bin/`.
 - Do not rename anything (per ADR-028).
 - Do not introduce new skills or templates as part of this issue.
@@ -89,7 +89,7 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs:
    - `CLAUDE.md`
-   - `Design/adr/adr-028-workflow-agnostic-framing.md`
+   - `design/adr/adr-028-workflow-agnostic-framing.md`
    - existing `README.md` end to end
    - `docs/install.md` and `docs/repo-structure.md`
    - `templates/adr-template.md`

@@ -6,7 +6,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-043-programmatic-check-plan.md`
+- File: `design/adr/adr-043-programmatic-check-plan.md`
 - Decision: Adopt Path 1 — ship a programmatic equivalent of `/check-plan` (likely `bin/check-plan`) so skills with documented chain points can invoke the deterministic check logic without the slash-command surface. Both surfaces share one source of truth for criteria evaluation; the five skill specs (`/adr-writer`, `/prepare-issue`, `/changelog`, `/milestone-summary`, `/pr-review-packager`) migrate to reference the programmatic surface and drop the transparency-note caveat language.
 
 GitHub Issue:
@@ -51,7 +51,7 @@ Acceptance criteria
 
 Scope and constraints
 - Primary folders to touch: `bin/`, `skills/check-plan/`, `skills/adr-writer/`, `skills/prepare-issue/`, `skills/changelog/`, `skills/milestone-summary/`, `skills/pr-review-packager/`, `docs/workflow-guide.md` (the §7 cat-1 classification line).
-- Folders to avoid unless absolutely necessary: `Design/adr/` (ADR-043 is accepted; do not edit), `templates/`, other `skills/*/SKILL.md` files not named in primary folders.
+- Folders to avoid unless absolutely necessary: `design/adr/` (ADR-043 is accepted; do not edit), `templates/`, other `skills/*/SKILL.md` files not named in primary folders.
 - Per ADR-039, this issue is **significant** (creates a new `bin/` script, modifies 5+ `skills/*/SKILL.md` files plus the workflow guide). Plan mode (`shift+tab shift+tab`) should be entered before any mutating edit.
 - This is the **first kit script that skills invoke programmatically** — establishes a precedent. Scope the bin/ subprocess interface (argument shape, output schema, exit codes) deliberately; future kit scripts will follow it.
 
@@ -66,9 +66,9 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-043-programmatic-check-plan.md`
-   - `Design/adr/adr-034-plan-checker.md` (the original `/check-plan` ADR — content boundary for the criteria list)
-   - `Design/adr/adr-041-auto-mode-permission-contract.md` (the §7 permission contract this issue extends)
+   - `design/adr/adr-043-programmatic-check-plan.md`
+   - `design/adr/adr-034-plan-checker.md` (the original `/check-plan` ADR — content boundary for the criteria list)
+   - `design/adr/adr-041-auto-mode-permission-contract.md` (the §7 permission contract this issue extends)
    - `skills/check-plan/SKILL.md` (the existing skill being refactored)
    - The five skills to migrate: `skills/adr-writer/SKILL.md`, `skills/prepare-issue/SKILL.md`, `skills/changelog/SKILL.md`, `skills/milestone-summary/SKILL.md`, `skills/pr-review-packager/SKILL.md` — survey the existing transparency-note language before editing
    - `docs/workflow-guide.md` §7 (the cat-1 classification target)

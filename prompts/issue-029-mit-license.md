@@ -5,10 +5,10 @@ Context:
   install into target projects to govern a disciplined development workflow.
 - Follow the rules in `CLAUDE.md`.
 - The workflow model is described in `generic-project-workflow.md` and
-  the ADRs under `Design/adr/`.
+  the ADRs under `design/adr/`.
 
 ADR:
-- File: `Design/adr/adr-025-license.md`
+- File: `design/adr/adr-025-license.md`
 - Decision: License the kit under MIT, copyright `(c) 2026 Oliver Morgan`.
   Document the kit-vs-user-output boundary in `README.md` and ADR-025.
   Installer does not auto-scaffold a `LICENSE` into target projects;
@@ -46,14 +46,14 @@ Requirements
   - states the MIT license covers the **kit itself** (templates,
     skills, scripts, docs shipped in this repository),
   - states user-built projects are unambiguously the user's work —
-    the user authors `Design/mvp.md`, `Design/prd.md`, individual
+    the user authors `design/mvp.md`, `design/prd.md`, individual
     ADRs, prompts, source code, tests, etc., and chooses their own
     license,
   - mentions the optional `--license=mit --license-holder=NAME`
     installer flag for users who want a starter LICENSE scaffolded
     in their target project (default behaviour: no LICENSE
     auto-scaffolded).
-- Write `Design/adr/adr-025-license.md` documenting:
+- Write `design/adr/adr-025-license.md` documenting:
   - context (no LICENSE today; need explicit license for adoption),
   - options considered (MIT, Apache 2.0, BSD, ISC, Unlicense/CC0,
     custom modified MIT) with pros/cons of each,
@@ -76,7 +76,7 @@ Acceptance criteria
 - Feature-ideas #18 marked `shipped` with ADR link.
 
 Scope and constraints
-- Primary folders to touch: repo root, `Design/adr/`, `notes/`.
+- Primary folders to touch: repo root, `design/adr/`, `notes/`.
 - Folders to avoid: `templates/`, `skills/`, `examples/`, `bin/`,
   `docs/`. (The installer's `--license` flag is documented but not
   implemented in this issue.)

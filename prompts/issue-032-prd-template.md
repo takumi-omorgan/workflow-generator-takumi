@@ -5,10 +5,10 @@ Context:
   install into target projects to govern a disciplined development workflow.
 - Follow the rules in `CLAUDE.md`.
 - The workflow model is described in `generic-project-workflow.md` and
-  the ADRs under `Design/adr/`.
+  the ADRs under `design/adr/`.
 
 ADR:
-- File: `Design/adr/adr-027-prd-template.md`
+- File: `design/adr/adr-027-prd-template.md`
 - Decision: Ship `templates/prd-template.md` mirroring
   `prd-normalizer`'s 11 canonical fields one-to-one, so users can
   draft a PRD offline (by hand or via any external LLM) and hand
@@ -55,7 +55,7 @@ Requirements
   - explains the template's purpose,
   - notes the file is filled by the user or by an external LLM
     (no specific provider named),
-  - notes the output path is `Design/prd.md` in target projects,
+  - notes the output path is `design/prd.md` in target projects,
   - names the consumer (`prd-normalizer`),
   - lists hard-required fields explicitly: Product name, Problem,
     Primary user, ≥1 core capability, ≥1 user story,
@@ -88,13 +88,13 @@ Acceptance criteria
   consumer correctly.
 - `prd-normalizer/SKILL.md` and `idea-to-prd/SKILL.md` reference
   the new template at the appropriate decision points.
-- ADR-027 is `accepted` and `Design/adr/README.md` reflects that
+- ADR-027 is `accepted` and `design/adr/README.md` reflects that
   (handled by `bin/sync-adr-index`).
 - Feature-ideas #16 is marked `shipped` with the ADR link.
 
 Scope and constraints
 - Primary folders to touch: `templates/`, `skills/prd-normalizer/`,
-  `skills/idea-to-prd/`, `Design/adr/`, `notes/`.
+  `skills/idea-to-prd/`, `design/adr/`, `notes/`.
 - Folders to avoid: `bin/`, `examples/`, `docs/`, anything
   unrelated.
 - Do not name a specific external LLM in directive contexts.
@@ -120,8 +120,8 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-003-prd-intake-model.md` (the parent decision)
-   - `Design/adr/adr-027-prd-template.md` (this issue's decision)
+   - `design/adr/adr-003-prd-intake-model.md` (the parent decision)
+   - `design/adr/adr-027-prd-template.md` (this issue's decision)
    - `skills/prd-normalizer/SKILL.md` for the canonical 11-field
      structure
    - `skills/idea-to-prd/SKILL.md` for the parallel structure

@@ -6,10 +6,10 @@ Context:
   workflow.
 - Follow the rules in `CLAUDE.md`.
 - The workflow model is described in `generic-project-workflow.md` and
-  the ADRs under `Design/adr/`.
+  the ADRs under `design/adr/`.
 
 ADR:
-- File: `Design/adr/adr-030-installer-license-flag.md`
+- File: `design/adr/adr-030-installer-license-flag.md`
 - Decision: implement `--license=mit --license-holder=NAME` in
   `bin/install-workflow-kit`. Use a template file at
   `templates/licenses/mit.txt` with `{{YEAR}}` and
@@ -80,7 +80,7 @@ Acceptance criteria
 
 Scope and constraints
 - Primary folders: `bin/`, `templates/`, `docs/install.md`,
-  `Design/adr/`, `prompts/`.
+  `design/adr/`, `prompts/`.
 - Folders to avoid: `skills/` (the installer is the only thing
   changing here), `examples/`, `notes/`.
 - Do not modify the canonical MIT text. Do not auto-scaffold
@@ -101,8 +101,8 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs:
    - `CLAUDE.md`
-   - `Design/adr/adr-025-license.md` (the parent decision)
-   - `Design/adr/adr-030-installer-license-flag.md` (this
+   - `design/adr/adr-025-license.md` (the parent decision)
+   - `design/adr/adr-030-installer-license-flag.md` (this
      issue's decision)
    - existing `bin/install-workflow-kit` (especially the flag
      parsing block, the render-CLAUDE.md step, and the

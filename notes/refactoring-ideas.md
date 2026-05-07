@@ -27,7 +27,7 @@ teaches.
   `shipped` or `dropped`.
 - Refactoring usually files as a small docs-or-convention-cleanup
   issue. Use ADR only when the refactor changes a kit convention that
-  target projects depend on (e.g. a directory rename like `Design/` →
+  target projects depend on (e.g. a directory rename like `design/` →
   `design/`).
 - When an entry is filed as a GitHub issue, move it into the **Filed**
   section below with the issue number.
@@ -161,20 +161,20 @@ _Most recent first._
 
 ---
 
-### 7. Rename `Design/` → `design/` for case consistency with other root directories
+### 7. Rename `design/` → `design/` for case consistency with other root directories
 
 **Status:** idea
 **Captured:** 2026-05-06
 
-**Trigger:** While reviewing root-directory casing — `Design/` is the only TitleCase top-level directory in a repo where everything else is lowercase.
+**Trigger:** While reviewing root-directory casing — `design/` is the only TitleCase top-level directory in a repo where everything else is lowercase.
 
-**Current state:** Root has `docs/`, `notes/`, `skills/`, `templates/`, `bin/`, `prompts/`, `examples/`, `archive/`, and `Design/`. The capitalised root *files* (`README.md`, `LICENSE`, `CHANGELOG.md`, `CLAUDE.md`) follow well-known external conventions — `Design/` has no analogous anchor; it's a project-internal choice that diverges from its peers.
+**Current state:** Root has `docs/`, `notes/`, `skills/`, `templates/`, `bin/`, `prompts/`, `examples/`, `archive/`, and `design/`. The capitalised root *files* (`README.md`, `LICENSE`, `CHANGELOG.md`, `CLAUDE.md`) follow well-known external conventions — `design/` has no analogous anchor; it's a project-internal choice that diverges from its peers.
 
-**Proposed change:** Rename `Design/` → `design/` across the kit and the convention it teaches target projects. Touches `CLAUDE.md`, `README.md`, `CHANGELOG.md`, `docs/`, `templates/`, `skills/*/SKILL.md`, `bin/lib/check-plan-eval.sh`, `examples/projects/*/`, and the kit's own ADR bodies. Needs a new ADR that explicitly authorises mechanical path-string rewrite inside accepted ADRs (otherwise blocked by the kit's "never edit accepted ADRs in place" rule).
+**Proposed change:** Rename `design/` → `design/` across the kit and the convention it teaches target projects. Touches `CLAUDE.md`, `README.md`, `CHANGELOG.md`, `docs/`, `templates/`, `skills/*/SKILL.md`, `bin/lib/check-plan-eval.sh`, `examples/projects/*/`, and the kit's own ADR bodies. Needs a new ADR that explicitly authorises mechanical path-string rewrite inside accepted ADRs (otherwise blocked by the kit's "never edit accepted ADRs in place" rule).
 
-**Blast radius:** ~176 files reference `Design/` (~500+ individual occurrences). Breaking change for every existing target-project install. Touches immutable ADR bodies — needs ADR-level authorisation.
+**Blast radius:** ~176 files reference `design/` (~500+ individual occurrences). Breaking change for every existing target-project install. Touches immutable ADR bodies — needs ADR-level authorisation.
 
-**Open questions:** Which existing ADR established `Design/` and would need to be superseded? Does mechanical path-string rewrite count as "editing in place" under the immutability rule? Should the kit ship a one-off migration helper for existing target-project installs, or document a manual `git mv` step? Is consistency worth the breaking change? Alternative names considered: `decisions/`, `planning/` (use the rename moment to clarify purpose, not just case).
+**Open questions:** Which existing ADR established `design/` and would need to be superseded? Does mechanical path-string rewrite count as "editing in place" under the immutability rule? Should the kit ship a one-off migration helper for existing target-project installs, or document a manual `git mv` step? Is consistency worth the breaking change? Alternative names considered: `decisions/`, `planning/` (use the rename moment to clarify purpose, not just case).
 
 ---
 
@@ -223,7 +223,7 @@ _Most recent first._
 
 1. **Eager-load** — `CLAUDE.md` + all 19 SKILL.md descriptions + memory files. Paid every session regardless of what's invoked.
 2. **On-demand** — when a skill runs, its full `SKILL.md` body, sibling `example.md` / `criteria.md`, and any templates it reads. Paid per invocation.
-3. **Inter-skill artefacts** — prompts, `Design/state.md`, `Design/decisions.md`, ADR bodies. Paid by downstream skills that read them. ADR-038's content-boundary rule already addresses prompt-artefact bloat; nothing analogous exists for `state.md`, `decisions.md`, or templates.
+3. **Inter-skill artefacts** — prompts, `design/state.md`, `design/decisions.md`, ADR bodies. Paid by downstream skills that read them. ADR-038's content-boundary rule already addresses prompt-artefact bloat; nothing analogous exists for `state.md`, `decisions.md`, or templates.
 
 **Proposed change:** Three-step framework, not a one-shot edit:
 

@@ -11,9 +11,9 @@
      history and makes it easy to resume or re-run a session later.
 
   Underlying decisions:
-  - ADR-006 (Design/adr/adr-006-claude-code-execution-model.md) — plan-first,
+  - ADR-006 (design/adr/adr-006-claude-code-execution-model.md) — plan-first,
     one issue per session.
-  - ADR-008 (Design/adr/adr-008-dedicated-prompts-folder.md) — prompts live
+  - ADR-008 (design/adr/adr-008-dedicated-prompts-folder.md) — prompts live
     in `prompts/`, not `notes/`. The `notes/` directory is for freeform
     working notes only.
 
@@ -25,13 +25,13 @@
   consumed once by `/claude-issue-executor`. Project- or session-scoped
   artefacts are read-only context here; do not duplicate their content into
   the prompt:
-    - Design/planning.md (ADR-031): project-wide decomposition, risks,
+    - design/planning.md (ADR-031): project-wide decomposition, risks,
       sequencing rationale. Reference; do not restate.
-    - Design/build-out-plan.md `## Phase N` blocks (ADR-032): phase scope,
+    - design/build-out-plan.md `## Phase N` blocks (ADR-032): phase scope,
       deliverables, exit criteria. Reference by phase name.
-    - Design/decisions.md (ADR-033): informal-but-settled decisions
+    - design/decisions.md (ADR-033): informal-but-settled decisions
       below ADR weight. Reference when a decision constrains this issue.
-    - Design/state.md (ADR-035): session-mutable pointer (in-flight
+    - design/state.md (ADR-035): session-mutable pointer (in-flight
       issue, recent PRs, blockers). Never mirror it here.
     - skills/check-plan/criteria.md (ADR-034): structural validation
       rules. Orthogonal to this prompt's Acceptance criteria (which
@@ -48,7 +48,7 @@ Context:
 - The workflow model is described in `{{WORKFLOW_DOC_PATH}}`.
 
 ADR:
-- File: `Design/adr/{{ADR_FILE}}`
+- File: `design/adr/{{ADR_FILE}}`
 - Decision: {{ADR_ONE_LINE_SUMMARY}}
 <!-- If multiple ADRs apply, repeat the two lines per ADR.
      If no ADR applies, replace this section with: "ADR: none — {{REASON}}." -->
@@ -89,7 +89,7 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/{{ADR_FILE}}`
+   - `design/adr/{{ADR_FILE}}`
    - any existing modules under {{PRIMARY_FOLDERS}}
    - any existing tests related to the modules you will change
 2. Propose a short, step-by-step implementation PLAN for this issue, including:

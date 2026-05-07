@@ -6,7 +6,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-039-plan-mode-for-significant-tasks.md`
+- File: `design/adr/adr-039-plan-mode-for-significant-tasks.md`
 - Decision: Update `skills/claude-issue-executor/SKILL.md` so the executor classifies each session against a documented "significant" checklist at session start and routes accordingly: auto-flag for plan mode entry on clearly-significant sessions, auto-skip on clearly-trivial sessions, ask once on borderline. The "trivial" checklist is shared with ADR-038's `--no-prompt` criteria — single source of truth.
 
 GitHub Issue:
@@ -41,7 +41,7 @@ Acceptance criteria
 
 Scope and constraints
 - Primary folders to touch: `skills/claude-issue-executor/`, `docs/`
-- Folders to avoid unless absolutely necessary: `Design/adr/` (never edit accepted ADRs in place per CLAUDE.md), `bin/`, `templates/`, `.claude/`
+- Folders to avoid unless absolutely necessary: `design/adr/` (never edit accepted ADRs in place per CLAUDE.md), `bin/`, `templates/`, `.claude/`
 - **Self-application: this issue's implementation is itself "significant" per ADR-039** — modifies a SKILL.md file, edits the workflow guide, multi-file. The executor must be entered in plan mode for this issue. The kit is its own first test case.
 - Cross-skill consistency: `skills/prepare-issue/SKILL.md` and `skills/pr-review-packager/SKILL.md` are NOT modified in this issue — applying the rhythm to other skills is explicitly deferred to a follow-up (per ADR-039's "Deferred" consequence).
 
@@ -57,8 +57,8 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-039-plan-mode-for-significant-tasks.md`
-   - `Design/adr/adr-038-tighten-prompt-step.md` (for the trivial-criteria alignment)
+   - `design/adr/adr-039-plan-mode-for-significant-tasks.md`
+   - `design/adr/adr-038-tighten-prompt-step.md` (for the trivial-criteria alignment)
    - `skills/claude-issue-executor/SKILL.md` (the file you'll be modifying)
    - `skills/claude-issue-executor/example.md`
    - `docs/workflow-guide.md`

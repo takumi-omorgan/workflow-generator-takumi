@@ -5,13 +5,13 @@ Context:
   install into target projects to govern a disciplined development workflow.
 - Follow the rules in `CLAUDE.md`.
 - The workflow model is described in `generic-project-workflow.md` and
-  the ADRs under `Design/adr/`.
+  the ADRs under `design/adr/`.
 
 ADR:
-- File: `Design/adr/adr-024-mvp-vocabulary-versus-v1.md`
+- File: `design/adr/adr-024-mvp-vocabulary-versus-v1.md`
 - Decision: Replace "In v1 / Not in v1" with "In scope / Out of scope"
   across the kit's MVP scoping framework. Keep the filename
-  `Design/mvp.md` and skill name `prd-to-mvp` unchanged.
+  `design/mvp.md` and skill name `prd-to-mvp` unchanged.
 
 GitHub Issue:
 - Title: Replace MVP "In v1 / Not in v1" headings with neutral
@@ -63,14 +63,14 @@ Requirements
   - `skills/claude-issue-executor/SKILL.md` (drop
     "v1 of this skill" language)
 - Rebuild example projects:
-  - `examples/projects/kb-lookup/Design/mvp.md`,
-    `Design/prd.md`, `CLAUDE.md`, `README.md`,
+  - `examples/projects/kb-lookup/design/mvp.md`,
+    `design/prd.md`, `CLAUDE.md`, `README.md`,
     `issues/issue-002-kb-cli-command.md`,
-    `Design/adr/adr-001-shortcut-data-format.md`
-  - `examples/projects/slug-utils/Design/mvp.md`,
-    `Design/prd.md`, `README.md`,
+    `design/adr/adr-001-shortcut-data-format.md`
+  - `examples/projects/slug-utils/design/mvp.md`,
+    `design/prd.md`, `README.md`,
     `issues/issue-002-unslugify-and-publish.md`,
-    `Design/adr/adr-001-public-api-surface.md`
+    `design/adr/adr-001-public-api-surface.md`
 - Update top-level walkthroughs:
   `examples/idea-only-example.md`,
   `examples/custom-prd-example.md`,
@@ -88,7 +88,7 @@ Acceptance criteria
   legitimate semver/target-project examples (the changelog flag
   defaults `--from=v1.2.0`, the AI-summary placeholder example
   `{{e.g. MVP, Beta, v1.0}}`).
-- `Design/mvp.md` filename and `prd-to-mvp` skill name unchanged.
+- `design/mvp.md` filename and `prd-to-mvp` skill name unchanged.
 - The "first cut, more later" signal is preserved via the
   filename, the skill name, and section intro prose — readers do
   not lose the temporal meaning.
@@ -96,27 +96,27 @@ Acceptance criteria
 
 Scope and constraints
 - Primary folders to touch: `templates/`, `skills/`, `examples/`,
-  `Design/adr/`, `notes/`.
-- Folders to avoid: `bin/`, `docs/`, `Design/` (other than
-  `Design/adr/`), the kit's own `CLAUDE.md`.
+  `design/adr/`, `notes/`.
+- Folders to avoid: `bin/`, `docs/`, `design/` (other than
+  `design/adr/`), the kit's own `CLAUDE.md`.
 - No backwards-compat shim — the kit has not shipped externally,
   so old placeholder names do not need to remain accepted.
-- Do not rename `Design/mvp.md` or the `prd-to-mvp` skill.
+- Do not rename `design/mvp.md` or the `prd-to-mvp` skill.
 
 Evaluation & testing requirements
 - After the sweep, run the two grep commands listed in
   Acceptance criteria.
 - Open `templates/mvp-template.md` and confirm the rendered
   structure still makes sense as an MVP scoping doc.
-- Open `examples/projects/kb-lookup/Design/mvp.md` and
-  `examples/projects/slug-utils/Design/mvp.md` and confirm both
+- Open `examples/projects/kb-lookup/design/mvp.md` and
+  `examples/projects/slug-utils/design/mvp.md` and confirm both
   read coherently after the rebrand.
 - All existing tests continue to pass.
 
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-024-mvp-vocabulary-versus-v1.md`
+   - `design/adr/adr-024-mvp-vocabulary-versus-v1.md`
    - all template files under `templates/`
    - all skill files listed in Requirements
    - all example files listed in Requirements

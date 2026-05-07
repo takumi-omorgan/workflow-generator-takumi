@@ -6,7 +6,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-042-project-shape-detection-in-release.md`
+- File: `design/adr/adr-042-project-shape-detection-in-release.md`
 - Decision: Adopt Option A — add project-shape detection to `/release`'s preflight, with operator override.
 
 GitHub Issue:
@@ -39,7 +39,7 @@ Acceptance criteria
 
 Scope and constraints
 - Primary folders to touch: `skills/release/`, `docs/workflow-guide.md` (cross-reference only).
-- Folders to avoid unless absolutely necessary: other skills (extending detection to `/changelog` or `/audit-milestone` is explicitly deferred per ADR-042 Consequences), `Design/adr/` (never edit accepted ADRs in place), `templates/` (no installer changes needed for this issue).
+- Folders to avoid unless absolutely necessary: other skills (extending detection to `/changelog` or `/audit-milestone` is explicitly deferred per ADR-042 Consequences), `design/adr/` (never edit accepted ADRs in place), `templates/` (no installer changes needed for this issue).
 - Detection is spec-level: documented in `skills/release/SKILL.md` and executed by the skill itself. Do not add a `bin/` script for detection unless the implementation genuinely calls for one — ADR-042 explicitly leaves a shared cross-skill helper as deferred. Per CLAUDE.md, keep the kit lightweight; no premature automation.
 
 Evaluation & testing requirements
@@ -53,9 +53,9 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-042-project-shape-detection-in-release.md`
-   - `Design/adr/adr-028-workflow-agnostic-framing.md` (the framing this enforces)
-   - `Design/adr/adr-017-release-skill.md` (the skill scope being amended)
+   - `design/adr/adr-042-project-shape-detection-in-release.md`
+   - `design/adr/adr-028-workflow-agnostic-framing.md` (the framing this enforces)
+   - `design/adr/adr-017-release-skill.md` (the skill scope being amended)
    - `skills/release/SKILL.md` and `skills/release/example.md` (current surface)
    - `docs/workflow-guide.md` (for the cross-reference target)
 2. Propose a short, step-by-step implementation PLAN for this issue, including:

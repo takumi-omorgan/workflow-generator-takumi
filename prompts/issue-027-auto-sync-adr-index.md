@@ -5,17 +5,17 @@ Context:
   install into target projects to govern a disciplined development workflow.
 - Follow the rules in `CLAUDE.md`.
 - The workflow model is described in `generic-project-workflow.md` and
-  the ADRs under `Design/adr/`.
+  the ADRs under `design/adr/`.
 
 ADR:
-- File: `Design/adr/adr-023-auto-sync-adr-index.md`
+- File: `design/adr/adr-023-auto-sync-adr-index.md`
 - Decision: Build `bin/sync-adr-index` (regenerator script) plus
-  marker-fenced `Design/adr/README.md`, plus skill integrations into
+  marker-fenced `design/adr/README.md`, plus skill integrations into
   `adr-writer`, `claude-issue-executor`, `pr-review-packager`, and
   `release`. Defer the optional git pre-commit hook (Option C).
 
 GitHub Issue:
-- Title: Auto-sync ADR index in Design/adr/README.md (ADR-023)
+- Title: Auto-sync ADR index in design/adr/README.md (ADR-023)
 - Number: #27
 - Milestone: v3.0.0 — kit hygiene and licensing
 - Labels: feature, infra
@@ -23,7 +23,7 @@ GitHub Issue:
 Goal
 Eliminate ADR-index drift by introducing a regenerator script and
 wiring it into the four ADR-touching skills so the index table stays
-in sync with `Design/adr/adr-*.md` files automatically.
+in sync with `design/adr/adr-*.md` files automatically.
 
 Why it matters
 The index has drifted repeatedly — at one point listed only ADR-006
@@ -35,26 +35,26 @@ skill-driven flows.
 
 Requirements
 - Write `bin/sync-adr-index` (bash, no runtime deps). Behaviour:
-  - Scan `Design/adr/adr-*.md`. Sort by ADR number (numeric, padded).
+  - Scan `design/adr/adr-*.md`. Sort by ADR number (numeric, padded).
   - Parse title from `# ADR-NNN: ...` headline.
   - Parse status from first `**Status:**` line. Render any
     `[ADR-NNN](path)` link in the status as a plain `ADR-NNN`
     reference.
   - Rewrite the region between marker fences
     `<!-- adr-index:start -->` and `<!-- adr-index:end -->` in
-    `Design/adr/README.md`. Preserve everything outside the fence.
+    `design/adr/README.md`. Preserve everything outside the fence.
   - Idempotent. Exit 0 on no-op, 1 if changes were written.
   - Support `--check` for CI/preflight: exit 1 if drift is detected,
     do not modify the file.
   - Set executable bit (`chmod +x`).
-- Add the marker fences to `Design/adr/README.md`. Wrap the existing
+- Add the marker fences to `design/adr/README.md`. Wrap the existing
   index table; add a one-paragraph note above the fence explaining
   the table is generated and edits inside will be overwritten.
 - Wire the script into the four skills:
   - `skills/adr-writer/SKILL.md`: run after the batch as the final
     step before commit. Add a self-check item.
   - `skills/claude-issue-executor/SKILL.md`: run before any commit
-    that includes a file under `Design/adr/adr-*.md`. Add a bullet
+    that includes a file under `design/adr/adr-*.md`. Add a bullet
     to the Commit model section.
   - `skills/pr-review-packager/SKILL.md`: include `--check` in the
     pre-PR self-check; refuse if drift is detected.
@@ -75,10 +75,10 @@ Acceptance criteria
 - The installer copy step preserves the executable bit and skips on
   re-run unless `--force`.
 - ADR-023 is `accepted` and the ADR index reflects that.
-- Marker fences in `Design/adr/README.md` are intact.
+- Marker fences in `design/adr/README.md` are intact.
 
 Scope and constraints
-- Primary folders to touch: `bin/`, `Design/adr/`, `skills/`,
+- Primary folders to touch: `bin/`, `design/adr/`, `skills/`,
   `notes/`.
 - Folders to avoid: `templates/`, `examples/`, anything not directly
   involved in ADR-index workflow.
@@ -102,14 +102,14 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-023-auto-sync-adr-index.md`
-   - existing `Design/adr/README.md` and a couple of ADRs to verify
+   - `design/adr/adr-023-auto-sync-adr-index.md`
+   - existing `design/adr/README.md` and a couple of ADRs to verify
      the headline / status format
    - the four skills' current `SKILL.md` files
    - `bin/install-workflow-kit`
 2. Propose a short, step-by-step PLAN:
    - script structure and key parsing rules,
-   - marker-fence placement in `Design/adr/README.md`,
+   - marker-fence placement in `design/adr/README.md`,
    - exact SKILL.md insertions for each of the four skills,
    - installer change,
    - test cases for verification.

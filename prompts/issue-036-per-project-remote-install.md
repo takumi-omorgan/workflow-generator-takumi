@@ -6,10 +6,10 @@ Context:
   workflow.
 - Follow the rules in `CLAUDE.md`.
 - The workflow model is described in `generic-project-workflow.md` and
-  the ADRs under `Design/adr/`.
+  the ADRs under `design/adr/`.
 
 ADR:
-- File: `Design/adr/adr-029-per-project-remote-install.md`
+- File: `design/adr/adr-029-per-project-remote-install.md`
 - Decision: refine ADR-009 — make per-project remote install (gh
   repo clone --depth=1 --branch=vX.Y.Z, run installer, cleanup) the
   documented default. Add `bin/bootstrap-workflow-kit` as a
@@ -98,7 +98,7 @@ Acceptance criteria
 
 Scope and constraints
 - Primary folders: `bin/`, `README.md`, `docs/install.md`,
-  `skills/release/`, `Design/adr/`, `prompts/`, `notes/` (only
+  `skills/release/`, `design/adr/`, `prompts/`, `notes/` (only
   if a feature-ideas entry should be marked).
 - Folders to avoid: `templates/`, `examples/`, other skills.
 - Do not modify `bin/install-workflow-kit`'s behaviour; ADR-029
@@ -121,8 +121,8 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs:
    - `CLAUDE.md`
-   - `Design/adr/adr-009-installer-script.md` (the parent decision)
-   - `Design/adr/adr-029-per-project-remote-install.md` (this
+   - `design/adr/adr-009-installer-script.md` (the parent decision)
+   - `design/adr/adr-029-per-project-remote-install.md` (this
      issue's decision)
    - existing `bin/install-workflow-kit` (especially how it
      resolves `KIT_ROOT` from script location)

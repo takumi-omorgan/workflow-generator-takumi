@@ -5,10 +5,10 @@ Context:
   install into target projects to govern a disciplined development workflow.
 - Follow the rules in `CLAUDE.md`.
 - The workflow model is described in `generic-project-workflow.md` and
-  the ADRs under `Design/adr/`.
+  the ADRs under `design/adr/`.
 
 ADR:
-- File: `Design/adr/adr-022-drop-version-qualifiers-from-kit-scope.md`
+- File: `design/adr/adr-022-drop-version-qualifiers-from-kit-scope.md`
 - Decision: Kit-self ADRs and docs do not version-qualify scope decisions;
   supersession is the one mechanism for scope changes. Supersedes ADR-002
   specifically; does not supersede ADR-001/003/004/006/014/016, whose
@@ -38,13 +38,13 @@ Requirements
   `docs/install.md:251` (non-GitHub providers) to drop "v1".
 - Reword `docs/github-setup.md:4` to drop "v1" from the GitHub-first
   description.
-- Mark `Design/adr/adr-002-new-project-only-scope.md` as superseded by
+- Mark `design/adr/adr-002-new-project-only-scope.md` as superseded by
   ADR-022 in the `Status:` line **without editing the historical
   body** (per CLAUDE.md rule against in-place ADR edits). Add a short
   note immediately under the status pointing readers at ADR-022.
-- Update the ADR index in `Design/adr/README.md` so ADR-002's row
+- Update the ADR index in `design/adr/README.md` so ADR-002's row
   reads `superseded by ADR-022`.
-- Write the new ADR `Design/adr/adr-022-drop-version-qualifiers-from-kit-scope.md`
+- Write the new ADR `design/adr/adr-022-drop-version-qualifiers-from-kit-scope.md`
   capturing the convention in full.
 
 Acceptance criteria
@@ -62,7 +62,7 @@ Acceptance criteria
   by ADR-024 (see issue #28).
 
 Scope and constraints
-- Primary folders to touch: `CLAUDE.md`, `docs/`, `Design/adr/`.
+- Primary folders to touch: `CLAUDE.md`, `docs/`, `design/adr/`.
 - Folders to avoid: `templates/`, `skills/`, `examples/`,
   `generic-project-workflow.md`, `notes/`, MVP/build-out plan
   historical docs.
@@ -80,8 +80,8 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-002-new-project-only-scope.md`
-   - `Design/adr/README.md`
+   - `design/adr/adr-002-new-project-only-scope.md`
+   - `design/adr/README.md`
    - `docs/install.md` and `docs/github-setup.md`
    - `templates/adr-template.md` (for ADR-022 structure)
 2. Propose a short, step-by-step implementation PLAN for this issue,
