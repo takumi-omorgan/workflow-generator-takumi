@@ -2,7 +2,7 @@
 
 Continues the Pace Drift scenario. Input is byte-for-byte the
 `design/prd-normalized.md` shown in
-[`prd-normalizer/examples.md`](../prd-normalizer/examples.md) (Example 1).
+[`prd-normalizer/example.md`](../prd-normalizer/example.md) (Example 1).
 
 ---
 

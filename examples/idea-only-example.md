@@ -41,7 +41,7 @@ the first release"* item moves out of non-goals and into "Constraints
 and preferences" because it is an MVP-scope decision, not a
 product-level non-goal. That distinction matters for the next step.
 
-→ Full input/output trace: [`skills/prd-normalizer/examples.md`](../skills/prd-normalizer/examples.md) (Example 1).
+→ Full input/output trace: [`skills/prd-normalizer/example.md`](../skills/prd-normalizer/example.md) (Example 1).
 
 ## Step 3 — `prd-to-mvp`
 
