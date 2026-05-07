@@ -31,17 +31,20 @@ Without a defined exception, every directory rename or kit-wide identifier chang
 
 ## Decision
 
-Adopt **Option A**. Mechanical path-string rewrites are an explicit exception to the "never edit accepted ADRs in place" rule. A rewrite qualifies as mechanical when **all three** of the following hold:
+Adopt **Option A**. Mechanical path-string rewrites are an explicit exception to the "never edit accepted ADRs in place" rule. A rewrite qualifies as mechanical when **all of the following hold**:
 
-1. Only path strings or identifier strings change (e.g. `Design/` → `design/`, `bin/foo.sh` → `bin/foo`, a renamed skill directory).
-2. The surrounding prose's claim is unchanged — the ADR still decides what it decided, just with the new name.
-3. Every occurrence in the ADR body changes uniformly (no partial rewrites that leave a mix of old and new strings within one ADR).
+1. **Deterministic string substitution.** The transformation is a single literal replacement (or a finite, enumerable set of such replacements) of path strings or identifier strings — e.g. `Design/` → `design/`, `bin/foo.sh` → `bin/foo`, a renamed skill directory. A regex with `.*`-style wildcards, or any rewrite that requires per-occurrence judgement, does not qualify.
+2. **No sentence meaning changes.** The surrounding prose's claim is unchanged — the ADR still decides what it decided, just with the new name.
+3. **No altered decisions or rationale.** Nothing in the Decision or Context sections changes its load-bearing claim. If the rewrite would force a re-reading of *what* the ADR decided or *why*, it is editorial, not mechanical, and requires supersession.
+4. **No added or removed requirements.** No constraints, capabilities, or scope appear or disappear. If the rewrite would change what the ADR obliges the project to do or not do, it is editorial.
+5. **Uniform application.** Every occurrence of the matched string in the ADR body changes — no partial rewrites that leave a mix of old and new strings within one ADR.
+6. **Scriptable and reproducible.** The transformation can be expressed as a runnable command (e.g. `sed`, `git mv`, or a short script) such that re-running it on the original input produces the rewritten output deterministically.
 
-Editorial changes — anything that alters what an ADR decided, the rationale, the options weighed, or the consequences — still require supersession. `CLAUDE.md`'s immutability paragraph gains a one-line citation of this exception so the rule and its exception are read together.
+Editorial changes — anything that fails any of (1)–(6) — still require supersession. `CLAUDE.md`'s immutability paragraph gains a one-line citation of this exception so the rule and its exception are read together.
 
 ## Consequences
 
 - Renames (directory, file, kit-wide identifier) become possible without abandoning historical ADRs to stale paths or triggering a supersession cascade.
 - The supersession mechanism stays reserved for genuine meaning changes — the rule's original purpose is preserved where it matters.
 - `CLAUDE.md` gains a one-line citation of this exception alongside the immutability rule, so future contributors discover the exception when they read the rule.
-- Reviewers must verify each rewrite satisfies criteria (1)–(3) above before merging; the kit trades a small enforcement cost for a much larger cascade cost avoided. PRs that perform mechanical rewrites should state in the description that they invoke this ADR and list the affected ADR numbers.
+- Reviewers must verify each rewrite satisfies criteria (1)–(6) above before merging; the kit trades a small enforcement cost for a much larger cascade cost avoided. PRs that perform mechanical rewrites **must** state in the description: (a) that they invoke this ADR, (b) the exact transformation rule applied (e.g. `Design/ → design/`, not "various path fixes"), (c) the runnable command used to apply the transformation, and (d) the list of affected ADR numbers. PR descriptions that say only "various path fixes" or similar non-specific language do not satisfy this requirement.
