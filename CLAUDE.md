@@ -40,6 +40,10 @@ that gets generated for a target project — that one is rendered from
   live in `notes/`.
 - Reference ADR numbers and issue numbers in commit messages when the
   change is driven by them.
+- SKILL.md bodies should not include parenthetical ADR attributions
+  (`(per ADR-NNN)`, `(ADR-NNN)`) for traceability alone. Cite an ADR
+  only when the reader needs the link to do the task — in which case
+  use a markdown link in body text, not an inline parenthetical.
 - Keep the kit lightweight — no premature automation, no speculative
   abstractions.
 - Never edit accepted ADRs in place. If a decision needs to change, add a
