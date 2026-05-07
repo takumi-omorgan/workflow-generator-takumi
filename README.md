@@ -220,7 +220,7 @@ project's lifetime:
   ADRs are never edited in place — to change a decision, write a
   new ADR that supersedes the old one (per ADR-022's convention).
 - **The ADR index keeps itself in sync.** `bin/sync-adr-index`
-  regenerates the table in `Design/adr/README.md` from the ADR
+  regenerates the table in `design/adr/README.md` from the ADR
   files on disk. The four ADR-touching skills run it automatically;
   manual edits inside the marker fences are overwritten on the next
   sync (per ADR-023).
@@ -240,14 +240,14 @@ project's lifetime:
   and publishes a GitHub Release (per ADR-016 / ADR-017).
   Versioning follows ADR-026's MAJOR/MINOR/PATCH classification.
 - **Documentation that stays current.** `/workflow-docs`
-  regenerates `README.md` and `Design/ai-summary.md` from the
+  regenerates `README.md` and `design/ai-summary.md` from the
   project's PRD, MVP, ADRs, and `CLAUDE.md`. Re-run after any
   meaningful change; manual edits outside the marker fences are
   preserved (per ADR-018).
 - **Deeper planning for non-trivial projects (opt-in).**
-  `/planning` adds a `Design/planning.md` between MVP scoping and
+  `/planning` adds a `design/planning.md` between MVP scoping and
   ADR drafting (decomposition, risks, sequencing — per ADR-031);
-  `/clarify` resolves gray areas into a `Design/decisions.md`
+  `/clarify` resolves gray areas into a `design/decisions.md`
   append-only log (below ADR weight, per ADR-033). The build-out
   plan can be split into `## Phase N` blocks (per ADR-032), each
   becoming its own GitHub milestone and release boundary; tune the
@@ -257,7 +257,7 @@ project's lifetime:
   they're written; chained from `/adr-writer` and `/prepare-issue`,
   with `--skip-check` to opt out (per ADR-034).
 - **Session continuity across context resets.**
-  `Design/state.md` is a small committed pointer (~100 lines) with
+  `design/state.md` is a small committed pointer (~100 lines) with
   five marker-fenced zones: phase, in-flight issue, recent PRs,
   blockers, continue-here. `/resume` reads it at the start of a
   fresh session; `/pause` refreshes it before a context reset and
@@ -267,7 +267,7 @@ project's lifetime:
   `/audit-milestone <N>` verifies a GitHub milestone is finishable
   (issues closed, ADRs linked to merged PRs, phase exit criteria
   met); `/milestone-summary <N>` generates
-  `Design/milestones/<N>-<slug>.md` from `git log` + the milestone
+  `design/milestones/<N>-<slug>.md` from `git log` + the milestone
   + accepted ADRs; `/complete-milestone <N> [--release]` closes
   the GitHub milestone, archives state.md, and optionally chains
   `/release --milestone-phase=N` (per ADR-037).
@@ -288,7 +288,7 @@ The full flow from idea to release is documented end-to-end in
 
 | Path | What it is |
 |---|---|
-| `Design/adr/` | Accepted ADRs that govern the kit |
+| `design/adr/` | Accepted ADRs that govern the kit |
 | `docs/` | Kit documentation |
 | `skills/` | Source of the Claude Code skills shipped by the kit |
 | `templates/` | Starter templates rendered into target projects |
@@ -304,7 +304,7 @@ target project.
 Latest release: see the
 [releases page](https://github.com/olivermorgan2/workflow-generator/releases).
 The kit is in active development. Versioning follows
-[ADR-026](Design/adr/adr-026-kit-versioning-policy.md): MAJOR for
+[ADR-026](design/adr/adr-026-kit-versioning-policy.md): MAJOR for
 breaking changes (placeholder/heading renames, removed skills),
 MINOR for additive changes (new skills, new templates, new flags),
 PATCH for docs and bug fixes.
@@ -316,14 +316,14 @@ under future milestones.
 ## License
 
 The kit is released under the [MIT License](LICENSE) (see
-[ADR-025](Design/adr/adr-025-license.md) for the rationale).
+[ADR-025](design/adr/adr-025-license.md) for the rationale).
 
 The MIT license covers the **kit itself**: the templates, skills,
 scripts, and documentation shipped in this repository. It does not
 propagate to projects you build with the kit.
 
 When you run the kit, you author your own content — your
-`Design/mvp.md`, your `Design/prd.md`, your individual ADRs, your
+`design/mvp.md`, your `design/prd.md`, your individual ADRs, your
 prompts, and the source code, tests, and build artifacts of the
 project you are building. **That work is yours.** You choose its
 license (or none) independently of the kit's.

@@ -19,7 +19,7 @@ that gets generated for a target project — that one is rendered from
 
 ## Guiding documents
 
-- `Design/adr/` — accepted decisions; consult before proposing changes that
+- `design/adr/` — accepted decisions; consult before proposing changes that
   touch installation, scope, PRD intake, GitHub conventions, templates, or
   execution model
 - `docs/repo-structure.md` — kit vs. target-project layout
