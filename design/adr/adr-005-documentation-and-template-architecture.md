@@ -1,7 +1,7 @@
 
 # ADR-005: Generate documentation and templates directly into the target repository
 
-**Status:** accepted
+**Status:** superseded by ADR-045
 **Date:** 2026-04-12
 
 ## Context

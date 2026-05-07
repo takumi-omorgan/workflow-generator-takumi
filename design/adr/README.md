@@ -19,7 +19,7 @@ fences is preserved.
 | [ADR-002](adr-002-new-project-only-scope.md) | Limit v1 to new-project setup only | superseded by ADR-022 |
 | [ADR-003](adr-003-prd-intake-model.md) | Support three PRD intake paths | accepted |
 | [ADR-004](adr-004-github-first-workflow-model.md) | Use a GitHub-first workflow model | accepted |
-| [ADR-005](adr-005-documentation-and-template-architecture.md) | Generate documentation and templates directly into the target repository | accepted |
+| [ADR-005](adr-005-documentation-and-template-architecture.md) | Generate documentation and templates directly into the target repository | superseded by ADR-045 |
 | [ADR-006](adr-006-claude-code-execution-model.md) | Use issue-by-issue, plan-first Claude Code execution | accepted |
 | [ADR-007](adr-007-claude-md-starter-template.md) | Provide a CLAUDE.md starter template with placeholders | accepted |
 | [ADR-008](adr-008-dedicated-prompts-folder.md) | Dedicated prompts/ folder for issue session briefs | accepted |
@@ -59,6 +59,7 @@ fences is preserved.
 | [ADR-042](adr-042-project-shape-detection-in-release.md) | Project-shape detection in `/release` for non-product projects | accepted |
 | [ADR-043](adr-043-programmatic-check-plan.md) | Programmatic equivalent of `/check-plan` for in-skill invocation | accepted |
 | [ADR-044](adr-044-mechanical-rewrite-immutability-exception.md) | Mechanical path-string rewrite as an exception to ADR immutability | accepted |
+| [ADR-045](adr-045-rename-design-directory-lowercase.md) | Rename `Design/` → `design/` for root-directory casing consistency | accepted |
 
 <!-- adr-index:end -->
 
