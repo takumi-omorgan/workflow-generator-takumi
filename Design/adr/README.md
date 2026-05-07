@@ -58,6 +58,7 @@ fences is preserved.
 | [ADR-041](adr-041-auto-mode-permission-contract.md) | Auto-mode permission contract for strict-mode skill operations | accepted |
 | [ADR-042](adr-042-project-shape-detection-in-release.md) | Project-shape detection in `/release` for non-product projects | accepted |
 | [ADR-043](adr-043-programmatic-check-plan.md) | Programmatic equivalent of `/check-plan` for in-skill invocation | accepted |
+| [ADR-044](adr-044-mechanical-rewrite-immutability-exception.md) | Mechanical path-string rewrite as an exception to ADR immutability | accepted |
 
 <!-- adr-index:end -->
 
