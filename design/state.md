@@ -18,7 +18,7 @@ single
 - **Issue:** #83
 - **Prompt:** prompts/issue-083-prune-adr-attributions.md
 - **Branch:** issue-083-prune-adr-attributions
-- **Status:** prepared
+- **Status:** verified
 
 <!-- state:in-flight:end -->
 
