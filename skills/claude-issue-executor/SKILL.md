@@ -231,182 +231,25 @@ purpose of the skill.
 See **Plan-mode rhythm** below for harness-level
 enforcement that runs alongside this rule.
 
-## Plan-mode rhythm
+## Plan-mode rhythm and `--no-prompt` mode
 
-The chat plan-gate above is **convention** — the assistant follows the
-8-step rule because the skill says so. Claude Code also ships a
-**harness-level** mechanism: plan mode (toggled with
-`shift+tab shift+tab`) locks the assistant out of all mutating tools
-until the user explicitly exits plan mode with approval. The two are
-complementary: the chat plan-gate operates *inside* plan mode when the
-user has entered it, so both run together rather than competing.
+The chat plan-gate above is the in-session 8-step rule. Claude Code
+also ships a harness-level mechanism (plan mode, `shift+tab shift+tab`)
+that locks mutating tools until the user exits. The two run together.
 
-This section defines when the executor requests plan-mode entry and
-how it routes sessions of different sizes. The rules below come from
+When the executor parses an invocation it classifies the session
+against a significance/trivial checklist and routes to one of three
+plan-mode branches, then optionally runs in `--no-prompt` mode for
+trivial issues. Both flows are governed by
 [ADR-039](../../design/adr/adr-039-plan-mode-for-significant-tasks.md)
-and instance the **category-2** rule of the kit-wide auto-mode
-permission contract — see
-[`docs/workflow-guide.md` §7](../../docs/workflow-guide.md#7-auto-mode-permission-contract-adr-041)
-for the canonical contract.
+and [ADR-038](../../design/adr/adr-038-tighten-prompt-step.md), and
+the executor instances the **category-2** rule of the auto-mode
+permission contract (see
+[`docs/workflow-guide.md` §7](../../docs/workflow-guide.md#7-auto-mode-permission-contract-adr-041)).
 
-### Significant checklist
-
-A session is **significant** if it meets any of:
-
-- modifies 3+ files, OR
-- edits any `skills/*/SKILL.md`, OR
-- edits any `templates/*` file, OR
-- edits `bin/*` (scripts, installer), OR
-- modifies `.claude/settings*.json` or other harness config, OR
-- otherwise carries blast radius beyond a single small fix.
-
-### Trivial checklist
-
-A session is **trivial** if it is one of:
-
-- single typo,
-- single-line doc tweak,
-- status-line / config-default tweak,
-- single-file rename within scratch space,
-- `feature-ideas.md` status flip,
-- ADR status flip (proposed → accepted),
-- single-PR scope with no design decisions and no ADR linkage.
-
-This list is the **single source of truth shared with ADR-038's
-`--no-prompt` mode**. When either ADR's checklist evolves, both must
-move together — ADR-038's mandatory content-boundary review is the
-enforcement point.
-
-### Hybrid path
-
-When the executor parses the invocation and reads the prompt's Scope
-section, it classifies the session against the two checklists and
-routes to one of three branches:
-
-- **Clearly-significant** → the assistant *requests* the user toggle
-  plan mode and waits. The assistant cannot enter plan mode itself —
-  only the user can press `shift+tab shift+tab`. After the user
-  toggles, the assistant proposes the plan inside plan mode (the chat
-  plan-gate's 8-step rule above runs here, with the harness-level
-  lock providing belt-and-braces enforcement). The user approves and
-  exits plan mode (`shift+tab` once); optionally enables auto-accept
-  edits (`shift+tab` again) for the execution phase.
-- **Clearly-trivial** → the executor proceeds with the chat plan-gate
-  alone. No plan-mode request is made; the friction of toggling is
-  not warranted for the work in question.
-- **Borderline** → the executor asks once: *"Significant? yes / no /
-  decide for me based on scope."* Proceed accordingly.
-
-### Auto-mode behaviour
-
-The executor is **category 2** in the kit-wide auto-mode permission
-contract — *operator-acknowledged-bypass*. Auto-mode may proceed
-through the plan-mode gate but the bypass must be explicit and
-operator-acknowledged, never silent.
-
-When a session starts under auto-mode (operator has pre-authorized
-auto-mode for the session via an explicit toggle), the executor
-**asks once** at session start, before classifying the session
-against the significance checklist:
-
-> *"Enter plan mode for this task? yes / no / decide-from-scope."*
-
-- **`yes`** — request plan-mode entry as normal. The clearly-
-  significant branch of the Hybrid path applies regardless of how
-  the checklist would have classified the session.
-- **`decide-from-scope`** — fall through to the Hybrid path's
-  classifier. Clearly-significant requests plan mode; clearly-
-  trivial skips it; borderline asks the per-Hybrid-path question.
-- **`no`** — the executor writes a one-line acknowledgement in
-  chat output, **before any mutating edit**:
-
-  > *"Plan mode bypassed by operator (cat-2 operator-acknowledged
-  > bypass per workflow-guide §7)."*
-
-  The acknowledgement is mandatory. Without it the bypass is
-  silent and the cat-2 contract is violated. The executor then
-  proceeds with the chat plan-gate alone (the 8-step rule above),
-  which still requires explicit user approval before any mutating
-  edit.
-
-The ask-once rule applies *only* under auto-mode. When the
-operator is interacting normally (no auto-mode toggle), the
-Hybrid path runs as before — there is no ask-once question to
-answer because operator approval at the plan gate is already
-explicit.
-
-### Alignment-review obligation
-
-When the trivial checklist above is amended, ADR-038's
-`--no-prompt` criteria must be reviewed and aligned in the same change.
-ADR-038 carries a mandatory content-boundary review obligation that
-serves as the enforcement point for keeping the two checklists in
-lockstep.
-
-The cat-2 contract text in
-[`docs/workflow-guide.md` §7](../../docs/workflow-guide.md#7-auto-mode-permission-contract-adr-041)
-and the significance checklist above must also move together: when
-either is amended, review the other in the same change. PR review
-is the enforcement point until ADR-034's plan-checker grows a
-structural rule for it (deferred to issue #72).
-
-## `--no-prompt` mode
-
-Per [ADR-038](../../design/adr/adr-038-tighten-prompt-step.md), the
-executor accepts a `--no-prompt` flag that **skips prompt generation
-entirely** and runs from the issue body alone. The prompt artefact is
-not written. A one-line breadcrumb — `issue executed without prompt
-per ADR-038` — is appended to the first commit's message so the
-audit trail survives.
-
-### When `--no-prompt` is appropriate
-
-The criteria for `--no-prompt` are exactly the **Trivial checklist**
-above (lines beginning *"A session is **trivial** if it is one of:"*).
-That checklist is the **single source of truth**; the `--no-prompt`
-mode does not duplicate it. If the trivial checklist evolves, this
-mode's criteria evolve in lockstep — see the **Alignment-review
-obligation** section just above.
-
-### Auto-detect (with confirmation)
-
-When the user invokes `/claude-issue-executor <issue-number>` (no
-explicit `--no-prompt`), the executor auto-detects candidates
-*conservatively*:
-
-- The issue has **zero `ADR-NNN` references** in its body, AND
-- The issue has at least one of the labels `chore`, `docs`, or
-  `bugfix-trivial`.
-
-When both conditions hold, the executor *suggests* `--no-prompt`
-mode and asks for confirmation: *"Issue looks trivial — skip prompt
-generation? (yes / no)"*. On `yes`, proceed without prompt. On `no`,
-fall back to the standard auto-chain path. The suggestion never
-short-circuits silently.
-
-### Override
-
-Explicit `--no-prompt` overrides auto-detection — no confirmation is
-asked. This is for the user who already knows the issue is trivial
-and wants the lowest-ceremony path. The breadcrumb is still left in
-the commit message.
-
-### Interactions
-
-- **Plan-mode rhythm** still applies. `--no-prompt`
-  affects the *prompt* step, not the plan-mode gate. A trivial
-  issue with `--no-prompt` typically also classifies as
-  clearly-trivial against the significance checklist, so plan mode
-  is not requested. But if the executor is ever invoked with
-  `--no-prompt` on something that *is* significant (e.g. a multi-
-  file refactor mislabelled `chore`), the significance gate still
-  fires — the two are independent.
-- **`/check-plan`** does not run when `--no-prompt` is
-  set, because there is no rendered prompt to check. The skip is
-  noted in the evaluation summary alongside the breadcrumb.
-- **`design/state.md`** updates still happen. The
-  `state:in-flight` zone records `Status: verified` (or `executing`
-  mid-session) regardless of whether a prompt was generated.
+See [`plan-mode.md`](plan-mode.md) for the significance and trivial
+checklists, the hybrid routing path, auto-mode behaviour, the
+alignment-review obligation, and the `--no-prompt` mode rules.
 
 ## Session protocol — end to end
 
@@ -425,9 +268,9 @@ the commit message.
      `prompts/` and (fallback) `notes/issue*-prompt.md`. Ask the
      user which to use.
 2. **Parse invocation and classify.** With the prompt resolved
-   (or `--no-prompt` set — see **`--no-prompt` mode** below),
+   (or `--no-prompt` set — see [`plan-mode.md`](plan-mode.md)),
    **classify the session against the significance checklist** (see
-   **Plan-mode rhythm** above): if clearly-significant, request the
+   [`plan-mode.md`](plan-mode.md)): if clearly-significant, request the
    user toggle plan mode before continuing; if borderline, ask once;
    if clearly-trivial, proceed with the chat plan-gate alone.
 3. **Preflight.** Confirm the working tree is clean. If dirty, stop and
@@ -511,47 +354,14 @@ the on-disk shape only:
 ```
 ````
 
-**When to populate.** Add an entry only when *all three* hold: the
-question concerns a load-bearing constraint, a specific upcoming
-issue depends on the answer, and this issue's commits do not fully
-resolve it. (Full rule in §6 of the workflow guide — when adding a
-new entry, follow §6's rule, not a restatement here.)
-
-**When NOT to populate.** Skip the entry — even if a design
-question came up — when *any* of the following hold: (1) the
-question was self-resolved by this issue's commits; (2) no
-upcoming filed-or-planned issue depends on the answer (capture in
-`notes/feature-ideas.md` instead); (3) the question is purely
-implementation tactics with no cross-issue coupling; (4) the
-answer is already in an ADR or `design/decisions.md`.
-
-If borderline, **omit** the entry. False positives cost more than
-false negatives — see §6's rationale.
-
-**Empty case.** If there are no entries, **omit the entire
-`### design-questions` block**. Do not emit `design-questions: []`
-or an empty heading.
+See [`reference.md`](reference.md#design-questions-populate-rules) for
+the When-to-populate / When-NOT-to-populate / Empty-case rules.
 
 ## Edge cases
 
-- **Prompt file not found.** Search `prompts/` and `notes/` for the
-  closest match and ask the user which they meant. Never guess silently.
-- **Prompt file malformed.** Report the missing sections by name and
-  ask whether to fix the prompt or to proceed with explicit user
-  guidance for the gaps.
-- **Working tree dirty on entry.** Refuse to proceed. Do not auto-stash.
-  Ask the user what to do.
-- **Target branch already exists.** Ask whether to (a) switch to the
-  existing branch and continue, (b) pick a new name, or (c) delete the
-  existing one (only with explicit confirmation and only when the user
-  is sure nothing there is needed). Never force-delete silently.
-- **User denies the plan.** Offer to revise. If the user wants to stop
-  entirely, stop — do not keep pushing variants.
-- **Tests fail during implementation.** Stop, report, and ask — do not
-  paper over failing tests to keep the commit cadence.
-- **ADR or issue number missing from the prompt.** Malformed — see
-  **Prompt validation**. Do not substitute a placeholder in commit
-  messages.
+See [`reference.md`](reference.md#edge-cases) for the full list:
+prompt not found, prompt malformed, dirty working tree, branch already
+exists, plan denial, test failures, missing ADR/issue numbers.
 
 ## Handoff
 
@@ -566,24 +376,10 @@ between implementation and PR publication.
 
 ## Alignment check
 
-Before finishing the session, confirm:
-
-- [ ] The plan was proposed and explicitly approved before any edits.
-- [ ] A feature branch was created from `main` (not committed to `main`
-  directly).
-- [ ] Every commit message includes `ADR-NNN` and `#issue` from the
-  prompt.
-- [ ] Tests, if applicable to the project, landed with the code.
-- [ ] An evaluation summary was printed **and persisted to
-  `notes/eval-issue-NNN.md`**.
-- [ ] If the session raised a cross-issue design question matching
-  the §6 when-to-populate rule, a `### design-questions` block
-  was added to the persisted eval summary; otherwise the block was
-  omitted.
-- [ ] `/pr-review-packager` was suggested, not auto-invoked.
-
-If any box is unchecked, the skill has drifted — say so in the
-evaluation summary rather than hiding it.
+Before finishing the session, run the seven-item alignment checklist
+in [`reference.md`](reference.md#alignment-check). If any box is
+unchecked, the skill has drifted — say so in the evaluation summary
+rather than hiding it.
 
 See [`example.md`](example.md) for a worked session driven by
 `prompts/issue-017-pr-review-packager.md`.
