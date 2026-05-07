@@ -315,6 +315,18 @@ continue-here), and optionally chains `/release` with
   GitHub milestone.
 - **Spec:** [`skills/complete-milestone/SKILL.md`](../skills/complete-milestone/SKILL.md).
 
+### Skills without a worked-example sidecar
+
+`/complete-milestone` and `/milestone-summary` are the only two
+skills in the cohort that ship without their own `example.md`. Both
+are thin routing-orchestration layers: `/complete-milestone` chains
+`/audit-milestone`, `/milestone-summary`, and optionally `/release`;
+`/milestone-summary` reads `git log`, `gh`, and accepted ADRs to
+compose one file. The full chain walkthrough lives in
+[`skills/audit-milestone/example.md`](../skills/audit-milestone/example.md),
+which exercises all three milestone-cluster skills against a phased
+example project. The omission is intentional, not drift.
+
 ---
 
 ## 6. Cutting releases

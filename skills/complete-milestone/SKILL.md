@@ -249,4 +249,5 @@ quote from it; future planning rounds can reference it.
 
 See [`audit-milestone/example.md`](../audit-milestone/example.md)
 for a worked walkthrough of the full chain on a phased example
-project.
+project. (This skill ships without its own `example.md` by design —
+see [`docs/skills.md` §5](../../docs/skills.md#skills-without-a-worked-example-sidecar).)
