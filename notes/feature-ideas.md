@@ -91,9 +91,10 @@ entries shipped. New v-next entries can be appended directly here.
 
 ### 31. Cross-skill design-question carry-forward
 
-**Status:** ready-for-adr
+**Status:** shipped
 **Target:** v-next
 **Captured:** 2026-05-06
+**Shipped:** ADR-040 (accepted), issue #69, PR #73
 **Origin:** v3.3.0 baseline eval — research-tracker fixture (see `runs/kit-v3.3.0/baseline-verdict.md` § "Cross-skill chain handoff")
 
 **Context / trigger:** Research-tracker demonstrated organically a property the kit aspires to but doesn't currently codify: **end-to-end design-coherence loop closure across the implementation skill chain**. On issues #4 + #5 (the depth-scaled note templates), the full round-trip happened: `/claude-issue-executor 4` raised two design-agreement questions in eval-summary follow-ups → `/pr-review-packager #16` preserved them in PR body's "Notes for #5" → `/prepare-issue 5` carried them into the prompt as a load-bearing section → `/claude-issue-executor 5` MADE both decisions with documented reasoning → `/pr-review-packager #17` surfaced the decisions in PR body with ✅ checkmarks. **Audit-trail-grade visibility — anyone reading the PR sequence can trace the design-coherence work.** This emerged from the kit's existing skill behaviors composing well; no skill-spec hook required it. Codifying it as a deterministic property (with skill-spec hooks for design-question carry-forward across the executor → packager → prepare-issue boundary) would promote this from happy-accident to kit promise.
@@ -123,9 +124,10 @@ entries shipped. New v-next entries can be appended directly here.
 
 ### 32. Auto-mode permission contract — close the strict-mode bypass loophole
 
-**Status:** ready-for-adr
+**Status:** shipped
 **Target:** v-next
 **Captured:** 2026-05-06
+**Shipped:** ADR-041 (accepted), issue #70, PR #74
 **Origin:** v3.3.0 baseline eval — F24 calibration trajectory across all three fixtures (see `runs/kit-v3.3.0/baseline-verdict.md` § "F-finding cluster status")
 
 **Context / trigger:** ADR-039 (entry #30) shipped harness-level plan mode for significant tasks in `claude-issue-executor`. The v3.3.0 baseline eval calibrated F24 (the executor's plan-mode bypass under "auto mode") across three fixtures: HIGH severity on md-notes (silent bypass), MEDIUM on podcast-pipeline (session-context-dependent), LOW on research-tracker (bypass-but-self-reported in alignment check). **The trajectory is positive but the principle stands**: even at LOW severity, the kit should not allow auto-mode to silently substitute for an explicit operator gate on significant tasks. The same shape appears in F23 (`/pr-review-packager`'s strict-mode-vs-runtime mismatch) and would appear in any future skill with strict-mode contracts. The kit needs an **explicit "permission mode" specification**: what auto-mode is allowed to substitute for, what it isn't, and how operators authorize substitutions when permitted.
@@ -158,9 +160,10 @@ Plus a documentation change:
 
 ### 33. Project-shape detection in `/release` for non-product projects
 
-**Status:** ready-for-adr
+**Status:** shipped
 **Target:** v-next
 **Captured:** 2026-05-06
+**Shipped:** ADR-042 (accepted), issue #71, PR #77
 **Origin:** v3.3.0 baseline eval — F26 calibration across all three fixtures, with workflow-project severity escalation on research-tracker (see `runs/kit-v3.3.0/baseline-verdict.md` § "Active findings worth fixing before v3.4" #3)
 
 **Context / trigger:** F26 (silent v0.1.0 default on `/release`) reproduced across all three fixtures of the v3.3.0 baseline. md-notes was medium severity (partial-scope honesty), podcast-pipeline mitigated to low via the Caveats section pattern, but research-tracker escalates the severity again because the project explicitly disclaims being a product (PRD has *"I'm not shipping a product"* language; success criteria are user-outcomes not test-pass; build-out plan is markdown-only with no compile/build/deploy step). On a project that isn't a product, `/release` should not pretend to ship one. It currently does — defaults to v0.1.0, generates release notes claiming *"first tagged release of …"*, with no acknowledgement of the workflow-not-product framing in the release body. **Strongest ADR-028-leakage signal in the release surface** across the v3.3.0 baseline.
@@ -191,9 +194,10 @@ Fallback: if the operator wants the standard product-release framing on a border
 
 ### 34. Programmatic equivalent of `/check-plan` for in-skill invocation
 
-**Status:** idea
+**Status:** shipped
 **Target:** v-next
 **Captured:** 2026-05-06
+**Shipped:** ADR-043 (accepted), issue #72, PR #75
 **Origin:** v3.3.0 baseline eval — kit-architectural meta-friction reproduced across 5 skills (see `runs/kit-v3.3.0/baseline-verdict.md` § "Active findings worth filing but lower-leverage")
 
 **Context / trigger:** `/check-plan`'s slash-command surface assumes operator invocation. Five skills in the v3.3.0 baseline (`/adr-writer`, `/prepare-issue`, `/changelog` inlined in `/release`, `/milestone-summary` inlined in `/complete-milestone`, plus `/pr-review-packager` for ADR-references checks) document that they should chain `/check-plan` as a sub-step, but **slash-commands aren't invokable from inside another skill's execution**. Every affected skill currently self-flags this with a transparency note (cross-skill consistency on the behavior across all 5) and substitutes the deterministic check logic inline. The substitution works, but the kit-architectural friction is real: the spec says one thing, the runtime can't deliver it, and every skill has to know to substitute. Two paths exist; they have different design implications.
@@ -570,3 +574,42 @@ Features for consideration in later versions. Ordered by theme.
 4. OpenRouter — *GPT-5.5 API Pricing & Providers* — https://openrouter.ai/openai/gpt-5.5
 5. GitHub Docs — *Using secrets in GitHub Actions* — https://docs.github.com/actions/security-guides/using-secrets-in-github-actions
 6. GitHub Docs — *Store information in variables* — https://docs.github.com/actions/learn-github-actions/variables
+
+---
+
+### AI PR review remediation helper — convert unresolved PR comments to a Claude Code prompt
+
+**Status:** ready-for-adr
+**Target:** future
+**Captured:** 2026-05-07
+**Origin:** ADR-046 deferral — separated out so its option-space is not collapsed into the AI review module's ADR.
+
+**Context / trigger:** ADR-046 codifies the AI PR review module — review feedback writes to GitHub. The other half of the loop is reading review feedback back into the kit's implementation flow. Today, addressing PR review comments is unstructured: operator scrolls the PR, copy-pastes points into a chat with Claude Code, hopes nothing was missed. This is the same failure mode `/prepare-issue` (ADR-013) closes for *initial* implementation. The remediation helper closes the equivalent loop on the review side, sourced from PR comments instead of an issue body. Gated on ADR-046's review module shipping and producing 2–3 real PRs of review output to learn from.
+
+**Sketch of the idea:** New kit skill (working name `/pr-comments-to-prompt`). Inputs: a PR number (or auto-detect from current branch), the kit's existing `gh` CLI access. Reads: top-level review comment(s), inline comments on specific files / lines, thread state (resolved / unresolved, latest replier), and the PR diff at invocation time so stale-line detection works. Produces: a single file `prompts/remediation-pr-NNN.md` following `prompts/_template.md`'s shape, with sections adapted for remediation — Context (link back to the PR), Comments to address (each unresolved comment as a discrete sub-task with file, line, comment text, and code context), Acceptance criteria ("every listed comment addressed in code or replied with a written rationale"), Out of scope, Instructions. Operator runs `/claude-issue-executor` against the prompt; the executor writes fixes; operator reviews and pushes. Conceptually parallel to `/prepare-issue` — same role, different source (PR review instead of issue body).
+
+**Options in mind:**
+
+- **New stand-alone skill `/pr-comments-to-prompt`** (recommended). Cleanest scope split — `prepare-issue` stays focused on issue-bodies-to-prompts; the new skill handles PR-comments-to-prompts. Two skills, two clear contracts.
+- **`--from-pr-comments` flag on `/prepare-issue`** — fewer artefacts, single skill name, but mixes two distinct sources (issue body vs PR comments) and breaks `/prepare-issue`'s current contract that the source is the issue.
+- **Extension to `/claude-issue-executor`** — executor reads PR comments directly when invoked with a `--from-pr` flag. Rejected — couples a remediation surface into the executor's main contract; harder to audit; loses the prompt-artefact anchor `/check-plan` and `state.md` rely on.
+
+**Open questions:**
+
+- **Comment-thread schema.** Each comment as its own task block, or grouped by file? Probably file-grouped for inline comments + the top-level review block separately, but worth deciding once a few real PRs of output exist.
+- **Author / source filter.** Default to *all unresolved comments*, *only AI-reviewer comments*, or *operator-selectable*? AI-reviewer-only is the v1 use case; human-comments-only is also valuable; "all unresolved" is the union and probably the safest default.
+- **Thread-reply handling.** When the operator has already replied in-thread pushing back on a comment, include or skip? Probably skip (operator-marked) but offer `--include-replied` override.
+- **Stale-line detection.** When a commented line has moved or been deleted since the comment was posted, surface that in the prompt so the executor knows the comment may be obsolete. How aggressive should the detection be — line moved within file vs file deleted vs whole-file rename?
+- **Re-runs.** If invoked twice (initial review → fixes → AI re-review → second round of comments), append a `## Round 2` section or overwrite? Probably append — round-by-round trail mirrors the kit's existing eval-summary pattern from `claude-issue-executor`.
+- **Interaction with `--no-prompt` mode (ADR-038).** Trivial single-comment fixes (typo in a docstring) probably do not need a remediation prompt at all. Same trivial-case carve-out as ADR-038. How is the threshold drawn — number of comments, their severity, or operator-set?
+
+**Consequences to think through:**
+
+- Easier: closes the review-side loop with the same prompt-artefact anchor pattern that ADR-013 / ADR-034 / ADR-035 already depend on for issues; review feedback becomes auditable input to the executor rather than ad-hoc chat handoff; preserves ADR-041's permission-contract spirit because no automated GitHub write-back is introduced.
+- Harder: new skill to maintain in the kit's growing skill set; thread-state and stale-line detection require non-trivial logic; the prompt-artefact's structural shape needs to align with `prompts/_template.md` without becoming a parallel template that can drift.
+- Maintain: one new skill (`/pr-comments-to-prompt`) plus its `SKILL.md` and `example.md`; possibly a new `/check-plan` criteria set (`PROMPT-REM-C*`) if remediation prompts have different structural expectations than issue prompts; documentation in `docs/workflow-guide.md` § 2.b or a new section.
+- Deferred: any autonomous remediation (auto-applying fixes, auto-replying to threads, auto-resolving comments) is explicitly out of scope. Operator-in-the-loop review is preserved — the operator runs the prompt manually.
+
+**Alignment note for the ADR:** New ADR. Cross-references ADR-013 (sibling skill — same shape), ADR-038 (`--no-prompt` carve-out for trivial cases), ADR-041 (permission-contract reasoning for staying prompt-artefact-only), and ADR-034 (plan-checker — may need a new criteria set). Supersedes the deferral bullet in ADR-046's Decision section.
+
+**Dependency note:** Gated on ADR-046 shipping. Pairs with ADR-013, ADR-034, ADR-038, ADR-041 as listed above. Independent of feature-ideas #full-codebase indexing and #advanced model config — could land before or after either of those without conflict.

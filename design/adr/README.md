@@ -60,6 +60,7 @@ fences is preserved.
 | [ADR-043](adr-043-programmatic-check-plan.md) | Programmatic equivalent of `/check-plan` for in-skill invocation | accepted |
 | [ADR-044](adr-044-mechanical-rewrite-immutability-exception.md) | Mechanical path-string rewrite as an exception to ADR immutability | accepted |
 | [ADR-045](adr-045-rename-design-directory-lowercase.md) | Rename `Design/` → `design/` for root-directory casing consistency | accepted |
+| [ADR-046](adr-046-ai-pr-review-module.md) | Optional AI PR review module | accepted |
 
 <!-- adr-index:end -->
 
