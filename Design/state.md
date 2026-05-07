@@ -15,10 +15,10 @@ single
 
 ## In-flight issue
 
-- **Issue:** #79 — Accept ADR-044 and cite mechanical-rewrite immutability exception in CLAUDE.md
-- **Prompt:** `prompts/issue-079-accept-adr-044-immutability-exception.md`
-- **Branch:** `accept-adr-044-immutability-exception`
-- **Status:** verified
+- **Issue:** none
+- **Prompt:** n/a
+- **Branch:** n/a
+- **Status:** none
 
 <!-- state:in-flight:end -->
 
@@ -30,11 +30,11 @@ Rolling list of the last five issues completed (oldest drops off as
 new entries land). One line each: PR number, ADR if any, one-line
 summary.
 
+- #81 — ADR-044 — accept ADR-044 mechanical-rewrite immutability exception
 - #77 — none — persist eval summary for issue #71
 - #76 — none — add infra verb to pr-review-packager classifier
 - #75 — ADR-043 — bin/check-plan programmatic surface for chain points
 - #74 — ADR-041 — auto-mode permission contract for strict-mode skill operations
-- #73 — ADR-040 — cross-skill design-question carry-forward
 
 <!-- state:recent:end -->
 
@@ -50,6 +50,6 @@ none
 
 ## Continue here
 
-#79 implemented on branch `accept-adr-044-immutability-exception` in three commits: (1) ADR-044 status flip proposed→accepted + index regen, (2) CLAUDE.md one-line citation under the immutability rule, (3) prompt + this state.md. ADR-044 still passes `bin/check-plan --criteria-set adr`. ADR-045 file is moved to `/tmp/adr-045-rename-design-directory-lowercase.md` for the duration of #79's branch — restore to `Design/adr/` for #80's branch. Next: run `/pr-review-packager` to package this branch into a PR (cat-3 explicit-yes gate per ADR-041). After PR merges, restore ADR-045 and run `/prepare-issue 80` for the rename itself.
+PR #81 is open against `main` from branch `accept-adr-044-immutability-exception` (4 commits: ADR-044 status flip + index, CLAUDE.md citation, prompt + state, eval summary). Review and merge #81; ADR-044 becomes the kit-wide authority for mechanical path-string rewrites. After #81 merges: (1) `git checkout main && git pull`, (2) `mv /tmp/adr-045-rename-design-directory-lowercase.md Design/adr/` to restore the ADR-045 draft, (3) `/prepare-issue 80` to draft the prompt for the rename itself, (4) executor → packager chain to ship #80.
 
 <!-- state:continue-here:end -->
