@@ -15,10 +15,10 @@ single
 
 ## In-flight issue
 
-- **Issue:** #80 — Rename `Design/` → `design/` kit-wide for root-directory casing consistency
-- **Prompt:** `prompts/issue-080-rename-design-directory-lowercase.md`
-- **Branch:** `rename-design-directory-lowercase`
-- **Status:** verified
+- **Issue:** none
+- **Prompt:** n/a
+- **Branch:** n/a
+- **Status:** none
 
 <!-- state:in-flight:end -->
 
@@ -30,11 +30,11 @@ Rolling list of the last five issues completed (oldest drops off as
 new entries land). One line each: PR number, ADR if any, one-line
 summary.
 
+- #82 — ADR-045 — rename Design/ → design/ kit-wide for root-directory casing consistency
 - #81 — ADR-044 — accept ADR-044 mechanical-rewrite immutability exception
 - #77 — none — persist eval summary for issue #71
 - #76 — none — add infra verb to pr-review-packager classifier
 - #75 — ADR-043 — bin/check-plan programmatic surface for chain points
-- #74 — ADR-041 — auto-mode permission contract for strict-mode skill operations
 
 <!-- state:recent:end -->
 
@@ -50,6 +50,6 @@ none
 
 ## Continue here
 
-#80 implemented on branch `rename-design-directory-lowercase` in 13 commits: two-step rename via `_design_tmp` (commits 1+2), bulk `sed Design/ → design/` batched by category (commits 3-10), ADR-005 + ADR-045 status flips + ADR-044/045 editorial restoration + index regen (commit 11), CHANGELOG bulk-rewrite + v4.0.0 (UNRELEASED) entry (commit 12), example-project Design/ rename (commit 13). 1,186 → 0 path-string occurrences across 179 files; 14 deliberately-restored editorial `Design/` references remain in ADR-044/045 prose (where the literal old name is the subject of the rename) and CHANGELOG migration snippet. Verification clean: `git ls-files | grep ^Design/` → 0; `find -type d -name Design` → empty; `bin/sync-adr-index --check` → 0; `bin/check-state-cap` → 0; check-plan pass count unchanged from main (24/45 — pre-existing C4 failures on older ADRs preserved). Next: `/pr-review-packager` to package the PR. After merge, mark refactoring-ideas entry #7 as `shipped`.
+PR #82 opened against `main` from branch `rename-design-directory-lowercase` (14 commits: two-step rename + 8 batched path-string rewrites + ADR status flips + CHANGELOG entry + example-project rename + session orchestration). 217 files changed, 1,473/1,206 +/-. Review and merge #82; v4.0.0 is the natural release version (MAJOR — breaking change). After #82 merges: (1) `git checkout main && git pull` (rebase if needed — same un-pushed-local-commit pattern as the post-#81 merge); (2) edit `notes/refactoring-ideas.md` to move entry #7 from Unfiled to Filed with `shipped-#82` status; (3) optional: run `/release` to cut v4.0.0, which will also fix the CHANGELOG entry's UNRELEASED → date+SHA. The kit no longer has any TitleCase root directory.
 
 <!-- state:continue-here:end -->
