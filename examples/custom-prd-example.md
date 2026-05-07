@@ -33,7 +33,7 @@ preserved at its original path.
 
 → Full input/output trace, including the brain-dump input, the
 elicitation questions, and the rendered normalized PRD:
-[`skills/prd-normalizer/examples.md`](../skills/prd-normalizer/examples.md) (Example 2).
+[`skills/prd-normalizer/example.md`](../skills/prd-normalizer/example.md) (Example 2).
 
 ## Step 2 — `prd-to-mvp`
 

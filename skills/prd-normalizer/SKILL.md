@@ -138,5 +138,5 @@ Both `prd-to-mvp` and `adr-writer` read `design/prd-normalized.md` only.
 Neither re-parses the user's raw input. `adr-writer` pays particular
 attention to "constraints and preferences".
 
-See [`examples.md`](examples.md) for two worked transformations — one
+See [`example.md`](example.md) for two worked transformations — one
 from a standard PRD, one from a custom document.

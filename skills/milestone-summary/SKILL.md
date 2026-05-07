@@ -224,4 +224,6 @@ Natural next steps after a successful write:
 See [`example.md`](../audit-milestone/example.md) for a
 walkthrough that exercises both `/audit-milestone` and
 `/milestone-summary` against a phased example project — the two
-skills are designed to chain.
+skills are designed to chain. (This skill ships without its own
+`example.md` by design — see
+[`docs/skills.md` §5](../../docs/skills.md#skills-without-a-worked-example-sidecar).)
