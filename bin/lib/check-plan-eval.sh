@@ -176,7 +176,7 @@ eval_adr_criteria() {
     fi
   fi
 
-  # ADR-C5 (warning): every ADR-NNN token resolves to a file in Design/adr/.
+  # ADR-C5 (warning): every ADR-NNN token resolves to a file in design/adr/.
   local tokens unresolved=""
   tokens=$(grep -o -E '\bADR-[0-9]+' "$file" 2>/dev/null | sort -u || true)
   if [ -n "$tokens" ]; then
@@ -187,9 +187,9 @@ eval_adr_criteria() {
       # raw form in case the file uses a different width.
       local padded
       padded=$(printf '%03d' "$((10#$num))" 2>/dev/null || echo "$num")
-      matches=$(ls Design/adr/adr-"${padded}"-*.md 2>/dev/null | head -1 || true)
+      matches=$(ls design/adr/adr-"${padded}"-*.md 2>/dev/null | head -1 || true)
       if [ -z "$matches" ]; then
-        matches=$(ls Design/adr/adr-"${num}"-*.md 2>/dev/null | head -1 || true)
+        matches=$(ls design/adr/adr-"${num}"-*.md 2>/dev/null | head -1 || true)
       fi
       if [ -z "$matches" ]; then
         unresolved="$unresolved $tok"
@@ -198,7 +198,7 @@ eval_adr_criteria() {
   fi
   if [ -z "$unresolved" ]; then
     _cp_emit "ADR-C5" "warning" "pass" \
-      "All ADR-NNN tokens resolve to files in Design/adr/" ""
+      "All ADR-NNN tokens resolve to files in design/adr/" ""
   else
     _cp_emit "ADR-C5" "warning" "warn" \
       "Unresolved ADR token(s):${unresolved}" \
@@ -300,8 +300,8 @@ eval_prompt_criteria() {
       if [ -n "$adr_file_line" ]; then
         tok=$(printf '%s' "$adr_file_line" | grep -o -E 'adr-[0-9]+-[A-Za-z0-9_-]*\.md' | head -1 || true)
         if [ -n "$tok" ]; then
-          if [ -f "Design/adr/$tok" ]; then
-            adr_status_message="resolves to Design/adr/$tok"
+          if [ -f "design/adr/$tok" ]; then
+            adr_status_message="resolves to design/adr/$tok"
           fi
         fi
       fi
@@ -311,7 +311,7 @@ eval_prompt_criteria() {
         "ADR section ${adr_status_message}" ""
     else
       _cp_emit "PROMPT-C2" "deterministic" "fail" \
-        "ADR section does not resolve to a file in Design/adr/ and does not explicitly say 'ADR: none — <reason>'" \
+        "ADR section does not resolve to a file in design/adr/ and does not explicitly say 'ADR: none — <reason>'" \
         "Either fix the File: line, or replace the section with 'ADR: none — <reason>'."
     fi
   fi
@@ -338,7 +338,7 @@ eval_prompt_criteria() {
   # PROMPT-C4 (warning): scope fits a phase. Skip silently when no
   # build-out-plan or single-phase. The check is a coarse heuristic;
   # warn but never fail.
-  local plan="Design/build-out-plan.md" phase_count
+  local plan="design/build-out-plan.md" phase_count
   if [ -f "$plan" ]; then
     phase_count=$(grep -c -E '^## Phase ' "$plan" || true)
     if [ "$phase_count" -ge 2 ]; then

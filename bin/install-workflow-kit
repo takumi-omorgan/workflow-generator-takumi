@@ -118,8 +118,8 @@ EXAMPLES
 
 SEE ALSO
   docs/install.md, docs/repo-structure.md,
-  Design/adr/adr-009-installer-script.md,
-  Design/adr/adr-025-license.md, Design/adr/adr-030-installer-license-flag.md
+  design/adr/adr-009-installer-script.md,
+  design/adr/adr-025-license.md, design/adr/adr-030-installer-license-flag.md
 EOF
 }
 
@@ -170,7 +170,7 @@ if [ -n "$LICENSE_ID" ]; then
     *" $LICENSE_ID "*) : ;;
     *)
       err "unknown license: '$LICENSE_ID'. Supported: $SUPPORTED_LICENSES."
-      err "(see Design/adr/adr-030-installer-license-flag.md to extend.)"
+      err "(see design/adr/adr-030-installer-license-flag.md to extend.)"
       exit 2
       ;;
   esac
@@ -255,7 +255,7 @@ done
 
 mkdir -p \
   "$TARGET_DIR/.claude/skills" \
-  "$TARGET_DIR/Design/adr" \
+  "$TARGET_DIR/design/adr" \
   "$TARGET_DIR/prompts" \
   "$TARGET_DIR/notes"
 
@@ -280,7 +280,7 @@ for skill_dir in "$KIT_ROOT/skills"/*/; do
 done
 
 # 1b. Copy bin/sync-adr-index into the target's .claude/bin/ so target
-#     projects can keep their Design/adr/README.md in sync. Per ADR-023.
+#     projects can keep their design/adr/README.md in sync. Per ADR-023.
 SYNC_SRC="$KIT_ROOT/bin/sync-adr-index"
 SYNC_DEST_DIR="$TARGET_DIR/.claude/bin"
 SYNC_DEST="$SYNC_DEST_DIR/sync-adr-index"
@@ -388,20 +388,20 @@ else
   warn "kit templates/gitignore.target not found; .gitignore not seeded"
 fi
 
-# 2e. Seed Design/adr/README.md so bin/sync-adr-index has the marker
+# 2e. Seed design/adr/README.md so bin/sync-adr-index has the marker
 #     fences to populate on first run. Without this, sync-adr-index
-#     errors out with "no Design/adr/README.md found".
+#     errors out with "no design/adr/README.md found".
 ADR_README_SRC="$KIT_ROOT/templates/adr-readme-template.md"
-ADR_README_DEST="$TARGET_DIR/Design/adr/README.md"
+ADR_README_DEST="$TARGET_DIR/design/adr/README.md"
 if [ -f "$ADR_README_SRC" ]; then
   if [ -f "$ADR_README_DEST" ] && [ "$FORCE" -ne 1 ]; then
-    info "skip Design/adr/README.md (exists)"
+    info "skip design/adr/README.md (exists)"
   else
-    info "copy Design/adr/README.md from templates/adr-readme-template.md"
+    info "copy design/adr/README.md from templates/adr-readme-template.md"
     cp "$ADR_README_SRC" "$ADR_README_DEST"
   fi
 else
-  warn "kit templates/adr-readme-template.md not found; Design/adr/README.md not seeded"
+  warn "kit templates/adr-readme-template.md not found; design/adr/README.md not seeded"
 fi
 
 # 3. Render CLAUDE.md. Skipped if it already exists unless --force.

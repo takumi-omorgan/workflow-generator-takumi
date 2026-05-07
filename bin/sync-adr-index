@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# sync-adr-index — regenerate the ADR index table in Design/adr/README.md
-# from the current state of Design/adr/adr-*.md.
+# sync-adr-index — regenerate the ADR index table in design/adr/README.md
+# from the current state of design/adr/adr-*.md.
 #
 # Implements ADR-023.
 #
 # Behaviour:
-#   - Scans Design/adr/adr-NNN-*.md files in the current working directory.
+#   - Scans design/adr/adr-NNN-*.md files in the current working directory.
 #   - Parses ADR number from filename, title from `# ADR-NNN: ...`,
 #     status from the first `**Status:**` line, and the optional phase
 #     from the first `**Phase:**` line (per ADR-032). When ANY ADR
@@ -13,7 +13,7 @@
 #     otherwise the table stays 3-column for back-compat with unphased
 #     projects.
 #   - Rewrites the region between the marker fences in
-#     Design/adr/README.md:
+#     design/adr/README.md:
 #         <!-- adr-index:start -->
 #         ...generated table...
 #         <!-- adr-index:end -->
@@ -49,7 +49,7 @@ for arg in "$@"; do
   esac
 done
 
-ADR_DIR="Design/adr"
+ADR_DIR="design/adr"
 INDEX_FILE="$ADR_DIR/README.md"
 START_MARKER="<!-- adr-index:start -->"
 END_MARKER="<!-- adr-index:end -->"

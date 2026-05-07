@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-state-cap — sanity-check that Design/state.md stays under the
+# check-state-cap — sanity-check that design/state.md stays under the
 # line cap mandated by ADR-035.
 #
 # Implements ADR-035's "Maintain" line: a CI sanity check that the
@@ -8,7 +8,7 @@
 # the goal is a guard rail, not a hard ceiling.
 #
 # Behaviour:
-#   - If Design/state.md does not exist, exit 0 silently. The kit
+#   - If design/state.md does not exist, exit 0 silently. The kit
 #     repo itself does not ship the file (it is a target-project
 #     artefact) and many projects will not have adopted ADR-035 yet.
 #   - If the file exists, count lines. Pass if at or below the cap;
@@ -43,7 +43,7 @@ for arg in "$@"; do
   esac
 done
 
-STATE_FILE="Design/state.md"
+STATE_FILE="design/state.md"
 
 if [ ! -f "$STATE_FILE" ]; then
   if [ "$VERBOSE" = 1 ]; then
