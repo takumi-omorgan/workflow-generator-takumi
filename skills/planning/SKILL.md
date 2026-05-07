@@ -1,6 +1,6 @@
 ---
 name: planning
-description: Capture deeper planning context (requirements decomposition, risks, assumptions, sequencing rationale, open research questions) into design/planning.md before ADR drafting
+description: Capture deeper planning context — requirements decomposition, risks, assumptions, sequencing rationale, open research questions — into design/planning.md. Use when project scope warrants deeper preparation before ADR drafting; for resolving specific open questions use /clarify; for committing a decision to an ADR use /adr-writer.
 permission-category: 1  # substitutable — writes design/planning.md locally, per workflow-guide §7
 ---
 

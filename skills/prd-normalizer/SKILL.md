@@ -1,6 +1,6 @@
 ---
 name: prd-normalizer
-description: Normalize a standard or custom PRD into a single canonical form
+description: Normalize a standard or custom PRD into a single canonical form (design/prd-normalized.md). Use when preparing a PRD before MVP scoping — after /idea-to-prd or against a hand-authored PRD.
 permission-category: 1  # substitutable — local doc rewrite, per workflow-guide §7
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: pr-review-packager
-description: Draft a pull-request body from templates/pr-template.md, auto-fill Closes #N and ADR references from branch and commit history, show the draft for approval, then open the PR via gh pr create
+description: Draft a pull-request body from templates/pr-template.md, auto-fill the Closes line and ADR references from branch and commit history, show the draft for approval, then open the PR via gh pr create. Use when packaging a feature branch into a PR after implementation commits land.
 permission-category: 3  # non-substitutable — gh pr create is public, hard-to-reverse, per workflow-guide §7
 ---
 

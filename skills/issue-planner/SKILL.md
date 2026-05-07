@@ -1,6 +1,6 @@
 ---
 name: issue-planner
-description: Turn design/mvp.md and design/build-out-plan.md into a reviewed batch of GitHub issues, plus a Project board
+description: Turn design/mvp.md and design/build-out-plan.md into a reviewed batch of GitHub issues, plus a Project board. Use when filing the issue backlog after the MVP and build-out plan have been finalized.
 permission-category: 3  # non-substitutable — gh issue create is public-visibility; existing approval gate is correct, per workflow-guide §7
 ---
 

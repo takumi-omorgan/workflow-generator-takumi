@@ -1,6 +1,6 @@
 ---
 name: claude-issue-executor
-description: Drive a disciplined implementation session from a prepared issue prompt — plan-first, branch, incremental commits, tests alongside, evaluation summary
+description: Drive a disciplined implementation session from a prepared issue prompt — plan-first, branch, incremental commits, tests alongside, evaluation summary. Use when running the implementation session for an issue whose prompt artefact already exists; use /prepare-issue first if no prompt is on disk.
 permission-category: 2  # operator-acknowledged-bypass — significant-task plan-mode gate per workflow-guide §7
 ---
 

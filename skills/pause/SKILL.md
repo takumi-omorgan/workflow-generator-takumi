@@ -1,6 +1,6 @@
 ---
 name: pause
-description: Refresh design/state.md to current truth (phase, in-flight issue, recent work, blockers, continue-here) and optionally write a richer notes/handoff-YYYY-MM-DD.md for context-window-exhausting session handoffs.
+description: Refresh design/state.md to current truth (phase, in-flight issue, recent work, blockers, continue-here) and optionally write a richer notes/handoff-YYYY-MM-DD.md. Use when ending a session or handing off context; pair with /resume at the start of the next session.
 permission-category: 1  # substitutable — refreshes local design/state.md, per workflow-guide §7
 ---
 

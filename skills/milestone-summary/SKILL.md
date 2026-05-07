@@ -1,6 +1,6 @@
 ---
 name: milestone-summary
-description: Generate design/milestones/N-summary.md for a closed or near-closing milestone — what shipped, ADRs adopted, deferred work — from git log, the GitHub milestone, and accepted ADRs in the phase range.
+description: Generate design/milestones/N-summary.md for a closed or near-closing milestone — what shipped, ADRs adopted, deferred work — from git log, the GitHub milestone, and accepted ADRs in the phase range. Use when writing a retrospective for a closed milestone; for the close itself use /complete-milestone; for readiness checks use /audit-milestone.
 permission-category: 1  # substitutable — writes design/milestones/N-summary.md locally; reads gh + git log non-mutating, per workflow-guide §7
 ---
 

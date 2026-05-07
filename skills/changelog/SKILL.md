@@ -1,6 +1,6 @@
 ---
 name: changelog
-description: Parse git log between two refs and emit grouped, readable release notes in markdown to stdout, a file, or a GitHub Release body
+description: Parse git log between two refs and emit grouped, readable release notes in markdown to stdout, a file, or a GitHub Release body. Use when generating release notes only; for tagging and publishing use /release instead.
 permission-category: 1  # substitutable — renders to stdout / file / Release-body draft; publishing is /release's job, per workflow-guide §7
 ---
 

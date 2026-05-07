@@ -1,6 +1,6 @@
 ---
 name: prd-to-mvp
-description: Scope a normalized PRD into an MVP statement and a build-out plan
+description: Scope a normalized PRD into an MVP statement (design/mvp.md) and a build-out plan (design/build-out-plan.md). Use when scoping the next milestone after the PRD has been normalized.
 permission-category: 1  # substitutable — local doc creation (design/mvp.md, design/build-out-plan.md), per workflow-guide §7
 ---
 

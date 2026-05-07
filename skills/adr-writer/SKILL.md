@@ -1,6 +1,6 @@
 ---
 name: adr-writer
-description: Draft one or more ADRs from architectural decision topics, using the repo's ADR template
+description: Draft one or more ADRs from architectural decision topics, using the repo's ADR template, written to design/adr/adr-NNN-short-title.md. Use when committing a settled architectural choice; for pre-decision context use /planning or /clarify first.
 permission-category: 1  # substitutable — drafts ADRs locally; user accepts manually, per workflow-guide §7
 ---
 
