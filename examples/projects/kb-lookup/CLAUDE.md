@@ -31,11 +31,11 @@ kb-lookup/
     platform.py         # renders modifier keys per OS
     data/               # bundled shortcut JSON, one file per app
   tests/                # pytest suite mirroring kb_lookup/
-  Design/               # PRD, MVP, ADRs
+  design/               # PRD, MVP, ADRs
   pyproject.toml
 ```
 
-See also: `Design/` for ADRs, `notes/` for per-issue prompts.
+See also: `design/` for ADRs, `notes/` for per-issue prompts.
 
 ## How to run
 

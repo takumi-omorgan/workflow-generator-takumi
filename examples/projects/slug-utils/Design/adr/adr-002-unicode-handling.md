@@ -5,7 +5,7 @@
 
 ## Context
 
-The MVP (`Design/mvp.md`) says non-ASCII characters are
+The MVP (`design/mvp.md`) says non-ASCII characters are
 transliterated where a single obvious mapping exists and dropped
 otherwise. We need to decide *how* that transliteration is
 implemented, because the choice drives bundle size and predictability

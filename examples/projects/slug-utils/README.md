@@ -16,10 +16,10 @@ shape, not implementation.
 
 ## How to read this example
 
-1. [`Design/prd.md`](Design/prd.md) — the problem statement.
-2. [`Design/mvp.md`](Design/mvp.md) — in-scope capabilities and non-goals.
-3. [`Design/adr/adr-001-public-api-surface.md`](Design/adr/adr-001-public-api-surface.md) — decides the shape of the exported API.
-4. [`Design/adr/adr-002-unicode-handling.md`](Design/adr/adr-002-unicode-handling.md) — decides how non-ASCII input is treated.
+1. [`design/prd.md`](design/prd.md) — the problem statement.
+2. [`design/mvp.md`](design/mvp.md) — in-scope capabilities and non-goals.
+3. [`design/adr/adr-001-public-api-surface.md`](design/adr/adr-001-public-api-surface.md) — decides the shape of the exported API.
+4. [`design/adr/adr-002-unicode-handling.md`](design/adr/adr-002-unicode-handling.md) — decides how non-ASCII input is treated.
 5. [`issues/`](issues/) — two issues that together ship the MVP.
 6. [`prs/`](prs/) — PR bodies closing those issues.
 7. [`CLAUDE.md`](CLAUDE.md) — project rules for Claude Code.

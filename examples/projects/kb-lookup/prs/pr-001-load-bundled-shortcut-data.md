@@ -13,7 +13,7 @@ Closes #1
 
 ## ADR
 
-Related ADR: `Design/adr/adr-001-shortcut-data-format.md`
+Related ADR: `design/adr/adr-001-shortcut-data-format.md`
 
 ## Changes
 

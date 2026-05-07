@@ -12,7 +12,7 @@ assignees: ""
 
 ## ADR
 
-Related ADR: `Design/adr/adr-NNN-short-title.md`
+Related ADR: `design/adr/adr-NNN-short-title.md`
 <!-- If no ADR applies, write "none" and say why. -->
 
 ## Goal

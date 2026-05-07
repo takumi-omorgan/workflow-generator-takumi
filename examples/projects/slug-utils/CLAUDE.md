@@ -30,12 +30,12 @@ slug-utils/
     index.ts              # slugify + unslugify exports
     transliterate.ts      # Latin-1 → ASCII map
   tests/                  # vitest suite mirroring src/
-  Design/                 # PRD, MVP, ADRs
+  design/                 # PRD, MVP, ADRs
   package.json
   tsup.config.ts
 ```
 
-See also: `Design/` for ADRs, `notes/` for per-issue prompts.
+See also: `design/` for ADRs, `notes/` for per-issue prompts.
 
 ## How to run
 

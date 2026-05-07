@@ -8,7 +8,7 @@
 > planning notes (use [`custom-prd-example.md`](custom-prd-example.md)).
 
 End-to-end walkthrough of the **standard-PRD** path defined in
-[ADR-003](../Design/adr/adr-003-prd-intake-model.md). The scenario —
+[ADR-003](../design/adr/adr-003-prd-intake-model.md). The scenario —
 *Release Notes Generator*, a small CLI that turns merged GitHub PRs
 into a markdown changelog — is fresh to the kit (no prior skill
 example covers it), so the artifacts are inlined here in abbreviated
@@ -27,11 +27,11 @@ needed.
 The user passes their PRD to `prd-normalizer`. The skill recognises
 the shape, maps the input sections onto the canonical 11 fields, asks
 two batched questions (confirm product name; one-line description),
-and writes `Design/prd-normalized.md`.
+and writes `design/prd-normalized.md`.
 
 The user's original PRD is preserved at its original path.
 
-### Input — `Design/release-notes-prd.md` (the user's PRD)
+### Input — `design/release-notes-prd.md` (the user's PRD)
 
 ```markdown
 # Release Notes Generator — PRD
@@ -78,7 +78,7 @@ varies in quality each time.
 - Less than 10 minutes per release vs. 30+ today.
 ```
 
-### Output — `Design/prd-normalized.md` (abbreviated)
+### Output — `design/prd-normalized.md` (abbreviated)
 
 After mapping to the canonical 11 fields:
 
@@ -105,7 +105,7 @@ The user runs `prd-to-mvp`. The skill reads the normalized PRD, asks
 three batched questions (project size, capability cut, phase shape),
 and writes both planning artifacts.
 
-### `Design/mvp.md` (abbreviated)
+### `design/mvp.md` (abbreviated)
 
 - **Principles:** Stdin/stdout-friendly. No installer. No LLM. One
   command, one purpose.
@@ -120,7 +120,7 @@ and writes both planning artifacts.
   output needs ≤ 10% editing"; runtime under 10 seconds for a typical
   release.
 
-### `Design/build-out-plan.md` (abbreviated)
+### `design/build-out-plan.md` (abbreviated)
 
 - **Phase 1 — Core**: tag resolution, `gh` PR fetch, label grouping.
   Exit when running on a real tag range produces correctly grouped
@@ -143,7 +143,7 @@ Initial backlog: ~7 issues across three milestones (M1 / M2 / M3).
 The user passes the two-item decisions list to `adr-writer`. One ADR
 per item, drafted in one run, both with status `proposed`.
 
-### `Design/adr/adr-001-implementation-language.md` (abbreviated)
+### `design/adr/adr-001-implementation-language.md` (abbreviated)
 
 - **Context:** PRD constrains to "single-file Bash or short Node
   script — no installer." Need to pick one.
@@ -156,7 +156,7 @@ per item, drafted in one run, both with status `proposed`.
   Maintain — keep to a single file. Deferred — Bash port if a
   no-Node user appears.
 
-### `Design/adr/adr-002-test-framework.md` (abbreviated)
+### `design/adr/adr-002-test-framework.md` (abbreviated)
 
 The trivial sibling — Vitest, two-option ADR, terse Consequences.
 Same shape as the contentious one because the kit's convention is
@@ -171,17 +171,17 @@ Same shape as the contentious one because the kit's convention is
 User reviews both ADRs and accepts them. Picks the first M1 issue
 (*"Tag-range resolution and PR fetch"*) and starts a Claude Code
 session with a filled [`notes/issue-prompt.md`](../notes/issue-prompt.md)
-referencing `Design/adr/adr-001-implementation-language.md`.
+referencing `design/adr/adr-001-implementation-language.md`.
 
 → Template and guide:
 [`notes/issue-prompt.md`](../notes/issue-prompt.md),
 [`docs/issue-prompt-guide.md`](../docs/issue-prompt-guide.md).
 
-## Final state of `Design/`
+## Final state of `design/`
 
 ```text
 release-notes-generator/
-  Design/
+  design/
     release-notes-prd.md                     ← user's original (preserved)
     prd-normalized.md                        ← Step 1 (prd-normalizer)
     mvp.md                                   ← Step 2 (prd-to-mvp)

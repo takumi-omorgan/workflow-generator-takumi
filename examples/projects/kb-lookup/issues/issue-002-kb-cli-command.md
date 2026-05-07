@@ -8,7 +8,7 @@ loader from #1, and prints a platform-correct result to stdout.
 
 ## ADR
 
-Related ADR: `Design/adr/adr-001-shortcut-data-format.md`
+Related ADR: `design/adr/adr-001-shortcut-data-format.md`
 <!-- ADR-001 governs the data shape this command reads. No new ADR is needed for the CLI surface. -->
 
 ## Goal
@@ -19,7 +19,7 @@ host platform.
 
 ## Why it matters
 
-This is the MVP's headline capability (see `Design/mvp.md` → "MVP
+This is the MVP's headline capability (see `design/mvp.md` → "MVP
 scope → In scope"). Without it, the loader from #1 has no user.
 
 ## Tasks

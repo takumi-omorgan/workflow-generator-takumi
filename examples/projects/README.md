@@ -6,7 +6,7 @@ snapshot of artifacts — PRD, MVP, ADRs, GitHub issues, PRs, and a
 rendered `CLAUDE.md`. They are **not** runnable software; the
 artifacts *are* the example.
 
-See [ADR-021](../../Design/adr/adr-021-example-projects.md) for why
+See [ADR-021](../../design/adr/adr-021-example-projects.md) for why
 these exist.
 
 ## How these differ from the planning-path walkthroughs
@@ -31,7 +31,7 @@ recommended reading order. Every example follows the same tree:
 ```
 <project>/
   README.md           # 1-page tour
-  Design/
+  design/
     prd.md
     mvp.md
     adr/

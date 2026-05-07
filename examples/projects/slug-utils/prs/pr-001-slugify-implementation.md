@@ -14,8 +14,8 @@ Closes #1
 ## ADR
 
 Related ADRs:
-- `Design/adr/adr-001-public-api-surface.md`
-- `Design/adr/adr-002-unicode-handling.md`
+- `design/adr/adr-001-public-api-surface.md`
+- `design/adr/adr-002-unicode-handling.md`
 
 ## Changes
 

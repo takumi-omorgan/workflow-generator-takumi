@@ -12,7 +12,7 @@ Closes #2
 
 ## ADR
 
-Related ADR: `Design/adr/adr-001-public-api-surface.md`
+Related ADR: `design/adr/adr-001-public-api-surface.md`
 
 ## Changes
 

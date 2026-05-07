@@ -16,9 +16,9 @@ is a single command-line tool rather than a web app or library.
 Start with the PRD, then walk the artifacts in the order the workflow
 produces them:
 
-1. [`Design/prd.md`](Design/prd.md) — the rough scope the user brought to the kit.
-2. [`Design/mvp.md`](Design/mvp.md) — the in-scope cut produced by `prd-to-mvp`.
-3. [`Design/adr/adr-001-shortcut-data-format.md`](Design/adr/adr-001-shortcut-data-format.md) — the one scoping decision that needed recording.
+1. [`design/prd.md`](design/prd.md) — the rough scope the user brought to the kit.
+2. [`design/mvp.md`](design/mvp.md) — the in-scope cut produced by `prd-to-mvp`.
+3. [`design/adr/adr-001-shortcut-data-format.md`](design/adr/adr-001-shortcut-data-format.md) — the one scoping decision that needed recording.
 4. [`issues/`](issues/) — the two GitHub issues that make up the backlog.
 5. [`prs/`](prs/) — the PR bodies that close those issues.
 6. [`CLAUDE.md`](CLAUDE.md) — the rendered project rules Claude Code reads each session.

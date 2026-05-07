@@ -11,7 +11,7 @@ for users, not something copied into a target project.
 
 Short scenarios that show how the kit's **intake phase** works for
 each of the three PRD starting points defined in
-[ADR-003](../Design/adr/adr-003-prd-intake-model.md). Use these to
+[ADR-003](../design/adr/adr-003-prd-intake-model.md). Use these to
 choose which skill to run first.
 
 | File | Scenario |
@@ -32,7 +32,7 @@ want to see what the **full output of the kit** looks like after
 the first milestone has shipped — PRD, MVP, ADRs, issues, PRs,
 and a rendered `CLAUDE.md` — all in one place.
 
-See [ADR-021](../Design/adr/adr-021-example-projects.md) for why
+See [ADR-021](../design/adr/adr-021-example-projects.md) for why
 these exist and [`projects/README.md`](projects/README.md) for the
 gallery index.
 

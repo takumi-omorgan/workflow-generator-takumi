@@ -7,7 +7,7 @@
 > custom planning notes (use [`custom-prd-example.md`](custom-prd-example.md)).
 
 End-to-end walkthrough of the **no-PRD** path defined in
-[ADR-003](../Design/adr/adr-003-prd-intake-model.md). The scenario —
+[ADR-003](../design/adr/adr-003-prd-intake-model.md). The scenario —
 *Pace Drift*, a small web app for analyzing race-pace drift from a GPX
 file — is the running example used across the kit's skill files, so
 each step links to the canonical detail rather than duplicating it.
@@ -23,7 +23,7 @@ spec, no design doc.
 
 The user runs `idea-to-prd`. The skill reads the rough paragraph,
 asks four batched elicitation questions (target user, platform, success
-shape, explicit non-goals), and writes `Design/prd.md` — a lightweight
+shape, explicit non-goals), and writes `design/prd.md` — a lightweight
 8-section PRD draft.
 
 → Full input/output trace: [`skills/idea-to-prd/example.md`](../skills/idea-to-prd/example.md).
@@ -33,7 +33,7 @@ shape, explicit non-goals), and writes `Design/prd.md` — a lightweight
 The user runs `prd-normalizer`. The PRD draft from Step 1 already has
 the standard 8-section shape, so the normalizer's standard path
 applies. It asks two identity-field questions (product name, one-line
-description) and writes `Design/prd-normalized.md` — the canonical
+description) and writes `design/prd-normalized.md` — the canonical
 11-field shape that downstream skills consume.
 
 A small relocation happens: the draft's *"No mobile-optimized view in
@@ -45,16 +45,16 @@ product-level non-goal. That distinction matters for the next step.
 
 ## Step 3 — `prd-to-mvp`
 
-The user runs `prd-to-mvp`. The skill reads `Design/prd-normalized.md`,
+The user runs `prd-to-mvp`. The skill reads `design/prd-normalized.md`,
 proposes an in-scope / out-of-scope split, asks four batched questions
 (project size, capability cut, target-input format, phase shape), and
 writes two files in one run:
 
-- `Design/mvp.md` — five in-scope capabilities, eight out-of-scope
+- `design/mvp.md` — five in-scope capabilities, eight out-of-scope
   items separated by source (product-level non-goals vs.
   deferred-by-MVP scoping), four product principles, three end-to-end
   success criteria.
-- `Design/build-out-plan.md` — three phases (Foundation → UI →
+- `design/build-out-plan.md` — three phases (Foundation → UI →
   Validation), three milestones, twelve initial backlog issues, and a
   closing **"Decisions needing ADRs"** list with two items.
 
@@ -65,10 +65,10 @@ writes two files in one run:
 The user passes the two-item "Decisions needing ADRs" list to
 `adr-writer`. The skill drafts both in one run:
 
-- `Design/adr/adr-001-gpx-parsing-location.md` — a contentious choice
+- `design/adr/adr-001-gpx-parsing-location.md` — a contentious choice
   (browser-side vs. server-side), with two options weighed against
   the MVP's local-session and no-backend constraints.
-- `Design/adr/adr-002-test-framework.md` — a near-trivial choice
+- `design/adr/adr-002-test-framework.md` — a near-trivial choice
   (Vitest), drafted briefly to honour the kit's "decisions are
   recorded, not assumed" convention.
 
@@ -85,21 +85,21 @@ The user picks the first issue from M1 of the build-out plan
 [`feature-request`](../.github/ISSUE_TEMPLATE/feature-request.md)
 template, and starts a Claude Code session with a filled
 [`notes/issue-prompt.md`](../notes/issue-prompt.md). The filled prompt
-references `Design/adr/adr-001-gpx-parsing-location.md` and the M1
+references `design/adr/adr-001-gpx-parsing-location.md` and the M1
 context.
 
 → Sample filled prompt: [`notes/issue-prompt-sample.md`](../notes/issue-prompt-sample.md).
 → How to fill it and what the closing evaluation summary must contain:
 [`docs/issue-prompt-guide.md`](../docs/issue-prompt-guide.md).
 
-## Final state of `Design/`
+## Final state of `design/`
 
 After Step 4 (planning complete) and before Step 5 (execution begins),
-the target project's `Design/` tree looks like this:
+the target project's `design/` tree looks like this:
 
 ```text
 pace-drift/
-  Design/
+  design/
     prd.md                                  ← Step 1 (idea-to-prd)
     prd-normalized.md                       ← Step 2 (prd-normalizer)
     mvp.md                                  ← Step 3 (prd-to-mvp)

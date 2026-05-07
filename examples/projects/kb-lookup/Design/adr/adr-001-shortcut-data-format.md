@@ -5,10 +5,10 @@
 
 ## Context
 
-The MVP (`Design/mvp.md`) requires bundled shortcut data for three
+The MVP (`design/mvp.md`) requires bundled shortcut data for three
 apps, with platform-aware rendering. We need a format that is easy
 to author by hand, easy to parse at runtime, and easy to extend when
-a fourth app is added. The PRD (`Design/prd.md`) also constrains us
+a fourth app is added. The PRD (`design/prd.md`) also constrains us
 to offline operation, so remote lookups are off the table.
 
 ## Options considered

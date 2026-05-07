@@ -5,11 +5,11 @@
 
 ## Context
 
-The MVP (`Design/mvp.md`) commits to "two functions, two signatures
+The MVP (`design/mvp.md`) commits to "two functions, two signatures
 — nothing else exported". We still need to decide what those two
 signatures look like, because the choice is expensive to reverse
 once consumers start importing the library. The PRD
-(`Design/prd.md`) rules out an options object, which narrows the
+(`design/prd.md`) rules out an options object, which narrows the
 design space but still leaves two reasonable shapes.
 
 ## Options considered
