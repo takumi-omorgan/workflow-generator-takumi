@@ -18,7 +18,7 @@ single
 - **Issue:** #84 (Phase 1 of 3 — description rewrites only)
 - **Prompt:** prompts/issue-084-skills-audit-cohort.md
 - **Branch:** issue-084-phase1-skills-descriptions
-- **Status:** prepared
+- **Status:** verified
 
 <!-- state:in-flight:end -->
 
