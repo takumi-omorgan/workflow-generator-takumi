@@ -1,6 +1,6 @@
 # Claude Code Workflow Kit — State
 
-**Last updated:** 2026-05-06
+**Last updated:** 2026-05-07
 **Source of truth:** `gh` is canonical for issue/PR status; this file is a pointer.
 
 <!-- state:phase:start -->
@@ -15,10 +15,10 @@ single
 
 ## In-flight issue
 
-- **Issue:** none
-- **Prompt:** n/a
-- **Branch:** n/a
-- **Status:** none
+- **Issue:** #79 — Accept ADR-044 and cite mechanical-rewrite immutability exception in CLAUDE.md
+- **Prompt:** `prompts/issue-079-accept-adr-044-immutability-exception.md`
+- **Branch:** `accept-adr-044-immutability-exception`
+- **Status:** verified
 
 <!-- state:in-flight:end -->
 
@@ -50,6 +50,6 @@ none
 
 ## Continue here
 
-Last session bundled the post-MVP doc cleanup into a single commit: workflow-guide restructure (new §3 steady-state loop, §4 idea backlog, pruned ADR attributions, text diagram), new `docs/skills.md` functional reference, top-level `archive/` directory with the original methodology docs and phase-1 prompts moved into it, feature-ideas split into `archive/feature-ideas-ledger.md`, and 7 new refactoring entries in `notes/refactoring-ideas.md`. Next session: pick up the next refactoring item from `notes/refactoring-ideas.md` — entries #1-#7 are all queued; the natural first pick is #1 (archive shipped prompts) since it pairs with the archive restructure that just landed.
+#79 implemented on branch `accept-adr-044-immutability-exception` in three commits: (1) ADR-044 status flip proposed→accepted + index regen, (2) CLAUDE.md one-line citation under the immutability rule, (3) prompt + this state.md. ADR-044 still passes `bin/check-plan --criteria-set adr`. ADR-045 file is moved to `/tmp/adr-045-rename-design-directory-lowercase.md` for the duration of #79's branch — restore to `Design/adr/` for #80's branch. Next: run `/pr-review-packager` to package this branch into a PR (cat-3 explicit-yes gate per ADR-041). After PR merges, restore ADR-045 and run `/prepare-issue 80` for the rename itself.
 
 <!-- state:continue-here:end -->
