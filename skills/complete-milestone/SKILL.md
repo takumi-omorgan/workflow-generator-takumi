@@ -13,7 +13,7 @@ Close a milestone end-to-end:
 2. Run `/milestone-summary <N>` (chained, unless `--skip-summary`).
    Wait for the user to author the lessons zone before continuing.
 3. Close the GitHub milestone via `gh api`.
-4. Archive `design/state.md` zones (per ADR-035) — clear `in-flight`,
+4. Archive `design/state.md` zones — clear `in-flight`,
    prepend the close to `recent`, set `continue-here` to the next
    action.
 5. Optionally chain `/release --milestone-phase=N` if the milestone
@@ -45,7 +45,7 @@ closing, that is `/milestone-summary`. This skill is for the
 
 - Does not bypass the audit. The audit always runs (chained); its
   result is surfaced to the user. But the audit does not gate the
-  close — ADR-037 is explicit on this.
+  close.
 - Does not author the `lessons` zone. The user does that between
   the summary step and the close step.
 - Does not invoke `/release` without explicit consent. The
@@ -139,7 +139,7 @@ user sees the full plan before any mutation.
 8. **On `yes`, execute:**
    - Close the milestone:
      `gh api repos/:owner/:repo/milestones/<N> -X PATCH -f state=closed`.
-   - Update `design/state.md` (only if file exists per ADR-035):
+   - Update `design/state.md` (only if file exists):
      - `in-flight` zone → set `Issue: none`, `Prompt: n/a`,
        `Branch: n/a`, `Status: none`.
      - `recent` zone → prepend
@@ -160,7 +160,7 @@ user sees the full plan before any mutation.
     set. The release skill has its own approval gate; this skill
     does not pre-approve the release. If the user declines the
     release inside `/release`, the milestone stays closed —
-    that's fine. The two are decoupled per ADR-037.
+    that's fine. The two are decoupled.
 11. **Report.** Print:
     - The closed milestone URL
       (`gh api repos/:owner/:repo/milestones/<N> --jq .html_url`).

@@ -10,7 +10,7 @@ Read an ADR or issue prompt, detect its type, run the matching
 checklist from
 [`skills/check-plan/criteria.md`](criteria.md), and return either a
 pass or a list of specific revisions per failed criterion. When
-chained from `adr-writer` (ADR-007) or `prepare-issue` (ADR-013), it
+chained from `adr-writer` or `prepare-issue`, it
 runs against an in-memory rendering before disk write — so a failed
 check leaves the working tree clean. Standalone, it operates on any
 artefact already on disk.
@@ -20,7 +20,7 @@ This skill is the quality gate decided in
 opt-out (default on), with `--skip-check` available on the chained
 producers for known-good rapid iteration.
 
-**Two surfaces, one source of truth (per ADR-043).** This skill's
+**Two surfaces, one source of truth.** This skill's
 deterministic criteria evaluation is implemented as a kit script —
 [`bin/check-plan`](../../bin/check-plan) — that takes
 `--criteria-set <adr|prompt>` and `--input <path-or-->` and emits
@@ -146,7 +146,7 @@ otherwise noted.
    surfaced verbatim to the user — never swallowed silently. When
    `--skip-check` is set on the chained producer, this skill is not
    invoked at all and the producer leaves a one-line breadcrumb
-   (commit message or prompt body) per ADR-034.
+   (commit message or prompt body).
 
 ## Type detection — detailed rules
 
@@ -206,9 +206,9 @@ path-match result. If neither matches, stop per step 2 above.
 ## How chained mode works
 
 `adr-writer` and `prepare-issue` invoke **`bin/check-plan`** as
-their final gate before disk write (per ADR-043 — slash-commands
-are not invokable from inside another skill's execution, so the
-chain point uses the programmatic surface). The flow:
+their final gate before disk write (slash-commands are not invokable
+from inside another skill's execution, so the chain point uses the
+programmatic surface). The flow:
 
 1. Producer renders the artefact in memory.
 2. Producer pipes the rendered text into `bin/check-plan

@@ -43,7 +43,7 @@ Optional pass-through flags are supported and forwarded verbatim to
 ```
 
 The skill is **read-only** with respect to `templates/pr-template.md`
-(ADR-005) — it consumes the file without editing it.
+— it consumes the file without editing it.
 
 ## What this skill does not do
 
@@ -65,7 +65,7 @@ The skill is **read-only** with respect to `templates/pr-template.md`
   body. The approval gate from ADR-015's chosen option (Option B) is
   mandatory.
 
-## Auto-mode permission category (per ADR-041)
+## Auto-mode permission category
 
 This skill is **category 3** — *non-substitutable* — in the kit-wide
 auto-mode permission contract. See
@@ -139,7 +139,7 @@ The skill consults five sources, in this order:
    does not encode the issue number.
 4. **ADR files.** For each `ADR-NNN` token found, glob
    `design/adr/adr-<NNN>-*.md` and resolve the full filename.
-5. **Eval-summary file** (per ADR-040, optional). Once the issue
+5. **Eval-summary file** (optional). Once the issue
    number is resolved (step 6 of the execution protocol), read
    `notes/eval-issue-NNN.md` (zero-padded). Parse the
    `### design-questions` YAML block under `## Follow-ups` if
@@ -189,7 +189,7 @@ noted.
    If no hit is found, leave `{{ISSUE_NUMBER}}` as
    `<!-- TODO: fill in issue number -->` and flag it during the
    approval gate rather than blocking.
-6.5. **Scan for design-questions (per ADR-040).** With the issue
+6.5. **Scan for design-questions.** With the issue
     number resolved, read `notes/eval-issue-NNN.md` (zero-padded).
     If the file is absent, skip silently and continue to step 7.
     If present, locate the `### design-questions` heading under

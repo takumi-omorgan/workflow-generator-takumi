@@ -25,7 +25,7 @@ for the canonical schema.
 
 ## When to use this skill
 
-- After `/prepare-issue` (ADR-013) has written a prompt file — typically
+- After `/prepare-issue` has written a prompt file — typically
   `prompts/issue-NNN-short-title.md`.
 - When starting an implementation session for a single GitHub issue.
 - When the user invokes `/claude-issue-executor <path-to-prompt>`.
@@ -36,8 +36,8 @@ If no prompt file exists yet, stop and tell the user to run
 
 ## What this skill does not do
 
-- Does not create prompts. That is `/prepare-issue` (ADR-013).
-- Does not create pull requests. That is `/pr-review-packager` (ADR-015).
+- Does not create prompts. That is `/prepare-issue`.
+- Does not create pull requests. That is `/pr-review-packager`.
   This skill **suggests** `/pr-review-packager` in its final summary but
   never auto-invokes it.
 - Does not draft, amend, or accept ADRs. ADRs are authored by
@@ -56,13 +56,12 @@ If no prompt file exists yet, stop and tell the user to run
   — preferred location `prompts/issue-NNN-short-title.md`, legacy
   fallback `notes/issueN-prompt.md`; or (b) a GitHub issue number, in
   which case the skill resolves the prompt path itself and may
-  auto-chain `/prepare-issue` per the auto-chain protocol below
-  (ADR-038).
+  auto-chain `/prepare-issue` per the auto-chain protocol below.
 - **No argument given:** list candidate prompt files from `prompts/`
   and, as a fallback, `notes/issue*-prompt.md`. Ask the user which to
   use. Do nothing else until they answer.
 
-### Auto-chain `prepare-issue` (per [ADR-038](../../design/adr/adr-038-tighten-prompt-step.md))
+### Auto-chain `prepare-issue`
 
 When the resolved issue has no `prompts/issue-NNN-*.md` on disk, the
 skill auto-invokes `/prepare-issue NNN` and proceeds. The prep step
@@ -78,7 +77,7 @@ prompt and surface a one-line note in the eventual evaluation
 summary.
 
 The auto-chain runs *before* significance classification, so plan-
-mode rhythm (ADR-039) gates the regenerated prompt as well.
+mode rhythm gates the regenerated prompt as well.
 
 ## Inputs
 
@@ -96,7 +95,7 @@ mode rhythm (ADR-039) gates the regenerated prompt as well.
   and issue from the prompt.
 - Tests alongside implementation, where the project has a test runner.
 - An evaluation summary printed at the end of the session **and
-  persisted to `notes/eval-issue-NNN.md`** (per ADR-040). The
+  persisted to `notes/eval-issue-NNN.md`**. The
   persisted file is the canonical input to `/pr-review-packager`
   for the carry-forward chain — see [`docs/workflow-guide.md` §6](../../docs/workflow-guide.md#6-cross-skill-carry-forward-adr-040).
 
@@ -229,10 +228,10 @@ are read-only ones needed to answer follow-up questions from the user.
 This rule is load-bearing. Skipping it violates ADR-006 and defeats the
 purpose of the skill.
 
-See **Plan-mode rhythm (per ADR-039)** below for harness-level
+See **Plan-mode rhythm** below for harness-level
 enforcement that runs alongside this rule.
 
-## Plan-mode rhythm (per ADR-039)
+## Plan-mode rhythm
 
 The chat plan-gate above is **convention** — the assistant follows the
 8-step rule because the skill says so. Claude Code also ships a
@@ -243,7 +242,7 @@ complementary: the chat plan-gate operates *inside* plan mode when the
 user has entered it, so both run together rather than competing.
 
 This section defines when the executor requests plan-mode entry and
-how it routes sessions of different sizes. The rules below implement
+how it routes sessions of different sizes. The rules below come from
 [ADR-039](../../design/adr/adr-039-plan-mode-for-significant-tasks.md)
 and instance the **category-2** rule of the kit-wide auto-mode
 permission contract — see
@@ -298,7 +297,7 @@ routes to one of three branches:
 - **Borderline** → the executor asks once: *"Significant? yes / no /
   decide for me based on scope."* Proceed accordingly.
 
-### Auto-mode behaviour (per ADR-041)
+### Auto-mode behaviour
 
 The executor is **category 2** in the kit-wide auto-mode permission
 contract — *operator-acknowledged-bypass*. Auto-mode may proceed
@@ -349,8 +348,7 @@ The cat-2 contract text in
 and the significance checklist above must also move together: when
 either is amended, review the other in the same change. PR review
 is the enforcement point until ADR-034's plan-checker grows a
-structural rule for it (deferred to issue #72 per ADR-040 /
-ADR-041).
+structural rule for it (deferred to issue #72).
 
 ## `--no-prompt` mode
 
@@ -395,7 +393,7 @@ the commit message.
 
 ### Interactions
 
-- **Plan-mode rhythm** (ADR-039) still applies. `--no-prompt`
+- **Plan-mode rhythm** still applies. `--no-prompt`
   affects the *prompt* step, not the plan-mode gate. A trivial
   issue with `--no-prompt` typically also classifies as
   clearly-trivial against the significance checklist, so plan mode
@@ -403,17 +401,16 @@ the commit message.
   `--no-prompt` on something that *is* significant (e.g. a multi-
   file refactor mislabelled `chore`), the significance gate still
   fires — the two are independent.
-- **`/check-plan`** (ADR-034) does not run when `--no-prompt` is
+- **`/check-plan`** does not run when `--no-prompt` is
   set, because there is no rendered prompt to check. The skip is
   noted in the evaluation summary alongside the breadcrumb.
-- **`design/state.md`** updates (ADR-035) still happen. The
+- **`design/state.md`** updates still happen. The
   `state:in-flight` zone records `Status: verified` (or `executing`
   mid-session) regardless of whether a prompt was generated.
 
 ## Session protocol — end to end
 
-1. **Resolve the prompt (auto-chain `prepare-issue` per
-   [ADR-038](../../design/adr/adr-038-tighten-prompt-step.md)).**
+1. **Resolve the prompt (auto-chain `prepare-issue`).**
    - If the argument is a *path*, treat as the prompt file directly.
    - If the argument is an *issue number*, resolve the prompt at
      `prompts/issue-NNN-*.md`. If absent, **auto-invoke
@@ -466,7 +463,7 @@ the commit message.
     summary** below) **and write the same content to
     `notes/eval-issue-NNN.md`** (zero-padded issue number). The
     persisted file is what `/pr-review-packager` reads for the
-    cross-skill carry-forward (per ADR-040). For `--no-prompt` runs,
+    cross-skill carry-forward. For `--no-prompt` runs,
     the summary explicitly notes the bypass for the audit trail.
 13. **Suggest handoff.** Tell the user the next step is
     `/pr-review-packager` to package a PR. Do not invoke it.
@@ -489,11 +486,11 @@ Print a single structured message that covers:
   themselves. Concrete shell lines, not prose.
 - **Next step** — `/pr-review-packager` once the session is reviewed.
 
-The same content is written to `notes/eval-issue-NNN.md` (per
-ADR-040) so `/pr-review-packager` can read it deterministically.
+The same content is written to `notes/eval-issue-NNN.md` so
+`/pr-review-packager` can read it deterministically.
 The on-disk format mirrors the printed format exactly.
 
-### `### design-questions` (per ADR-040)
+### `### design-questions`
 
 When the executor session raises a design question that affects an
 upcoming issue, append a structured `design-questions` block under
@@ -565,7 +562,7 @@ On successful completion, the final message suggests:
 
 This skill does not invoke `/pr-review-packager` itself. The user opens
 the next session deliberately, preserving a human review checkpoint
-between implementation and PR publication (ADR-015).
+between implementation and PR publication.
 
 ## Alignment check
 
@@ -578,11 +575,11 @@ Before finishing the session, confirm:
   prompt.
 - [ ] Tests, if applicable to the project, landed with the code.
 - [ ] An evaluation summary was printed **and persisted to
-  `notes/eval-issue-NNN.md`** (per ADR-040).
+  `notes/eval-issue-NNN.md`**.
 - [ ] If the session raised a cross-issue design question matching
   the §6 when-to-populate rule, a `### design-questions` block
   was added to the persisted eval summary; otherwise the block was
-  omitted (per ADR-040).
+  omitted.
 - [ ] `/pr-review-packager` was suggested, not auto-invoked.
 
 If any box is unchecked, the skill has drifted — say so in the

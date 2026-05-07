@@ -38,7 +38,7 @@ decisions and `issue-planner` (later issue) for the GitHub backlog.
 - **Optional:** user preference on project size — weekend project,
   one-month, multi-month — to guide how aggressive the scope cut is.
 - **Optional flag:** `--granularity={coarse|standard|fine}` — phase-
-  count target band, per [ADR-036](../../design/adr/adr-036-granularity-control.md).
+  count target band.
   `coarse` aims for 1–3 phases, `standard` (default) for 5–8, `fine`
   for 8–12. Bands are targets, not hard caps; the skill picks the
   actual count and justifies it inline. Precedence (highest first):

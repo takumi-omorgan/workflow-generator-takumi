@@ -22,7 +22,7 @@ If the user wants to draft a PRD offline before involving Claude Code —
 by hand, or by giving an external LLM a canonical shape to fill — point
 them at [`templates/prd-template.md`](../../templates/prd-template.md).
 That template's 11 sections match `prd-normalizer`'s canonical fields
-one-to-one (ADR-027), so a faithfully-filled file flows through
+one-to-one, so a faithfully-filled file flows through
 `prd-normalizer` as a pass-through. Use this skill only when there is
 no draft PRD at all.
 

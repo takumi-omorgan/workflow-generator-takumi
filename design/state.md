@@ -15,10 +15,10 @@ single
 
 ## In-flight issue
 
-- **Issue:** none
-- **Prompt:** n/a
-- **Branch:** n/a
-- **Status:** none
+- **Issue:** #83
+- **Prompt:** prompts/issue-083-prune-adr-attributions.md
+- **Branch:** issue-083-prune-adr-attributions
+- **Status:** verified
 
 <!-- state:in-flight:end -->
 
@@ -50,6 +50,6 @@ none
 
 ## Continue here
 
-PR #82 opened against `main` from branch `rename-design-directory-lowercase` (14 commits: two-step rename + 8 batched path-string rewrites + ADR status flips + CHANGELOG entry + example-project rename + session orchestration). 217 files changed, 1,473/1,206 +/-. Review and merge #82; v4.0.0 is the natural release version (MAJOR — breaking change). After #82 merges: (1) `git checkout main && git pull` (rebase if needed — same un-pushed-local-commit pattern as the post-#81 merge); (2) edit `notes/refactoring-ideas.md` to move entry #7 from Unfiled to Filed with `shipped-#82` status; (3) optional: run `/release` to cut v4.0.0, which will also fix the CHANGELOG entry's UNRELEASED → date+SHA. The kit no longer has any TitleCase root directory.
+Run `/claude-issue-executor prompts/issue-083-prune-adr-attributions.md` to prune 71 high-confidence + 5 medium-confidence type-3 ADR attributions across 17 of 19 SKILL.md files, per the audit harness output at `notes/skills-audit-2026-05-07/adr-attributions.md`. Six planned commits on branch `issue-083-prune-adr-attributions`: prep (prompt + state.md), CLAUDE.md style rule, then four prune batches grouped by audit density. Verification via `python3 notes/skills-audit-2026-05-07/adr-audit.py` after each commit; final `high_conf_count` ≤ 5.
 
 <!-- state:continue-here:end -->

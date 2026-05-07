@@ -62,12 +62,12 @@ project produces a doc with more ceremony than content.
   starting point for re-runs. The skill preserves editorial text
   outside the marker fences.
 - **Optional flag:** `--granularity={coarse|standard|fine}` — phase-
-  count target band, per [ADR-036](../../design/adr/adr-036-granularity-control.md).
+  count target band.
   Same precedence as `prd-to-mvp`: explicit flag > `**Granularity:**`
   line in `design/build-out-plan.md` > default `standard`. The flag
   affects this skill only when no build-out-plan exists yet — the
   declared phase order in an existing build-out-plan is canonical
-  (per ADR-031), so the flag does not re-decompose phases. If the
+  so the flag does not re-decompose phases. If the
   flag and the stored value disagree, the skill prints a one-line
   warning that the new tier will only take effect on the next
   `prd-to-mvp` run.

@@ -38,8 +38,8 @@ retrospective summary, that is `/milestone-summary`. This skill
 
 - Does not modify the milestone, the issues, the ADRs, or the
   working tree. Read-only against GitHub and the local repo.
-- Does not block `/complete-milestone`. ADR-037 is explicit:
-  audit warns, the user decides.
+- Does not block `/complete-milestone` — audit warns, the user
+  decides.
 - Does not invent phase exit criteria. If `design/build-out-plan.md`
   is absent, the phase check degrades to skipped (kit-only mode).
 - Does not infer a milestone from "current work." The argument is
@@ -186,7 +186,7 @@ input. Two natural next steps:
   ADR-linked PR, run `/release --milestone-phase=N`), then re-run
   this skill. Or, if the user explicitly accepts the gaps, proceed
   to `/complete-milestone <N>` — that skill chains this audit but
-  does not gate on its result, per ADR-037.
+  does not gate on its result.
 
 See [`example.md`](example.md) for a worked walkthrough covering
 both pass and fail cases on a phased example project.

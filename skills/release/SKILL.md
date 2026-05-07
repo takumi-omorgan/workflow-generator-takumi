@@ -11,7 +11,7 @@ generate release notes via the `/changelog` skill, create an annotated
 git tag, push it, and publish a GitHub Release. Every mutating step is
 gated behind a single explicit approval.
 
-This skill implements [ADR-017](../../design/adr/adr-017-release-skill.md).
+This skill comes from [ADR-017](../../design/adr/adr-017-release-skill.md).
 
 ## When to use this skill
 
@@ -28,7 +28,7 @@ Do not use this skill to draft changelog content in isolation — that is
 
 - Does not generate changelog content itself. It invokes `/changelog`.
   If `/changelog` is not installed, the skill aborts with a pointer to
-  install it (see ADR-016, Issue #18).
+  install it (see Issue #18).
 - Does not modify existing tags. Never force-pushes tags.
 - Does not create releases without explicit user approval.
 - Does not merge branches, push commits, or alter `main`. It only tags.
@@ -85,7 +85,7 @@ Flags:
 If neither `--version` nor `--bump` is supplied, the skill computes a
 **suggestion** (see below) and presents it for confirmation.
 
-## Default release boundary (per ADR-032)
+## Default release boundary
 
 The default release unit is **one phase**. When
 `design/build-out-plan.md` has multiple `### Phase N: <name>` blocks
@@ -151,7 +151,7 @@ Before anything else, verify:
   `bin/sync-adr-index --check` (or `.claude/bin/sync-adr-index --check`
   in target projects). Refuse if it reports drift (exit 1) — the
   release should not capture a stale index. The user must run
-  `bin/sync-adr-index`, commit the update, and retry. (ADR-023.)
+  `bin/sync-adr-index`, commit the update, and retry.
 
 If any check fails, stop and report the specific failure. Do not
 attempt to fix the environment.
@@ -164,8 +164,7 @@ indicators and classify the release as either *product-shape* (the
 default) or *workflow-shape*. The classification gates the framing of
 the release-body content.
 
-The kit applies to any structured project — software or otherwise (per
-[ADR-028](../../design/adr/adr-028-workflow-agnostic-framing.md)). On
+The kit applies to any structured project — software or otherwise. On
 non-product projects (research projects, books, curricula, content
 projects, design system docs, internal-policy documents), defaulting
 to product-shape framing — *"first tagged release of …"*, semver-shaped
@@ -281,8 +280,8 @@ mutation. The user sees the full plan and types `yes` exactly once to
 execute every step.
 
 1. **Run prerequisites check.** Stop on any failure.
-2. **Run project-shape detection** (per [ADR-042](../../design/adr/adr-042-project-shape-detection-in-release.md)
-   — see "Project-shape detection" section above). Score the four
+2. **Run project-shape detection** (see "Project-shape detection"
+   section above). Score the four
    signals; record `shape = product` (default) or `shape = workflow`
    (when ≥2 signals fire). Apply `--force-product-shape` or
    `--force-workflow-shape` if set, recording the override for the

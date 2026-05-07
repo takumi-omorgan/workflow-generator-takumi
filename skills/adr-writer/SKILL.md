@@ -46,14 +46,14 @@ just summarises the alternatives that were considered.
 - **Recommended:** `design/mvp.md` for product principles and MVP
   scope context — useful when an option's pros/cons depend on what
   the MVP includes.
-- **Optional:** `design/planning.md` (per [ADR-031](../../design/adr/adr-031-deeper-planning-workflow.md))
+- **Optional:** `design/planning.md`
   for requirements decomposition, risks, assumptions, and the
   "Decisions needing ADRs" list. When present, use it as the input
   batch source and reference its requirement IDs (`R1`, `R2`, …) in
   ADR Context sections where they apply. When absent, behaviour is
   unchanged — small projects skip this artefact and the skill works
   from PRD + MVP alone.
-- **Optional:** `design/decisions.md` (per [ADR-033](../../design/adr/adr-033-clarify-step.md))
+- **Optional:** `design/decisions.md`
   for informal-but-settled context surfaced by `/clarify` before ADR
   drafting. When present, read it for additional Context-section
   background and to avoid re-deciding questions already settled
@@ -62,8 +62,7 @@ just summarises the alternatives that were considered.
   graduate-to-ADR criterion in `skills/clarify/SKILL.md`) over
   re-litigating. When absent, behaviour is unchanged.
 - **Optional flag:** `--skip-check` — opt out of the `/check-plan`
-  pre-write gate (per [ADR-034](../../design/adr/adr-034-plan-checker.md)).
-  Default is on (gate runs); the flag is documented as opt-out for
+  pre-write gate. Default is on (gate runs); the flag is documented as opt-out for
   rapid iteration on known-good drafts only. When set, the skill
   writes each ADR despite any deterministic-criteria failures and
   appends a one-line breadcrumb to the commit message —
@@ -89,7 +88,7 @@ ADR-006:
 - Top-level heading `# ADR-NNN: Title`.
 - `**Status:**` and `**Date:**` lines immediately after the heading.
 - Optional `**Phase:** N` line when the ADR belongs to a specific
-  build-out-plan phase (per ADR-032). Omit the line on cross-cutting
+  build-out-plan phase. Omit the line on cross-cutting
   ADRs and on single-phase projects.
 - Four top-level sections: `## Context`, `## Options considered`,
   `## Decision`, `## Consequences`.
@@ -117,15 +116,14 @@ Repeat for every topic in the input batch:
 5. Draft `## Consequences` as four bullets covering what becomes
    easier / harder / has to be maintained / is deferred. If a bullet
    has nothing to add, write "None new" rather than removing it.
-6. **Phase tagging (optional, per ADR-032).** If the input topic
+6. **Phase tagging (optional).** If the input topic
    names a phase, or if `design/build-out-plan.md` makes the ADR's
    phase obvious, write `**Phase:** N` immediately after the
    `**Date:**` line. Omit the line for cross-cutting ADRs and for
    single-phase projects. The line is opt-in — when set,
    `bin/sync-adr-index` surfaces a Phase column in
    `design/adr/README.md`.
-7. **Pre-write check (per [ADR-034](../../design/adr/adr-034-plan-checker.md)
-   + [ADR-043](../../design/adr/adr-043-programmatic-check-plan.md)).**
+7. **Pre-write check.**
    Unless `--skip-check` was passed, pipe the in-memory rendered
    ADR into the kit's programmatic check-plan surface:
    ```
@@ -142,7 +140,7 @@ Repeat for every topic in the input batch:
    invocation only and writes despite failures, leaving a
    breadcrumb in the commit message.
 
-   The programmatic surface (per ADR-043) is what skills with
+   The programmatic surface is what skills with
    chain points invoke — slash-commands aren't invokable from
    inside another skill's execution. The slash-command surface
    `/check-plan` remains for direct operator use; both share the
@@ -169,7 +167,7 @@ When the input is multiple topics:
    created and any that were yielded by the gate.
 5. After all files are rendered, run `bin/sync-adr-index` to refresh
    the index in `design/adr/README.md`. This keeps the index table
-   aligned with what is on disk (ADR-023). If the script reports
+   aligned with what is on disk. If the script reports
    changes, include `design/adr/README.md` in the next commit
    alongside the new ADRs.
 

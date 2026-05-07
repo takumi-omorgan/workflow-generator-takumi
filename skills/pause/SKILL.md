@@ -13,7 +13,7 @@ pointer — and (optionally) write a richer
 read end-to-end to pick up cleanly.
 
 This skill is the **session-handoff** counterpart to `/resume`. The
-two together implement ADR-035's session-continuity contract:
+two together drive the session-continuity contract:
 `/pause` writes the truth down, `/resume` reads it back. The other
 write side — incremental updates to `state.md` during the normal
 flow — is owned by `prepare-issue`, `claude-issue-executor`, and
@@ -88,7 +88,7 @@ sufficient.
    header with today's date in `YYYY-MM-DD` form; leave zones empty
    for the next steps to populate.
 3. **Determine current phase.** If `design/build-out-plan.md` exists
-   and contains `## Phase` blocks (per ADR-032), pick the earliest
+   and contains `## Phase` blocks, pick the earliest
    unfinished phase. Otherwise write the literal `single`. Confirm
    with the user before overwriting an existing non-empty `phase`
    zone.

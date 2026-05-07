@@ -12,7 +12,7 @@ references, show the full batch for human approval, then create the
 approved issues via `gh issue create`. On successful creation, create
 a GitHub Project board and add every new issue to it.
 
-This skill implements
+This skill comes from
 [ADR-011](../../design/adr/adr-011-issue-planner-skill.md) (issue-planner
 hybrid draft-approve-create flow) and
 [ADR-012](../../design/adr/adr-012-github-projects-integration.md)
@@ -36,8 +36,7 @@ cleanly and tell the user which prerequisite skill to run.
   executor skill and `pr-review-packager` (later issues).
 - Does not modify `design/mvp.md`, `design/build-out-plan.md`, or any
   ADR file in place. If the plan needs changing, re-run `prd-to-mvp`.
-- Does not silently bulk-create issues. Human approval is mandatory
-  (ADR-006, ADR-011).
+- Does not silently bulk-create issues. Human approval is mandatory.
 - Does not work against an arbitrary repo. It targets the current
   working repo as resolved by `gh` (user must be inside a checkout with
   `gh` authenticated).
@@ -55,7 +54,7 @@ cleanly and tell the user which prerequisite skill to run.
   for it.
 - **Optional:** `design/adr/` — used to attach ADR references to
   issues when a draft matches an ADR title or topic.
-- **Optional:** `design/planning.md` (per [ADR-031](../../design/adr/adr-031-deeper-planning-workflow.md))
+- **Optional:** `design/planning.md`
   — when present, the sequencing-rationale section informs phase
   ordering of the issue backlog and the requirement IDs (`R1`,
   `R2`, …) are referenced in issue bodies for traceability. When
@@ -106,7 +105,7 @@ write these files; tolerate minor formatting drift.
    issues should be filed against.
 3. Every bullet (`- {{title}}`) under that subheading is one issue
    title.
-4. **Phase-driven path (per ADR-032).** When the build-out plan
+4. **Phase-driven path.** When the build-out plan
    contains `### Phase N: <name>` blocks (the post-ADR-032 shape) or
    `### Phase N — <name>` blocks (legacy shape), create **one
    GitHub milestone per phase** named "Phase N — <name>" by default,

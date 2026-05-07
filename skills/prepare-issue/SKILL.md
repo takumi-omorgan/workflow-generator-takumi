@@ -38,7 +38,7 @@ The argument is a single GitHub issue number (no `#`). The skill is
 comments on issues.
 
 If the user does not yet have a GitHub issue backlog, run
-`issue-planner` first (ADR-011). If the filled prompt already exists
+`issue-planner` first. If the filled prompt already exists
 and is still accurate, skip this skill and re-use the existing file.
 
 ## What this skill does not do
@@ -62,16 +62,15 @@ and is still accurate, skip this skill and re-use the existing file.
   inside a git repo whose `origin` is the GitHub repo containing the
   issue. `gh` infers the repo from git remotes.
 - **Optional flag:** `--skip-check` — opt out of the `/check-plan`
-  pre-write gate (per [ADR-034](../../design/adr/adr-034-plan-checker.md)).
-  Default is on (gate runs); the flag is documented as opt-out for
+  pre-write gate. Default is on (gate runs); the flag is documented as opt-out for
   rapid iteration on known-good drafts only. When set, the skill
   writes the prompt despite any deterministic-criteria failures and
   appends a one-line breadcrumb to the prompt body —
   `<!-- /check-plan was skipped via --skip-check per ADR-034 -->` —
   so the bypass is auditable.
 - **Optional flag:** `--pr-scan-limit <N>` — number of recently-merged
-  PRs to scan for cross-issue carry-forward notes (per ADR-040).
-  Default is 30, which covers ~2-3 milestones at typical kit
+  PRs to scan for cross-issue carry-forward notes. Default is 30,
+  which covers ~2-3 milestones at typical kit
   cadence. Override only when working in a repo with unusually high
   or low PR cadence. The scanned window is surfaced to the user at
   the review-before-write checkpoint.
@@ -79,9 +78,9 @@ and is still accurate, skip this skill and re-use the existing file.
 ## Output
 
 - **File:** `prompts/issue-NNN-short-title.md` in the target project.
-- **Shape:** exactly the section order of `prompts/_template.md`
-  (ADR-008): Context, ADR, GitHub Issue, Goal, Why it matters,
-  Requirements, Acceptance criteria, Scope, Evaluation, Instructions.
+- **Shape:** exactly the section order of `prompts/_template.md`:
+  Context, ADR, GitHub Issue, Goal, Why it matters, Requirements,
+  Acceptance criteria, Scope, Evaluation, Instructions.
 - **Filename convention:** zero-padded to 3 digits, kebab-case short
   title derived from the issue title (see "Short-title derivation"
   below).
@@ -101,7 +100,7 @@ The skill consults four sources, in priority order:
 3. **Build-out plan** (optional) — `design/build-out-plan.md`, if it
    exists. Grep it for mentions of the issue number or the issue's
    core noun phrase and pull a short contextual paragraph.
-4. **Recently-merged PRs** (optional, per ADR-040) — via
+4. **Recently-merged PRs** (optional) — via
    `gh pr list --state merged --limit <N> --json number,body,mergedAt`
    where `<N>` is the `--pr-scan-limit` value (default 30). For each
    PR's body, scan for `^## Notes for #<NNN>` sections where `NNN`
@@ -158,8 +157,7 @@ noted.
    "Context" section or the "Why it matters" section where it fits
    naturally. If the file does not exist, skip silently — this is
    normal in a freshly-initialized kit repo.
-6.5. **Scan recently-merged PRs for carry-forward notes (per
-   ADR-040).** Run
+6.5. **Scan recently-merged PRs for carry-forward notes.** Run
    `gh pr list --state merged --limit <N> --json number,body,mergedAt`
    where `<N>` is the `--pr-scan-limit` value (default 30). For each
    returned PR's body, look for sections matching
@@ -184,8 +182,7 @@ noted.
    markdown block. Ask explicitly: "Write this to
    `prompts/issue-NNN-short-title.md`? (yes / edit / cancel)".
    **Do not write the file before this confirmation.**
-10. **Pre-write check (per [ADR-034](../../design/adr/adr-034-plan-checker.md)
-    + [ADR-043](../../design/adr/adr-043-programmatic-check-plan.md)).**
+10. **Pre-write check.**
     Unless `--skip-check` was passed, after the user confirms with
     `yes`, pipe the in-memory filled prompt into the kit's
     programmatic check-plan surface:
@@ -204,7 +201,7 @@ noted.
     the gate and the skill proceeds to step 11 with a one-line
     breadcrumb appended to the prompt body.
 
-    The programmatic surface (per ADR-043) is what skills with
+    The programmatic surface is what skills with
     chain points invoke — slash-commands aren't invokable from
     inside another skill's execution. The slash-command surface
     `/check-plan` remains for direct operator use; both share the
@@ -292,7 +289,7 @@ rather than inventing content.
 the `- File:` / `- Decision:` pair for each, in the order they first
 appear in the issue body.
 
-**Carry-forward subsection (per ADR-040).** When step 6.5 found one
+**Carry-forward subsection.** When step 6.5 found one
 or more matching `## Notes for #<NNN>` sections in recently-merged
 PRs, insert a `## Design questions carried forward from PR #M`
 subsection into the rendered prompt **immediately before the
@@ -352,7 +349,7 @@ heading. The schema and field semantics of the underlying
   Append the documented breadcrumb to the prompt body before
   writing, and proceed to step 11. The flag is single-use; future
   `/prepare-issue` invocations re-enable the gate.
-- **No PR-scan matches (per ADR-040)** → the
+- **No PR-scan matches** → the
   `## Design questions carried forward from PR #M` subsection is
   omitted entirely from the rendered prompt. This is the common
   case; do not emit an empty heading. Surface "no carry-forward
@@ -394,7 +391,7 @@ filled prompt looks clean.
   review-before-write output). When matches were found, the
   `## Design questions carried forward from PR #M` subsection(s)
   were inserted immediately before `Requirements`, in newest-first
-  `mergedAt` order (per ADR-040). When no matches were found, no
+  `mergedAt` order. When no matches were found, no
   carry-forward subsection was emitted.
 
 If any fail, fix and re-show before writing.

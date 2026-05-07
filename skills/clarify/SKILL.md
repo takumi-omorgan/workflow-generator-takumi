@@ -62,7 +62,7 @@ alone is sufficient.
 
 - **Required:** `design/prd-normalized.md`.
 - **Required:** `design/mvp.md`.
-- **Optional:** `design/planning.md` (per [ADR-031](../../design/adr/adr-031-deeper-planning-workflow.md))
+- **Optional:** `design/planning.md`
   — when present, the open-research-questions section is the
   canonical source of gray areas to scan.
 - **Optional:** existing `design/decisions.md` — used as the starting
