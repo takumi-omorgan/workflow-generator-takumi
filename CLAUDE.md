@@ -43,7 +43,8 @@ that gets generated for a target project — that one is rendered from
 - Keep the kit lightweight — no premature automation, no speculative
   abstractions.
 - Never edit accepted ADRs in place. If a decision needs to change, add a
-  new ADR that supersedes the old one.
+  new ADR that supersedes the old one. Mechanical path-string rewrites
+  are an explicit exception (ADR-044).
 
 ## Developing the kit on itself (dogfooding)
 
