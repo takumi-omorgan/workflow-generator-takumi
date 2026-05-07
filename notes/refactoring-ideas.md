@@ -59,6 +59,28 @@ teaches.
 
 _Most recent first._
 
+### 11. Issue-drafter skill for non-ADR refactor issues
+
+**Status:** idea
+**Captured:** 2026-05-07
+
+**Trigger:** Filed #83 and #84 by hand from entries #2 and #9 — the HTML comment at the top of each draft (`Draft GitHub issue body for X. Source: notes/refactoring-ideas.md entry #N`) is already the de-facto template, but no skill operationalises it. Surfaced while answering the question "should I have used `/adr-writer` or `/issue-planner` for #83 and #84?" — the answer was "neither," exposing a gap between `/idea-to-prd`, `/adr-writer`, and `/issue-planner`.
+
+**Current state:** Three adjacent skills cover related shapes — `/idea-to-prd` (rough idea → PRD draft), `/adr-writer` (decision topic → ADR), `/issue-planner` (MVP + build-out plan → batch of issues at project setup). None drafts a single GitHub issue body from a `notes/refactoring-ideas.md` entry. The gap is filled today by manual drafting following the shape of #83 / #84: source-line HTML comment, Summary, ADR section (often "None required"), Why with evidence, Scope (sometimes phased), Tasks, Acceptance criteria, Scope and constraints (plan-mode policy, batching, no new tooling), Out of scope, Notes.
+
+**Proposed change:** Add `/issue-drafter` taking an entry number (`/issue-drafter 11`), optionally with a sizing/audit folder under `notes/`. Differs from siblings on four dimensions:
+
+1. **Input** — reads a `notes/refactoring-ideas.md` entry plus any sized audit harness output, not MVP/ADR/build-out plan.
+2. **Output** — writes `notes/issue-NN-draft.md` to disk for review; user files via `gh issue create --body "$(cat ...)"`. Does *not* file the issue itself.
+3. **ADR gate** — applies the kit's actual test ("does this change a kit convention that target projects depend on?") and either bails out with "run `/adr-writer` first" or auto-writes the `## ADR` section with `None required` + reasoning.
+4. **Auto-sizing + plan-mode policy** — counts touched files / hunks from any audit output, applies the standing plan-mode threshold heuristic, auto-writes `## Scope and constraints` with the right plan-mode recommendation, batching policy, and tooling-promotion stance.
+
+**Blast radius:** New `skills/issue-drafter/` (SKILL.md + example.md, ~300 lines L2). Small touch to `docs/skills.md` and `docs/workflow-guide.md` to position it. Sibling-of `/idea-to-prd` rather than under `/prepare-issue`'s wing — `/prepare-issue` runs after the issue exists; this runs before.
+
+**Open questions:** Volume threshold to justify building — n=2 (#83, #84) is too thin; revisit after ~5+ refactor issues filed. Should the skill also draft from `bug-fixes.md` and `feature-ideas.md` entries (similar shape, different ADR-gate defaults), or is single-source scope cleaner? If multi-source, does the entry-number argument need a source qualifier (`/issue-drafter refactoring 11` vs `/issue-drafter 11`)? Does the skill need its own check-plan criteria, or does the existing issue-shape audit cover it?
+
+---
+
 ### 1. Archive shipped prompts to `archive/issues/`
 
 **Status:** idea
@@ -73,23 +95,6 @@ _Most recent first._
 **Blast radius:** ~25 file moves; one new directory; cosmetic — no skill consumes shipped prompts. Cleaner working tray.
 
 **Open questions:** Flat `phase-2/` or further structured by milestone?
-
----
-
-### 2. Prune type-3 ADR attributions across SKILL.md files
-
-**Status:** idea
-**Captured:** 2026-05-06
-
-**Trigger:** Recent `docs/workflow-guide.md` refactor removed ~22 "(per ADR-XXX)" parenthetical attributions and the resulting voice was markedly cleaner. The same noise pattern is present across the 19 SKILL.md files.
-
-**Current state:** SKILL.md files include attribution-style ADR refs ("(ADR-014)", "implements ADR-035", "per ADR-038") that serve internal traceability but obscure the user-facing description. Type-1 canonical anchors and type-2 load-bearing schema cross-refs (ADR-040 carry-forward, ADR-041 permission contract) should stay.
-
-**Proposed change:** Apply the same three-bucket audit per SKILL.md — keep type-1 / type-2, prune type-3. Estimate ~2-4 prunable per skill, ~50-80 edits total. Optionally add a one-line style-guide entry to `CLAUDE.md` so the noise doesn't reaccumulate.
-
-**Blast radius:** 19 SKILL.md files; no behaviour change; voice/clarity-only.
-
-**Open questions:** Borderline cases like "per ADR-006" for plan-first model — drill-down or attribution? One-shot batch PR, per-skill PRs, or lazy-as-touched?
 
 ---
 
@@ -178,23 +183,6 @@ _Most recent first._
 
 ---
 
-### 9. Audit all SKILL.md files for structural consistency and token economy
-
-**Status:** idea
-**Captured:** 2026-05-06
-
-**Trigger:** Skills are loaded into context every session — their length and structure directly affect token usage on every invocation. Without periodic audit, drift accumulates: some skills bloat with examples, others diverge in section structure, and noise (stale ADR attributions, restated conventions) reaccumulates.
-
-**Current state:** 19 SKILL.md files. No formal style guide for skill structure. Length and structure vary skill-to-skill — some are concise, others have grown over multiple iterations. Token cost is paid every session because skills are loaded eagerly. Entry #2 of this file (prune type-3 ADR attributions) addresses one specific noise bucket; this entry is the broader audit.
-
-**Proposed change:** Define a canonical SKILL.md structure (header order, what belongs in `SKILL.md` vs sibling `example.md` / `examples.md` / `criteria.md`, target length range), then audit each of the 19 skills against it. Trim sections that duplicate guidance from `CLAUDE.md` or `docs/workflow-guide.md`. Move long worked examples and edge-case walkthroughs out of `SKILL.md` into sibling files so the loaded surface stays lean. Optionally add a `skills/STYLE.md` style guide and a CI check for length / required sections.
-
-**Blast radius:** 19 SKILL.md files; voice/structure-only — no behaviour change. Pairs with entry #2 (which it could naturally absorb when filed). May produce a `skills/STYLE.md` and a small CI guard.
-
-**Open questions:** What's the target length per `SKILL.md` (e.g. < 200 lines, < 4k tokens)? Canonical section order applied uniformly, or best-fit per skill type? Style enforced by docs only, or by a linter / CI check? Does this need a small ADR establishing the SKILL.md style contract, or is it a docs-cleanup issue? Should entry #2 be merged into this entry when filed, or stay separate as a quick-win precursor?
-
----
-
 ### 10. Kit-wide token-economy framework — measure, budget, audit
 
 **Status:** idea
@@ -224,6 +212,60 @@ _Most recent first._
 
 _Move entries here when filed as GitHub issues. Includes issue # for
 cross-reference._
+
+### 9. Audit all SKILL.md files for structural consistency and token economy
+
+**Status:** filed-#84
+**Captured:** 2026-05-06
+**Filed:** #84 (2026-05-07)
+
+**Trigger:** Skills are loaded into context every session — their length and structure directly affect token usage on every invocation. Without periodic audit, drift accumulates: some skills bloat with examples, others diverge in section structure, and noise (stale ADR attributions, restated conventions) reaccumulates.
+
+**Current state:** 19 SKILL.md files. No formal style guide for skill structure. Length and structure vary skill-to-skill — some are concise, others have grown over multiple iterations. Token cost is paid every session because skills are loaded eagerly. Entry #2 of this file (prune type-3 ADR attributions) addresses one specific noise bucket; this entry is the broader audit.
+
+**Proposed change:** Define a canonical SKILL.md structure (header order, what belongs in `SKILL.md` vs sibling `example.md` / `examples.md` / `criteria.md`, target length range), then audit each of the 19 skills against it. Trim sections that duplicate guidance from `CLAUDE.md` or `docs/workflow-guide.md`. Move long worked examples and edge-case walkthroughs out of `SKILL.md` into sibling files so the loaded surface stays lean. Optionally add a `skills/STYLE.md` style guide and a CI check for length / required sections.
+
+**Blast radius:** 19 SKILL.md files; voice/structure-only — no behaviour change. Pairs with entry #2 (which it could naturally absorb when filed). May produce a `skills/STYLE.md` and a small CI guard.
+
+**Pre-work (2026-05-07):** Initial audit run against the canonical Anthropic Skills guidance — see [`skills-audit-2026-05-07/findings-v2.md`](skills-audit-2026-05-07/findings-v2.md). Reusable deterministic script (`audit.py`), source-checked findings, re-scored per-skill judgment CSV, and an independent gpt-5.5 verification pass. Six prioritised findings; one outright budget violation (`claude-issue-executor`, 586 lines / ~6.7k tokens).
+
+**Resolution of open questions:**
+
+- *Target length per SKILL.md?* ≤500 lines / <5k tokens (Anthropic best-practices, verbatim).
+- *Canonical section order applied uniformly?* Deferred per Finding #6 — cohort outline shape is "loosely consistent" but not drifted enough to justify a hard template at 19 skills. Revisit if cohort grows.
+- *Style enforced by docs or linter / CI check?* Docs only for now. The audit harness (`audit.py`) is reusable but lives under `notes/` until evidence accumulates that the rules are violated by new skills.
+- *Need an ADR?* No — internal kit style only; doesn't change a target-project-facing convention.
+- *Merge entry #2 into entry #9 when filed?* No — kept separate. Entry #2 (#83) is a quick-win precursor focused on noise removal; this entry covers the broader cohort cleanup (descriptions, body slimming, sidecar consistency).
+
+**Sibling issue:** #83 — Prune parenthetical ADR attributions from SKILL.md bodies (entry #2).
+
+---
+
+### 2. Prune type-3 ADR attributions across SKILL.md files
+
+**Status:** shipped-#85
+**Captured:** 2026-05-06
+**Filed:** #83 (2026-05-07)
+**Shipped:** #85 (2026-05-07)
+
+**Trigger:** Recent `docs/workflow-guide.md` refactor removed ~22 "(per ADR-XXX)" parenthetical attributions and the resulting voice was markedly cleaner. The same noise pattern is present across the 19 SKILL.md files.
+
+**Current state:** SKILL.md files include attribution-style ADR refs ("(ADR-014)", "implements ADR-035", "per ADR-038") that serve internal traceability but obscure the user-facing description. Type-1 canonical anchors and type-2 load-bearing schema cross-refs (ADR-040 carry-forward, ADR-041 permission contract) should stay.
+
+**Proposed change:** Apply the same three-bucket audit per SKILL.md — keep type-1 / type-2, prune type-3. Estimate ~2-4 prunable per skill, ~50-80 edits total. Optionally add a one-line style-guide entry to `CLAUDE.md` so the noise doesn't reaccumulate.
+
+**Blast radius:** 19 SKILL.md files; no behaviour change; voice/clarity-only.
+
+**Pre-work (2026-05-07):** Detection script (`adr-audit.py`) run — see [`skills-audit-2026-05-07/adr-attributions.md`](skills-audit-2026-05-07/adr-attributions.md) for the full per-match listing. **71 high-confidence + 5 medium-confidence type-3 candidates** across 17 of 19 skills (`milestone-summary` and `resume` already clean). Confirms the original 50–80 estimate. Top by count: `claude-issue-executor` (21), `prepare-issue` (12), `adr-writer` (8), `check-plan` (5), `issue-planner` (5), `release` (5). Top by density per 100 lines: `adr-writer` (3.92), `claude-issue-executor` (3.58), `prepare-issue` (2.96). Dominant pattern: parenthetical `(per ADR-NNN)` (≈55% of matches).
+
+**Resolution of open questions:**
+
+- *Borderline cases like "per ADR-006" — drill-down or attribution?* Default prune; reformat to a markdown link in body text when the reader genuinely needs the ADR to do the task.
+- *One-shot batch PR, per-skill PRs, or lazy-as-touched?* One-shot batch PR — voice-only, 17-file blast radius, partial state would drift back. The per-match listing in `adr-attributions.md` is the work plan.
+
+**Sibling issue:** #84 — Apply 2026-05-07 skills-audit recommendations across the cohort (entry #9).
+
+---
 
 ### 7. Rename `Design/` → `design/` for case consistency with other root directories
 
