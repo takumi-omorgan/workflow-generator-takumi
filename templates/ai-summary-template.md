@@ -1,7 +1,7 @@
 <!--
   Template: AI-readable project summary
   Filled by: the workflow-docs skill, or a human at design checkpoints
-  Output in a target project: Design/ai-summary.md
+  Output in a target project: design/ai-summary.md
   This document is written for AI consumption. External AIs (Perplexity,
   ChatGPT, other Claude instances) read it when helping to design a
   feature or review an ADR. Prioritise structure, concrete facts, and

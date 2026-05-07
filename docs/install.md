@@ -1,7 +1,7 @@
 # Install Guide
 
 How to install the Claude Code Workflow Kit into a **new** project. The
-kit is project-agnostic (per [ADR-028](../Design/adr/adr-028-workflow-agnostic-framing.md))
+kit is project-agnostic (per [ADR-028](../design/adr/adr-028-workflow-agnostic-framing.md))
 — software, research, content, curriculum, or any other structured
 project that fits the kit's three assumptions: a git repo, GitHub, and
 Claude Code.
@@ -10,11 +10,11 @@ Claude Code.
 > not adapt or migrate existing repositories. If you want to add the
 > workflow to an existing codebase, this kit is not the right fit —
 > see [What this kit does not support](#what-this-kit-does-not-support) below and
-> [ADR-002](../Design/adr/adr-002-new-project-only-scope.md).
+> [ADR-002](../design/adr/adr-002-new-project-only-scope.md).
 
 The kit uses a **project-local installation model**: each new target
 project gets its own copy of the skills under `.claude/skills/`. There is
-no global install. See [ADR-001](../Design/adr/adr-001-project-local-installation-model.md)
+no global install. See [ADR-001](../design/adr/adr-001-project-local-installation-model.md)
 for the reasoning.
 
 ---
@@ -131,7 +131,7 @@ Environment variables:
 
 The installer's behaviour itself is unchanged from ADR-009:
 
-1. Creates `Design/adr/`, `prompts/`, `notes/`, and `.claude/skills/`
+1. Creates `design/adr/`, `prompts/`, `notes/`, and `.claude/skills/`
    in the target project.
 2. Copies every skill from the kit's `skills/` into `.claude/skills/`.
 3. Copies `bin/sync-adr-index` into `.claude/bin/` (ADR-023).
@@ -218,7 +218,7 @@ gh repo clone olivermorgan2/workflow-generator "$TMPKIT" -- --depth=1 --branch=v
 
 ```bash
 cd my-project                                   # target project root
-mkdir -p .claude/skills .claude/bin Design/adr prompts notes
+mkdir -p .claude/skills .claude/bin design/adr prompts notes
 cp -R "$TMPKIT/skills/"* .claude/skills/
 cp "$TMPKIT/bin/sync-adr-index" .claude/bin/
 chmod +x .claude/bin/sync-adr-index
@@ -228,7 +228,7 @@ cp "$TMPKIT/prompts/_template.md" prompts/_template.md
 The `prompts/` folder holds one filled session brief per GitHub
 issue (`issue-NNN-short-title.md`), copied from `_template.md`.
 Freeform working notes stay in `notes/`. See
-[ADR-008](../Design/adr/adr-008-dedicated-prompts-folder.md).
+[ADR-008](../design/adr/adr-008-dedicated-prompts-folder.md).
 
 This is the step that makes the install **project-local**: the
 skills now live under the target project's own `.claude/skills/`,
@@ -270,7 +270,7 @@ my-project/
   .claude/
     skills/
       idea-to-prd/          # plus the other skills shipped by the kit
-  Design/
+  design/
     adr/
   prompts/
     _template.md            # blank template; copy to start an issue session
@@ -293,7 +293,7 @@ For the full expected layout and which artifacts originate where, see
 ## 5. Pick a starting path
 
 The kit supports three ways to start planning, defined in
-[ADR-003](../Design/adr/adr-003-prd-intake-model.md). Pick the one that
+[ADR-003](../design/adr/adr-003-prd-intake-model.md). Pick the one that
 matches what you have in hand:
 
 | You have… | Use this skill | Status |
@@ -348,10 +348,10 @@ The kit intentionally does **not** include:
 - **Team/multi-repo features.** The kit is scoped to a solo author or
   small team working on a single project at a time.
 - **Non-GitHub providers.** The workflow is GitHub-first
-  ([ADR-004](../Design/adr/adr-004-github-first-workflow-model.md)).
+  ([ADR-004](../design/adr/adr-004-github-first-workflow-model.md)).
   GitLab, Bitbucket, and others are not supported.
 - **Non-Claude AI tools.** The skills target Claude Code specifically
-  ([ADR-006](../Design/adr/adr-006-claude-code-execution-model.md)).
+  ([ADR-006](../design/adr/adr-006-claude-code-execution-model.md)).
 
 If any of the above is a hard requirement for your project, this release
 is not the right fit — revisit after Phase 2.
@@ -383,7 +383,7 @@ Project-local skills are discovered relative to the current working
 directory. If you `cd` into a subdirectory, skills still resolve, but if
 you run Claude Code from an unrelated directory they will not.
 
-**I already have a `Design/` or `.claude/` in the target project**
+**I already have a `design/` or `.claude/` in the target project**
 The copy commands in step 3 use `mkdir -p` and directory-level `cp -R`,
 so they will not overwrite files that already exist with different
 names. If you want to replace them wholesale, remove them first.

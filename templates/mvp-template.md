@@ -1,7 +1,7 @@
 <!--
   Template: MVP statement
   Filled by: the prd-to-mvp skill, or a human after PRD intake
-  Output in a target project: Design/mvp.md (recommended) or similar
+  Output in a target project: design/mvp.md (recommended) or similar
   The MVP statement is a scoping document. It turns a PRD into an
   explicit yes/no list: what the first release must do, what it must
   not do, and how you'll know you've succeeded. Keep it short — one

@@ -3,12 +3,12 @@
   Filled by:  the user (by hand) or by an external LLM given this
               file as the shape to follow. Tool-agnostic — any
               external LLM, or no LLM at all, works equally well.
-  Output in a target project: Design/prd.md
+  Output in a target project: design/prd.md
   Consumer:   the `prd-normalizer` skill.
 
   The PRD is the starting artifact of the workflow. Once filled, hand
   it to `prd-normalizer`, which maps it onto the canonical 11-field
-  Normalized PRD at Design/prd-normalized.md. If this template is
+  Normalized PRD at design/prd-normalized.md. If this template is
   filled faithfully, the normalizer has almost nothing to do — it
   just confirms the two identity fields and writes the file through.
 

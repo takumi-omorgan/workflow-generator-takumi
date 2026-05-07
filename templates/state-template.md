@@ -2,7 +2,7 @@
   Template: Session-continuity state
   Filled by: prepare-issue, claude-issue-executor, pr-review-packager
             (and refreshed by /pause; read by /resume)
-  Output in a target project: Design/state.md
+  Output in a target project: design/state.md
 
   Purpose. A small, committed pointer to the project's current
   position so a fresh Claude Code session does not have to
@@ -16,7 +16,7 @@
   skills) is preserved across re-runs. The same pattern is used by
   templates/decisions-template.md.
 
-  Conflict-resolution rule. On merge conflict in Design/state.md,
+  Conflict-resolution rule. On merge conflict in design/state.md,
   the most recently merged PR's version wins for the conflicting
   zone. /resume re-derives from `gh` if the file looks suspect —
   e.g. the in-flight issue is already closed/merged, or the
@@ -37,7 +37,7 @@
 
 ## Phase
 
-{{Phase name from Design/build-out-plan.md, or the literal `single` for projects without phases.}}
+{{Phase name from design/build-out-plan.md, or the literal `single` for projects without phases.}}
 
 <!-- state:phase:end -->
 

@@ -6,7 +6,7 @@
 
   The README is the public entry point for humans. It explains what the
   project is, who it is for, how to run it, and where to find the deeper
-  design docs. Keep it short — link out to Design/ and docs/ for detail.
+  design docs. Keep it short — link out to design/ and docs/ for detail.
 
   ------------------------------------------------------------------------
   PLACEHOLDERS (all use {{UPPER_SNAKE}} syntax)
@@ -26,8 +26,8 @@
   entirely by the workflow-docs skill if no source data is available):
     {{CURRENT_PHASE}}         Short line describing what is active now.
     {{CURRENT_MILESTONE}}     Example: "MVP", "v0.2"
-    {{IN_SCOPE_BULLETS}}      Bulleted "In scope" list from Design/mvp.md.
-    {{OUT_OF_SCOPE_BULLETS}}  Bulleted "Out of scope" list from Design/mvp.md.
+    {{IN_SCOPE_BULLETS}}      Bulleted "In scope" list from design/mvp.md.
+    {{OUT_OF_SCOPE_BULLETS}}  Bulleted "Out of scope" list from design/mvp.md.
     {{KEY_ADR_BULLETS}}       One bullet per ADR, newest first.
 
   The workflow-docs skill wraps each generated section in marker fences
@@ -90,14 +90,14 @@ Active milestone: `{{CURRENT_MILESTONE}}`.
 
 {{KEY_ADR_BULLETS}}
 
-See [`Design/adr/`](Design/adr/) for the full list.
+See [`design/adr/`](design/adr/) for the full list.
 <!-- workflow-docs:end:key-decisions -->
 
 <!-- workflow-docs:start:more -->
 ## More
 
 - [`CLAUDE.md`](CLAUDE.md) — project rules for Claude Code
-- [`Design/mvp.md`](Design/mvp.md) — MVP statement
-- [`Design/ai-summary.md`](Design/ai-summary.md) — AI-readable project summary
-- [`Design/adr/`](Design/adr/) — architecture decisions
+- [`design/mvp.md`](design/mvp.md) — MVP statement
+- [`design/ai-summary.md`](design/ai-summary.md) — AI-readable project summary
+- [`design/adr/`](design/adr/) — architecture decisions
 <!-- workflow-docs:end:more -->

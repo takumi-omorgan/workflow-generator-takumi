@@ -1,7 +1,7 @@
 <!--
   Template: Build-out plan
   Filled by: the prd-to-mvp skill (alongside the MVP statement), or a human
-  Output in a target project: Design/build-out-plan.md (recommended)
+  Output in a target project: design/build-out-plan.md (recommended)
   The build-out plan sequences the MVP into phases, milestones, and an
   initial issue backlog. It should be lightweight enough to revise
   mid-project and concrete enough to drive GitHub issue creation.
@@ -107,7 +107,7 @@ The plan is complete when a user can:
 <!-- Phased ADR linkage. ADRs that belong to a specific phase should
      declare it via the optional `**Phase:**` frontmatter line in their
      ADR file. bin/sync-adr-index will surface a Phase column in
-     Design/adr/README.md whenever any ADR is phase-tagged. -->
+     design/adr/README.md whenever any ADR is phase-tagged. -->
 
 ## Milestone recommendation
 

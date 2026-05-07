@@ -1,7 +1,7 @@
 <!--
   Template: Milestone summary
   Filled by: /milestone-summary (ADR-037)
-  Output in a target project: Design/milestones/<N>-<slug>.md
+  Output in a target project: design/milestones/<N>-<slug>.md
 
   Purpose. A retrospective artefact for a closed (or near-closing)
   milestone: what shipped, which ADRs were adopted, what's deferred,
@@ -103,7 +103,7 @@ retrospective, not an essay.}}
 
 {{One short paragraph: the next milestone (or "release pending"),
 the open thread to pick up, and any cross-milestone follow-up. The
-canonical pointer is `Design/state.md` — this is the human-readable
+canonical pointer is `design/state.md` — this is the human-readable
 companion.}}
 
 <!-- summary:next:end -->

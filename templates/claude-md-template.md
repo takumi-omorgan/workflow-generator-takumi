@@ -62,8 +62,8 @@ worse output than no rules.
 ## What this is
 
 {{One paragraph: what the project does, for whom, and roughly how. Link to
-the PRD, MVP doc, or AI summary if they exist — `Design/mvp.md` and
-`Design/ai-summary.md` are the standard locations in a kit-installed project.}}
+the PRD, MVP doc, or AI summary if they exist — `design/mvp.md` and
+`design/ai-summary.md` are the standard locations in a kit-installed project.}}
 
 ## Current phase
 
@@ -113,7 +113,7 @@ Active milestone: `{{CURRENT_MILESTONE}}`.
     three or four entries is enough. Example:
     src/            application code
     test/           unit and integration tests
-    Design/         ADRs, MVP doc, AI summary
+    design/         ADRs, MVP doc, AI summary
     notes/          per-issue prompts and process notes
     .claude/skills/ installed workflow skills
   }}
@@ -121,7 +121,7 @@ Active milestone: `{{CURRENT_MILESTONE}}`.
 
 See also:
 
-- `Design/` — ADRs (`Design/adr/`), MVP (`Design/mvp.md`), AI summary (`Design/ai-summary.md`)
+- `design/` — ADRs (`design/adr/`), MVP (`design/mvp.md`), AI summary (`design/ai-summary.md`)
 - `notes/` — per-issue prompts and working notes
 - `.claude/skills/` — installed workflow skills (do not edit by hand)
 
@@ -137,7 +137,7 @@ as hard requirements unless a human overrides them in the session.
   Per-issue prompts live in `notes/issueNN-prompt.md`.
 - **Consult ADRs before changing load-bearing behaviour.** If a change
   touches architecture, installation, or conventions, check
-  `Design/adr/` first. Never edit an accepted ADR in place — supersede it
+  `design/adr/` first. Never edit an accepted ADR in place — supersede it
   with a new ADR.
 - **Stay in scope.** Do not refactor unrelated code, rename files, or add
   speculative abstractions while working on an issue. If something is
@@ -191,9 +191,9 @@ A task is **done** when:
 
 ## What this file is NOT
 
-- Not a spec — architectural decisions live in `Design/adr/`.
-- Not a roadmap — phased plans live in `Design/build-out-plan.md`.
-- Not an AI-readable summary — that is `Design/ai-summary.md`.
+- Not a spec — architectural decisions live in `design/adr/`.
+- Not a roadmap — phased plans live in `design/build-out-plan.md`.
+- Not an AI-readable summary — that is `design/ai-summary.md`.
 
 Keep this file focused on rules and conventions Claude Code needs to do
 its job. When in doubt, link out.

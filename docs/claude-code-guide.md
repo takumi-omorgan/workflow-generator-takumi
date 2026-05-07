@@ -48,7 +48,7 @@ approving the plan — then the assistant implements it.
 
 This is the interaction model that every build-oriented skill in the
 kit enforces at the prompt level, per
-[ADR-006](../Design/adr/adr-006-claude-code-execution-model.md).
+[ADR-006](../design/adr/adr-006-claude-code-execution-model.md).
 
 ### When skills use it
 
@@ -138,7 +138,7 @@ list. As of this writing the kit ships:
 ## The approve-then-implement loop
 
 This is the core interaction pattern. It comes from
-[ADR-006](../Design/adr/adr-006-claude-code-execution-model.md) and is
+[ADR-006](../design/adr/adr-006-claude-code-execution-model.md) and is
 enforced by every build skill.
 
 The loop has five steps:
@@ -276,7 +276,7 @@ avoid it.
   immediately invoke `/pr-review-packager` in the same session.
 - **Why it bites.** The review checkpoint between implementation
   and PR disappears — the whole point of separating the two
-  skills. See [ADR-015](../Design/adr/adr-015-pr-review-packager-skill.md).
+  skills. See [ADR-015](../design/adr/adr-015-pr-review-packager-skill.md).
 - **How to avoid.** Close the session, review the diff yourself
   (`gh pr view --web` or `git log -p`), then open a new session
   for the next skill.

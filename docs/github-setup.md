@@ -2,7 +2,7 @@
 
 How to set up GitHub for a **new target project** that uses the Claude Code
 Workflow Kit. The kit is GitHub-first
-([ADR-004](../Design/adr/adr-004-github-first-workflow-model.md)); this
+([ADR-004](../design/adr/adr-004-github-first-workflow-model.md)); this
 guide is the practical configuration that makes that decision real.
 
 > **Prerequisites:** Git, GitHub CLI, `gh auth login` working, and SSH
@@ -215,7 +215,7 @@ against and continues to be the contract if they're ever revised.
 
 - `## Summary` — one-paragraph description of the change
 - `## Closes` — `Closes #N` line(s)
-- `## ADR` — `Related ADR: Design/adr/adr-NNN-...md` (or "none" if N/A)
+- `## ADR` — `Related ADR: design/adr/adr-NNN-...md` (or "none" if N/A)
 - `## Changes` — bulleted list of the substantive edits
 - `## Test results` — paste of the test-runner output or "no code changes"
 - `## Manual verification` — steps the reviewer should run, or "none needed"
@@ -297,7 +297,7 @@ gh pr merge --squash --delete-branch
 ## Alignment
 
 Every section of this guide traces back to
-[ADR-004](../Design/adr/adr-004-github-first-workflow-model.md), which
+[ADR-004](../design/adr/adr-004-github-first-workflow-model.md), which
 names the GitHub assumptions in one line each: repositories, issues,
 labels, milestones, pull requests, `main + feature branch`, and optional
 branch protection.

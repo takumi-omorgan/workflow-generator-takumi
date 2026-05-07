@@ -2,7 +2,7 @@
 
 How to use [`notes/issue-prompt.md`](../notes/issue-prompt.md) — the
 reusable Claude Code session prompt. The underlying decision is
-[ADR-006](../Design/adr/adr-006-claude-code-execution-model.md):
+[ADR-006](../design/adr/adr-006-claude-code-execution-model.md):
 issue-by-issue, plan-first execution.
 
 A worked instance is at
@@ -39,8 +39,8 @@ source:
 | Placeholder | Where the value comes from |
 |---|---|
 | `{{PROJECT_NAME}}` | The repo name. |
-| `{{ONE_LINE_PROJECT_DESCRIPTION}}` | The one-line description in `Design/mvp.md` (or `Design/prd-normalized.md` if no MVP yet). |
-| `{{WORKFLOW_DOC_PATH}}` | Usually `Design/build-out-plan.md`. For repos that customise this, point at the actual workflow doc. |
+| `{{ONE_LINE_PROJECT_DESCRIPTION}}` | The one-line description in `design/mvp.md` (or `design/prd-normalized.md` if no MVP yet). |
+| `{{WORKFLOW_DOC_PATH}}` | Usually `design/build-out-plan.md`. For repos that customise this, point at the actual workflow doc. |
 | `{{ADR_FILE}}` and `{{ADR_ONE_LINE_SUMMARY}}` | The ADR(s) that drive this issue. Repeat the two-line block per ADR. If none applies, write `ADR: none — {{REASON}}` and explain. |
 | `{{ISSUE_TITLE}}`, `{{ISSUE_NUMBER}}`, `{{MILESTONE}}`, `{{LABELS}}` | Straight from the GitHub issue. |
 | `{{ONE_OR_TWO_SENTENCES}}` (Goal) | The "Goal" field of the GitHub issue body. |

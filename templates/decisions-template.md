@@ -1,7 +1,7 @@
 <!--
   Template: Decisions log
   Filled by: the clarify skill, or a human
-  Output in a target project: Design/decisions.md
+  Output in a target project: design/decisions.md
   The decisions log captures informal-but-settled context that sits
   below ADR weight: gray areas surfaced before ADR drafting, deep-dive
   resolutions, and the rationale that hardens them. The skill is
@@ -25,8 +25,8 @@
 # {{PRODUCT_NAME}} — Decisions
 
 **Last updated:** {{YYYY-MM-DD}}
-**Source PRD:** [`Design/prd-normalized.md`](prd-normalized.md)
-**Source MVP:** [`Design/mvp.md`](mvp.md)
+**Source PRD:** [`design/prd-normalized.md`](prd-normalized.md)
+**Source MVP:** [`design/mvp.md`](mvp.md)
 
 ## Purpose
 

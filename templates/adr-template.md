@@ -1,7 +1,7 @@
 <!--
   Template: ADR (Architecture Decision Record)
   Filled by: the adr-writer skill, or a human at decision time
-  Output in a target project: Design/adr/adr-NNN-short-title.md
+  Output in a target project: design/adr/adr-NNN-short-title.md
   Numbering is sequential and never reused. One decision per ADR.
 -->
 
@@ -12,7 +12,7 @@
 <!-- Optional: declare the build-out-plan phase this ADR belongs to.
      Omit the line if the project is single-phase or this ADR is
      cross-cutting. When set, bin/sync-adr-index surfaces a Phase
-     column in Design/adr/README.md. Per ADR-032. -->
+     column in design/adr/README.md. Per ADR-032. -->
 **Phase:** {{N}}
 
 ## Context

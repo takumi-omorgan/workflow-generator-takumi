@@ -39,13 +39,13 @@ in the steady state (see [workflow-guide §3](workflow-guide.md#3-after-the-firs
 ### `/idea-to-prd` (cat-1)
 
 Turn a rough idea — a paragraph, a conversation, a notes file — into
-a lightweight PRD draft at `Design/prd.md`. Output is intentionally
+a lightweight PRD draft at `design/prd.md`. Output is intentionally
 minimal; the next skill (`/prd-normalizer`) reshapes it into the
 kit's canonical format.
 
 - **Use when:** you have only an idea, no PRD or planning notes.
 - **Input:** prose or notes from the user; no required files.
-- **Output:** `Design/prd.md`.
+- **Output:** `design/prd.md`.
 - **Skip when:** you already have a PRD or custom planning notes — go
   straight to `/prd-normalizer`.
 - **Spec:** [`skills/idea-to-prd/SKILL.md`](../skills/idea-to-prd/SKILL.md).
@@ -60,7 +60,7 @@ don't have to branch on the input shape.
 - **Use when:** you have a PRD or custom notes that need to be
   reshaped into the kit's format before scoping.
 - **Input:** an existing PRD or custom planning notes on disk.
-- **Output:** `Design/prd-normalized.md`.
+- **Output:** `design/prd-normalized.md`.
 - **Spec:** [`skills/prd-normalizer/SKILL.md`](../skills/prd-normalizer/SKILL.md).
 
 ### `/prd-to-mvp` (cat-1)
@@ -73,8 +73,8 @@ in-scope work into phases that downstream skills (`/issue-planner`,
 
 - **Use when:** you have a normalized PRD and want to scope the first
   release.
-- **Input:** `Design/prd-normalized.md`.
-- **Output:** `Design/mvp.md` and `Design/build-out-plan.md`.
+- **Input:** `design/prd-normalized.md`.
+- **Output:** `design/mvp.md` and `design/build-out-plan.md`.
 - **Key flag:** `--granularity={coarse|standard|fine}` sets a target
   phase count (1–3 / 5–8 / 8–12). The choice is recorded in the
   build-out plan so re-runs are consistent.
@@ -86,15 +86,15 @@ in-scope work into phases that downstream skills (`/issue-planner`,
 
 Capture deeper planning context — requirements decomposition, risks,
 assumptions, phase-sequencing rationale, open research questions —
-into `Design/planning.md` before any ADRs are drafted. Optional;
+into `design/planning.md` before any ADRs are drafted. Optional;
 small projects skip it and go straight from `/prd-to-mvp` to
 `/adr-writer`.
 
 - **Use when:** the project is large or unfamiliar enough that you
   want to harden ambiguity into structured questions before writing
   ADRs.
-- **Input:** `Design/prd-normalized.md` and `Design/mvp.md`.
-- **Output:** `Design/planning.md`.
+- **Input:** `design/prd-normalized.md` and `design/mvp.md`.
+- **Output:** `design/planning.md`.
 - **Spec:** [`skills/planning/SKILL.md`](../skills/planning/SKILL.md).
 
 ### `/clarify` (cat-1, opt-in)
@@ -102,13 +102,13 @@ small projects skip it and go straight from `/prd-to-mvp` to
 Surface unresolved implementation questions — "gray areas" that
 don't warrant a full ADR but need to be settled before ADRs are
 written. Conducts a deep-dive per question and appends settled
-decisions to `Design/decisions.md` (a below-ADR-weight log).
+decisions to `design/decisions.md` (a below-ADR-weight log).
 
 - **Use when:** scoping is done but you can feel a handful of small
   implementation questions hanging in the air.
-- **Input:** `Design/prd-normalized.md`, `Design/mvp.md`, optionally
-  `Design/planning.md`.
-- **Output:** appends to `Design/decisions.md`.
+- **Input:** `design/prd-normalized.md`, `design/mvp.md`, optionally
+  `design/planning.md`.
+- **Output:** appends to `design/decisions.md`.
 - **Spec:** [`skills/clarify/SKILL.md`](../skills/clarify/SKILL.md).
 
 ---
@@ -131,7 +131,7 @@ human act and is not done by this skill.
   or ad-hoc when an architectural question comes up later).
 - **Input:** a list of decision topics (chat input or a "Decisions
   needing ADRs" section in the MVP).
-- **Output:** one or more `Design/adr/adr-NNN-*.md` files, status
+- **Output:** one or more `design/adr/adr-NNN-*.md` files, status
   `proposed`.
 - **Key flag:** `--skip-check` opts out of the chained `/check-plan`
   quality gate.
@@ -163,7 +163,7 @@ gate (skip with `--skip-check`).
 
 ### `/issue-planner` (cat-3)
 
-Turn `Design/mvp.md` and `Design/build-out-plan.md` into a reviewed
+Turn `design/mvp.md` and `design/build-out-plan.md` into a reviewed
 batch of GitHub issues, plus a Project board. Drafts the full batch
 (titles, bodies, labels, milestones, ADR references), shows it for
 your approval, and only then creates the issues via `gh issue create`
@@ -172,7 +172,7 @@ and adds them to a new GitHub Project board.
 - **Use when:** the MVP and build-out plan exist and you're ready to
   turn them into a tracked GitHub backlog. Also re-runnable later
   when you're adding a new milestone-worth of issues.
-- **Input:** `Design/mvp.md`, `Design/build-out-plan.md`, accepted
+- **Input:** `design/mvp.md`, `design/build-out-plan.md`, accepted
   ADRs.
 - **Output:** GitHub issues + Project board + (one milestone per
   phase, or one for the whole project on single-phase plans).
@@ -199,8 +199,8 @@ Claude Code session.
 - **Use when:** you have an issue number and want a primed prompt to
   hand to the executor. Auto-chained from `/claude-issue-executor`
   when no prompt exists for the issue.
-- **Input:** an issue number; reads `gh`, `Design/adr/`, and
-  `Design/build-out-plan.md`.
+- **Input:** an issue number; reads `gh`, `design/adr/`, and
+  `design/build-out-plan.md`.
 - **Output:** `prompts/issue-NNN-<short-title>.md`. Embeds
   carry-forward notes from a recently-merged PR if any (see
   [workflow-guide §6](workflow-guide.md#6-cross-skill-carry-forward-adr-040)).
@@ -277,7 +277,7 @@ every `## Phase` block's exit criterion satisfied.
 ### `/milestone-summary` (cat-1)
 
 Render a retrospective for a milestone into
-`Design/milestones/<N>-<slug>.md`. Filled from `git log` between
+`design/milestones/<N>-<slug>.md`. Filled from `git log` between
 phase-boundary tags, the GitHub milestone, and accepted ADRs in the
 date range. The `lessons` zone is **user-authored** and is preserved
 verbatim across re-runs.
@@ -285,7 +285,7 @@ verbatim across re-runs.
 - **Use when:** before or just after closing a milestone, to capture
   what shipped, what was deferred, and lessons learned.
 - **Input:** a milestone number.
-- **Output:** `Design/milestones/<N>-<slug>.md`.
+- **Output:** `design/milestones/<N>-<slug>.md`.
 - **Key flag:** `--overwrite` to regenerate (preserves the lessons
   zone verbatim).
 - **Example:** `/milestone-summary 3 --overwrite` to regenerate the
@@ -303,7 +303,7 @@ continue-here), and optionally chains `/release` with
 - **Use when:** the milestone's issues are merged and you're ready
   to close it cleanly.
 - **Input:** a milestone number.
-- **Output:** closed GitHub milestone, refreshed `Design/state.md`,
+- **Output:** closed GitHub milestone, refreshed `design/state.md`,
   and optionally a tagged release.
 - **Key flags:**
   - `--release` chains `/release --milestone-phase=N` after the
@@ -368,7 +368,7 @@ single explicit approval.
 
 ### `/workflow-docs` (cat-1)
 
-Re-render `README.md` and `Design/ai-summary.md` from the project's
+Re-render `README.md` and `design/ai-summary.md` from the project's
 current artefacts (PRD, MVP, accepted ADRs, `CLAUDE.md`). Generated
 regions are wrapped in marker fences so manual edits outside those
 regions are preserved across re-runs. Sections with no source data
@@ -379,7 +379,7 @@ are omitted entirely rather than left blank.
   `ai-summary.md` is what you paste into external AIs for
   second-opinion design reviews, so it's worth keeping current.
 - **Input:** project artefacts (PRD, MVP, ADRs, `CLAUDE.md`).
-- **Output:** updated `README.md` and `Design/ai-summary.md`.
+- **Output:** updated `README.md` and `design/ai-summary.md`.
 - **Spec:** [`skills/workflow-docs/SKILL.md`](../skills/workflow-docs/SKILL.md).
 
 ---
@@ -388,35 +388,35 @@ are omitted entirely rather than left blank.
 
 Skills that bridge multiple Claude Code sessions, so a fresh session
 can pick up exactly where the last one left off. Backed by a single
-committed pointer file, `Design/state.md`.
+committed pointer file, `design/state.md`.
 
 ### `/resume` (cat-1)
 
-Read `Design/state.md` and emit a one-message brief: current phase,
+Read `design/state.md` and emit a one-message brief: current phase,
 in-flight issue (with its prompt and branch), the last few merged
 PRs, blockers, and the "continue here" pointer. No `gh` calls on the
 happy path; falls back to `gh pr list` / `gh issue list` if state.md
 is missing, empty, or looks stale.
 
 - **Use when:** at the start of every fresh Claude Code session in a
-  project that uses `Design/state.md`.
-- **Input:** `Design/state.md` (or `gh` fallback).
+  project that uses `design/state.md`.
+- **Input:** `design/state.md` (or `gh` fallback).
 - **Output:** a chat brief; no file writes.
 - **Spec:** [`skills/resume/SKILL.md`](../skills/resume/SKILL.md).
 
 ### `/pause` (cat-1)
 
-Refresh `Design/state.md` so it reflects right now — phase, in-flight
+Refresh `design/state.md` so it reflects right now — phase, in-flight
 issue, recent work, blockers, continue-here. Optionally writes a
 richer `notes/handoff-YYYY-MM-DD.md` for context-window-exhausting
 session handoffs.
 
 - **Use when:** before a context reset, end of day, after a
-  non-trivial detour, or to seed `Design/state.md` for the first
+  non-trivial detour, or to seed `design/state.md` for the first
   time.
 - **Input:** project state (build-out plan, prompts, branches, `gh
   pr list`).
-- **Output:** refreshed `Design/state.md`; with `--handoff`, also a
+- **Output:** refreshed `design/state.md`; with `--handoff`, also a
   handoff file in `notes/`.
 - **Key flag:** `--handoff` for the richer context-window-exhausting
   case.
@@ -436,8 +436,8 @@ never invoke them directly.
 | Tool | Purpose |
 |---|---|
 | `bin/check-plan` | Programmatic equivalent of `/check-plan` for chained, non-interactive use |
-| `bin/check-state-cap` | CI guard rail: exits 1 if `Design/state.md` exceeds the line cap (default 100) |
-| `bin/sync-adr-index` | Rebuild `Design/adr/README.md` from the ADRs in `Design/adr/` |
+| `bin/check-state-cap` | CI guard rail: exits 1 if `design/state.md` exceeds the line cap (default 100) |
+| `bin/sync-adr-index` | Rebuild `design/adr/README.md` from the ADRs in `design/adr/` |
 | `bin/check-plan-criteria-drift` | Detect drift between `/check-plan` criteria and the canonical version-locked checklist |
 | `bin/install-workflow-kit` | Install the kit into a target project |
 | `bin/bootstrap-workflow-kit` | One-shot bootstrap helper for new projects |

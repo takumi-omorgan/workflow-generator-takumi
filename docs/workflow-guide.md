@@ -24,7 +24,7 @@ project with versioned releases (per the MAJOR/MINOR/PATCH policy in
 §3) and a documented idea backlog (§4) feeding the next round of work.
 
 This guide focuses on *what to run next*. For the *why* behind the
-workflow's design choices, see the ADRs in [`Design/adr/`](../Design/adr/).
+workflow's design choices, see the ADRs in [`design/adr/`](../design/adr/).
 Skills are referenced by their slash name (e.g. `/idea-to-prd`); each
 one has its own `SKILL.md` under `.claude/skills/<name>/` in your
 target project with the full interface spec.
@@ -51,14 +51,14 @@ IDEA OR PRD
    ├─ /idea-to-prd          (rough idea → PRD)
    ├─ /prd-normalizer       (external PRD → kit format)
    ├─ /prd-to-mvp [--granularity=coarse|standard|fine]
-   │     → Design/mvp.md + Design/build-out-plan.md
-   └─ /planning             (optional, deeper plans → Design/planning.md)
+   │     → design/mvp.md + design/build-out-plan.md
+   └─ /planning             (optional, deeper plans → design/planning.md)
    │
    ▼
 2. DECISIONS  (per architectural choice)
    ├─ /clarify              (optional, scopes the question
-   │                         → Design/decisions.md)
-   ├─ /adr-writer           → Design/adr/adr-NNN-*.md
+   │                         → design/decisions.md)
+   ├─ /adr-writer           → design/adr/adr-NNN-*.md
    │                         (proposed → accepted)
    └─ /check-plan or bin/check-plan   (advisory gate)
    │
@@ -97,7 +97,7 @@ IDEA OR PRD
    ▼
 5. MILESTONE CLOSE  (per phase)
    ├─ /audit-milestone N    (advisory pass/fail report)
-   ├─ /milestone-summary N  → Design/milestones/N-slug.md
+   ├─ /milestone-summary N  → design/milestones/N-slug.md
    │                         (lessons zone is user-authored)
    └─ /complete-milestone N [--release]  ⚠cat-3
          (closes GH milestone; chains /release if --release)
@@ -107,7 +107,7 @@ IDEA OR PRD
    ├─ /changelog            → release notes (grouped by verb / ADR / issue)
    ├─ /release  ⚠cat-3      → git tag + gh release create
    │                          (auto-detects product vs workflow shape)
-   └─ /workflow-docs        → README.md + Design/ai-summary.md
+   └─ /workflow-docs        → README.md + design/ai-summary.md
    │
    ▼
 TAGGED RELEASE ON GITHUB
@@ -119,10 +119,10 @@ TAGGED RELEASE ON GITHUB
 committed pointer file so each new session knows where to pick up.
 
 ```
-/pause [--handoff]   → writes Design/state.md
-/resume              → reads Design/state.md at session start
+/pause [--handoff]   → writes design/state.md
+/resume              → reads design/state.md at session start
 
-Design/state.md zones:
+design/state.md zones:
    phase | in-flight | recent | blockers | continue-here
 ```
 
@@ -201,7 +201,7 @@ Pick the skill that matches what you have in hand:
 
 | You have… | Run | You produce |
 |---|---|---|
-| A rough idea, no doc | `/idea-to-prd` | A lightweight PRD in `Design/` |
+| A rough idea, no doc | `/idea-to-prd` | A lightweight PRD in `design/` |
 | A standard or custom PRD | `/prd-normalizer` | A normalized PRD in the kit's internal format |
 | A normalized PRD | `/prd-to-mvp` | An MVP scope statement: in-scope, out-of-scope, success signals |
 
@@ -214,7 +214,7 @@ target band for phase count: `coarse` aims for 1–3 phases, `standard`
 (the default) for 5–8, `fine` for 8–12. Bands are *targets*, not hard
 caps — the skill picks the actual count for your project and includes
 an inline justification in the rendered build-out-plan. The choice is
-recorded as a `**Granularity:**` line in `Design/build-out-plan.md`,
+recorded as a `**Granularity:**` line in `design/build-out-plan.md`,
 so re-runs are consistent without you having to remember the flag.
 Precedence (highest first): explicit flag, then the stored value in
 the build-out-plan, then the default `standard`. Pick `coarse` for
@@ -239,7 +239,7 @@ For each meaningful architectural choice surfaced by the MVP — a library
 pick, an integration, a data model, a deployment target — write an ADR.
 
 - **Run:** `/adr-writer`
-- **What you see:** a drafted ADR in `Design/adr/adr-NNN-<short-title>.md`
+- **What you see:** a drafted ADR in `design/adr/adr-NNN-<short-title>.md`
   following the kit's template (context, options, decision, consequences).
 - **What you produce:** one accepted ADR per decision.
 
@@ -271,7 +271,7 @@ The skill is GitHub-first: issues live on GitHub, not in local files.
 The Project board gives you a kanban view of the backlog.
 
 **Phased vs single-phase plans.** When
-`Design/build-out-plan.md` contains multiple `## Phase N: <name>`
+`design/build-out-plan.md` contains multiple `## Phase N: <name>`
 blocks, `/issue-planner` creates one GitHub milestone per phase and
 assigns each issue to its phase's milestone; `/release` defaults to
 one tag per phase. When the plan has only one Phase block — or no
@@ -493,8 +493,8 @@ order:
 | Step | Run | Produces |
 |---|---|---|
 | 1. Verify the milestone is finishable | `/audit-milestone <N>` | Pass/fail report — open issues, ADRs without merged PRs, phases still `in-progress` |
-| 2. Draft the retrospective | `/milestone-summary <N>` | `Design/milestones/<N>-<slug>.md` filled from `git log`, the GitHub milestone, and accepted ADRs in the date range; `lessons` zone left for you to author |
-| 3. Close and (optionally) release | `/complete-milestone <N> [--release]` | GitHub milestone closed; `Design/state.md` archived (in-flight cleared, recent prepended, continue-here updated); chains `/release --milestone-phase=N` if `--release` is set |
+| 2. Draft the retrospective | `/milestone-summary <N>` | `design/milestones/<N>-<slug>.md` filled from `git log`, the GitHub milestone, and accepted ADRs in the date range; `lessons` zone left for you to author |
+| 3. Close and (optionally) release | `/complete-milestone <N> [--release]` | GitHub milestone closed; `design/state.md` archived (in-flight cleared, recent prepended, continue-here updated); chains `/release --milestone-phase=N` if `--release` is set |
 
 The audit is **advisory**, not gating — gaps surface clearly but
 the user has the final say. The summary file's `lessons` zone is
@@ -557,7 +557,7 @@ bound.
 
 ### 2.j Docs sync
 
-**Why this step exists.** `README.md` and `Design/ai-summary.md`
+**Why this step exists.** `README.md` and `design/ai-summary.md`
 drift. Each shipped feature, each accepted ADR, each scope pivot
 makes them slightly less accurate. `/workflow-docs` re-renders both
 from the current state of the project, so the docs people actually
@@ -570,9 +570,9 @@ current state of the project.
 - **Run:** `/workflow-docs`
 - **What you see:** the skill reads the PRD, MVP spec, accepted ADRs,
   and `CLAUDE.md`, then re-renders `README.md` and
-  `Design/ai-summary.md` from the kit's templates.
+  `design/ai-summary.md` from the kit's templates.
 - **What you produce:** an updated `README.md` and
-  `Design/ai-summary.md` committed to `main`.
+  `design/ai-summary.md` committed to `main`.
 
 Re-run this whenever the project's shape has changed meaningfully — new
 ADRs accepted, a major feature shipped, a pivot in scope. The `ai-summary.md`
@@ -634,7 +634,7 @@ API consumers, library users — rely on.
 suggests a bump, and waits for your confirmation. The full
 kit-internal classification table — including edge cases like "heading
 rename in a template that no skill parses" — is in
-[ADR-026](../Design/adr/adr-026-kit-versioning-policy.md). The same
+[ADR-026](../design/adr/adr-026-kit-versioning-policy.md). The same
 logic applies to target projects, with your domain replacing the
 kit's templates/skills/installer surface.
 
@@ -697,7 +697,7 @@ idea  →  ready-for-adr  →  adr-drafted  →  shipped  |  dropped
 ### Graduating an idea
 
 When an entry reaches `ready-for-adr`, hand it to `/adr-writer`. The
-skill produces a draft ADR in `Design/adr/`. From there it follows
+skill produces a draft ADR in `design/adr/`. From there it follows
 §2.b → §2.c (or steady-state filing per §3) → §2.d–§2.j like any
 other ADR. Update the entry's status to `adr-drafted` with a link
 to the ADR file.
@@ -713,16 +713,16 @@ session surfaces a question with no dependent issue, it goes into
 
 ---
 
-## 5. Across sessions: `Design/state.md`, `/resume`, `/pause`
+## 5. Across sessions: `design/state.md`, `/resume`, `/pause`
 
 Long-running projects span many Claude Code sessions. Without a
 canonical "where are we?" pointer, every fresh session reconstructs
 state from `gh` calls and prompt files. The kit closes that gap with
-a single committed artefact, `Design/state.md`, plus two skills.
+a single committed artefact, `design/state.md`, plus two skills.
 
 ### The artefact
 
-`Design/state.md` is a small (under ~100 lines), committed pointer
+`design/state.md` is a small (under ~100 lines), committed pointer
 holding five zones, each wrapped in marker fences so individual
 skills can rewrite their zone idempotently without disturbing the
 others:
@@ -737,7 +737,7 @@ others:
 
 The format spec is [`templates/state-template.md`](../templates/state-template.md).
 The kit ships the template; each target project instantiates its
-own `Design/state.md` (typically by running `/pause` for the first
+own `design/state.md` (typically by running `/pause` for the first
 time).
 
 ### Reading it: `/resume`
@@ -746,7 +746,7 @@ time).
 - **What you see:** a one-message brief — phase, in-flight issue,
   last five PRs, blockers, "continue here" — with no `gh` calls on
   the happy path.
-- **Fallback:** if `Design/state.md` is missing, empty, or looks
+- **Fallback:** if `design/state.md` is missing, empty, or looks
   suspect (in-flight issue already merged, file mtime stale),
   `/resume` falls back to `gh pr list` / `gh issue list` and
   recommends running `/pause` to seed the file.
@@ -762,12 +762,12 @@ time).
   here) and written back. With `--handoff`, an additional richer
   `notes/handoff-YYYY-MM-DD.md` is written for context-window-
   exhausting handoffs.
-- **What you produce:** a refreshed `Design/state.md` ready to
+- **What you produce:** a refreshed `design/state.md` ready to
   commit.
 
 ### Conflict-resolution rule
 
-`Design/state.md` is committed, so parallel branches can produce
+`design/state.md` is committed, so parallel branches can produce
 merge conflicts in it. The rule: **the most recently merged PR's
 version wins for the conflicting zone.** If the result looks
 suspect after the merge, `/resume` re-derives from `gh` and points
@@ -775,11 +775,11 @@ you at `/pause` to refresh.
 
 ### Optional CI line-cap check
 
-`bin/check-state-cap` exits 1 if `Design/state.md` exceeds the
+`bin/check-state-cap` exits 1 if `design/state.md` exceeds the
 line cap (default 100). Wire it into CI alongside `bin/sync-adr-index`
 if you want a guard rail; it exits 0 silently when the file is
 absent, so adopting it is no-op for projects that don't use
-`Design/state.md`.
+`design/state.md`.
 
 ## 6. Cross-skill carry-forward (ADR-040)
 
@@ -863,7 +863,7 @@ up — when *any* of the following hold:
    filter, exact log message wording, internal helper-function
    factoring). These belong in the issue's commits or `## Follow-ups`
    prose, not the structured carry-forward.
-4. **Already covered by an ADR or `Design/decisions.md`.** The
+4. **Already covered by an ADR or `design/decisions.md`.** The
    question has a documented answer — link to it from the issue's
    prompt instead. Carrying it forward as if undecided would create
    a duplicate authority.
@@ -912,7 +912,7 @@ run `prepare-issue` explicitly.
 
 ### Pointers
 
-- ADR: [`Design/adr/adr-040-cross-skill-design-question-carry-forward.md`](../Design/adr/adr-040-cross-skill-design-question-carry-forward.md)
+- ADR: [`design/adr/adr-040-cross-skill-design-question-carry-forward.md`](../design/adr/adr-040-cross-skill-design-question-carry-forward.md)
 - Producer skill: [`skills/claude-issue-executor/SKILL.md`](../skills/claude-issue-executor/SKILL.md)
 - Preserver skill: [`skills/pr-review-packager/SKILL.md`](../skills/pr-review-packager/SKILL.md)
 - Consumer skill: [`skills/prepare-issue/SKILL.md`](../skills/prepare-issue/SKILL.md)
@@ -972,16 +972,16 @@ in the same PR that ships the skill.
 | 1 | `/changelog` | Renders to stdout / file / Release-body draft (publishing is `/release`'s job) |
 | 1 | `/check-plan` | Validates an ADR or prompt against criteria; advisory only |
 | 1 | `bin/check-plan` | Programmatic equivalent of `/check-plan`; read-only against the criteria list, no mutating side effects; invoked by chained skills under auto-mode |
-| 1 | `/clarify` | Local conversation; appends to `Design/decisions.md` |
+| 1 | `/clarify` | Local conversation; appends to `design/decisions.md` |
 | 1 | `/idea-to-prd` | Drafts a PRD locally |
-| 1 | `/milestone-summary` | Writes `Design/milestones/N-summary.md` locally |
-| 1 | `/pause` | Refreshes local `Design/state.md` |
-| 1 | `/planning` | Writes `Design/planning.md` locally |
+| 1 | `/milestone-summary` | Writes `design/milestones/N-summary.md` locally |
+| 1 | `/pause` | Refreshes local `design/state.md` |
+| 1 | `/planning` | Writes `design/planning.md` locally |
 | 1 | `/prd-normalizer` | Local doc rewrite |
-| 1 | `/prd-to-mvp` | Local doc creation (`Design/mvp.md`, `Design/build-out-plan.md`) |
+| 1 | `/prd-to-mvp` | Local doc creation (`design/mvp.md`, `design/build-out-plan.md`) |
 | 1 | `/prepare-issue` | Reads `gh` and ADRs (non-mutating); writes prompt file locally |
-| 1 | `/resume` | Reads `Design/state.md` and emits a summary; falls back to `gh` reads |
-| 1 | `/workflow-docs` | Generates `README.md` and `Design/ai-summary.md` locally |
+| 1 | `/resume` | Reads `design/state.md` and emits a summary; falls back to `gh` reads |
+| 1 | `/workflow-docs` | Generates `README.md` and `design/ai-summary.md` locally |
 | **2** | `/claude-issue-executor` | Significant-task plan-mode gate (ADR-039); local file edits and `git` commits but no push |
 | **3** | `/complete-milestone` | Closes a GitHub milestone via `gh`; chains `/release` when `--release` is passed |
 | **3** | `/issue-planner` | Calls `gh issue create` for each issue and creates a Project board |
@@ -1074,10 +1074,10 @@ solution.
 
 ### Pointers
 
-- ADR: [`Design/adr/adr-041-auto-mode-permission-contract.md`](../Design/adr/adr-041-auto-mode-permission-contract.md)
+- ADR: [`design/adr/adr-041-auto-mode-permission-contract.md`](../design/adr/adr-041-auto-mode-permission-contract.md)
 - Cat-2 instance: [`skills/claude-issue-executor/SKILL.md`](../skills/claude-issue-executor/SKILL.md) — *Plan-mode rhythm* section
 - Cat-3 instance: [`skills/pr-review-packager/SKILL.md`](../skills/pr-review-packager/SKILL.md) — *Auto-mode permission category* section
-- Related: [ADR-039](../Design/adr/adr-039-plan-mode-for-significant-tasks.md) (per-skill rule that ADR-041 generalises), [ADR-038](../Design/adr/adr-038-tighten-prompt-step.md) (`--no-prompt` interaction), [ADR-040](../Design/adr/adr-040-cross-skill-design-question-carry-forward.md) (schema-drift home alignment)
+- Related: [ADR-039](../design/adr/adr-039-plan-mode-for-significant-tasks.md) (per-skill rule that ADR-041 generalises), [ADR-038](../design/adr/adr-038-tighten-prompt-step.md) (`--no-prompt` interaction), [ADR-040](../design/adr/adr-040-cross-skill-design-question-carry-forward.md) (schema-drift home alignment)
 
 ---
 
@@ -1129,7 +1129,7 @@ and a rejected ADR is still useful as a record of what was considered.
 |---|---|
 | Learn how to run Claude Code skills from inside a target project | [`claude-code-guide.md`](claude-code-guide.md) |
 | Understand a specific skill's interface, inputs, and outputs | `.claude/skills/<name>/SKILL.md` in your target project, or [`skills/README.md`](../skills/README.md) in the kit |
-| Revisit a design decision that shaped this workflow | [`Design/adr/`](../Design/adr/) |
+| Revisit a design decision that shaped this workflow | [`design/adr/`](../design/adr/) |
 | Set up GitHub labels, milestones, and branch protection | [`docs/github-setup.md`](github-setup.md) |
 | Fill a Claude Code session prompt by hand | [`docs/issue-prompt-guide.md`](issue-prompt-guide.md) |
 

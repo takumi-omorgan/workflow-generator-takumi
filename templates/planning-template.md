@@ -1,8 +1,8 @@
 <!--
   Template: Planning artefact
   Filled by: the planning skill, or a human
-  Output in a target project: Design/planning.md
-  The planning doc sits between Design/mvp.md and the first ADR. It
+  Output in a target project: design/planning.md
+  The planning doc sits between design/mvp.md and the first ADR. It
   captures requirements decomposition, risks, assumptions, sequencing
   rationale, and open research questions. The doc is OPT-IN — small
   projects can skip it and go straight from MVP to adr-writer.
@@ -17,8 +17,8 @@
 # {{PRODUCT_NAME}} — Planning
 
 **Last updated:** {{YYYY-MM-DD}}
-**Source PRD:** [`Design/prd-normalized.md`](prd-normalized.md)
-**Source MVP:** [`Design/mvp.md`](mvp.md)
+**Source PRD:** [`design/prd-normalized.md`](prd-normalized.md)
+**Source MVP:** [`design/mvp.md`](mvp.md)
 
 ## Objective
 
@@ -115,7 +115,7 @@ explaining why it has to come before the next.}}
 {{Questions that need answering before specific ADRs can be drafted.
 Each question has an owner and a target answer date. Once answered,
 the resolution either graduates into an ADR (architectural) or into
-`Design/decisions.md` (informal — see ADR-033 once shipped).}}
+`design/decisions.md` (informal — see ADR-033 once shipped).}}
 
 - **Q1 — {{question}}.** Owner: {{NAME}}. Target: {{YYYY-MM-DD}}.
 - **Q2 — {{question}}.** Owner: {{NAME}}. Target: {{YYYY-MM-DD}}.
