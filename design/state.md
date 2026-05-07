@@ -15,10 +15,10 @@ single
 
 ## In-flight issue
 
-- **Issue:** none
-- **Prompt:** n/a
-- **Branch:** n/a
-- **Status:** none
+- **Issue:** #84 (Phase 2 of 3 — body slimming for 4 over-budget skills)
+- **Prompt:** prompts/issue-084-phase2-body-slimming.md
+- **Branch:** n/a (executor will create)
+- **Status:** prepared
 
 <!-- state:in-flight:end -->
 
@@ -50,6 +50,6 @@ none
 
 ## Continue here
 
-PR #86 merged (squash `b74778e`); Phase 1 of issue #84 shipped. Issue #84 stays open for Phase 2 + Phase 3. Audit-harness tracking decision made (commit `aafd34b`): curated subset tracked under `notes/skills-audit-2026-05-07/`, regenerable outputs gitignored, convention documented in the directory README. **Next:** pick Phase 2 (body slimming — bring 4 over-budget skills `claude-issue-executor`/`pr-review-packager`/`release`/`prepare-issue` under 500L/5k tokens via one-level-deep sidecars; higher-leverage) or Phase 3 (sidecar consistency: `examples.md` → `example.md`, `complete-milestone`/`milestone-summary` policy; smallest). Both ship as separate PRs against #84. To start either: `/prepare-issue 84` and brief executor for the chosen phase only. Rich handoff context: `notes/handoff-2026-05-07.md`.
+Run `/claude-issue-executor prompts/issue-084-phase2-body-slimming.md` to lift content from 4 over-budget SKILL.md files (`claude-issue-executor` 586L/6.7k, `pr-review-packager` 471L/5.6k, `release` 474L/5.4k, `prepare-issue` 405L/5.2k) into one-level-deep sidecars until each is ≤500L AND ≤5k tokens. Single PR for all 4 skills. Plan-mode required per issue body. Phase 1 (description rewrites) shipped in PR #86; Phase 3 (sidecar consistency) is a separate later session. Audit harness curated subset is now tracked (commit `aafd34b`); `audit.py` is the per-commit verification tool. Rich handoff: `notes/handoff-2026-05-07.md`.
 
 <!-- state:continue-here:end -->
