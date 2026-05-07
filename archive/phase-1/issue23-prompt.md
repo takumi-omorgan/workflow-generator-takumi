@@ -7,7 +7,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-021-example-starter-projects-gallery.md`
+- File: `design/adr/adr-021-example-starter-projects-gallery.md`
 - Decision: Add 2-3 complete worked example projects under examples/ showing the kit end-to-end.
 
 GitHub Issue:
@@ -38,7 +38,7 @@ Acceptance criteria
 
 Scope and constraints
 - Primary folders to touch: `examples/`
-- Folders to avoid unless absolutely necessary: `skills/`, `templates/`, `Design/`, `docs/`
+- Folders to avoid unless absolutely necessary: `skills/`, `templates/`, `design/`, `docs/`
 - Keep each example minimal — the goal is to show the workflow, not to build real software
 - Use realistic but simple project ideas that are easy to follow
 - Do not modify the kit's core files; only add example content and update README.md
@@ -52,7 +52,7 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-021-example-starter-projects-gallery.md`
+   - `design/adr/adr-021-example-starter-projects-gallery.md`
    - `generic-project-workflow.md`
    - `README.md`
    - existing content under `examples/` if any

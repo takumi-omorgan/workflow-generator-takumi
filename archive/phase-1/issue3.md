@@ -2,7 +2,7 @@
 Create the GitHub setup guide and define the first GitHub-native workflow assets for the kit.
 
 ## ADR
-Related ADR: `Design/adr/adr-004-github-first-workflow-model.md`
+Related ADR: `design/adr/adr-004-github-first-workflow-model.md`
 
 ## Goal
 Document the GitHub-first operating model and define the initial repo assets needed to support it.

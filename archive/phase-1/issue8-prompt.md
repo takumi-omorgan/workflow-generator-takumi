@@ -7,7 +7,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-006-claude-code-execution-model.md`
+- File: `design/adr/adr-006-claude-code-execution-model.md`
 - Decision: Use issue-by-issue, plan-first Claude Code execution in v1.
 
 GitHub Issue:
@@ -48,7 +48,7 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-006-claude-code-execution-model.md`
+   - `design/adr/adr-006-claude-code-execution-model.md`
    - `generic-project-workflow.md`
    - the example issue prompt framework used in this project planning effort
    - existing `notes/` docs

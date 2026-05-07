@@ -12,7 +12,7 @@
 > - [`README.md`](../README.md) — positioning and what the kit is today
 > - [`docs/workflow-guide.md`](../docs/workflow-guide.md) — the action-oriented walkthrough
 > - [`docs/skills.md`](../docs/skills.md) — the functional skill reference
-> - [`Design/adr/`](../Design/adr/) — accepted decisions
+> - [`design/adr/`](../design/adr/) — accepted decisions
 >
 > This file is kept only as audit trail for the kit's original
 > methodology framing.
@@ -103,7 +103,7 @@ my-project/
   ├── package.json            ← Dependencies (or equivalent for other languages)
   ├── tsconfig.json           ← TypeScript config (if applicable)
   │
-  ├── Design/                 ← Architecture & decisions
+  ├── design/                 ← Architecture & decisions
   │   ├── adr/                ← Architecture Decision Records
   │   └── ai-summary.md      ← AI-readable project summary (for external AI tools)
   │
@@ -152,7 +152,7 @@ What's being worked on now.
 
 ### 3.4 AI Summary Document
 
-Create `Design/ai-summary.md` — a comprehensive, AI-readable description of the entire project. This is what you paste into Perplexity, ChatGPT, or other external AIs when you want them to help design features.
+Create `design/ai-summary.md` — a comprehensive, AI-readable description of the entire project. This is what you paste into Perplexity, ChatGPT, or other external AIs when you want them to help design features.
 
 **Contents:** Objectives, architecture, tech stack, constraints, extension points, current status. Written for AI consumption (explicit, structured, no ambiguity). See the Arigato project for a reference example.
 
@@ -189,7 +189,7 @@ An Architecture Decision Record captures **one decision** with its context, opti
 
 ### 4.3 ADR Template
 
-Save as `Design/adr/adr-NNN-short-title.md`:
+Save as `design/adr/adr-NNN-short-title.md`:
 
 ```markdown
 # ADR-NNN: Title
@@ -239,7 +239,7 @@ proposed → accepted → implemented (via GitHub issue + PR)
 
 For non-trivial ADRs, get a second opinion:
 
-1. Paste `Design/ai-summary.md` into Perplexity / ChatGPT / other AI
+1. Paste `design/ai-summary.md` into Perplexity / ChatGPT / other AI
 2. Paste the ADR draft
 3. Ask focused questions: "What are the risks?", "What alternatives am I missing?", "Does this conflict with existing constraints?"
 4. Record useful feedback in the ADR's `## Review Notes` section
@@ -250,7 +250,7 @@ For projects with a central design document (not all projects need one):
 
 - Periodically batch accepted ADRs into a new version of the design doc
 - Update `CLAUDE.md` to point to the latest version
-- Regenerate `Design/ai-summary.md`
+- Regenerate `design/ai-summary.md`
 
 ---
 
@@ -268,7 +268,7 @@ gh issue create \
 Brief description of what's being built.
 
 ## ADR
-See `Design/adr/adr-NNN-short-title.md`
+See `design/adr/adr-NNN-short-title.md`
 
 ## Tasks
 - [ ] Task 1
@@ -386,10 +386,10 @@ Context:
 - {{ONE_LINE_PROJECT_DESCRIPTION}}
 - Follow the rules in `CLAUDE.md`.
 - Architecture is described in {{ARCHITECTURE_DOC_PATH}}.
-- AI-readable summary is at `Design/ai-summary.md`.
+- AI-readable summary is at `design/ai-summary.md`.
 
 ADR:
-- File: `Design/adr/{{ADR_FILE}}`
+- File: `design/adr/{{ADR_FILE}}`
 - Decision: {{ADR_SUMMARY}}
 
 GitHub Issue:
@@ -427,8 +427,8 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing code:
    - `CLAUDE.md`
-   - `Design/adr/{{ADR_FILE}}`
-   - `Design/ai-summary.md`
+   - `design/adr/{{ADR_FILE}}`
+   - `design/ai-summary.md`
    - Any existing modules under {{PRIMARY_FOLDERS}}.
    - Any existing tests related to the modules you will change.
 2. Propose a step-by-step implementation PLAN including:
@@ -537,7 +537,7 @@ gh pr create --title "Add feature X (ADR-NNN)" --body "$(cat <<'EOF'
 - Bullet point changes
 
 ## ADR
-Design/adr/adr-NNN-short-title.md
+design/adr/adr-NNN-short-title.md
 
 ## Changes
 - `src/file.ts` — what changed
@@ -729,7 +729,7 @@ If development and production are on different machines (e.g. laptop for dev, se
 │                    DESIGN PHASE                         │
 │                                                         │
 │  1. Idea / problem / feature request                    │
-│  2. Write ADR → Design/adr/adr-NNN-title.md            │
+│  2. Write ADR → design/adr/adr-NNN-title.md            │
 │  3. (Optional) Review with external AI                  │
 │  4. Accept or reject ADR                                │
 │  5. (Optional) Bump design doc version                  │
@@ -810,8 +810,8 @@ Use this checklist when starting a new project:
 - [ ] Add `.gitignore`
 - [ ] Write `CLAUDE.md` (project rules, conventions, structure)
 - [ ] Write `README.md`
-- [ ] Create `Design/adr/` directory
-- [ ] Write `Design/ai-summary.md` (AI-readable project context)
+- [ ] Create `design/adr/` directory
+- [ ] Write `design/ai-summary.md` (AI-readable project context)
 - [ ] Customise `notes/issue-prompt.md` (fill project-specific sections)
 - [ ] Customise `notes/design-workflow.md` (adapt process to project)
 - [ ] Set up test framework (`vitest`, `jest`, `pytest`, etc.)
@@ -844,7 +844,7 @@ When adapting this workflow to a specific project, these are the sections that n
 | What to customise | Where | Example |
 |-------------------|-------|---------|
 | Project description and stack | `CLAUDE.md` | "React SPA with Supabase backend" |
-| Architecture reference | `Design/ai-summary.md` | Full system overview for external AIs |
+| Architecture reference | `design/ai-summary.md` | Full system overview for external AIs |
 | Coding constraints | `notes/issue-prompt.md` → Scope section | "No direct SQL — use Prisma ORM" |
 | Test framework and commands | `notes/issue-prompt.md` → Evaluation section | `npx vitest run` vs `pytest` vs `go test` |
 | Deployment method | `notes/design-workflow.md` → Deploy section | Git pull vs GitHub Actions vs Docker |

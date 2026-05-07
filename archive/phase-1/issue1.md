@@ -2,7 +2,7 @@
 Create the initial repository skeleton for the Claude Code Workflow Kit and define the project-local installation structure used in v1.
 
 ## ADR
-Related ADR: `Design/adr/adr-001-project-local-installation-model.md`
+Related ADR: `design/adr/adr-001-project-local-installation-model.md`
 
 ## Goal
 Establish the base repo layout and the target-project installation model so the rest of the kit can be built on a stable structure.
@@ -12,7 +12,7 @@ ADR-001 decides that the workflow kit will be installed into each new target pro
 
 ## Tasks
 - [ ] Create the top-level repository folders for `docs/`, `skills/`, `templates/`, and `examples/`
-- [ ] Define the expected target-project structure for `.claude/skills/`, `Design/`, `notes/`, and `.github/`
+- [ ] Define the expected target-project structure for `.claude/skills/`, `design/`, `notes/`, and `.github/`
 - [ ] Add placeholder files where needed to make the structure explicit
 - [ ] Document which files belong in the kit repo versus the target project
 - [ ] Add a short note describing the installation flow at a structural level

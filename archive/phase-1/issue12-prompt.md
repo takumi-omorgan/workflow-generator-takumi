@@ -7,7 +7,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-008-dedicated-prompts-folder.md`
+- File: `design/adr/adr-008-dedicated-prompts-folder.md`
 - Decision: Introduce a dedicated prompts/ folder in the target project layout and provide a prompt template.
 
 GitHub Issue:
@@ -52,7 +52,7 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-008-dedicated-prompts-folder.md`
+   - `design/adr/adr-008-dedicated-prompts-folder.md`
    - `generic-project-workflow.md`
    - `notes/issue-prompt.md` and `notes/issue1-prompt.md` (as reference for the template)
    - `docs/repo-structure.md`

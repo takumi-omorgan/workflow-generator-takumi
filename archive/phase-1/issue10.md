@@ -3,8 +3,8 @@ Add example artifacts and walkthroughs for the idea-only, standard-PRD, and cust
 
 ## ADR
 Related ADRs:
-- `Design/adr/adr-002-new-project-only-scope.md`
-- `Design/adr/adr-003-prd-intake-model.md`
+- `design/adr/adr-002-new-project-only-scope.md`
+- `design/adr/adr-003-prd-intake-model.md`
 
 ## Goal
 Make the workflow easier to understand by showing realistic examples for all three planning paths.

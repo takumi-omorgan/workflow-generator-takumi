@@ -7,8 +7,8 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-018-workflow-docs-skill.md`
-- Decision: Build a /workflow-docs skill that generates README.md and Design/ai-summary.md for target projects.
+- File: `design/adr/adr-018-workflow-docs-skill.md`
+- Decision: Build a /workflow-docs skill that generates README.md and design/ai-summary.md for target projects.
 
 GitHub Issue:
 - Title: Build /workflow-docs skill (ADR-018)
@@ -17,7 +17,7 @@ GitHub Issue:
 - Labels: feature, design, docs
 
 Goal
-Build the /workflow-docs skill that generates README.md and Design/ai-summary.md for target projects by reading existing project artifacts and filling templates.
+Build the /workflow-docs skill that generates README.md and design/ai-summary.md for target projects by reading existing project artifacts and filling templates.
 
 Why it matters
 Every project needs a README and an AI-readable summary, but writing them from scratch is repetitive. A skill that reads the PRD, MVP spec, ADRs, and CLAUDE.md and generates these docs from templates saves time and ensures consistency across projects using the workflow kit.
@@ -25,14 +25,14 @@ Every project needs a README and an AI-readable summary, but writing them from s
 Requirements
 - Read PRD, MVP spec, ADRs, and CLAUDE.md from the target project
 - Generate `README.md` from a README template, filling sections from source documents
-- Generate `Design/ai-summary.md` from a summary template, providing a concise project overview for AI tools
+- Generate `design/ai-summary.md` from a summary template, providing a concise project overview for AI tools
 - Re-runnable: running the skill again updates generated docs without clobbering manual edits (use markers or fenced sections)
 - Sections with no source data are omitted rather than left empty or filled with placeholders
 - Present the generated docs to the user for review before writing
 
 Acceptance criteria
 - The skill generates a useful README.md from project artifacts
-- The skill generates a useful Design/ai-summary.md from project artifacts
+- The skill generates a useful design/ai-summary.md from project artifacts
 - Re-running the skill updates generated sections without destroying manual edits outside marked regions
 - Template variables are correctly filled from source documents
 - Sections without source data are cleanly omitted
@@ -47,7 +47,7 @@ Scope and constraints
 
 Evaluation & testing requirements
 - Verify that generated README.md contains correct content from source artifacts
-- Verify that generated Design/ai-summary.md is concise and accurate
+- Verify that generated design/ai-summary.md is concise and accurate
 - Test re-run behavior: confirm manual edits outside markers are preserved
 - Test with missing source documents (no PRD, no ADRs, etc.) to confirm graceful omission
 - All existing tests must continue to pass
@@ -55,7 +55,7 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-018-workflow-docs-skill.md`
+   - `design/adr/adr-018-workflow-docs-skill.md`
    - `generic-project-workflow.md`
    - any existing skills in `skills/` for structure conventions
    - any existing templates in `templates/` that relate to README or summary generation

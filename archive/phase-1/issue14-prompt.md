@@ -7,7 +7,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-011-issue-planner-skill.md`
+- File: `design/adr/adr-011-issue-planner-skill.md`
 - Decision: Build an issue-planner skill that reads the MVP and build-out plan to create GitHub issues in batch.
 
 GitHub Issue:
@@ -17,14 +17,14 @@ GitHub Issue:
 - Labels: feature, design
 
 Goal
-Build an issue-planner skill that reads `Design/mvp.md` and `Design/build-out-plan.md`, drafts GitHub issues with titles, bodies, labels, milestones, and ADR references, and creates them via `gh issue create` after user approval.
+Build an issue-planner skill that reads `design/mvp.md` and `design/build-out-plan.md`, drafts GitHub issues with titles, bodies, labels, milestones, and ADR references, and creates them via `gh issue create` after user approval.
 
 Why it matters
 Turning a build-out plan into GitHub issues is one of the most tedious and error-prone steps in the workflow. Automating issue creation from the plan ensures consistency, saves time, and keeps issues tightly linked to ADRs and milestones.
 
 Requirements
 - Create the skill in `skills/issue-planner/`
-- The skill must read `Design/mvp.md` and `Design/build-out-plan.md` to extract planned work items
+- The skill must read `design/mvp.md` and `design/build-out-plan.md` to extract planned work items
 - Draft issues with structured titles, bodies, labels, milestones, and ADR references
 - Present the full batch of drafted issues to the user for review and approval before creating any
 - Create approved issues via `gh issue create` with correct labels and milestone assignments
@@ -60,10 +60,10 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-011-issue-planner-skill.md`
-   - `Design/adr/adr-012-github-project-board.md` (if it exists)
+   - `design/adr/adr-011-issue-planner-skill.md`
+   - `design/adr/adr-012-github-project-board.md` (if it exists)
    - `generic-project-workflow.md`
-   - `Design/mvp.md` and `Design/build-out-plan.md` (as reference for the input format)
+   - `design/mvp.md` and `design/build-out-plan.md` (as reference for the input format)
    - existing skills in `skills/` for style and conventions
 2. Propose a short, step-by-step implementation PLAN for this issue, including:
    - how the skill will parse the plan files,

@@ -7,9 +7,9 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADRs:
-- File: `Design/adr/adr-002-new-project-only-scope.md`
+- File: `design/adr/adr-002-new-project-only-scope.md`
 - Decision: Limit v1 to new projects only.
-- File: `Design/adr/adr-003-prd-intake-model.md`
+- File: `design/adr/adr-003-prd-intake-model.md`
 - Decision: Support three PRD intake paths.
 
 GitHub Issue:
@@ -51,8 +51,8 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-002-new-project-only-scope.md`
-   - `Design/adr/adr-003-prd-intake-model.md`
+   - `design/adr/adr-002-new-project-only-scope.md`
+   - `design/adr/adr-003-prd-intake-model.md`
    - `generic-project-workflow.md`
    - current planning skills, docs, and templates
 2. Propose a short, step-by-step implementation PLAN for this issue, including:

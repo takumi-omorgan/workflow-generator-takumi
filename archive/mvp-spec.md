@@ -14,7 +14,7 @@
 > - [`README.md`](../README.md) — positioning and what the kit is today
 > - [`docs/workflow-guide.md`](../docs/workflow-guide.md) — the action-oriented walkthrough
 > - [`docs/skills.md`](../docs/skills.md) — the functional skill reference
-> - [`Design/adr/`](../Design/adr/) — accepted decisions
+> - [`design/adr/`](../design/adr/) — accepted decisions
 >
 > This file is kept only as audit trail for the kit's original framing.
 
@@ -358,8 +358,8 @@ This may include:
 
 - `README.md`,
 - `CLAUDE.md`,
-- `Design/adr/`,
-- `Design/ai-summary.md`,
+- `design/adr/`,
+- `design/ai-summary.md`,
 - `.github/pull_request_template.md`,
 - and issue templates.
 
@@ -402,7 +402,7 @@ my-project/
         SKILL.md
       pr-review-packager/
         SKILL.md
-  Design/
+  design/
     adr/
     ai-summary.md
   docs/

@@ -1,7 +1,7 @@
 # ADR-038 alignment review — content boundary audit
 
 **Date:** 2026-04-30
-**ADR:** [`Design/adr/adr-038-tighten-prompt-step.md`](../Design/adr/adr-038-tighten-prompt-step.md)
+**ADR:** [`design/adr/adr-038-tighten-prompt-step.md`](../design/adr/adr-038-tighten-prompt-step.md)
 **Issue:** #47
 
 ## Why this audit exists
@@ -47,7 +47,7 @@ this ADR's artefact is supposed to hold?* Three possible verdicts:
 
 ## Per-ADR decisions
 
-### ADR-031 — `Design/planning.md`
+### ADR-031 — `design/planning.md`
 
 **What planning.md holds.** Project-wide discovery: requirements
 decomposition, risks, assumptions, sequencing rationale across all
@@ -76,7 +76,7 @@ by name when one applies (via the optional `**Phase:**` frontmatter
 on linked ADRs); it does not restate phase scope or exit criteria.
 Build-out-plan owns phase content; the prompt is downstream.
 
-### ADR-033 — `Design/decisions.md`
+### ADR-033 — `design/decisions.md`
 
 **What decisions.md holds.** Informal-but-settled implementation
 decisions below ADR weight: gray areas resolved before ADR
@@ -91,7 +91,7 @@ captures *this issue's* guard rails — what folders to touch, what
 to avoid for *this work*. `decisions.md` is project-wide settled
 context that downstream agents (planner, adr-writer, executor) all
 consult. The prompt may *reference* a settled decision when scoping
-this issue (`"per the decision to use Yjs (Design/decisions.md)"`),
+this issue (`"per the decision to use Yjs (design/decisions.md)"`),
 but it doesn't restate the rationale or the alternatives weighed.
 
 ### ADR-034 — `/check-plan` criteria
@@ -120,7 +120,7 @@ ADR-034's existing version-lock contract and
 `bin/check-plan-criteria-drift`. No action here, but the link is
 recorded so future authors see the dependency.
 
-### ADR-035 — `Design/state.md`
+### ADR-035 — `design/state.md`
 
 **What state.md holds.** Project-wide session-mutable pointer:
 current phase, in-flight issue, recent work (last 5 PRs), blockers,

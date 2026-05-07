@@ -16,7 +16,7 @@ format is documented there.
 **Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-16
-**ADR:** [ADR-007](../Design/adr/adr-007-claude-md-starter-template.md)
+**ADR:** [ADR-007](../design/adr/adr-007-claude-md-starter-template.md)
 
 **Context / trigger:** `docs/install.md:102` states the template "will be added in Issue #4" and users currently hand-write a minimal `CLAUDE.md` from a stub. Worth confirming Issue #4 is still open and tracked before duplicating.
 
@@ -39,18 +39,18 @@ format is documented there.
 **Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-16
-**ADR:** [ADR-008](../Design/adr/adr-008-dedicated-prompts-folder.md)
+**ADR:** [ADR-008](../design/adr/adr-008-dedicated-prompts-folder.md)
 
 **Context / trigger:** Filled issue prompts (`issue-N-prompt.md`) currently live in `notes/` alongside freeform working notes, making `notes/` a mixed bag that's hard to scan. The prompts are structured, numbered session briefs — they deserve their own space.
 
-**Sketch of the idea:** Move filled issue prompts into a dedicated `prompts/` directory at project root (or `Design/prompts/` to group with PRDs/ADRs). Use richer naming mirroring the ADR convention: `issue-NNN-short-title.md`. Keep the blank template as `prompts/_template.md`. `notes/` reverts to freeform working notes only.
+**Sketch of the idea:** Move filled issue prompts into a dedicated `prompts/` directory at project root (or `design/prompts/` to group with PRDs/ADRs). Use richer naming mirroring the ADR convention: `issue-NNN-short-title.md`. Keep the blank template as `prompts/_template.md`. `notes/` reverts to freeform working notes only.
 
 **Options in mind:**
 - `prompts/` at project root — clean separation, easy to find.
-- `Design/prompts/` — groups all structured planning artifacts under one tree (PRD → ADR → prompt traceability in one place).
+- `design/prompts/` — groups all structured planning artifacts under one tree (PRD → ADR → prompt traceability in one place).
 - Keep in `notes/prompts/` subfolder — minimal change, but `notes/` still owns the namespace.
 
-**Open questions:** Does moving prompts out of `notes/` break any existing skill references? Should the install step scaffold `prompts/` alongside `Design/adr/` and `notes/`? Does `docs/repo-structure.md` need a v2 revision to reflect the new layout?
+**Open questions:** Does moving prompts out of `notes/` break any existing skill references? Should the install step scaffold `prompts/` alongside `design/adr/` and `notes/`? Does `docs/repo-structure.md` need a v2 revision to reflect the new layout?
 
 **Consequences to think through:** Easier: scanning session briefs without wading through scratch notes; naming convention gives at-a-glance context. Harder: target project layout changes — `docs/repo-structure.md`, install guide, and README all need updating. Maintenance: one more directory to scaffold on install.
 
@@ -65,11 +65,11 @@ format is documented there.
 **Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-16
-**ADR:** [ADR-009](../Design/adr/adr-009-installer-script.md)
+**ADR:** [ADR-009](../design/adr/adr-009-installer-script.md)
 
 **Context / trigger:** `docs/install.md:169` explicitly flags "an installer script" as a Phase 2 candidate. Current install is a documented `mkdir -p` + `cp -R` flow users run manually (`README.md:71-76`); friction scales with how often users set up new projects.
 
-**Sketch of the idea:** Ship a small script (e.g. `bin/install-workflow-kit`) that runs the copy steps, scaffolds `Design/adr/`, `prompts/`, and `notes/`, renders `CLAUDE.md` from the template, and makes the initial commit. Keep the manual flow documented as a fallback so nothing is hidden.
+**Sketch of the idea:** Ship a small script (e.g. `bin/install-workflow-kit`) that runs the copy steps, scaffolds `design/adr/`, `prompts/`, and `notes/`, renders `CLAUDE.md` from the template, and makes the initial commit. Keep the manual flow documented as a fallback so nothing is hidden.
 
 **Options in mind:** Bash script in the kit repo; a one-liner `curl | bash`; a setup skill the user runs after a minimal manual copy; do nothing.
 
@@ -88,7 +88,7 @@ format is documented there.
 **Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-16
-**ADR:** [ADR-010](../Design/adr/adr-010-optional-with-docs-flag.md)
+**ADR:** [ADR-010](../design/adr/adr-010-optional-with-docs-flag.md)
 
 **Context / trigger:** The install currently copies only `skills/` (and later `CLAUDE.md`) into the target project. `docs/` explains how the kit itself works — useful to some users who want it local and searchable in their project, unnecessary for users who prefer to read it in the source repo.
 
@@ -120,11 +120,11 @@ format is documented there.
 **Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-17
-**ADR:** [ADR-011](../Design/adr/adr-011-issue-planner-skill.md)
+**ADR:** [ADR-011](../design/adr/adr-011-issue-planner-skill.md)
 
 **Context / trigger:** Referenced in `docs/repo-structure.md:87` as a skill that should exist in target projects, but has no source in `skills/`. After `/prd-to-mvp` produces the MVP spec and build-out plan, users currently create GitHub issues manually. No existing GitHub issue tracks this skill.
 
-**Sketch of the idea:** A skill that reads `Design/mvp.md` and `Design/build-out-plan.md`, generates a set of GitHub issues via `gh issue create`, each referencing the relevant ADR(s), tagged with labels, and assigned to the appropriate milestone. Bridges the gap between planning output and execution backlog.
+**Sketch of the idea:** A skill that reads `design/mvp.md` and `design/build-out-plan.md`, generates a set of GitHub issues via `gh issue create`, each referencing the relevant ADR(s), tagged with labels, and assigned to the appropriate milestone. Bridges the gap between planning output and execution backlog.
 
 **Options in mind:** Skill that creates issues directly via `gh`; skill that drafts issue markdown files for review before creation; hybrid that drafts, lets user approve, then creates.
 
@@ -143,7 +143,7 @@ format is documented there.
 **Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-17
-**ADR:** [ADR-012](../Design/adr/adr-012-github-projects-integration.md)
+**ADR:** [ADR-012](../design/adr/adr-012-github-projects-integration.md)
 
 **Context / trigger:** The kit tracks work via milestones + labels + issues but has no integration with GitHub Projects (the kanban board feature). Users get a flat issue list with no visual workflow view of status across milestones. GitHub Projects provides Todo → In Progress → Done columns, custom fields, and board/table views out of the box.
 
@@ -169,11 +169,11 @@ format is documented there.
 **Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-16
-**ADR:** [ADR-013](../Design/adr/adr-013-prepare-issue-skill.md)
+**ADR:** [ADR-013](../design/adr/adr-013-prepare-issue-skill.md)
 
 **Context / trigger:** Users currently fill the issue prompt template manually — copying context from the GitHub issue body, linked ADRs, and the build-out plan phase into the blank form. This is repetitive, error-prone, and the biggest friction point between "issue exists" and "Claude Code session is briefed."
 
-**Sketch of the idea:** A `/prepare-issue` skill that takes a GitHub issue number, pulls the issue body and linked ADR(s) via `gh`, reads the relevant build-out plan phase from `Design/build-out-plan.md`, auto-fills the prompt template, and writes the result to `prompts/issue-NNN-short-title.md`. Optionally outputs the filled prompt ready for direct use in a Claude Code session.
+**Sketch of the idea:** A `/prepare-issue` skill that takes a GitHub issue number, pulls the issue body and linked ADR(s) via `gh`, reads the relevant build-out plan phase from `design/build-out-plan.md`, auto-fills the prompt template, and writes the result to `prompts/issue-NNN-short-title.md`. Optionally outputs the filled prompt ready for direct use in a Claude Code session.
 
 **Options in mind:**
 - Skill that writes the file and prints it (recommended — leaves session start to the user).
@@ -195,7 +195,7 @@ format is documented there.
 **Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-17
-**ADR:** [ADR-014](../Design/adr/adr-014-claude-issue-executor-skill.md)
+**ADR:** [ADR-014](../design/adr/adr-014-claude-issue-executor-skill.md)
 
 **Context / trigger:** Referenced in `docs/repo-structure.md:89` as a skill for target projects, but no source exists in `skills/`. This is the execution counterpart to `/prepare-issue` — once the prompt is filled, this skill drives the actual Claude Code implementation session. No GitHub issue tracks it.
 
@@ -218,7 +218,7 @@ format is documented there.
 **Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-17
-**ADR:** [ADR-015](../Design/adr/adr-015-pr-review-packager-skill.md)
+**ADR:** [ADR-015](../design/adr/adr-015-pr-review-packager-skill.md)
 
 **Context / trigger:** Referenced in `docs/repo-structure.md:89` as a target project skill, but no source in `skills/`. After implementation, users manually create PRs and fill the PR template. No GitHub issue tracks it. Note: overlaps with Claude Code's built-in `/review` skill, but serves a different purpose — packaging the PR rather than reviewing it.
 
@@ -241,7 +241,7 @@ format is documented there.
 **Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-16
-**ADR:** [ADR-016](../Design/adr/adr-016-changelog-and-release-notes-skill.md)
+**ADR:** [ADR-016](../design/adr/adr-016-changelog-and-release-notes-skill.md)
 
 **Context / trigger:** V1's commit convention (`<verb> <what> (ADR-NNN, #issue)`) makes `git log` highly readable, but there's no way to produce a polished changelog or release notes for stakeholders who don't use git. A maintained commit log would drift from reality; an auto-generated one stays accurate with zero upkeep.
 
@@ -264,11 +264,11 @@ format is documented there.
 **Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-17
-**ADR:** [ADR-017](../Design/adr/adr-017-release-skill.md)
+**ADR:** [ADR-017](../design/adr/adr-017-release-skill.md)
 
 **Context / trigger:** The kit has no skills for versioning, releasing, or tagging. Projects built with the kit reach "merge to main" but have no structured path from there to a tagged release with release notes. The `/changelog` skill (also logged) generates the content, but there's nothing to orchestrate the actual release.
 
-**Sketch of the idea:** A `/release` skill that: determines the next semver version (based on ADR impact or user input), runs the `/changelog` skill to generate release notes, creates a git tag, pushes it, and creates a GitHub Release via `gh release create`. Optionally updates `Design/build-out-plan.md` phase status to mark a milestone as shipped. Could also define a semver convention section in `CLAUDE.md` or the workflow guide (e.g. new ADR = minor, superseded ADR = potentially major, bug fixes = patch).
+**Sketch of the idea:** A `/release` skill that: determines the next semver version (based on ADR impact or user input), runs the `/changelog` skill to generate release notes, creates a git tag, pushes it, and creates a GitHub Release via `gh release create`. Optionally updates `design/build-out-plan.md` phase status to mark a milestone as shipped. Could also define a semver convention section in `CLAUDE.md` or the workflow guide (e.g. new ADR = minor, superseded ADR = potentially major, bug fixes = patch).
 
 **Options in mind:**
 - Full skill that handles tag + changelog + GitHub Release end-to-end (recommended).
@@ -290,11 +290,11 @@ format is documented there.
 **Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-17
-**ADR:** [ADR-018](../Design/adr/adr-018-workflow-docs-skill.md)
+**ADR:** [ADR-018](../design/adr/adr-018-workflow-docs-skill.md)
 
-**Context / trigger:** Referenced in `docs/repo-structure.md:88` as the skill that generates `README.md` and `Design/ai-summary.md` for target projects. No source exists in `skills/`, and no GitHub issue tracks it.
+**Context / trigger:** Referenced in `docs/repo-structure.md:88` as the skill that generates `README.md` and `design/ai-summary.md` for target projects. No source exists in `skills/`, and no GitHub issue tracks it.
 
-**Sketch of the idea:** A skill that reads the project's PRD, MVP spec, ADRs, and `CLAUDE.md` to generate a project `README.md` (from `templates/`) and `Design/ai-summary.md` (from `templates/ai-summary-template.md`). Should be re-runnable to refresh docs as the project evolves.
+**Sketch of the idea:** A skill that reads the project's PRD, MVP spec, ADRs, and `CLAUDE.md` to generate a project `README.md` (from `templates/`) and `design/ai-summary.md` (from `templates/ai-summary-template.md`). Should be re-runnable to refresh docs as the project evolves.
 
 **Options in mind:** Single skill generating both files; two separate skills (one per doc); fold into the installer script as a post-install step.
 
@@ -313,7 +313,7 @@ format is documented there.
 **Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-16
-**ADR:** [ADR-019](../Design/adr/adr-019-claude-code-guide.md)
+**ADR:** [ADR-019](../design/adr/adr-019-claude-code-guide.md)
 
 **Context / trigger:** `docs/install.md:154` references `docs/claude-code-guide.md` as "a later issue" — it's already promised to users reading the install guide but doesn't exist yet.
 
@@ -336,7 +336,7 @@ format is documented there.
 **Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-16
-**ADR:** [ADR-020](../Design/adr/adr-020-workflow-guide.md)
+**ADR:** [ADR-020](../design/adr/adr-020-workflow-guide.md)
 
 **Context / trigger:** Users installing the kit can see the pieces (skills, templates, ADRs) but there's no single doc that walks through the full flow the kit creates end-to-end. `docs/install.md:214` already references a planned `docs/workflow-guide.md` ("end-to-end flow from idea to deploy — coming in a later issue"), and `generic-project-workflow.md` at the repo root (~29 KB) looks like source material waiting to be distilled.
 
@@ -369,7 +369,7 @@ format is documented there.
 **Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-16
-**ADR:** [ADR-021](../Design/adr/adr-021-example-projects.md)
+**ADR:** [ADR-021](../design/adr/adr-021-example-projects.md)
 
 **Context / trigger:** `examples/` currently covers the three PRD intake paths but no full worked projects. New users lack end-to-end references showing the kit in use from install to shipped PR.
 
@@ -392,11 +392,11 @@ format is documented there.
 **Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-17
-**ADR:** [ADR-027](../Design/adr/adr-027-prd-template.md)
+**ADR:** [ADR-027](../design/adr/adr-027-prd-template.md)
 
 **Context / trigger:** `templates/` ships `mvp-template.md`, `build-out-plan-template.md`, `adr-template.md`, `issue-template.md`, `pr-template.md`, `claude-md-template.md`, `ai-summary-template.md`, `readme-template.md` — but no `prd-template.md`. Users who draft PRDs in external LLMs (Perplexity, ChatGPT) have no paste-in skeleton matching the kit's canonical 11-field shape from `skills/prd-normalizer/SKILL.md:46-63`. Only `examples/standard-prd-example.md` hints at shape, and it's an 8-section illustrative example rather than a reusable template. A provisional `templates/prd-template.md` was added locally to unblock drafting today, ahead of formalization — this entry records the work that's still owed.
 
-**Sketch of the idea:** Ship `templates/prd-template.md` with `{{UPPER_SNAKE}}` placeholders matching the 11 canonical fields (product name, one-line description, problem, target users, goal, user stories, core capabilities, non-goals, constraints and preferences, success signals, open questions). Document the flow: paste the template into an external LLM → get a filled PRD → save to `Design/prd.md` → run `prd-normalizer` (near-no-op if filled faithfully). Update `templates/README.md` index and add a reference from `docs/install.md` or the forthcoming `docs/workflow-guide.md` (#14).
+**Sketch of the idea:** Ship `templates/prd-template.md` with `{{UPPER_SNAKE}}` placeholders matching the 11 canonical fields (product name, one-line description, problem, target users, goal, user stories, core capabilities, non-goals, constraints and preferences, success signals, open questions). Document the flow: paste the template into an external LLM → get a filled PRD → save to `design/prd.md` → run `prd-normalizer` (near-no-op if filled faithfully). Update `templates/README.md` index and add a reference from `docs/install.md` or the forthcoming `docs/workflow-guide.md` (#14).
 
 **Options in mind:**
 - 11-field canonical shape (recommended — closest to `prd-normalized.md`, fast-path through the normalizer).
@@ -419,7 +419,7 @@ format is documented there.
 **Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-19
-**ADR:** [ADR-025](../Design/adr/adr-025-license.md)
+**ADR:** [ADR-025](../design/adr/adr-025-license.md)
 
 **Context / trigger:** The repo has no `LICENSE` file and the README currently says "not yet specified" (added 2026-04-19 alongside v2.0.0). GitHub visibly flags missing licenses on the repo homepage, and without one the default copyright applies — downstream users technically cannot redistribute, modify, or fork the kit. For a kit whose whole purpose is to be installed into other projects, this is a soft blocker on external adoption. Separately: target projects scaffolded via the installer also ship without a license, pushing the same problem one layer down.
 
@@ -442,16 +442,16 @@ format is documented there.
 
 ---
 
-### 20. Auto-sync `Design/adr/README.md` index
+### 20. Auto-sync `design/adr/README.md` index
 
 **Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-26
-**ADR:** [ADR-023](../Design/adr/adr-023-auto-sync-adr-index.md)
+**ADR:** [ADR-023](../design/adr/adr-023-auto-sync-adr-index.md)
 
-**Context / trigger:** The ADR index in `Design/adr/README.md` has drifted out of sync with the filesystem repeatedly — at one point listing only ADR-001 through ADR-006 while the directory contained 21 ADRs. Index drift means readers can't find ADRs by title or check status without scanning the directory directly. Status transitions (e.g., supersession) compound the problem: ADR-002 was superseded by ADR-022 and the index needed a manual update for the new row. Today, every ADR add or status change requires the author to also edit the README.
+**Context / trigger:** The ADR index in `design/adr/README.md` has drifted out of sync with the filesystem repeatedly — at one point listing only ADR-001 through ADR-006 while the directory contained 21 ADRs. Index drift means readers can't find ADRs by title or check status without scanning the directory directly. Status transitions (e.g., supersession) compound the problem: ADR-002 was superseded by ADR-022 and the index needed a manual update for the new row. Today, every ADR add or status change requires the author to also edit the README.
 
-**Sketch of the idea:** A `bin/sync-adr-index` regenerator that scans `Design/adr/adr-*.md`, parses title and status from each, and rewrites a marker-fenced (`<!-- adr-index:start -->` / `<!-- adr-index:end -->`) region of `Design/adr/README.md`. Editorial text outside the fence is preserved. The script is idempotent and ships with the kit so target projects get the same behaviour. The ADR-touching skills (`adr-writer`, `claude-issue-executor`, `pr-review-packager`, `release`) call it before commit/PR/tag. Optional belt-and-braces: a git pre-commit hook installed by `install-workflow-kit` that runs the script if any `Design/adr/adr-*.md` is staged.
+**Sketch of the idea:** A `bin/sync-adr-index` regenerator that scans `design/adr/adr-*.md`, parses title and status from each, and rewrites a marker-fenced (`<!-- adr-index:start -->` / `<!-- adr-index:end -->`) region of `design/adr/README.md`. Editorial text outside the fence is preserved. The script is idempotent and ships with the kit so target projects get the same behaviour. The ADR-touching skills (`adr-writer`, `claude-issue-executor`, `pr-review-packager`, `release`) call it before commit/PR/tag. Optional belt-and-braces: a git pre-commit hook installed by `install-workflow-kit` that runs the script if any `design/adr/adr-*.md` is staged.
 
 **Options in mind:**
 - **Skill-level only** — only adr-writer regenerates. Simple, but skips manual-edit and out-of-band cases.
@@ -474,7 +474,7 @@ format is documented there.
 **Status:** shipped
 **Target:** v-next
 **Captured:** 2026-04-26
-**ADR:** [ADR-024](../Design/adr/adr-024-mvp-vocabulary-versus-v1.md)
+**ADR:** [ADR-024](../design/adr/adr-024-mvp-vocabulary-versus-v1.md)
 
 **Context / trigger:** The kit's MVP scoping framework uses "In v1 / Not in v1" as the canonical headings — appearing in `templates/mvp-template.md`, `templates/readme-template.md`, the `prd-to-mvp` / `idea-to-prd` / `prd-normalizer` skills, `issue-planner`, `workflow-docs`, and example projects. ADR-022 just removed kit-self "v1" qualifiers because they were misleading after the kit shipped v2.0.0. The same wording survives in the MVP framework with a different meaning ("the target project's first release"), and a reader can reasonably ask whether the two uses should align. There is also a collision risk: a target project at its own v2 still has "In v1" headings in its MVP doc.
 
@@ -502,16 +502,16 @@ format is documented there.
 **Shipped:** v3.3.0
 **Target:** v-next
 **Captured:** 2026-04-30
-**ADR:** [ADR-031](../Design/adr/adr-031-deeper-planning-workflow.md)
+**ADR:** [ADR-031](../design/adr/adr-031-deeper-planning-workflow.md)
 
 **Context / trigger:** The current planning chain (`idea-to-prd` → `prd-normalizer` → `prd-to-mvp` → `adr-writer` → `issue-planner`) produces a working backlog quickly, but for non-trivial projects the depth of planning between "MVP scoped" and "issues created" is thin. There's no structured place for: deeper requirements decomposition, risk/assumption logs, sequencing rationale beyond a flat build-out plan, or a research/spike phase before ADRs are drafted. A reference repo will be supplied with patterns worth borrowing.
 
 **Sketch of the idea:** Introduce an optional, deeper planning layer between MVP scoping and ADR drafting. Possible artefacts: a structured planning doc (requirements, risks, assumptions, sequencing), a research/spike skill that captures findings before they harden into ADRs, and a richer build-out plan format that can express phased delivery (see #23). Skill(s) would be opt-in for larger projects so small ones still get the lightweight current flow.
 
 **Options in mind:**
-- **New `/planning` skill that produces a `Design/planning.md`** sitting between `mvp.md` and `adr-writer` — captures requirements decomposition, risks, assumptions, open questions, and sequencing rationale.
+- **New `/planning` skill that produces a `design/planning.md`** sitting between `mvp.md` and `adr-writer` — captures requirements decomposition, risks, assumptions, open questions, and sequencing rationale.
 - **Extend `prd-to-mvp`** to optionally emit a deeper planning section rather than a separate skill — fewer skills, but conflates two concerns.
-- **A research/spike skill** that produces `Design/spikes/NNN-topic.md` for areas needing investigation before an ADR can be written.
+- **A research/spike skill** that produces `design/spikes/NNN-topic.md` for areas needing investigation before an ADR can be written.
 - **Adopt patterns from a reference repo** the user will supply — defer specifics until reviewed.
 
 **Open questions:** What's the canonical artefact name and shape — single `planning.md` or a small directory? Does it replace, augment, or live alongside `build-out-plan.md`? At what project size does the extra step pay for itself? Should `issue-planner` learn to read it, or stay sourced from `mvp.md` + `build-out-plan.md` only? Which patterns from the reference repo are worth importing wholesale vs adapting?
@@ -530,7 +530,7 @@ format is documented there.
 **Shipped:** v3.3.0
 **Target:** v-next
 **Captured:** 2026-04-30
-**ADR:** [ADR-032](../Design/adr/adr-032-implementation-phases.md)
+**ADR:** [ADR-032](../design/adr/adr-032-implementation-phases.md)
 
 **Context / trigger:** Today's flow treats the MVP as a single scope cut: everything is either `In scope` or `Out of scope`, and `build-out-plan.md` is a flat list of work. For large projects, that's too coarse — useful work often falls into multiple ordered phases (e.g. foundation → core feature → polish → scale), each potentially with its own ADRs and acceptance criteria. There's no first-class place to express "this is in scope, but it's phase 2, not phase 1," and `issue-planner` has nothing to key milestones off beyond the flat plan.
 
@@ -538,7 +538,7 @@ format is documented there.
 
 **Options in mind:**
 - **Phases in `build-out-plan.md`** — extend the existing template with `## Phase N: <name>` sections; least disruption, reuses the artefact users already know.
-- **Separate `Design/phases.md`** — phases as a first-class doc; cleaner separation but adds another file.
+- **Separate `design/phases.md`** — phases as a first-class doc; cleaner separation but adds another file.
 - **Phases as a field on ADRs and issues only** — no new artefact, just metadata; lightest, but loses the narrative "what each phase is for."
 - **Phases captured during PRD review** (in `prd-normalizer` / `prd-to-mvp`) so they're decided early rather than retrofitted onto the build-out plan.
 
@@ -558,16 +558,16 @@ format is documented there.
 **Shipped:** v3.3.0
 **Target:** v-next
 **Captured:** 2026-04-30
-**ADR:** [ADR-033](../Design/adr/adr-033-clarify-step.md)
+**ADR:** [ADR-033](../design/adr/adr-033-clarify-step.md)
 
 **Context / trigger:** Inspired by the GSD project's [`discuss-phase`](https://github.com/gsd-build/get-shit-done/blob/main/commands/gsd/discuss-phase.md) command, which surfaces "gray areas" — undecided implementation questions — before the planner runs, so downstream agents don't stall on ambiguity. Today our kit jumps from MVP scoping straight to `adr-writer`, which means ambiguity gets resolved either inside ADR drafts (mixing decisions with discovery) or during issue execution (too late, costs a session). A focused clarification step would catch the gray areas earlier.
 
-**Sketch of the idea:** A `/clarify` (or `/discuss-scope`) skill that reads the current `Design/prd-normalized.md` and `Design/mvp.md`, scouts the codebase (if any), and surfaces a checklist of unresolved implementation questions for user selection and deep-dive resolution. Output is appended to a `Design/decisions.md` (or per-phase `Design/phases/N-context.md` if #23 lands) capturing settled decisions in a form ADR-writer and issue-planner can consume without re-asking. Skips areas already locked by accepted ADRs.
+**Sketch of the idea:** A `/clarify` (or `/discuss-scope`) skill that reads the current `design/prd-normalized.md` and `design/mvp.md`, scouts the codebase (if any), and surfaces a checklist of unresolved implementation questions for user selection and deep-dive resolution. Output is appended to a `design/decisions.md` (or per-phase `design/phases/N-context.md` if #23 lands) capturing settled decisions in a form ADR-writer and issue-planner can consume without re-asking. Skips areas already locked by accepted ADRs.
 
 **Options in mind:**
-- **New `/clarify` skill** that produces `Design/decisions.md`, run between `prd-to-mvp` and `adr-writer` — recommended, narrow scope, opt-in.
+- **New `/clarify` skill** that produces `design/decisions.md`, run between `prd-to-mvp` and `adr-writer` — recommended, narrow scope, opt-in.
 - **Extend `prd-to-mvp`** to emit a clarification section — fewer skills but conflates scoping with decision capture.
-- **Per-phase clarification** tied to #23, producing `Design/phases/N-context.md` per phase — more structured but blocked on the phase shape.
+- **Per-phase clarification** tied to #23, producing `design/phases/N-context.md` per phase — more structured but blocked on the phase shape.
 - **Do nothing** — keep relying on ADRs to surface ambiguity. Cheap but leaves the gap.
 
 **Open questions:** Does this artefact graduate into ADRs once a decision is hardened, or stay as standing context? How does it interact with the existing ADR supersession model — clarifications are below ADR-weight by design? Should it be re-runnable to add gray areas as they're discovered mid-project, or one-shot per planning round?
@@ -586,7 +586,7 @@ format is documented there.
 **Shipped:** v3.3.0
 **Target:** v-next
 **Captured:** 2026-04-30
-**ADR:** [ADR-034](../Design/adr/adr-034-plan-checker.md)
+**ADR:** [ADR-034](../design/adr/adr-034-plan-checker.md)
 
 **Context / trigger:** Inspired by GSD's [`gsd-plan-checker`](https://github.com/gsd-build/get-shit-done/blob/main/agents/gsd-plan-checker.md) agent, which validates a phase plan on 8 dimensions (atomicity, requirements coverage, dependencies, context fit, etc.) and iterates up to 3 times until pass. Our kit produces ADRs (via `adr-writer`) and issue prompts (via `prepare-issue`), but neither has a structured quality check before they're accepted. Bad ADRs and thin prompts are caught only at execution time, when the cost of fixing them is highest.
 
@@ -614,14 +614,14 @@ format is documented there.
 **Shipped:** v3.3.0
 **Target:** v-next
 **Captured:** 2026-04-30
-**ADR:** [ADR-035](../Design/adr/adr-035-state-md-session-continuity.md)
+**ADR:** [ADR-035](../design/adr/adr-035-state-md-session-continuity.md)
 
 **Context / trigger:** Inspired by GSD's `STATE.md` (current position: which phase, plans completed, blockers), `HANDOFF.json`, and `continue-here.md` artefacts. Today our kit relies entirely on git state, GitHub issue status, and the prompt files in `prompts/` to convey "where are we?" That's enough for a fresh session on a single issue, but for projects spanning many issues and phases, it leaves the user (and any new Claude session) reconstructing context from scratch every time. No cross-session memory beyond what's in git.
 
-**Sketch of the idea:** Ship a small `Design/state.md` (or `notes/state.md`) that captures: current phase (if #23 lands), in-flight issues, recently completed work, known blockers, and a "continue here" pointer to the next prompt. Updated by `/prepare-issue` (sets the in-flight issue), `claude-issue-executor` (marks progress), and `pr-review-packager` (closes out an issue). A companion `/resume` skill reads it and briefs the next session. Optional `/pause` skill writes a richer handoff for context-window-exhausting sessions.
+**Sketch of the idea:** Ship a small `design/state.md` (or `notes/state.md`) that captures: current phase (if #23 lands), in-flight issues, recently completed work, known blockers, and a "continue here" pointer to the next prompt. Updated by `/prepare-issue` (sets the in-flight issue), `claude-issue-executor` (marks progress), and `pr-review-packager` (closes out an issue). A companion `/resume` skill reads it and briefs the next session. Optional `/pause` skill writes a richer handoff for context-window-exhausting sessions.
 
 **Options in mind:**
-- **Single `Design/state.md` updated by existing skills** — recommended, lightweight, reuses skills already in the chain.
+- **Single `design/state.md` updated by existing skills** — recommended, lightweight, reuses skills already in the chain.
 - **Standalone `/resume` and `/pause` skills** with no shared state file — simpler but loses the cross-skill traceability.
 - **Per-issue state in `prompts/issue-NNN-state.md`** — granular but fragmented; harder to see "the project's overall position."
 - **Do nothing** — keep relying on git + issue board. Cheap but limits the kit's usefulness on multi-month projects.
@@ -642,7 +642,7 @@ format is documented there.
 **Shipped:** v3.3.0
 **Target:** v-next
 **Captured:** 2026-04-30
-**ADR:** [ADR-036](../Design/adr/adr-036-granularity-control.md)
+**ADR:** [ADR-036](../design/adr/adr-036-granularity-control.md)
 
 **Context / trigger:** Inspired by GSD's `granularity` setting (`coarse` 3-5 phases, `standard` 5-8, `fine` 8-12) on `new-project`. Without an explicit knob, phase decomposition becomes a judgment call that varies project-to-project, making example projects and the workflow guide harder to write consistently. A small modifier on #23 (implementation phases) lets users dial the planning depth to match project size.
 
@@ -670,7 +670,7 @@ format is documented there.
 **Shipped:** v3.3.0
 **Target:** v-next
 **Captured:** 2026-04-30
-**ADR:** [ADR-037](../Design/adr/adr-037-milestone-lifecycle.md)
+**ADR:** [ADR-037](../design/adr/adr-037-milestone-lifecycle.md)
 
 **Context / trigger:** Inspired by GSD's `audit-milestone`, `milestone-summary`, and `complete-milestone` commands, which formalize the boundary between phases and treat a milestone as a first-class delivery unit. Our kit's closest analogue is `/release`, but a release covers a tag-and-publish step, not the wider "did we actually finish what this milestone promised?" check. If #23 (phases) lands, milestones become the natural multi-phase grouping — and need lifecycle ops of their own.
 
@@ -682,7 +682,7 @@ format is documented there.
 - **Fold into `/release`** — simplest but conflates "milestone done" with "release tagged" (they may differ — e.g. multiple milestones per release).
 - **Manual checklist in the workflow guide** — no automation, just docs. Cheap but abandons the kit's automation principle.
 
-**Open questions:** Is one milestone == one release the default, or are they decoupled? Where does the milestone summary live — `Design/milestones/N-summary.md`, the GitHub milestone description, or both? Does `/audit-milestone` block `/complete-milestone` on failure, or just warn?
+**Open questions:** Is one milestone == one release the default, or are they decoupled? Where does the milestone summary live — `design/milestones/N-summary.md`, the GitHub milestone description, or both? Does `/audit-milestone` block `/complete-milestone` on failure, or just warn?
 
 **Consequences to think through:** Easier — large projects get visible delivery checkpoints; retrospectives become routine artefact, not a manual exercise; release notes have richer source material. Harder — three more skills to maintain; only valuable if #23 (phases) and milestone groupings actually exist. Maintenance — tightly coupled to whatever milestone shape #23 settles on.
 
@@ -698,7 +698,7 @@ format is documented there.
 **Shipped:** v3.3.0
 **Target:** v-next
 **Captured:** 2026-04-30
-**ADR:** [ADR-038](../Design/adr/adr-038-tighten-prompt-step.md)
+**ADR:** [ADR-038](../design/adr/adr-038-tighten-prompt-step.md)
 
 **Context / trigger:** The kit's per-issue prompt artefact (`prompts/issue-NNN-*.md`, ADR-008 + ADR-013) is a load-bearing piece of the audit trail and the natural anchor for several v-next ideas (#25 plan-checker, #26 state.md). But a fair question came up — is the prompt strictly necessary now that Claude Code has plan mode? Honest read: dropping it loses the per-session brief (which ADRs apply, which build-out-plan phase, acceptance criteria, scope boundary, clarifications gathered post-ADR), the audit trail (one prompt per issue, committed alongside the work), and the re-runnable-with-the-same-brief property. The cost is already near-zero thanks to `/prepare-issue` auto-filling from the issue + ADRs + plan. So the right move is to keep the artefact and lower its ceremony, not remove it.
 
@@ -730,7 +730,7 @@ format is documented there.
 **Shipped:** v3.3.0
 **Target:** v-next
 **Captured:** 2026-04-30
-**ADR:** [ADR-039](../Design/adr/adr-039-plan-mode-for-significant-tasks.md)
+**ADR:** [ADR-039](../design/adr/adr-039-plan-mode-for-significant-tasks.md)
 
 **Context / trigger:** Today `claude-issue-executor` enforces "plan-first" via a chat-level protocol: it proposes a written plan and waits for explicit user approval before any mutating tool call. That's a *convention* the executor follows, not a *guarantee* the harness enforces. Claude Code also ships a harder mechanism — plan mode (toggled with shift+tab shift+tab) — that locks the assistant out of all mutating tools at the harness level until the user explicitly exits plan mode with approval. The two are complementary, but the kit currently only uses the soft one. During the v-next planning batch implementation, the user noted this gap and asked for the harder enforcement to become standard for "significant tasks."
 

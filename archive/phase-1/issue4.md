@@ -2,7 +2,7 @@
 Create the initial scaffold for documentation and template files that will be generated into target projects.
 
 ## ADR
-Related ADR: `Design/adr/adr-005-documentation-and-template-architecture.md`
+Related ADR: `design/adr/adr-005-documentation-and-template-architecture.md`
 
 ## Goal
 Define and add the first template set for core workflow artifacts so later skills can generate consistent outputs.

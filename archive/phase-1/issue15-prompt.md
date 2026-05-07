@@ -7,7 +7,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-013-prepare-issue-skill.md`
+- File: `design/adr/adr-013-prepare-issue-skill.md`
 - Decision: Build a /prepare-issue skill that auto-fills an issue prompt from a GitHub issue and its linked ADRs.
 
 GitHub Issue:
@@ -26,7 +26,7 @@ Requirements
 - Create the skill in `skills/prepare-issue/`
 - The skill must accept a GitHub issue number as input
 - Pull the issue title, body, labels, milestone, and linked ADR references via `gh issue view`
-- Read `Design/build-out-plan.md` to extract additional context for the issue
+- Read `design/build-out-plan.md` to extract additional context for the issue
 - Fill the prompt template from `prompts/_template.md` (ADR-008) with the extracted information
 - Write the filled prompt to `prompts/issue-NNN-short-title.md`, deriving the short title from the issue title
 - Handle edge cases: issue not found, missing ADR references, missing template file
@@ -63,10 +63,10 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-013-prepare-issue-skill.md`
+   - `design/adr/adr-013-prepare-issue-skill.md`
    - `generic-project-workflow.md`
    - `prompts/_template.md` (from ADR-008 / Issue #12)
-   - `Design/build-out-plan.md` (as reference for the context source)
+   - `design/build-out-plan.md` (as reference for the context source)
    - existing skills in `skills/` for style and conventions
    - `notes/issue1-prompt.md` through `notes/issue10-prompt.md` as examples of the desired output
 2. Propose a short, step-by-step implementation PLAN for this issue, including:

@@ -2,7 +2,7 @@
 Implement the first planning skill that helps a user go from a rough project idea to a usable PRD draft.
 
 ## ADR
-Related ADR: `Design/adr/adr-003-prd-intake-model.md`
+Related ADR: `design/adr/adr-003-prd-intake-model.md`
 
 ## Goal
 Support the “no PRD yet” path by creating a structured `idea-to-prd` skill.

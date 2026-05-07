@@ -7,7 +7,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-005-documentation-and-template-architecture.md`
+- File: `design/adr/adr-005-documentation-and-template-architecture.md`
 - Decision: Generate documentation and templates directly into the target repository.
 
 GitHub Issue:
@@ -52,7 +52,7 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-005-documentation-and-template-architecture.md`
+   - `design/adr/adr-005-documentation-and-template-architecture.md`
    - `generic-project-workflow.md`
    - existing `templates/` and `docs/` folders if present
 2. Propose a short, step-by-step implementation PLAN for this issue, including:

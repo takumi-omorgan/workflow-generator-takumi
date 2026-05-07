@@ -3,8 +3,8 @@ Write the installation documentation for the workflow kit and explicitly documen
 
 ## ADR
 Related ADRs:
-- `Design/adr/adr-001-project-local-installation-model.md`
-- `Design/adr/adr-002-new-project-only-scope.md`
+- `design/adr/adr-001-project-local-installation-model.md`
+- `design/adr/adr-002-new-project-only-scope.md`
 
 ## Goal
 Create installation and scope documentation that explains how the kit is used and what it does not support in v1.

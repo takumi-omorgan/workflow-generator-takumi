@@ -7,7 +7,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-009-installer-script.md`
+- File: `design/adr/adr-009-installer-script.md`
 - Decision: Provide a bin/install-workflow-kit bash script to automate the project-local installation flow.
 
 GitHub Issue:
@@ -24,7 +24,7 @@ The manual installation steps documented in the install guide are repetitive and
 
 Requirements
 - Create `bin/install-workflow-kit` as a portable bash script
-- The script must scaffold `Design/adr/`, `prompts/`, and `notes/` in the target project
+- The script must scaffold `design/adr/`, `prompts/`, and `notes/` in the target project
 - Copy skills from the kit repo into the target project's `.claude/skills/`
 - Render `CLAUDE.md` from `templates/claude-md-template.md` (ADR-007), prompting for placeholder values or accepting them as arguments
 - Make an initial commit with a clear message after scaffolding
@@ -62,7 +62,7 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-009-installer-script.md`
+   - `design/adr/adr-009-installer-script.md`
    - `generic-project-workflow.md`
    - `docs/install.md`
    - `docs/repo-structure.md`

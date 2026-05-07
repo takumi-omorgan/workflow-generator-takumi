@@ -7,7 +7,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-014-claude-issue-executor-skill.md`
+- File: `design/adr/adr-014-claude-issue-executor-skill.md`
 - Decision: Build a claude-issue-executor skill that drives disciplined implementation sessions from prepared issue prompts.
 
 GitHub Issue:
@@ -53,8 +53,8 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-014-claude-issue-executor-skill.md`
-   - `Design/adr/adr-006-*` (execution model ADR)
+   - `design/adr/adr-014-claude-issue-executor-skill.md`
+   - `design/adr/adr-006-*` (execution model ADR)
    - `generic-project-workflow.md`
    - any existing skills in `skills/` for structure conventions
 2. Propose a short, step-by-step implementation PLAN for this issue, including:

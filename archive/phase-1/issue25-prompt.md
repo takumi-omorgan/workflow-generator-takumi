@@ -52,7 +52,7 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - list the ADR files under `Design/adr/` (007 through 021) to get titles and summaries
+   - list the ADR files under `design/adr/` (007 through 021) to get titles and summaries
    - check existing GitHub milestones and issues via `gh` CLI
 2. Propose a short, step-by-step implementation PLAN for this issue, including:
    - the milestone creation command,

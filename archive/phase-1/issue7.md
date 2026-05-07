@@ -3,8 +3,8 @@ Implement the skills that turn planning inputs into a scoped MVP summary and dra
 
 ## ADR
 Related ADRs:
-- `Design/adr/adr-003-prd-intake-model.md`
-- `Design/adr/adr-005-documentation-and-template-architecture.md`
+- `design/adr/adr-003-prd-intake-model.md`
+- `design/adr/adr-005-documentation-and-template-architecture.md`
 
 ## Goal
 Create the bridge from PRD-level planning into actionable architecture and implementation planning artifacts.

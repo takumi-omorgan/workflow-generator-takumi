@@ -23,7 +23,7 @@ The feature-ideas.md file is the central tracking document for planned work. Wit
 
 Requirements
 - Update each of the 15 v-next entries in notes/feature-ideas.md from status "idea" to "adr-drafted"
-- Add an ADR link to each entry pointing to the corresponding ADR file under Design/adr/
+- Add an ADR link to each entry pointing to the corresponding ADR file under design/adr/
 - Ensure ADR links are correct and match the right feature entry
 - Do not change any other content in the file (descriptions, priorities, etc.)
 
@@ -35,9 +35,9 @@ Acceptance criteria
 
 Scope and constraints
 - Primary folders to touch: `notes/`
-- Folders to avoid unless absolutely necessary: `docs/`, `skills/`, `templates/`, `Design/`
+- Folders to avoid unless absolutely necessary: `docs/`, `skills/`, `templates/`, `design/`
 - This is a purely mechanical update — do not rewrite descriptions or re-order entries
-- Verify ADR filenames by checking the actual files under Design/adr/
+- Verify ADR filenames by checking the actual files under design/adr/
 
 Evaluation & testing requirements
 - Verify all 15 entries have been updated to "adr-drafted"
@@ -49,7 +49,7 @@ Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
    - `notes/feature-ideas.md`
-   - list the files under `Design/adr/` to confirm ADR filenames
+   - list the files under `design/adr/` to confirm ADR filenames
 2. Propose a short, step-by-step implementation PLAN for this issue, including:
    - the mapping of each feature entry to its ADR file,
    - the format you will use for the ADR link in each entry,

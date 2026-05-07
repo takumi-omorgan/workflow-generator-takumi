@@ -7,7 +7,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-007-claude-md-starter-template.md`
+- File: `design/adr/adr-007-claude-md-starter-template.md`
 - Decision: Ship a CLAUDE.md starter template with meaningful placeholders so target projects get a useful starting point.
 
 GitHub Issue:
@@ -51,7 +51,7 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-007-claude-md-starter-template.md`
+   - `design/adr/adr-007-claude-md-starter-template.md`
    - `generic-project-workflow.md`
    - existing files in `templates/`
    - the current CLAUDE.md in the kit repo as a reference

@@ -7,7 +7,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-003-prd-intake-model.md`
+- File: `design/adr/adr-003-prd-intake-model.md`
 - Decision: Support three PRD intake paths: no PRD, standard PRD, and custom PRD.
 
 GitHub Issue:
@@ -49,7 +49,7 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-003-prd-intake-model.md`
+   - `design/adr/adr-003-prd-intake-model.md`
    - `generic-project-workflow.md`
    - any existing skills under `skills/`
    - the templates created for planning artifacts

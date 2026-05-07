@@ -7,7 +7,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-020-end-to-end-workflow-guide.md`
+- File: `design/adr/adr-020-end-to-end-workflow-guide.md`
 - Decision: Write a distilled docs/workflow-guide.md covering the full workflow from idea to release.
 
 GitHub Issue:
@@ -39,7 +39,7 @@ Acceptance criteria
 
 Scope and constraints
 - Primary folders to touch: `docs/`
-- Folders to avoid unless absolutely necessary: `skills/`, `templates/`, `Design/`
+- Folders to avoid unless absolutely necessary: `skills/`, `templates/`, `design/`
 - Keep the guide practical and action-oriented — this is a "how to use" doc, not a reference spec
 - Do not rewrite generic-project-workflow.md; link to it as the detailed reference
 - Limit changes to README.md and docs/install.md to adding links only
@@ -53,7 +53,7 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-020-end-to-end-workflow-guide.md`
+   - `design/adr/adr-020-end-to-end-workflow-guide.md`
    - `generic-project-workflow.md`
    - `README.md`
    - `docs/install.md`

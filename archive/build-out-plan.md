@@ -13,7 +13,7 @@
 > - [`README.md`](../README.md) — positioning and what the kit is today
 > - [`docs/workflow-guide.md`](../docs/workflow-guide.md) — the action-oriented walkthrough
 > - [`docs/skills.md`](../docs/skills.md) — the functional skill reference
-> - [`Design/adr/`](../Design/adr/) — accepted decisions
+> - [`design/adr/`](../design/adr/) — accepted decisions
 >
 > This file is kept only as audit trail for the kit's original plan.
 

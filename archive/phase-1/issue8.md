@@ -2,7 +2,7 @@
 Create the issue execution workflow assets that support plan-first Claude Code implementation sessions.
 
 ## ADR
-Related ADR: `Design/adr/adr-006-claude-code-execution-model.md`
+Related ADR: `design/adr/adr-006-claude-code-execution-model.md`
 
 ## Goal
 Add the prompt and documentation assets required for issue-by-issue implementation with Claude Code.

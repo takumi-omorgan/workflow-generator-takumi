@@ -3,8 +3,8 @@ Add the repository-level GitHub issue templates and pull request template needed
 
 ## ADR
 Related ADRs:
-- `Design/adr/adr-004-github-first-workflow-model.md`
-- `Design/adr/adr-005-documentation-and-template-architecture.md`
+- `design/adr/adr-004-github-first-workflow-model.md`
+- `design/adr/adr-005-documentation-and-template-architecture.md`
 
 ## Goal
 Create the `.github` templates that standardize issue creation and pull request quality.

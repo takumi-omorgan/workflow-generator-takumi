@@ -7,7 +7,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-019-claude-code-guide.md`
+- File: `design/adr/adr-019-claude-code-guide.md`
 - Decision: Write a dedicated docs/claude-code-guide.md covering how to use Claude Code with the kit.
 
 GitHub Issue:
@@ -38,7 +38,7 @@ Acceptance criteria
 
 Scope and constraints
 - Primary folders to touch: `docs/`
-- Folders to avoid unless absolutely necessary: `skills/`, `templates/`, `Design/`
+- Folders to avoid unless absolutely necessary: `skills/`, `templates/`, `design/`
 - Keep the doc practical and concise — prefer examples over abstract descriptions
 - Do not rewrite or restructure existing docs beyond updating the install.md reference
 
@@ -51,7 +51,7 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-019-claude-code-guide.md`
+   - `design/adr/adr-019-claude-code-guide.md`
    - `generic-project-workflow.md`
    - `docs/install.md`
    - existing SKILL.md files under `skills/`

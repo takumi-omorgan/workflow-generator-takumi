@@ -7,7 +7,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-004-github-first-workflow-model.md`
+- File: `design/adr/adr-004-github-first-workflow-model.md`
 - Decision: Use a GitHub-first workflow model in v1.
 
 GitHub Issue:
@@ -50,7 +50,7 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-004-github-first-workflow-model.md`
+   - `design/adr/adr-004-github-first-workflow-model.md`
    - `generic-project-workflow.md`
    - current documentation under `docs/`
    - current labels/milestones guidance already referenced in the repo

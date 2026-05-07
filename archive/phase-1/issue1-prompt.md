@@ -8,7 +8,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-001-project-local-installation-model.md`
+- File: `design/adr/adr-001-project-local-installation-model.md`
 - Decision: Use a project-local installation model for the workflow kit in v1.
 
 GitHub Issue:
@@ -25,7 +25,7 @@ ADR-001 decides that the workflow kit will be installed into each new target pro
 
 Requirements
 - Create the top-level repository folders for `docs/`, `skills/`, `templates/`, and `examples/`
-- Define the expected target-project structure for `.claude/skills/`, `Design/`, `notes/`, and `.github/`
+- Define the expected target-project structure for `.claude/skills/`, `design/`, `notes/`, and `.github/`
 - Add placeholder files where needed to make the structure explicit
 - Document which files belong in the kit repo versus the target project
 - Add a short note describing the installation flow at a structural level
@@ -37,7 +37,7 @@ Acceptance criteria
 - The structure supports later work on docs, templates, and skills without rework
 
 Scope and constraints
-- Primary folders to touch: repository root, `docs/`, `skills/`, `templates/`, `examples/`, `notes/`, `Design/`
+- Primary folders to touch: repository root, `docs/`, `skills/`, `templates/`, `examples/`, `notes/`, `design/`
 - Folders to avoid unless absolutely necessary: any future app/demo folders not related to the toolkit structure
 - Keep the implementation lightweight and documentation-first
 - Do not invent unnecessary automation yet
@@ -52,7 +52,7 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-001-project-local-installation-model.md`
+   - `design/adr/adr-001-project-local-installation-model.md`
    - the MVP/product spec in the repo
    - `generic-project-workflow.md`
    - the current root directory structure

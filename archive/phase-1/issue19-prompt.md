@@ -7,7 +7,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-017-release-skill.md`
+- File: `design/adr/adr-017-release-skill.md`
 - Decision: Build a /release skill for version tagging and GitHub Releases.
 
 GitHub Issue:
@@ -55,7 +55,7 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-017-release-skill.md`
+   - `design/adr/adr-017-release-skill.md`
    - `generic-project-workflow.md`
    - any existing skills in `skills/` for structure conventions
    - the /changelog skill in `skills/changelog/` for integration points

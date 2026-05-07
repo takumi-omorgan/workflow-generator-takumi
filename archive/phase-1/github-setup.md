@@ -33,7 +33,7 @@ Issue 1 Body:
 Create the initial repository skeleton for the Claude Code Workflow Kit and define the project-local installation structure used in v1.
 
 ## ADR
-Related ADR: `Design/adr/adr-001-project-local-installation-model.md`
+Related ADR: `design/adr/adr-001-project-local-installation-model.md`
 
 ## Goal
 Establish the base repo layout and the target-project installation model so the rest of the kit can be built on a stable structure.
@@ -43,7 +43,7 @@ ADR-001 decides that the workflow kit will be installed into each new target pro
 
 ## Tasks
 - [ ] Create the top-level repository folders for `docs/`, `skills/`, `templates/`, and `examples/`
-- [ ] Define the expected target-project structure for `.claude/skills/`, `Design/`, `notes/`, and `.github/`
+- [ ] Define the expected target-project structure for `.claude/skills/`, `design/`, `notes/`, and `.github/`
 - [ ] Add placeholder files where needed to make the structure explicit
 - [ ] Document which files belong in the kit repo versus the target project
 - [ ] Add a short note describing the installation flow at a structural level
@@ -67,8 +67,8 @@ Write the installation documentation for the workflow kit and explicitly documen
 
 ## ADR
 Related ADRs:
-- `Design/adr/adr-001-project-local-installation-model.md`
-- `Design/adr/adr-002-new-project-only-scope.md`
+- `design/adr/adr-001-project-local-installation-model.md`
+- `design/adr/adr-002-new-project-only-scope.md`
 
 ## Goal
 Create installation and scope documentation that explains how the kit is used and what it does not support in v1.
@@ -102,7 +102,7 @@ Issue 3 Body:
 Create the GitHub setup guide and define the first GitHub-native workflow assets for the kit.
 
 ## ADR
-Related ADR: `Design/adr/adr-004-github-first-workflow-model.md`
+Related ADR: `design/adr/adr-004-github-first-workflow-model.md`
 
 ## Goal
 Document the GitHub-first operating model and define the initial repo assets needed to support it.
@@ -136,7 +136,7 @@ Issue 4 Body:
 Create the initial scaffold for documentation and template files that will be generated into target projects.
 
 ## ADR
-Related ADR: `Design/adr/adr-005-documentation-and-template-architecture.md`
+Related ADR: `design/adr/adr-005-documentation-and-template-architecture.md`
 
 ## Goal
 Define and add the first template set for core workflow artifacts so later skills can generate consistent outputs.

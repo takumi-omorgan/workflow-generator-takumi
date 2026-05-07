@@ -7,9 +7,9 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADRs:
-- File: `Design/adr/adr-001-project-local-installation-model.md`
+- File: `design/adr/adr-001-project-local-installation-model.md`
 - Decision: Use a project-local installation model for the workflow kit in v1.
-- File: `Design/adr/adr-002-new-project-only-scope.md`
+- File: `design/adr/adr-002-new-project-only-scope.md`
 - Decision: Limit v1 to new-project setup only.
 
 GitHub Issue:
@@ -54,8 +54,8 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-001-project-local-installation-model.md`
-   - `Design/adr/adr-002-new-project-only-scope.md`
+   - `design/adr/adr-001-project-local-installation-model.md`
+   - `design/adr/adr-002-new-project-only-scope.md`
    - `generic-project-workflow.md`
    - the current `README.md` and `docs/` structure
 2. Propose a short, step-by-step implementation PLAN for this issue, including:

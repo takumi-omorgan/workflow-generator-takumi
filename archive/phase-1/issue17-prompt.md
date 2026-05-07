@@ -7,7 +7,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-015-pr-review-packager-skill.md`
+- File: `design/adr/adr-015-pr-review-packager-skill.md`
 - Decision: Build a pr-review-packager skill that creates PRs with proper template, links, and summaries.
 
 GitHub Issue:
@@ -53,7 +53,7 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-015-pr-review-packager-skill.md`
+   - `design/adr/adr-015-pr-review-packager-skill.md`
    - `templates/pr-template.md`
    - `generic-project-workflow.md`
    - any existing skills in `skills/` for structure conventions

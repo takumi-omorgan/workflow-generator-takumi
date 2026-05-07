@@ -7,7 +7,7 @@ Context:
 - The workflow model is described in `generic-project-workflow.md`.
 
 ADR:
-- File: `Design/adr/adr-016-changelog-skill.md`
+- File: `design/adr/adr-016-changelog-skill.md`
 - Decision: Build a /changelog skill that auto-generates release notes from git history.
 
 GitHub Issue:
@@ -53,7 +53,7 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-016-changelog-skill.md`
+   - `design/adr/adr-016-changelog-skill.md`
    - `generic-project-workflow.md`
    - any existing skills in `skills/` for structure conventions
    - the current git log to understand commit message patterns in this repo

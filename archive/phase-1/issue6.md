@@ -2,7 +2,7 @@
 Implement a skill that normalizes either a standard PRD or a custom user format into a stable internal planning structure.
 
 ## ADR
-Related ADR: `Design/adr/adr-003-prd-intake-model.md`
+Related ADR: `design/adr/adr-003-prd-intake-model.md`
 
 ## Goal
 Support multiple PRD intake paths while keeping downstream workflow generation consistent.
