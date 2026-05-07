@@ -161,23 +161,6 @@ _Most recent first._
 
 ---
 
-### 7. Rename `design/` → `design/` for case consistency with other root directories
-
-**Status:** idea
-**Captured:** 2026-05-06
-
-**Trigger:** While reviewing root-directory casing — `design/` is the only TitleCase top-level directory in a repo where everything else is lowercase.
-
-**Current state:** Root has `docs/`, `notes/`, `skills/`, `templates/`, `bin/`, `prompts/`, `examples/`, `archive/`, and `design/`. The capitalised root *files* (`README.md`, `LICENSE`, `CHANGELOG.md`, `CLAUDE.md`) follow well-known external conventions — `design/` has no analogous anchor; it's a project-internal choice that diverges from its peers.
-
-**Proposed change:** Rename `design/` → `design/` across the kit and the convention it teaches target projects. Touches `CLAUDE.md`, `README.md`, `CHANGELOG.md`, `docs/`, `templates/`, `skills/*/SKILL.md`, `bin/lib/check-plan-eval.sh`, `examples/projects/*/`, and the kit's own ADR bodies. Needs a new ADR that explicitly authorises mechanical path-string rewrite inside accepted ADRs (otherwise blocked by the kit's "never edit accepted ADRs in place" rule).
-
-**Blast radius:** ~176 files reference `design/` (~500+ individual occurrences). Breaking change for every existing target-project install. Touches immutable ADR bodies — needs ADR-level authorisation.
-
-**Open questions:** Which existing ADR established `design/` and would need to be superseded? Does mechanical path-string rewrite count as "editing in place" under the immutability rule? Should the kit ship a one-off migration helper for existing target-project installs, or document a manual `git mv` step? Is consistency worth the breaking change? Alternative names considered: `decisions/`, `planning/` (use the rename moment to clarify purpose, not just case).
-
----
-
 ### 8. Finish the legacy `notes/issue-prompt.md` removal across the kit
 
 **Status:** idea
@@ -242,4 +225,27 @@ _Most recent first._
 _Move entries here when filed as GitHub issues. Includes issue # for
 cross-reference._
 
-_(empty)_
+### 7. Rename `Design/` → `design/` for case consistency with other root directories
+
+**Status:** shipped-#82
+**Captured:** 2026-05-06
+**Filed:** #80 (clarify pass + ADR-044 + ADR-045)
+**Shipped:** #82 (2026-05-07, merged into v4.0.0)
+
+**Trigger:** While reviewing root-directory casing — `Design/` was the only TitleCase top-level directory in a repo where everything else was lowercase.
+
+**Current state at filing:** Root had `docs/`, `notes/`, `skills/`, `templates/`, `bin/`, `prompts/`, `examples/`, `archive/`, and `Design/`. The capitalised root *files* (`README.md`, `LICENSE`, `CHANGELOG.md`, `CLAUDE.md`) follow well-known external conventions — `Design/` had no analogous anchor; it was a project-internal choice that diverged from its peers.
+
+**Proposed change:** Rename `Design/` → `design/` across the kit and the convention it teaches target projects. Touched `CLAUDE.md`, `README.md`, `CHANGELOG.md`, `docs/`, `templates/`, `skills/*/SKILL.md`, `bin/lib/check-plan-eval.sh`, `examples/projects/*/`, and the kit's own ADR bodies. Required a new ADR (ADR-044) authorising mechanical path-string rewrite inside accepted ADRs (otherwise blocked by the kit's "never edit accepted ADRs in place" rule).
+
+**Blast radius (actual):** 1,186 occurrences across 179 files. Breaking change for every existing target-project install. Migration snippet (two-step `git mv` for case-insensitive FS + bulk `sed`) shipped in CHANGELOG v4.0.0 entry.
+
+**Resolution of open questions:**
+
+- *Which existing ADR established `Design/` and would need to be superseded?* ADR-005 — superseded by ADR-045 on the directory-casing question only.
+- *Does mechanical path-string rewrite count as "editing in place" under the immutability rule?* No, per ADR-044 (drafted in #80, accepted in #81). ADR-044's six criteria carve a narrow exception: deterministic substitution, no sentence meaning changes, no altered decisions or rationale, no added/removed requirements, uniform application, scriptable and reproducible.
+- *Migration helper or manual `git mv` step?* Manual snippet in CHANGELOG, no new tooling.
+- *Is consistency worth the breaking change?* Yes — settled at the clarify gate.
+- *Alternative names (`decisions/`, `planning/`)?* Rejected — would force splitting `state.md` and `ai-summary.md` out into a new home, doubling the blast radius.
+
+**Lessons learned:** (1) macOS APFS case-insensitive default required a two-step rename via `_design_tmp` intermediate — caught at planning, not pre-merge. (2) Bulk `sed` corrupted three files (ADR-044, ADR-045, this entry) where the prose literally describes the rename — required editorial restoration. Future kit-wide renames should pre-flag any file whose body describes the rename itself for editorial-only handling.
