@@ -17,8 +17,8 @@ single
 
 - **Issue:** #84 (Phase 3 of 3 — sidecar consistency; final phase)
 - **Prompt:** prompts/issue-084-phase3-sidecar-consistency.md
-- **Branch:** n/a (executor will create)
-- **Status:** prepared
+- **Branch:** issue-084-phase3-sidecar-consistency
+- **Status:** verified
 
 <!-- state:in-flight:end -->
 
