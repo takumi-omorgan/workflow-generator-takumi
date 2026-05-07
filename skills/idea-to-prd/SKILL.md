@@ -6,7 +6,7 @@ permission-category: 1  # substitutable — drafts a PRD locally, per workflow-g
 
 # idea-to-prd
 
-Produce a lightweight PRD draft at `Design/prd.md` from whatever rough
+Produce a lightweight PRD draft at `design/prd.md` from whatever rough
 idea material the user has. The draft is intentionally minimal — just
 enough to hand off to `prd-normalizer` (Issue #6).
 
@@ -27,7 +27,7 @@ one-to-one (ADR-027), so a faithfully-filled file flows through
 no draft PRD at all.
 
 This skill exists to cover the "no PRD yet" path from
-[ADR-003](../../Design/adr/adr-003-prd-intake-model.md).
+[ADR-003](../../design/adr/adr-003-prd-intake-model.md).
 
 ## What this skill does not do
 
@@ -46,7 +46,7 @@ This skill exists to cover the "no PRD yet" path from
 
 ## Output
 
-- **File:** `Design/prd.md` in the target project.
+- **File:** `design/prd.md` in the target project.
 - **Shape:** the eight sections below. This shape intentionally mirrors
   a conventional PRD so that `prd-normalizer`'s standard-PRD path
   consumes it without special-casing.
@@ -78,7 +78,7 @@ This skill exists to cover the "no PRD yet" path from
 4. Update the draft from the answers. Repeat steps 3–4 until no TBDs
    remain or the user says "good enough".
 5. Run the self-check below.
-6. Write `Design/prd.md` and tell the user the next step is
+6. Write `design/prd.md` and tell the user the next step is
    `prd-normalizer`.
 
 ## Self-check before finishing

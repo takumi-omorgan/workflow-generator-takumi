@@ -9,11 +9,11 @@ a chained-mode fail-then-iterate.
 
 ### Input
 
-`/check-plan Design/adr/adr-035-state-md-session-continuity.md`
+`/check-plan design/adr/adr-035-state-md-session-continuity.md`
 
 ### Skill behaviour
 
-- Type detection: path matches `Design/adr/adr-*.md` → `adr`.
+- Type detection: path matches `design/adr/adr-*.md` → `adr`.
 - `criteria.md` loaded; ADR table selected.
 - Each criterion runs:
   - `ADR-C1` — Context, Decision, Consequences all present and
@@ -31,7 +31,7 @@ a chained-mode fail-then-iterate.
 ### Output
 
 ```
-✅ check-plan PASS — Design/adr/adr-035-state-md-session-continuity.md
+✅ check-plan PASS — design/adr/adr-035-state-md-session-continuity.md
    No warnings.
 ```
 
@@ -168,7 +168,7 @@ operator, and the iterative-with-user revision loop.
 
 ```bash
 bin/check-plan --criteria-set adr \
-  --input Design/adr/adr-041-auto-mode-permission-contract.md
+  --input design/adr/adr-041-auto-mode-permission-contract.md
 ```
 
 Output:
@@ -178,14 +178,14 @@ PASS  ADR-C1  Context, Decision, Consequences sections present and non-empty
 PASS  ADR-C2  Options considered has 4 Option blocks
 PASS  ADR-C3  Every Option block has Pros: and Cons: lines
 PASS  ADR-C4  Decision names Option A
-PASS  ADR-C5  All ADR-NNN tokens resolve to files in Design/adr/
+PASS  ADR-C5  All ADR-NNN tokens resolve to files in design/adr/
 WARN  ADR-C6  Semantic-conflict check deferred (best-effort substring per ADR-034 not implemented in v1)
 ```
 
 Exit 0 (no deterministic failures; warnings surfaced).
 
 The slash-command equivalent — `/check-plan
-Design/adr/adr-041-auto-mode-permission-contract.md` — runs the
+design/adr/adr-041-auto-mode-permission-contract.md` — runs the
 same evaluation under the hood (it invokes `bin/check-plan`
 internally) and renders the identical results, framed for the
 operator with the file name and a short summary.
@@ -194,7 +194,7 @@ operator with the file name and a short summary.
 
 ```bash
 bin/check-plan --criteria-set adr \
-  --input Design/adr/adr-041-auto-mode-permission-contract.md \
+  --input design/adr/adr-041-auto-mode-permission-contract.md \
   --format json
 ```
 
@@ -209,7 +209,7 @@ Returns a JSON envelope:
     {"id":"ADR-C2","severity":"deterministic","status":"pass","message":"Options considered has 4 Option blocks","remediation":""},
     {"id":"ADR-C3","severity":"deterministic","status":"pass","message":"Every Option block has Pros: and Cons: lines","remediation":""},
     {"id":"ADR-C4","severity":"deterministic","status":"pass","message":"Decision names Option A","remediation":""},
-    {"id":"ADR-C5","severity":"deterministic","status":"pass","message":"All ADR-NNN tokens resolve to files in Design/adr/","remediation":""},
+    {"id":"ADR-C5","severity":"deterministic","status":"pass","message":"All ADR-NNN tokens resolve to files in design/adr/","remediation":""},
     {"id":"ADR-C6","severity":"warning","status":"warn","message":"Semantic-conflict check deferred (best-effort substring per ADR-034 not implemented in v1)","remediation":"Reviewer should manually check the Decision against accepted ADRs in the same area; revisit when a structural rule lands."}
   ]
 }

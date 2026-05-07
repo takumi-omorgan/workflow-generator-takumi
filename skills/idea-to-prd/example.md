@@ -41,7 +41,7 @@ both were clear enough from the rough idea to draft without input.
    and a split-by-split table. That's it.
 4. No accounts, no saved history, no multi-race compare in the first release.
 
-## 4. Output — `Design/prd.md` in the target project
+## 4. Output — `design/prd.md` in the target project
 
 ```markdown
 # Pace Drift — PRD

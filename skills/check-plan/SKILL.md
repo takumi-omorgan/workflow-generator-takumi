@@ -16,7 +16,7 @@ check leaves the working tree clean. Standalone, it operates on any
 artefact already on disk.
 
 This skill is the quality gate decided in
-[ADR-034](../../Design/adr/adr-034-plan-checker.md). The contract is
+[ADR-034](../../design/adr/adr-034-plan-checker.md). The contract is
 opt-out (default on), with `--skip-check` available on the chained
 producers for known-good rapid iteration.
 
@@ -66,7 +66,7 @@ on the PR that introduces it; this skill is upstream of that.
 ## Inputs
 
 - **Required (standalone mode):** path to an artefact under check —
-  either `Design/adr/adr-NNN-*.md` or `prompts/issue-NNN-*.md` or
+  either `design/adr/adr-NNN-*.md` or `prompts/issue-NNN-*.md` or
   `prompts/_template.md`-shaped file at any path.
 - **Required (chained mode):** the in-memory rendered artefact
   (passed by the calling skill) plus the artefact's would-be path
@@ -104,13 +104,13 @@ otherwise noted.
    path; verify the file exists. In chained mode, take the in-memory
    text plus the would-be path. If neither, stop with usage.
 2. **Detect type.**
-   - If the path matches `Design/adr/adr-*.md` AND the body has a
+   - If the path matches `design/adr/adr-*.md` AND the body has a
      `**Status:**` line, type = `adr`.
    - Else if the path matches `prompts/issue-*.md` OR the body has
      the canonical prompt section sequence (Context, ADR, GitHub
      Issue, Goal — first four headings in order), type = `prompt`.
    - Else stop with `"Cannot determine artefact type from path or
-     body. Pass an ADR under Design/adr/ or a prompt under prompts/."`
+     body. Pass an ADR under design/adr/ or a prompt under prompts/."`
      Never guess silently.
 3. **Invoke `bin/check-plan`** with the detected criteria-set and
    the artefact (path or stdin), requesting JSON output:
@@ -152,7 +152,7 @@ otherwise noted.
 
 ADR detection (in priority order):
 
-1. **Path match.** `Design/adr/adr-(\d+)-.+\.md`. Sufficient.
+1. **Path match.** `design/adr/adr-(\d+)-.+\.md`. Sufficient.
 2. **Body match.** First non-blank line is `# ADR-NNN: <title>` AND
    a `**Status:**` line appears in the first 10 lines. Sufficient.
 3. **Frontmatter match.** YAML frontmatter declares `type: adr`.
@@ -181,7 +181,7 @@ path-match result. If neither matches, stop per step 2 above.
   flag is only meaningful in chained mode.
 - **Round counter exceeds `--max-rounds`.** Yield. Do not run
   another round even if the caller asks.
-- **Conflicting type signals (file under `Design/adr/` but body
+- **Conflicting type signals (file under `design/adr/` but body
   looks like a prompt, or vice versa).** Stop and ask the user to
   rename or fix the type ambiguity. Don't run the wrong checklist.
 - **Empty artefact.** All deterministic structural criteria fail —

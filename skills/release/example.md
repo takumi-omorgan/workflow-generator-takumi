@@ -40,7 +40,7 @@ Returns `v0.2.0`.
 The skill scans commits and ADR diffs in `v0.2.0..HEAD`:
 
 - Commits: 2 `feat(` + 1 `fix(` + 3 `chore(`.
-- ADRs: `Design/adr/adr-007-rolling-window-smoothing.md` is new,
+- ADRs: `design/adr/adr-007-rolling-window-smoothing.md` is new,
   status `accepted`.
 - No `BREAKING CHANGE` markers, no `breaking` PR label, no ADR
   status change from `accepted` to `superseded`.
@@ -173,13 +173,13 @@ No further steps run.
 ## Workflow-shape variant — research-shaped project, first release
 
 A first release run for `lit-review-2026`, a research project tracking
-a literature review. The repo is markdown-only — `Design/prd.md`,
-`Design/build-out-plan.md`, `notes/`, `sources/` — with no package
+a literature review. The repo is markdown-only — `design/prd.md`,
+`design/build-out-plan.md`, `notes/`, `sources/` — with no package
 manifest. No prior tag exists. The user wants to publish the first
 snapshot, `v0.1.0`.
 
 This walkthrough exercises the project-shape detection added in
-[ADR-042](../../Design/adr/adr-042-project-shape-detection-in-release.md):
+[ADR-042](../../design/adr/adr-042-project-shape-detection-in-release.md):
 four signals fire, the threshold is met, and the workflow-shape
 clarifier is emitted.
 
@@ -202,11 +202,11 @@ product-shape walkthrough's preflight.
 
 The skill scans the project:
 
-- **PRD language signal — fires.** `Design/prd.md` problem statement
+- **PRD language signal — fires.** `design/prd.md` problem statement
   reads *"I'm not shipping a product. This is a folder of markdown
   for tracking literature review work."* The substring
   *"not shipping a product"* matches case-insensitive. ✓
-- **Build-strategy signal — fires.** `Design/build-out-plan.md` Build
+- **Build-strategy signal — fires.** `design/build-out-plan.md` Build
   strategy section reads *"There is no compile / build / deploy
   step. Work is markdown."* ✓
 - **Success-criteria-shape signal — fires.** PRD Success criteria
@@ -215,7 +215,7 @@ The skill scans the project:
   pattern `^a researcher can ` matches both bullets, and the
   section contains zero `test`/`pass`/`coverage`/`build` mentions. ✓
 - **Package-manifest signal — fires.** Repo root: `README.md`,
-  `Design/`, `notes/`, `sources/`. No `package.json`,
+  `design/`, `notes/`, `sources/`. No `package.json`,
   `pyproject.toml`, `go.mod`, `Cargo.toml`, `Gemfile`,
   `requirements.txt`, `setup.py`, `Pipfile`, `mix.exs`, `pom.xml`,
   or `build.gradle`. ✓

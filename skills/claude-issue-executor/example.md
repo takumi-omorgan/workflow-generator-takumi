@@ -61,7 +61,7 @@ The skill reads `notes/issue17-prompt.md` and checks for the required
 sections:
 
 - Context — present
-- ADR (`Design/adr/adr-015-pr-review-packager-skill.md`) — present
+- ADR (`design/adr/adr-015-pr-review-packager-skill.md`) — present
 - GitHub Issue (`Number: #17`) — present
 - Goal — present
 - Requirements — present
@@ -111,7 +111,7 @@ only read-only tools.
 > - confirm the two files exist and the README row is updated,
 > - mentally run the skill against `notes/issue17-prompt.md` and confirm
 >   the commit/branch/message shape is correct,
-> - re-read `Design/adr/adr-015-pr-review-packager-skill.md` to confirm no
+> - re-read `design/adr/adr-015-pr-review-packager-skill.md` to confirm no
 >   drift from the decision.
 >
 > Approve to proceed?
@@ -173,7 +173,7 @@ The repo has no runnable tests. The skill runs a trace-style check:
 
 - Walks through `skills/pr-review-packager/SKILL.md` with the example
   branch's commit messages as input, confirming the skill would extract
-  `Closes #17` and `Related ADR: Design/adr/adr-015-...md`.
+  `Closes #17` and `Related ADR: design/adr/adr-015-...md`.
 - Re-reads `templates/pr-template.md` and confirms every required
   section is addressed by the skill's drafting protocol.
 - Re-reads ADR-015 and confirms the approval-gate language in the

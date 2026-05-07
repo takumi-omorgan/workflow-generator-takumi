@@ -15,7 +15,7 @@ project-locally (see ADR-001).
 | [`prd-normalizer/`](prd-normalizer/SKILL.md) | Normalize standard or custom PRDs into one internal format | Issue #6 |
 | [`prd-to-mvp/`](prd-to-mvp/SKILL.md) | Scope a PRD down to an MVP statement | Issue #7 |
 | [`planning/`](planning/SKILL.md) | Capture deeper planning context (decomposition, risks, assumptions, sequencing, research questions) — opt-in for non-trivial projects | Issue #40 |
-| [`clarify/`](clarify/SKILL.md) | Surface gray areas, conduct deep-dive resolution, append settled decisions to `Design/decisions.md` — opt-in, below-ADR-weight by design | Issue #42 |
+| [`clarify/`](clarify/SKILL.md) | Surface gray areas, conduct deep-dive resolution, append settled decisions to `design/decisions.md` — opt-in, below-ADR-weight by design | Issue #42 |
 | [`adr-writer/`](adr-writer/SKILL.md) | Draft ADRs from the MVP and key decisions | Issue #7 |
 | [`issue-planner/`](issue-planner/SKILL.md) | Turn MVP + ADRs into a GitHub issue backlog + Project board | Issue #14 |
 | [`prepare-issue/`](prepare-issue/SKILL.md) | Auto-fill an issue prompt from a GitHub issue and linked ADRs | Issue #15 |
@@ -23,12 +23,12 @@ project-locally (see ADR-001).
 | [`pr-review-packager/`](pr-review-packager/SKILL.md) | Package a branch into a PR with filled template, issue and ADR links, and a commit-derived change summary | Issue #17 |
 | [`changelog/`](changelog/SKILL.md) | Generate grouped release notes from git history between two refs | Issue #18 |
 | [`release/`](release/SKILL.md) | Tag a semver release, call `/changelog` for notes, publish a GitHub Release | Issue #19 |
-| [`workflow-docs/`](workflow-docs/SKILL.md) | Generate README.md and Design/ai-summary.md from project artifacts | Issue #20 |
-| [`resume/`](resume/SKILL.md) | Brief a fresh session by reading `Design/state.md` (with `gh` fallback) — no writes | Issue #44 |
-| [`pause/`](pause/SKILL.md) | Refresh `Design/state.md` to current truth and optionally write `notes/handoff-YYYY-MM-DD.md` for context-window-exhausting handoffs | Issue #44 |
+| [`workflow-docs/`](workflow-docs/SKILL.md) | Generate README.md and design/ai-summary.md from project artifacts | Issue #20 |
+| [`resume/`](resume/SKILL.md) | Brief a fresh session by reading `design/state.md` (with `gh` fallback) — no writes | Issue #44 |
+| [`pause/`](pause/SKILL.md) | Refresh `design/state.md` to current truth and optionally write `notes/handoff-YYYY-MM-DD.md` for context-window-exhausting handoffs | Issue #44 |
 | [`check-plan/`](check-plan/SKILL.md) | Validate ADRs and issue prompts against version-locked checklists; chained as a pre-commit gate from `adr-writer` and `prepare-issue` (`--skip-check` opts out) | Issue #43 |
 | [`audit-milestone/`](audit-milestone/SKILL.md) | Verify a GitHub milestone is complete — issues closed, ADRs linked to merged PRs, phase exit criteria met. Pass/fail with gap list; advisory, does not block close | Issue #46 |
-| [`milestone-summary/`](milestone-summary/SKILL.md) | Generate `Design/milestones/N-summary.md` for a closed or near-closing milestone — what shipped, ADRs adopted, deferred work — from git log, the GitHub milestone, and accepted ADRs | Issue #46 |
-| [`complete-milestone/`](complete-milestone/SKILL.md) | Close a GitHub milestone, archive `Design/state.md` per ADR-035, and optionally chain `/release --milestone-phase`. Chains audit + summary; never blocks on audit gaps | Issue #46 |
+| [`milestone-summary/`](milestone-summary/SKILL.md) | Generate `design/milestones/N-summary.md` for a closed or near-closing milestone — what shipped, ADRs adopted, deferred work — from git log, the GitHub milestone, and accepted ADRs | Issue #46 |
+| [`complete-milestone/`](complete-milestone/SKILL.md) | Close a GitHub milestone, archive `design/state.md` per ADR-035, and optionally chain `/release --milestone-phase`. Chains audit + summary; never blocks on audit gaps | Issue #46 |
 
 See ADR-001 for why skills live project-locally under `.claude/skills/`.

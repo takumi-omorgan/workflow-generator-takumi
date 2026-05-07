@@ -1,15 +1,15 @@
 ---
 name: clarify
-description: Surface unresolved implementation questions ("gray areas") between MVP scoping and ADR drafting, conduct deep-dive resolution per question, and append settled decisions to Design/decisions.md
-permission-category: 1  # substitutable — local conversation; appends to Design/decisions.md, per workflow-guide §7
+description: Surface unresolved implementation questions ("gray areas") between MVP scoping and ADR drafting, conduct deep-dive resolution per question, and append settled decisions to design/decisions.md
+permission-category: 1  # substitutable — local conversation; appends to design/decisions.md, per workflow-guide §7
 ---
 
 # clarify
 
-Take `Design/prd-normalized.md`, `Design/mvp.md`, and (when present)
-`Design/planning.md`, scout the codebase, surface a checklist of
+Take `design/prd-normalized.md`, `design/mvp.md`, and (when present)
+`design/planning.md`, scout the codebase, surface a checklist of
 unresolved implementation questions, conduct deep-dive resolution
-per question, and append settled decisions to `Design/decisions.md`.
+per question, and append settled decisions to `design/decisions.md`.
 
 This skill is **opt-in**. Small projects can skip it entirely and go
 from `prd-to-mvp` straight to `adr-writer`. Larger projects use it to
@@ -22,15 +22,15 @@ informal-but-settled context that downstream agents (planner,
 architectural commitments. See the **Graduate-to-ADR criterion**
 below for the line.
 
-See [ADR-033](../../Design/adr/adr-033-clarify-step.md) for the
+See [ADR-033](../../design/adr/adr-033-clarify-step.md) for the
 rationale and the contract this skill ships against.
 
 ## When to use this skill
 
-- After `prd-to-mvp` has produced `Design/mvp.md`, when the project
+- After `prd-to-mvp` has produced `design/mvp.md`, when the project
   has enough scope that drafting ADRs straight from the MVP would
   mix decisions with discovery.
-- After `/planning` has produced `Design/planning.md`, when a fresh
+- After `/planning` has produced `design/planning.md`, when a fresh
   pass over the open research questions would benefit from
   settle-or-promote resolution.
 - Mid-project when new gray areas surface — e.g. a sub-system whose
@@ -46,35 +46,35 @@ alone is sufficient.
 - Does not draft ADRs — that is `adr-writer`. This skill *flags*
   decisions that should graduate to ADRs (per the criterion below)
   but does not author them.
-- Does not modify `Design/prd-normalized.md`, `Design/mvp.md`, or
-  `Design/planning.md`. Inputs only.
+- Does not modify `design/prd-normalized.md`, `design/mvp.md`, or
+  `design/planning.md`. Inputs only.
 - Does not modify accepted ADRs in place. If a decision conflicts
   with an accepted ADR, the conflict surfaces during the gray-area
   scan and the user is asked whether to draft a superseding ADR.
-- Does not delete or rewrite earlier entries in `Design/decisions.md`.
+- Does not delete or rewrite earlier entries in `design/decisions.md`.
   The log is append-only; re-runs only add new entries or skip
   already-settled questions.
 - Does not duplicate content already locked by an accepted ADR. The
-  scan reads `Design/adr/*.md` and skips topics already settled
+  scan reads `design/adr/*.md` and skips topics already settled
   there.
 
 ## Inputs
 
-- **Required:** `Design/prd-normalized.md`.
-- **Required:** `Design/mvp.md`.
-- **Optional:** `Design/planning.md` (per [ADR-031](../../Design/adr/adr-031-deeper-planning-workflow.md))
+- **Required:** `design/prd-normalized.md`.
+- **Required:** `design/mvp.md`.
+- **Optional:** `design/planning.md` (per [ADR-031](../../design/adr/adr-031-deeper-planning-workflow.md))
   — when present, the open-research-questions section is the
   canonical source of gray areas to scan.
-- **Optional:** existing `Design/decisions.md` — used as the starting
+- **Optional:** existing `design/decisions.md` — used as the starting
   point for re-runs. Earlier entries are preserved verbatim; the
   skill skips topics already covered.
-- **Optional:** `Design/adr/*.md` — accepted ADRs lock topics. The
+- **Optional:** `design/adr/*.md` — accepted ADRs lock topics. The
   scan parses titles and statuses; topics whose decisions are
   recorded in an accepted ADR are skipped.
 
 ## Output
 
-- **`Design/decisions.md`** — rendered from
+- **`design/decisions.md`** — rendered from
   [`templates/decisions-template.md`](../../templates/decisions-template.md).
 
 The output is a single self-contained markdown file. Each gray-area
@@ -90,7 +90,7 @@ The single test for "should this be a decision or an ADR":
 >
 > - **Yes** → it should be an ADR. Hand it to `adr-writer` instead
 >   of recording it here.
-> - **No** → it lives in `Design/decisions.md`.
+> - **No** → it lives in `design/decisions.md`.
 
 Reversal-cost is the heuristic. ADRs document choices whose reversal
 is structural — a different storage backend, a different deployment
@@ -104,14 +104,14 @@ choice to a decision has compounding cost.
 
 ## Execution protocol
 
-1. **Validate inputs.** Confirm `Design/prd-normalized.md` and
-   `Design/mvp.md` exist. If either is missing, stop and tell the
+1. **Validate inputs.** Confirm `design/prd-normalized.md` and
+   `design/mvp.md` exist. If either is missing, stop and tell the
    user to run `prd-normalizer` and / or `prd-to-mvp` first.
-2. **Detect re-run.** If `Design/decisions.md` already exists, read
+2. **Detect re-run.** If `design/decisions.md` already exists, read
    it and parse out every existing entry's topic. Earlier entries
    are preserved verbatim; the skill will not add a new entry for a
    topic already present.
-3. **Read accepted ADRs.** Glob `Design/adr/adr-*.md`. For each ADR
+3. **Read accepted ADRs.** Glob `design/adr/adr-*.md`. For each ADR
    with `**Status:** accepted`, extract its title and topic. The
    scan will skip gray areas whose topic maps to an accepted ADR —
    those decisions are already locked.
@@ -196,7 +196,7 @@ against.
 
 ## Handoff
 
-`Design/decisions.md` is consumed by `adr-writer` (when present, as
+`design/decisions.md` is consumed by `adr-writer` (when present, as
 an Optional input — additive context for ADR Context sections). It
 is also a useful read for `/claude-issue-executor` when briefing a
 new session — though the executor reads it transitively via the

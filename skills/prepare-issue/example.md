@@ -27,15 +27,15 @@ filesystem.
   "Acceptance criteria", "Scope and constraints",
   "Evaluation & testing requirements" sections.
 - Body mentions `ADR-015` and references
-  `Design/adr/adr-015-pr-review-packager-skill.md`.
+  `design/adr/adr-015-pr-review-packager-skill.md`.
 
-**From `Design/adr/adr-015-pr-review-packager-skill.md`:**
+**From `design/adr/adr-015-pr-review-packager-skill.md`:**
 
 - Title line: `# ADR-015: pr-review-packager skill`
 - Decision (first sentence): "Build a pr-review-packager skill that
   creates PRs with proper template, links, and summaries."
 
-**From `Design/build-out-plan.md`:**
+**From `design/build-out-plan.md`:**
 
 - File does not exist in this repo. Skip silently.
 
@@ -63,7 +63,7 @@ Context:
 - The workflow model is described in `docs/workflow-guide.md`.
 
 ADR:
-- File: `Design/adr/adr-015-pr-review-packager-skill.md`
+- File: `design/adr/adr-015-pr-review-packager-skill.md`
 - Decision: Build a pr-review-packager skill that creates PRs with proper template, links, and summaries.
 
 GitHub Issue:
@@ -109,7 +109,7 @@ Evaluation & testing requirements
 Instructions for you
 1. Read the relevant docs and existing files:
    - `CLAUDE.md`
-   - `Design/adr/adr-015-pr-review-packager-skill.md`
+   - `design/adr/adr-015-pr-review-packager-skill.md`
    - any existing modules under `skills/pr-review-packager/`
    - any existing tests related to the modules you will change
 2. Propose a short, step-by-step implementation PLAN for this issue, including:

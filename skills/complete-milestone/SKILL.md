@@ -1,6 +1,6 @@
 ---
 name: complete-milestone
-description: Close a GitHub milestone, archive milestone-scoped state in Design/state.md per ADR-035, and optionally chain /release with --milestone-phase. Chains /audit-milestone and /milestone-summary; never blocks on audit gaps.
+description: Close a GitHub milestone, archive milestone-scoped state in design/state.md per ADR-035, and optionally chain /release with --milestone-phase. Chains /audit-milestone and /milestone-summary; never blocks on audit gaps.
 permission-category: 3  # non-substitutable — closes GitHub milestone via gh; chains /release with --release, per workflow-guide §7
 ---
 
@@ -13,14 +13,14 @@ Close a milestone end-to-end:
 2. Run `/milestone-summary <N>` (chained, unless `--skip-summary`).
    Wait for the user to author the lessons zone before continuing.
 3. Close the GitHub milestone via `gh api`.
-4. Archive `Design/state.md` zones (per ADR-035) — clear `in-flight`,
+4. Archive `design/state.md` zones (per ADR-035) — clear `in-flight`,
    prepend the close to `recent`, set `continue-here` to the next
    action.
 5. Optionally chain `/release --milestone-phase=N` if the milestone
    maps to a phase boundary.
 
 This skill implements the close half of
-[ADR-037](../../Design/adr/adr-037-milestone-lifecycle.md). It is
+[ADR-037](../../design/adr/adr-037-milestone-lifecycle.md). It is
 the natural endpoint of the milestone chain:
 `/audit-milestone` → `/milestone-summary` → `/complete-milestone`
 → optional `/release`.
@@ -52,7 +52,7 @@ closing, that is `/milestone-summary`. This skill is for the
   `--release` flag (or the interactive prompt) is required.
 - Does not delete the milestone. It only sets `state=closed`.
   Milestones stay in the repo's history for retrospective access.
-- Does not modify `Design/build-out-plan.md` itself. That is
+- Does not modify `design/build-out-plan.md` itself. That is
   `/release --milestone-phase=N`'s job; this skill chains to it.
 
 ## Inputs
@@ -60,8 +60,8 @@ closing, that is `/milestone-summary`. This skill is for the
 - **Required:** the milestone identifier (number or title; same
   resolution as `/audit-milestone` and `/milestone-summary`).
 - **Implicit:** `gh` authenticated; clean working tree (the close
-  may write to `Design/state.md`); the matching summary file
-  exists at `Design/milestones/<N>-<slug>.md` (warn if absent —
+  may write to `design/state.md`); the matching summary file
+  exists at `design/milestones/<N>-<slug>.md` (warn if absent —
   see edge cases).
 
 ## Invocation
@@ -118,9 +118,9 @@ user sees the full plan before any mutation.
    confirming.
 5. **Chain `/milestone-summary <N>`** (unless `--skip-summary`).
    Pass `--dry-run` if `--dry-run` is set on this skill. The
-   summary skill writes (or previews) `Design/milestones/<N>-<slug>.md`.
+   summary skill writes (or previews) `design/milestones/<N>-<slug>.md`.
    After it returns, prompt the user: *"Edit the lessons zone in
-   Design/milestones/<...>.md, then type `continue` to proceed.
+   design/milestones/<...>.md, then type `continue` to proceed.
    Type `cancel` to stop."* Wait for the literal `continue` or
    `cancel`. Any other input re-prompts.
 6. **Assemble the close plan and render it for review:**
@@ -133,13 +133,13 @@ user sees the full plan before any mutation.
    - The exact `gh` and file-write commands that will run, in
      order.
 7. **Approval gate.** Ask: *"Type `yes` to close milestone
-   <title> (#<N>) and update Design/state.md. Any other response
+   <title> (#<N>) and update design/state.md. Any other response
    cancels."* Accept only the literal `yes` (case-insensitive,
    trimmed). Any other input cancels cleanly.
 8. **On `yes`, execute:**
    - Close the milestone:
      `gh api repos/:owner/:repo/milestones/<N> -X PATCH -f state=closed`.
-   - Update `Design/state.md` (only if file exists per ADR-035):
+   - Update `design/state.md` (only if file exists per ADR-035):
      - `in-flight` zone → set `Issue: none`, `Prompt: n/a`,
        `Branch: n/a`, `Status: none`.
      - `recent` zone → prepend
@@ -189,11 +189,11 @@ With `--dry-run`:
 | Milestone already closed | Stop with notice. Do not re-close. |
 | Audit reports gaps | Surface verbatim; require explicit `yes` to proceed; do not block. |
 | Summary file absent (and `--skip-summary` not set) | Run `/milestone-summary` first; do not skip silently. |
-| Summary file absent and `--skip-summary` set | Warn: *"No summary file at Design/milestones/<...>.md. Continuing because --skip-summary was set."* Continue. |
-| `Design/state.md` absent | Skip the state-archive step silently (consistent with `prepare-issue`'s edge case). Other steps proceed. |
-| `Design/state.md` marker fences broken | Stop before the close. Tell the user which zone is malformed and suggest `/pause` to refresh. Do not partially write. |
+| Summary file absent and `--skip-summary` set | Warn: *"No summary file at design/milestones/<...>.md. Continuing because --skip-summary was set."* Continue. |
+| `design/state.md` absent | Skip the state-archive step silently (consistent with `prepare-issue`'s edge case). Other steps proceed. |
+| `design/state.md` marker fences broken | Stop before the close. Tell the user which zone is malformed and suggest `/pause` to refresh. Do not partially write. |
 | `gh` rate-limited at any step | Surface verbatim. If the milestone close already succeeded but state.md write failed, report the partial state and tell the user what to retry manually. |
-| `--release` set but `Design/build-out-plan.md` has no matching phase | Surface the warning from `/release` itself; the release skill handles this case. |
+| `--release` set but `design/build-out-plan.md` has no matching phase | Surface the warning from `/release` itself; the release skill handles this case. |
 | User authors no lessons zone | The `lessons` zone retains the template default. The skill does not enforce; that is editorial discipline. |
 
 ## Invariants
@@ -201,7 +201,7 @@ With `--dry-run`:
 - Never close a milestone without the literal `yes` approval.
 - Never invoke `/release` without explicit consent (flag or
   interactive `yes`).
-- Never write to `Design/state.md` if the marker fences are broken;
+- Never write to `design/state.md` if the marker fences are broken;
   refuse and ask the user to refresh first.
 - Never modify other state.md zones (`phase`, `blockers`).
 - Never push, force-push, or alter `main`. The close is GitHub-side;
@@ -224,7 +224,7 @@ With `--dry-run`:
 
 - [ ] `gh api repos/:owner/:repo/milestones/<N> --jq .state` returns
   `closed`.
-- [ ] `Design/state.md` has updated `in-flight`, `recent`, and
+- [ ] `design/state.md` has updated `in-flight`, `recent`, and
   `continue-here` zones; `phase` and `blockers` are unchanged.
 - [ ] If `--release` chained, the release URL is reported.
 - [ ] Working tree has the state.md change (uncommitted is fine —
@@ -243,7 +243,7 @@ it succeeds:
   already closed and the build-out-plan row update happens at
   release time.
 
-The summary file under `Design/milestones/` is now the canonical
+The summary file under `design/milestones/` is now the canonical
 retrospective for this milestone. Future runs of `/release` can
 quote from it; future planning rounds can reference it.
 

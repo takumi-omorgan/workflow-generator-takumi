@@ -8,17 +8,17 @@ permission-category: 1  # substitutable — reads gh non-mutating; writes prompt
 
 Take a GitHub issue number, pull the issue's title, body, labels,
 milestone, and linked ADR references via `gh`, read any relevant
-project context (most importantly `Design/build-out-plan.md`), fill
+project context (most importantly `design/build-out-plan.md`), fill
 `prompts/_template.md`, and write the result to
 `prompts/issue-NNN-short-title.md` for the user to paste into a fresh
 Claude Code session.
 
 This skill automates the biggest point of friction between "issue
 exists on GitHub" and "Claude Code session is briefed" — see
-[ADR-013](../../Design/adr/adr-013-prepare-issue-skill.md). It is
+[ADR-013](../../design/adr/adr-013-prepare-issue-skill.md). It is
 also the **consumer** in the cross-skill design-question
 carry-forward chain decided in
-[ADR-040](../../Design/adr/adr-040-cross-skill-design-question-carry-forward.md)
+[ADR-040](../../design/adr/adr-040-cross-skill-design-question-carry-forward.md)
 — it scans recently-merged PRs for `## Notes for #N` sections and
 embeds them in the generated prompt. See
 [`docs/workflow-guide.md` §6](../../docs/workflow-guide.md#6-cross-skill-carry-forward-adr-040)
@@ -62,7 +62,7 @@ and is still accurate, skip this skill and re-use the existing file.
   inside a git repo whose `origin` is the GitHub repo containing the
   issue. `gh` infers the repo from git remotes.
 - **Optional flag:** `--skip-check` — opt out of the `/check-plan`
-  pre-write gate (per [ADR-034](../../Design/adr/adr-034-plan-checker.md)).
+  pre-write gate (per [ADR-034](../../design/adr/adr-034-plan-checker.md)).
   Default is on (gate runs); the flag is documented as opt-out for
   rapid iteration on known-good drafts only. When set, the skill
   writes the prompt despite any deterministic-criteria failures and
@@ -94,11 +94,11 @@ The skill consults four sources, in priority order:
    `gh issue view <N> --json title,body,labels,milestone,url`.
    This is the primary source for almost every field.
 2. **Linked ADRs** (optional) — any `ADR-NNN` token or
-   `Design/adr/adr-NNN-*.md` link mentioned anywhere in the issue
+   `design/adr/adr-NNN-*.md` link mentioned anywhere in the issue
    body, title, or labels. For each referenced ADR, read the file
-   from `Design/adr/` and extract its title and one-line decision
+   from `design/adr/` and extract its title and one-line decision
    summary.
-3. **Build-out plan** (optional) — `Design/build-out-plan.md`, if it
+3. **Build-out plan** (optional) — `design/build-out-plan.md`, if it
    exists. Grep it for mentions of the issue number or the issue's
    core noun phrase and pull a short contextual paragraph.
 4. **Recently-merged PRs** (optional, per ADR-040) — via
@@ -140,9 +140,9 @@ noted.
 5. **Resolve ADR references.** Scan the issue title + body for both
    forms:
    - `ADR-NNN` tokens (case-insensitive, with or without zero-pad).
-   - Explicit path links like `Design/adr/adr-NNN-short.md` or
+   - Explicit path links like `design/adr/adr-NNN-short.md` or
      `adr-NNN-short.md`.
-   For each unique `NNN`, glob `Design/adr/adr-<NNN>-*.md`. If a
+   For each unique `NNN`, glob `design/adr/adr-<NNN>-*.md`. If a
    match is found, read the file and extract:
    - the filename (for the `ADR.File` line),
    - the ADR title from the `# ADR-NNN: Title` heading,
@@ -152,7 +152,7 @@ noted.
    "ADR: none — no ADR referenced in this issue." per the template
    comment.
 6. **Read build-out plan if present.** If
-   `Design/build-out-plan.md` exists, grep it for the issue number
+   `design/build-out-plan.md` exists, grep it for the issue number
    and for noun phrases from the issue title. Capture any short
    matching paragraph as supplementary context to include in the
    "Context" section or the "Why it matters" section where it fits
@@ -184,8 +184,8 @@ noted.
    markdown block. Ask explicitly: "Write this to
    `prompts/issue-NNN-short-title.md`? (yes / edit / cancel)".
    **Do not write the file before this confirmation.**
-10. **Pre-write check (per [ADR-034](../../Design/adr/adr-034-plan-checker.md)
-    + [ADR-043](../../Design/adr/adr-043-programmatic-check-plan.md)).**
+10. **Pre-write check (per [ADR-034](../../design/adr/adr-034-plan-checker.md)
+    + [ADR-043](../../design/adr/adr-043-programmatic-check-plan.md)).**
     Unless `--skip-check` was passed, after the user confirms with
     `yes`, pipe the in-memory filled prompt into the kit's
     programmatic check-plan surface:
@@ -217,8 +217,8 @@ noted.
 12. **Write the file** only after explicit confirmation. Report the
     absolute path and a one-line summary of what was filled vs. left
     as TODO.
-13. **Update `Design/state.md` if present.** Per
-    [ADR-035](../../Design/adr/adr-035-state-md-session-continuity.md),
+13. **Update `design/state.md` if present.** Per
+    [ADR-035](../../design/adr/adr-035-state-md-session-continuity.md),
     rewrite two zones:
     - `state:in-flight` → set `Issue: #NNN`, `Prompt:` to the just-
       written path, `Branch: n/a` (executor will set it later),
@@ -228,7 +228,7 @@ noted.
     Marker fences (`<!-- state:<zone>:start --> / :end -->`) bound
     each zone; rewrite only the bytes between the fences. Other
     zones (`phase`, `recent`, `blockers`) are left untouched. If
-    `Design/state.md` is absent, skip silently — this is normal in
+    `design/state.md` is absent, skip silently — this is normal in
     a kit repo or a project that has not adopted ADR-035. If the
     file exists but its marker fences are broken, do not attempt to
     repair; tell the user and suggest `/pause` to refresh.
@@ -327,8 +327,8 @@ heading. The schema and field semantics of the underlying
   `ADR: none — no ADR referenced in this issue.` per the template
   comment. Do not block on this.
 - **ADR referenced but file missing** → include the reference token
-  verbatim with ` <!-- TODO: ADR file not found in Design/adr/ -->`.
-- **`Design/build-out-plan.md` missing** → skip silently; the kit
+  verbatim with ` <!-- TODO: ADR file not found in design/adr/ -->`.
+- **`design/build-out-plan.md` missing** → skip silently; the kit
   repo itself does not have this file.
 - **`prompts/_template.md` missing** → stop with a clear message
   pointing at Issue #12.
@@ -336,9 +336,9 @@ heading. The schema and field semantics of the underlying
   before overwriting. Default no.
 - **Multi-line label list** → join with `, `.
 - **No milestone** → fill with the string `none`.
-- **`Design/state.md` missing** → skip the state-update step
+- **`design/state.md` missing** → skip the state-update step
   silently. Consistent with how the build-out-plan read is handled.
-- **`Design/state.md` marker fences broken** → do not rewrite. Tell
+- **`design/state.md` marker fences broken** → do not rewrite. Tell
   the user which zone is malformed and suggest `/pause` to refresh
   the file in place.
 - **`/check-plan` gate fails** → the gate runs *after* user-confirm
@@ -380,7 +380,7 @@ filled prompt looks clean.
 - [ ] The issue number was fetched successfully via `gh`.
 - [ ] Every `{{PLACEHOLDER}}` in the template is either filled or
   explicitly marked `<!-- TODO: fill in -->`.
-- [ ] The ADR section names a file that exists in `Design/adr/`, or
+- [ ] The ADR section names a file that exists in `design/adr/`, or
   explicitly says "none".
 - [ ] The short title is kebab-case, ≤ 50 chars, and starts with an
   alphanumeric.

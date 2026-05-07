@@ -9,19 +9,19 @@ are longer.
 
 ## 1. Inputs
 
-### `Design/prd-normalized.md` (excerpt)
+### `design/prd-normalized.md` (excerpt)
 
 A team-collaboration tool for distributed product squads. Realtime
 doc editing, threaded comments, shared task lists, integrations
 (Slack, GitHub, Linear). Constraints: web + desktop, multi-tenant,
 SSO required.
 
-### `Design/mvp.md` (excerpt)
+### `design/mvp.md` (excerpt)
 
 In scope: realtime doc editing, threaded comments, shared task
 lists, Slack integration only.
 
-### `Design/planning.md` (excerpt)
+### `design/planning.md` (excerpt)
 
 Three phases (Foundation → Editor → Slack). Open research questions:
 
@@ -29,19 +29,19 @@ Three phases (Foundation → Editor → Slack). Open research questions:
 - **Q2** — What's the right cursor-presence cadence — 100ms or
   500ms?
 
-### `Design/adr/` (excerpt)
+### `design/adr/` (excerpt)
 
 ADR-001 ("CRDT vs OT for realtime sync") — accepted. Locks the
 realtime-sync question.
 
 ## 2. Re-run detection
 
-`Design/decisions.md` does not exist yet. This is a first run; no
+`design/decisions.md` does not exist yet. This is a first run; no
 earlier entries to preserve.
 
 ## 3. Accepted-ADR scan
 
-Scanned `Design/adr/`:
+Scanned `design/adr/`:
 
 - ADR-001 (accepted, "CRDT vs OT for realtime sync") — topic
   "realtime sync mechanism" is locked. Any gray area mapping to
@@ -128,14 +128,14 @@ User picks: `2, 3, 4`.
   jotting a TODO mid-doc); absent forces a future migration of all
   v1 tasks. Optional matches both flows at low cost.
 
-## 8. Output — `Design/decisions.md`
+## 8. Output — `design/decisions.md`
 
 ```markdown
 # Squadly — Decisions
 
 **Last updated:** 2026-04-30
-**Source PRD:** Design/prd-normalized.md
-**Source MVP:** Design/mvp.md
+**Source PRD:** design/prd-normalized.md
+**Source MVP:** design/mvp.md
 
 ## Purpose
 
@@ -203,7 +203,7 @@ code change, not an architectural shift.
 ## 10. Report
 
 ```
-clarify: wrote Design/decisions.md (3 new entries)
+clarify: wrote design/decisions.md (3 new entries)
 clarify: 2 gray areas left unresolved for next run (cursor-presence
          cadence, Slack integration direction)
 clarify: 1 candidate ADR topic surfaced — CRDT library choice (Yjs

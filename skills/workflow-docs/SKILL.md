@@ -1,7 +1,7 @@
 ---
 name: workflow-docs
-description: Generate README.md and Design/ai-summary.md for a target project from PRD, MVP, ADRs, and CLAUDE.md — re-runnable with marker-fenced sections that preserve manual edits
-permission-category: 1  # substitutable — generates README.md and Design/ai-summary.md locally, per workflow-guide §7
+description: Generate README.md and design/ai-summary.md for a target project from PRD, MVP, ADRs, and CLAUDE.md — re-runnable with marker-fenced sections that preserve manual edits
+permission-category: 1  # substitutable — generates README.md and design/ai-summary.md locally, per workflow-guide §7
 ---
 
 # workflow-docs
@@ -10,7 +10,7 @@ Generate two project-level documents in a target project by reading the
 artifacts the kit already produces and filling templates:
 
 - `README.md` (public entry point for humans)
-- `Design/ai-summary.md` (AI-readable project summary)
+- `design/ai-summary.md` (AI-readable project summary)
 
 The skill is **re-runnable**. Generated regions are wrapped in comment
 markers so a second run updates those regions without clobbering manual
@@ -18,12 +18,12 @@ edits outside them. Sections with no source data are **omitted**
 entirely (heading + body) rather than left blank or filled with
 placeholders.
 
-See [ADR-018](../../Design/adr/adr-018-workflow-docs-skill.md) for the
+See [ADR-018](../../design/adr/adr-018-workflow-docs-skill.md) for the
 decision to consolidate both outputs into one skill instead of two.
 
 ## When to use this skill
 
-- After `prd-to-mvp` has produced `Design/mvp.md`, to generate a real
+- After `prd-to-mvp` has produced `design/mvp.md`, to generate a real
   README and AI summary.
 - After landing one or more ADRs, to refresh the "Key decisions" section
   in both outputs.
@@ -62,9 +62,9 @@ omitted.
 
 | Source                | What it contributes                                          |
 |-----------------------|--------------------------------------------------------------|
-| `Design/prd.md` or `Design/prd-normalized.md` | Project description, primary user, problem statement |
-| `Design/mvp.md`       | Product name, tagline, principles, In-scope, Out-of-scope, success criteria |
-| `Design/adr/*.md`     | "Key decisions" bullets — one line per ADR, newest first     |
+| `design/prd.md` or `design/prd-normalized.md` | Project description, primary user, problem statement |
+| `design/mvp.md`       | Product name, tagline, principles, In-scope, Out-of-scope, success criteria |
+| `design/adr/*.md`     | "Key decisions" bullets — one line per ADR, newest first     |
 | `CLAUDE.md`           | Tech stack, commands (install, dev, test), current phase, milestone |
 
 If **none** of these exist, stop with a clear message pointing the user
@@ -78,7 +78,7 @@ inputs:
 
 - `README.md` — rendered from
   [`templates/readme-template.md`](../../templates/readme-template.md).
-- `Design/ai-summary.md` — rendered from
+- `design/ai-summary.md` — rendered from
   [`templates/ai-summary-template.md`](../../templates/ai-summary-template.md).
 
 On a first run, whole files are written. On a re-run, only the content
@@ -121,27 +121,27 @@ Each generated section has a deterministic rule for when it appears:
 
 | Section         | Appears when                                                |
 |-----------------|-------------------------------------------------------------|
-| `tagline`       | `Design/mvp.md` has a one-line description, **or** PRD has a tagline |
-| `overview`      | `Design/prd.md` / `prd-normalized.md` or `Design/mvp.md` exists |
+| `tagline`       | `design/mvp.md` has a one-line description, **or** PRD has a tagline |
+| `overview`      | `design/prd.md` / `prd-normalized.md` or `design/mvp.md` exists |
 | `who-for`       | PRD / MVP identifies a primary user                         |
 | `status`        | `CLAUDE.md` has a non-placeholder `{{CURRENT_PHASE}}` or milestone |
-| `scope`         | `Design/mvp.md` has an "In scope" and/or "Out of scope" section |
+| `scope`         | `design/mvp.md` has an "In scope" and/or "Out of scope" section |
 | `how-to-run`    | `CLAUDE.md` has non-placeholder commands                    |
-| `key-decisions` | `Design/adr/` contains at least one ADR                     |
-| `roadmap`       | `Design/build-out-plan.md` has 2+ `### Phase N` blocks (per ADR-032). Single-phase / no-phase plans omit this section. |
-| `more`          | Always — static pointers to `CLAUDE.md`, `Design/`          |
+| `key-decisions` | `design/adr/` contains at least one ADR                     |
+| `roadmap`       | `design/build-out-plan.md` has 2+ `### Phase N` blocks (per ADR-032). Single-phase / no-phase plans omit this section. |
+| `more`          | Always — static pointers to `CLAUDE.md`, `design/`          |
 
-### `Design/ai-summary.md`
+### `design/ai-summary.md`
 
 | Section          | Appears when                                              |
 |------------------|-----------------------------------------------------------|
-| `objectives`     | `Design/mvp.md` has a product goal or success criteria    |
+| `objectives`     | `design/mvp.md` has a product goal or success criteria    |
 | `architecture`   | `CLAUDE.md` has a "Project structure" or tech stack block |
 | `tech-stack`     | `CLAUDE.md` has any of runtime / framework / data layer   |
-| `constraints`    | `Design/mvp.md` has principles, or PRD has constraints    |
+| `constraints`    | `design/mvp.md` has principles, or PRD has constraints    |
 | `extension-points` | `CLAUDE.md` or PRD notes extension points (rare on first run — usually omitted) |
 | `current-status` | `CLAUDE.md` has a current phase, or ADRs are dated        |
-| `key-decisions`  | `Design/adr/` contains at least one ADR                   |
+| `key-decisions`  | `design/adr/` contains at least one ADR                   |
 
 A section is **omitted** by removing its heading, body, and both
 markers — the file skips straight from the previous section to the
@@ -151,7 +151,7 @@ stray blank lines.
 ### Roadmap section content (per ADR-032)
 
 When the `roadmap` section appears, render a compact table sourced
-from `Design/build-out-plan.md`'s `### Phase N: <name>` blocks:
+from `design/build-out-plan.md`'s `### Phase N: <name>` blocks:
 
 | # | Phase | Goal | Exit criterion |
 |---|-------|------|----------------|
@@ -170,9 +170,9 @@ Run these steps in order. Stop on the first failure unless noted.
    target project root. Confirm by checking for a `.git/` directory.
    If absent, ask the user to `cd` into the project root and stop.
 2. **Collect inputs.** Read these files if they exist:
-   - `Design/prd.md` (fall back to `Design/prd-normalized.md`)
-   - `Design/mvp.md`
-   - Every file matching `Design/adr/adr-*.md`
+   - `design/prd.md` (fall back to `design/prd-normalized.md`)
+   - `design/mvp.md`
+   - Every file matching `design/adr/adr-*.md`
    - `CLAUDE.md`
 
    If none exist, stop with the message "No PRD, MVP, ADRs, or
@@ -194,7 +194,7 @@ Run these steps in order. Stop on the first failure unless noted.
    - Collapse any resulting run of more than one blank line to exactly
      one blank line.
 6. **Check for existing files and merge markers.**
-   - If `README.md` or `Design/ai-summary.md` already exists **and
+   - If `README.md` or `design/ai-summary.md` already exists **and
      contains** the skill's markers: parse the existing file, replace
      only the content between each `start:/end:` pair, leave
      everything else alone.
@@ -222,18 +222,18 @@ field is optional; missing fields drive section omission (see above).
 
 | Placeholder            | Source                                                    |
 |------------------------|-----------------------------------------------------------|
-| `{{PROJECT_NAME}}`     | `Design/mvp.md` "Product name", else `CLAUDE.md` first `#` heading, else repo basename |
-| `{{PROJECT_TAGLINE}}`  | `Design/mvp.md` "One-line description", else PRD tagline  |
-| `{{PROJECT_DESCRIPTION}}` | `Design/mvp.md` "Product goal", else PRD "Goal" / "Problem" paragraph |
-| `{{PRIMARY_USER}}`     | `Design/mvp.md` "Primary user", else PRD "Target user"    |
+| `{{PROJECT_NAME}}`     | `design/mvp.md` "Product name", else `CLAUDE.md` first `#` heading, else repo basename |
+| `{{PROJECT_TAGLINE}}`  | `design/mvp.md` "One-line description", else PRD tagline  |
+| `{{PROJECT_DESCRIPTION}}` | `design/mvp.md` "Product goal", else PRD "Goal" / "Problem" paragraph |
+| `{{PRIMARY_USER}}`     | `design/mvp.md` "Primary user", else PRD "Target user"    |
 | `{{CURRENT_PHASE}}`    | `CLAUDE.md` "Current phase" section                       |
 | `{{CURRENT_MILESTONE}}`| `CLAUDE.md` active milestone                              |
-| `{{IN_SCOPE_BULLETS}}`     | `Design/mvp.md` "In scope" bullets                    |
-| `{{OUT_OF_SCOPE_BULLETS}}` | `Design/mvp.md` "Out of scope" bullets                |
+| `{{IN_SCOPE_BULLETS}}`     | `design/mvp.md` "In scope" bullets                    |
+| `{{OUT_OF_SCOPE_BULLETS}}` | `design/mvp.md` "Out of scope" bullets                |
 | `{{INSTALL_COMMAND}}`  | `CLAUDE.md` install command                               |
 | `{{DEV_COMMAND}}`      | `CLAUDE.md` dev command                                   |
 | `{{TEST_COMMAND}}`     | `CLAUDE.md` test command                                  |
-| `{{KEY_ADR_BULLETS}}`  | One bullet per `Design/adr/adr-NNN-*.md`, newest first: `- ADR-NNN: <one-line decision>` |
+| `{{KEY_ADR_BULLETS}}`  | One bullet per `design/adr/adr-NNN-*.md`, newest first: `- ADR-NNN: <one-line decision>` |
 
 ### AI summary (`templates/ai-summary-template.md`)
 
@@ -241,10 +241,10 @@ field is optional; missing fields drive section omission (see above).
 |------------------------|-----------------------------------------------------------|
 | `{{PROJECT_NAME}}`     | Same as README                                            |
 | `{{YYYY-MM-DD}}`       | Today's date                                              |
-| "Objectives" bullets   | `Design/mvp.md` "Product goal" + "Success criteria"       |
+| "Objectives" bullets   | `design/mvp.md` "Product goal" + "Success criteria"       |
 | "Architecture" paragraph | `CLAUDE.md` "Project structure" + "Technology stack"    |
 | "Tech stack" bullets   | `CLAUDE.md` runtime / framework / data layer / libraries / deploy target |
-| "Constraints" bullets  | `Design/mvp.md` "Product principles", PRD "Constraints"   |
+| "Constraints" bullets  | `design/mvp.md` "Product principles", PRD "Constraints"   |
 | "Extension points" bullets | PRD / `CLAUDE.md` extension-point notes (usually omitted on first run) |
 | "Current status" bullets | `CLAUDE.md` "Current phase", ADR dates, issue activity if available |
 | "Key decisions" bullets | One bullet per ADR, newest first                         |
@@ -306,8 +306,8 @@ If any fail, fix and re-show before writing.
 
 ## Running against the kit repo itself
 
-This repo (`workflow-generator`) has `CLAUDE.md` and `Design/adr/*.md`
-but no `Design/prd.md` or `Design/mvp.md`. Running the skill here would
+This repo (`workflow-generator`) has `CLAUDE.md` and `design/adr/*.md`
+but no `design/prd.md` or `design/mvp.md`. Running the skill here would
 produce:
 
 - **README.md**: the `scope`, `overview`, `who-for`, `tagline`, and
@@ -318,7 +318,7 @@ produce:
   would be included — and because the kit repo already has a rich
   hand-written README, the skill would detect the missing markers and
   refuse to overwrite without an explicit "yes, replace".
-- **Design/ai-summary.md**: only `key-decisions` (from ADRs) and a
+- **design/ai-summary.md**: only `key-decisions` (from ADRs) and a
   minimal `current-status` section would be included. Objectives,
   architecture, tech stack, constraints, and extension points would
   all be omitted.

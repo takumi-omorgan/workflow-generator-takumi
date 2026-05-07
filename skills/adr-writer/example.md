@@ -19,8 +19,8 @@ From the Pace Drift build-out plan:
 2. **Test framework.** Vitest, Jest, or node:test. Affects developer
    ergonomics; mostly a defaults question.
 
-Plus context: `Design/prd-normalized.md` (constraints: web-only,
-laptop-first, single-user, local session) and `Design/mvp.md`
+Plus context: `design/prd-normalized.md` (constraints: web-only,
+laptop-first, single-user, local session) and `design/mvp.md`
 (principles: local session only, no server-side persistence).
 
 ## 2. Confirmation turn
@@ -36,7 +36,7 @@ The skill shows the numbered list back and asks one question:
 User: confirms, and asks the parsing-location ADR to also note the
 offline-use angle.
 
-## 3. Output 1 (contentious) — `Design/adr/adr-001-gpx-parsing-location.md`
+## 3. Output 1 (contentious) — `design/adr/adr-001-gpx-parsing-location.md`
 
 ```markdown
 # ADR-001: Parse GPX files in the browser, not on a server
@@ -50,7 +50,7 @@ Pace Drift loads a GPX file from the user, parses it, and computes
 pace drift against a target pace. The parsing and computation could
 run in the user's browser or on a server.
 
-The MVP constraints from Design/prd-normalized.md and Design/mvp.md
+The MVP constraints from design/prd-normalized.md and design/mvp.md
 are relevant:
 
 - Single-user, local session.
@@ -106,7 +106,7 @@ static site.
   re-open this decision.
 ```
 
-## 4. Output 2 (trivial) — `Design/adr/adr-002-test-framework.md`
+## 4. Output 2 (trivial) — `design/adr/adr-002-test-framework.md`
 
 ```markdown
 # ADR-002: Use Vitest as the test framework
@@ -175,8 +175,8 @@ For ADR-002:
 All checks pass for both ADRs. The skill reports back:
 
 > Drafted 2 ADRs:
-> - Design/adr/adr-001-gpx-parsing-location.md (proposed)
-> - Design/adr/adr-002-test-framework.md (proposed)
+> - design/adr/adr-001-gpx-parsing-location.md (proposed)
+> - design/adr/adr-002-test-framework.md (proposed)
 >
 > Review and change status to `accepted` when ready.
 

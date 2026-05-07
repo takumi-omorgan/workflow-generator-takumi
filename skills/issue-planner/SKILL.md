@@ -1,32 +1,32 @@
 ---
 name: issue-planner
-description: Turn Design/mvp.md and Design/build-out-plan.md into a reviewed batch of GitHub issues, plus a Project board
+description: Turn design/mvp.md and design/build-out-plan.md into a reviewed batch of GitHub issues, plus a Project board
 permission-category: 3  # non-substitutable — gh issue create is public-visibility; existing approval gate is correct, per workflow-guide §7
 ---
 
 # issue-planner
 
-Read `Design/mvp.md` and `Design/build-out-plan.md`, draft a batch of
+Read `design/mvp.md` and `design/build-out-plan.md`, draft a batch of
 GitHub issues with titles, bodies, labels, milestones, and ADR
 references, show the full batch for human approval, then create the
 approved issues via `gh issue create`. On successful creation, create
 a GitHub Project board and add every new issue to it.
 
 This skill implements
-[ADR-011](../../Design/adr/adr-011-issue-planner-skill.md) (issue-planner
+[ADR-011](../../design/adr/adr-011-issue-planner-skill.md) (issue-planner
 hybrid draft-approve-create flow) and
-[ADR-012](../../Design/adr/adr-012-github-projects-integration.md)
+[ADR-012](../../design/adr/adr-012-github-projects-integration.md)
 (GitHub Projects board baked into issue creation).
 
 ## When to use this skill
 
-Use after `prd-to-mvp` (Issue #7) has produced `Design/mvp.md` and
-`Design/build-out-plan.md`, and after `adr-writer` (Issue #7) has
+Use after `prd-to-mvp` (Issue #7) has produced `design/mvp.md` and
+`design/build-out-plan.md`, and after `adr-writer` (Issue #7) has
 drafted the ADRs surfaced by that plan. The backlog this skill creates
 is the direct input to `prepare-issue` (Issue #15) and, through it, the
 executor skill.
 
-If `Design/mvp.md` or `Design/build-out-plan.md` does not exist, stop
+If `design/mvp.md` or `design/build-out-plan.md` does not exist, stop
 cleanly and tell the user which prerequisite skill to run.
 
 ## What this skill does not do
@@ -34,7 +34,7 @@ cleanly and tell the user which prerequisite skill to run.
 - Does not write ADRs — that is `adr-writer`.
 - Does not open PRs, create branches, or run the executor — that is the
   executor skill and `pr-review-packager` (later issues).
-- Does not modify `Design/mvp.md`, `Design/build-out-plan.md`, or any
+- Does not modify `design/mvp.md`, `design/build-out-plan.md`, or any
   ADR file in place. If the plan needs changing, re-run `prd-to-mvp`.
 - Does not silently bulk-create issues. Human approval is mandatory
   (ADR-006, ADR-011).
@@ -44,18 +44,18 @@ cleanly and tell the user which prerequisite skill to run.
 
 ## Inputs
 
-- **Required:** `Design/mvp.md` — phased feature list and product
+- **Required:** `design/mvp.md` — phased feature list and product
   principles, rendered from `templates/mvp-template.md`.
-- **Required:** `Design/build-out-plan.md` — structured work items,
+- **Required:** `design/build-out-plan.md` — structured work items,
   phases, milestone recommendation, and initial issue backlog, rendered
   from `templates/build-out-plan-template.md`.
 - **Required:** an authenticated `gh` CLI (`gh auth status` must
   succeed). For Project board creation, the token needs the `project`
   OAuth scope; `gh auth refresh -s project,read:project` will prompt
   for it.
-- **Optional:** `Design/adr/` — used to attach ADR references to
+- **Optional:** `design/adr/` — used to attach ADR references to
   issues when a draft matches an ADR title or topic.
-- **Optional:** `Design/planning.md` (per [ADR-031](../../Design/adr/adr-031-deeper-planning-workflow.md))
+- **Optional:** `design/planning.md` (per [ADR-031](../../design/adr/adr-031-deeper-planning-workflow.md))
   — when present, the sequencing-rationale section informs phase
   ordering of the issue backlog and the requirement IDs (`R1`,
   `R2`, …) are referenced in issue bodies for traceability. When
@@ -97,7 +97,7 @@ Flags compose: `/issue-planner --dry-run --no-project` is valid.
 The skill parses by **heading hierarchy**, not regex or YAML. Humans
 write these files; tolerate minor formatting drift.
 
-### From `Design/build-out-plan.md`
+### From `design/build-out-plan.md`
 
 1. **Locate the `## Initial issue backlog` section.** This is the
    canonical backlog source (see `templates/build-out-plan-template.md`).
@@ -131,7 +131,7 @@ write these files; tolerate minor formatting drift.
    milestone short names (M1, M2, ...) to a focus description used in
    the milestone's GitHub description field.
 
-### From `Design/mvp.md`
+### From `design/mvp.md`
 
 1. Pull the **product name** from the top-level heading
    (`# <name> — MVP`) for the Project board name.
@@ -142,7 +142,7 @@ write these files; tolerate minor formatting drift.
    backlog. If a drafted issue title maps to something on the "Out of
    scope" list, warn the user during the approval step.
 
-### From `Design/adr/`
+### From `design/adr/`
 
 1. For each ADR file, parse the first-line heading (`# ADR-NNN: Title`).
 2. When a drafted issue title or body mentions an ADR number, topic, or
@@ -171,7 +171,7 @@ convention observed in this kit's own issues #11–#25:
   (ADR-007)`. No leading `[type]` prefix; labels carry that metadata.
 - **Body:** sections in this order:
   1. **Summary** — one paragraph, what the issue is about.
-  2. **ADR** — link to `Design/adr/adr-NNN-short-title.md`, or `none`
+  2. **ADR** — link to `design/adr/adr-NNN-short-title.md`, or `none`
      with a one-line reason.
   3. **Goal** — 1–2 sentences, the concrete outcome.
   4. **Why it matters** — link back to the ADR or a user need.
@@ -312,7 +312,7 @@ one or a clear explanation of why they did not.
 
 ## Edge cases
 
-- **Missing `Design/mvp.md` or `Design/build-out-plan.md`:** stop
+- **Missing `design/mvp.md` or `design/build-out-plan.md`:** stop
   cleanly. Print which file is missing and the prerequisite skill
   (`prd-to-mvp`).
 - **Plan files exist but backlog section is empty:** fall back to
@@ -326,7 +326,7 @@ one or a clear explanation of why they did not.
 - **Not inside a GitHub-backed repo:** `gh repo view` will fail — stop
   cleanly and ask the user to check their remote.
 - **User is in this kit repo itself** (not a target project): the
-  plan files `Design/mvp.md` / `Design/build-out-plan.md` do not
+  plan files `design/mvp.md` / `design/build-out-plan.md` do not
   exist here — only ADRs and the kit's own issues do. The skill will
   correctly stop at the "missing plan files" check. This is expected
   behaviour; the skill is designed to run in target projects.

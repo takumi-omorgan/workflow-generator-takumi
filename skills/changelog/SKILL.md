@@ -15,7 +15,7 @@ Docs, Refactoring, Chores, Other), and emits markdown suitable for a
 The skill is read-only with respect to git (it never creates tags,
 commits, or branches). The one write it can perform is posting the
 rendered markdown to a GitHub Release body via `gh release`. Release
-tagging itself is out of scope — see [ADR-016](../../Design/adr/adr-016-changelog-and-release-notes-skill.md)
+tagging itself is out of scope — see [ADR-016](../../design/adr/adr-016-changelog-and-release-notes-skill.md)
 and the future `/release` skill.
 
 ## When to use this skill

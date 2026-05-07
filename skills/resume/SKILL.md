@@ -1,19 +1,19 @@
 ---
 name: resume
-description: Brief a fresh Claude Code session by reading Design/state.md and emitting a single short summary of phase, in-flight issue, recent work, blockers, and the next concrete action. Falls back to `gh` if state.md is missing, empty, or suspect.
+description: Brief a fresh Claude Code session by reading design/state.md and emitting a single short summary of phase, in-flight issue, recent work, blockers, and the next concrete action. Falls back to `gh` if state.md is missing, empty, or suspect.
 permission-category: 1  # substitutable — reads state.md and emits a summary; falls back to gh reads (non-mutating), per workflow-guide §7
 ---
 
 # resume
 
-Read `Design/state.md` and emit a one-message brief that brings a
+Read `design/state.md` and emit a one-message brief that brings a
 fresh session up to speed in seconds: current phase, in-flight issue
 (with its prompt and branch), the last few completed PRs, any
 blockers, and the "continue here" pointer that names the next
 concrete action.
 
 This skill is the **read** side of the session-continuity contract
-decided in [ADR-035](../../Design/adr/adr-035-state-md-session-continuity.md).
+decided in [ADR-035](../../design/adr/adr-035-state-md-session-continuity.md).
 The **write** side lives in `prepare-issue`,
 `claude-issue-executor`, `pr-review-packager` (each updates its zone
 during the normal flow), and `pause` (which refreshes everything
@@ -47,7 +47,7 @@ log -1` is faster.
 
 ## Inputs
 
-- **Required:** `Design/state.md`. If absent, the skill takes the
+- **Required:** `design/state.md`. If absent, the skill takes the
   `gh` fallback path described under **Edge cases**.
 - **Optional (fallback only):** `gh` access to the GitHub repo whose
   remote is `origin`. Used when `state.md` is missing, empty, or
@@ -69,7 +69,7 @@ the user to skim it in two seconds and know what to do next.
 
 ## Execution protocol
 
-1. **Locate `Design/state.md`.** If absent, jump to step 7
+1. **Locate `design/state.md`.** If absent, jump to step 7
    (`gh` fallback).
 2. **Read the file.** Confirm the marker fences are intact:
    `state:phase`, `state:in-flight`, `state:recent`,
@@ -97,7 +97,7 @@ the user to skim it in two seconds and know what to do next.
    entries, render only what's there — do not pad.
 6. **Stop.** This skill never asks the user a follow-up question;
    the brief is the deliverable.
-7. **`gh` fallback** (only when `Design/state.md` is missing or
+7. **`gh` fallback** (only when `design/state.md` is missing or
    empty). Run, in order:
    - `gh pr list --state open --limit 5 --json number,title,url`
      for in-flight signals;
@@ -107,13 +107,13 @@ the user to skim it in two seconds and know what to do next.
      for outstanding issues.
    Render the same shape as on the happy path, but mark the brief
    with a one-line header noting the fallback was used and that the
-   project should consider running `/pause` to seed `Design/state.md`.
+   project should consider running `/pause` to seed `design/state.md`.
 
 ## Edge cases
 
-- **`Design/state.md` missing.** Take the `gh` fallback path
+- **`design/state.md` missing.** Take the `gh` fallback path
   (step 7). Do not create the file — that is `/pause`'s job.
-- **`Design/state.md` empty or all placeholders.** Same as missing —
+- **`design/state.md` empty or all placeholders.** Same as missing —
   `gh` fallback.
 - **Marker fences malformed.** Stop. Print which zone is broken and
   suggest `/pause` to refresh.
@@ -147,4 +147,4 @@ open PR. If the user wants to refresh the file before continuing,
 they run `/pause`.
 
 See [`example.md`](example.md) for a worked invocation against a
-populated `Design/state.md`.
+populated `design/state.md`.

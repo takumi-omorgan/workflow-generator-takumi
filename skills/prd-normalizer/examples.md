@@ -11,7 +11,7 @@ The input here is byte-for-byte the output of
 [`idea-to-prd/example.md`](../idea-to-prd/example.md). This example
 demonstrates that `idea-to-prd` and `prd-normalizer` chain cleanly.
 
-### Input — `Design/prd.md`
+### Input — `design/prd.md`
 
 ```markdown
 # Pace Drift — PRD
@@ -78,7 +78,7 @@ User confirms both. The input also mentions "web … on a laptop" and
 "no mobile-optimized view in the first release" — enough to populate
 "constraints and preferences" without another question.
 
-### Output — `Design/prd-normalized.md`
+### Output — `design/prd-normalized.md`
 
 ```markdown
 # Pace Drift — Normalized PRD
@@ -171,7 +171,7 @@ All six pass. Write the file and point the user at `prd-to-mvp` and
 A different project presented in the user's own brain-dump style — no
 conventional headings, mixed prose and bullets, some musings.
 
-### Input — `Design/brief.md` (user's original, preserved)
+### Input — `design/brief.md` (user's original, preserved)
 
 ```markdown
 # Stand-up Notes Bot — what I'm thinking
@@ -237,7 +237,7 @@ Batched questions (≤ 5):
 User answers. The skill drafts user stories from the answer and fills
 the remaining fields.
 
-### Output — `Design/prd-normalized.md`
+### Output — `design/prd-normalized.md`
 
 ```markdown
 # Stand-up Notes Bot — Normalized PRD
@@ -331,6 +331,6 @@ Note the transformation:
       covered every field. (Example 1 is where the `[TBD]` marker is
       exercised, on "Secondary user".)
 
-All six pass. The user's original `Design/brief.md` is untouched. The
-skill writes `Design/prd-normalized.md` and points the user at
+All six pass. The user's original `design/brief.md` is untouched. The
+skill writes `design/prd-normalized.md` and points the user at
 `prd-to-mvp` and `adr-writer` as the next steps.

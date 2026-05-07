@@ -42,8 +42,8 @@ No flags.
 **From the filesystem:**
 
 - `templates/pr-template.md` exists and is read.
-- `Design/adr/adr-015-pr-review-packager-skill.md` exists (matched by
-  glob `Design/adr/adr-0*15-*.md`).
+- `design/adr/adr-015-pr-review-packager-skill.md` exists (matched by
+  glob `design/adr/adr-0*15-*.md`).
 
 ## 3. Derived values
 
@@ -53,7 +53,7 @@ No flags.
   or prompt files.
 - **ADR references:** `ADR-015`, extracted from the commit subject's
   `(ADR-015, #17)` tail. Resolved to
-  `Design/adr/adr-015-pr-review-packager-skill.md`.
+  `design/adr/adr-015-pr-review-packager-skill.md`.
 - **Change summary groups:** one commit, prefix `feat`. Because there
   is only one group, the skill omits the group heading and emits a
   single bullet:
@@ -84,7 +84,7 @@ Closes #17
 
 ## ADR
 
-Related ADR: Design/adr/adr-015-pr-review-packager-skill.md
+Related ADR: design/adr/adr-015-pr-review-packager-skill.md
 
 ## Changes
 
@@ -276,7 +276,7 @@ Closes #100
 
 ## ADR
 
-Related ADR: Design/adr/adr-099-depth-tier-templates.md
+Related ADR: design/adr/adr-099-depth-tier-templates.md
 
 ## Changes
 

@@ -8,7 +8,7 @@ approval, and creates them along with a Project board.
 
 ## 1. Input — the plan files
 
-### `Design/mvp.md` (excerpt)
+### `design/mvp.md` (excerpt)
 
 ```markdown
 # Pace Drift — MVP
@@ -33,7 +33,7 @@ approval, and creates them along with a Project board.
 - Multi-file comparisons.
 ```
 
-### `Design/build-out-plan.md` (excerpt)
+### `design/build-out-plan.md` (excerpt)
 
 ```markdown
 ## Milestone recommendation
@@ -57,7 +57,7 @@ approval, and creates them along with a Project board.
 - Render drift chart
 ```
 
-### `Design/adr/`
+### `design/adr/`
 
 - `adr-001-gpx-parsing-location.md` (title: *Parse GPX files in the
   browser, not on a server*)
@@ -72,7 +72,7 @@ approval, and creates them along with a Project board.
 ## 3. Preflight — what the skill reports
 
 ```
-Parsed Design/build-out-plan.md and Design/mvp.md.
+Parsed design/build-out-plan.md and design/mvp.md.
 
 4 issues drafted across 2 milestones:
   M1 — foundations: 2 issues
@@ -115,7 +115,7 @@ Issue 1 of 4
     ## Why it matters
     Every later issue depends on this baseline.
     ## Tasks
-    - [ ] Create Design/, src/, tests/
+    - [ ] Create design/, src/, tests/
     - [ ] Add ADR-000 template
     - [ ] Commit baseline
     ## Acceptance criteria
@@ -128,7 +128,7 @@ Issue 2 of 4
   Title:     Browser-side GPX parser spike (ADR-001)
   Labels:    feature, design
   Milestone: M1 — foundations
-  ADR:       Design/adr/adr-001-gpx-parsing-location.md
+  ADR:       design/adr/adr-001-gpx-parsing-location.md
   Body: ...
 ```
 

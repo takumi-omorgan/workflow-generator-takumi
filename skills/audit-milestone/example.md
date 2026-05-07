@@ -45,7 +45,7 @@ Skill output:
 >
 > Issues: 3 closed, 0 open.
 > ADRs referenced: ADR-001 (storage format).
->   ✓ Design/adr/adr-001-storage-format.md exists.
+>   ✓ design/adr/adr-001-storage-format.md exists.
 >   ✓ Merged PR found: #14 — feat(ingest): add SQLite storage (ADR-001, #4).
 > Phase status: Phase 1 row in build-out-plan.md → `released v0.1.0`.
 >
@@ -62,7 +62,7 @@ $ /milestone-summary 1
 
 The skill resolves the tag range (`<initial>..v0.1.0`), pulls
 merged PRs and accepted ADRs, and renders the would-be content of
-`Design/milestones/1-phase-1-foundation.md`. After the user types
+`design/milestones/1-phase-1-foundation.md`. After the user types
 `yes`, the file is written:
 
 ```markdown
@@ -113,7 +113,7 @@ round-trips 50 sample notes without loss.
 
 <!-- summary:next:start -->
 Phase 2 — Publishing kicks off next. State pointer:
-`Design/state.md`. First issue: TTS pipeline (#18).
+`design/state.md`. First issue: TTS pipeline (#18).
 <!-- summary:next:end -->
 ```
 
@@ -133,7 +133,7 @@ plan:
 
 > Plan:
 > - Close milestone Phase 1 — Foundation (#1) on GitHub.
-> - Update Design/state.md:
+> - Update design/state.md:
 >   - in-flight → none
 >   - recent → prepend "Milestone closed: Phase 1 — Foundation (#1) — 2026-04-30"
 >   - continue-here → "Run `/release --milestone-phase=1`"
@@ -145,19 +145,19 @@ The user types `yes`. The skill runs:
 
 ```
 gh api repos/:owner/:repo/milestones/1 -X PATCH -f state=closed
-[updates Design/state.md zones]
+[updates design/state.md zones]
 /release --milestone-phase=1
 ```
 
 `/release` has its own approval gate; the user types `yes` again
 inside it. Tag `v0.1.0` is cut, the GitHub Release is published,
-and `Design/build-out-plan.md` Phase 1 row updates to
+and `design/build-out-plan.md` Phase 1 row updates to
 `released v0.1.0`.
 
 Final report:
 
 > ✅ Milestone Phase 1 — Foundation closed.
-> Summary: Design/milestones/1-phase-1-foundation.md
+> Summary: design/milestones/1-phase-1-foundation.md
 > State: in-flight cleared, recent prepended, continue-here updated.
 > Release: https://github.com/.../releases/tag/v0.1.0
 
@@ -177,7 +177,7 @@ Skill output:
 >
 > Issues: 4 closed, 1 open.
 > ADRs referenced: ADR-002 (publishing pipeline).
->   ✓ Design/adr/adr-002-publishing-pipeline.md exists.
+>   ✓ design/adr/adr-002-publishing-pipeline.md exists.
 >   ✗ No merged PR found mentioning ADR-002.
 > Phase status: Phase 2 row in build-out-plan.md → `in-progress`.
 >
@@ -191,7 +191,7 @@ Skill output:
 >   implementation PR was merged with `(ADR-002, #NN)` in its title or body.
 >
 > Phases:
-> - Phase 2 (Publishing) status is `in-progress` in `Design/build-out-plan.md`.
+> - Phase 2 (Publishing) status is `in-progress` in `design/build-out-plan.md`.
 >   Run `/release --milestone-phase=2` to mark it `released vX.Y.Z`,
 >   or update the row manually.
 

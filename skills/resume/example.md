@@ -7,7 +7,7 @@ fresh) and the fallback path (state.md missing or stale).
 
 ## Happy path
 
-### Input: `Design/state.md`
+### Input: `design/state.md`
 
 ```markdown
 # acme-platform — State
@@ -38,7 +38,7 @@ Phase 2 — Editor
 
 ## Recent work
 
-- #54 — ADR-033 — `/clarify` skill producing `Design/decisions.md`
+- #54 — ADR-033 — `/clarify` skill producing `design/decisions.md`
 - #53 — ADR-039 — plan-mode rhythm wired into executor
 - #51 — ADR-039 — plan-mode-for-significant-tasks ADR accepted
 - #50 — ADR-032 — implementation phases (Phase column, build-out blocks)
@@ -71,7 +71,7 @@ commit 4 (wire state.md updates into prepare/execute/review).
 **Phase:** Phase 2 — Editor
 **In-flight:** #44 (executing) — prompt prompts/issue-044-design-state-md-plus-resume-and-pause-skills.md, branch feat/v-next-adr-035-state-md-resume-pause
 **Recent:**
-- #54 — ADR-033 — `/clarify` skill producing `Design/decisions.md`
+- #54 — ADR-033 — `/clarify` skill producing `design/decisions.md`
 - #53 — ADR-039 — plan-mode rhythm wired into executor
 - #51 — ADR-039 — plan-mode-for-significant-tasks ADR accepted
 - #50 — ADR-032 — implementation phases (Phase column, build-out blocks)
@@ -89,7 +89,7 @@ where the prior session left off.
 
 ### Input
 
-`Design/state.md` does not exist (a fresh project that has not yet
+`design/state.md` does not exist (a fresh project that has not yet
 adopted ADR-035 or that has been pruned).
 
 ### Skill behaviour
@@ -105,15 +105,15 @@ gh issue list --state open --limit 5 --json number,title,url
 ### Output
 
 ```
-(state.md not found — using gh fallback. Consider /pause to seed Design/state.md.)
+(state.md not found — using gh fallback. Consider /pause to seed design/state.md.)
 
-**Phase:** unknown — no Design/state.md
+**Phase:** unknown — no design/state.md
 **In-flight:** none observed (no open PR)
 **Recent:**
-- #54 — `/clarify` skill producing Design/decisions.md (merged 2026-04-30)
+- #54 — `/clarify` skill producing design/decisions.md (merged 2026-04-30)
 - #53 — plan-mode rhythm in claude-issue-executor (merged 2026-04-30)
 - #51 — ADR-039 plan-mode-for-significant-tasks (merged 2026-04-30)
-**Blockers:** unknown — no Design/state.md
+**Blockers:** unknown — no design/state.md
 **Continue here:** open issues: #44, #45, #43, #47, #46. Pick one and run `/prepare-issue NNN`.
 ```
 

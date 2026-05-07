@@ -1,20 +1,20 @@
 ---
 name: prd-to-mvp
 description: Scope a normalized PRD into an MVP statement and a build-out plan
-permission-category: 1  # substitutable — local doc creation (Design/mvp.md, Design/build-out-plan.md), per workflow-guide §7
+permission-category: 1  # substitutable — local doc creation (design/mvp.md, design/build-out-plan.md), per workflow-guide §7
 ---
 
 # prd-to-mvp
 
-Take `Design/prd-normalized.md` and produce two artifacts: a scoped
-**MVP statement** at `Design/mvp.md` and a sequenced **build-out plan**
-at `Design/build-out-plan.md`. Both are rendered from existing
+Take `design/prd-normalized.md` and produce two artifacts: a scoped
+**MVP statement** at `design/mvp.md` and a sequenced **build-out plan**
+at `design/build-out-plan.md`. Both are rendered from existing
 templates in this kit.
 
 ## When to use this skill
 
 Use after `prd-normalizer` (Issue #6) has produced
-`Design/prd-normalized.md`. If that file does not exist, run
+`design/prd-normalized.md`. If that file does not exist, run
 `prd-normalizer` first.
 
 This skill is the entry point from product planning into implementation
@@ -34,22 +34,22 @@ decisions and `issue-planner` (later issue) for the GitHub backlog.
 
 ## Inputs
 
-- **Required:** `Design/prd-normalized.md`.
+- **Required:** `design/prd-normalized.md`.
 - **Optional:** user preference on project size — weekend project,
   one-month, multi-month — to guide how aggressive the scope cut is.
 - **Optional flag:** `--granularity={coarse|standard|fine}` — phase-
-  count target band, per [ADR-036](../../Design/adr/adr-036-granularity-control.md).
+  count target band, per [ADR-036](../../design/adr/adr-036-granularity-control.md).
   `coarse` aims for 1–3 phases, `standard` (default) for 5–8, `fine`
   for 8–12. Bands are targets, not hard caps; the skill picks the
   actual count and justifies it inline. Precedence (highest first):
   explicit flag > `**Granularity:**` line in an existing
-  `Design/build-out-plan.md` > default `standard`.
+  `design/build-out-plan.md` > default `standard`.
 
 ## Outputs
 
-- **`Design/mvp.md`** — rendered from
+- **`design/mvp.md`** — rendered from
   [`templates/mvp-template.md`](../../templates/mvp-template.md).
-- **`Design/build-out-plan.md`** — rendered from
+- **`design/build-out-plan.md`** — rendered from
   [`templates/build-out-plan-template.md`](../../templates/build-out-plan-template.md).
 
 Both files are produced from a single scoping conversation. The two
@@ -60,24 +60,24 @@ cover every in-scope capability of the MVP.
 
 1. **Resolve granularity tier.** If `--granularity=<tier>` was passed,
    validate the value is one of `coarse|standard|fine` and use it.
-   Else, if `Design/build-out-plan.md` already exists and contains a
+   Else, if `design/build-out-plan.md` already exists and contains a
    `**Granularity:** <tier>` line with a valid value, read it. Else
    default to `standard`. Reject invalid tiers with a one-line error
    naming the three valid values and stop. The resolved tier sets
    the target phase-count band for step 6: `coarse` 1–3, `standard`
    5–8, `fine` 8–12.
-2. Read `Design/prd-normalized.md` end to end.
+2. Read `design/prd-normalized.md` end to end.
 3. Propose an in-scope / out-of-scope split for every core capability
    and user story. Default to aggressive cuts; over-scoping is the
    more common failure.
 4. Ask the user to confirm or adjust the split — one batched turn
    (≤ 5 questions). Include the project-size question if the user
    has not stated a preference.
-5. Render `Design/mvp.md` from `templates/mvp-template.md`. Derive
+5. Render `design/mvp.md` from `templates/mvp-template.md`. Derive
    3–5 product principles from the normalized PRD's constraints,
    non-goals, and goal — principles that will resolve future scope
    arguments.
-6. Draft `Design/build-out-plan.md` from
+6. Draft `design/build-out-plan.md` from
    `templates/build-out-plan-template.md`. Write the resolved tier
    into the `**Granularity:**` line under the header. Sequence into
    N phases per the resolved band — `coarse` 1–3, `standard` 5–8

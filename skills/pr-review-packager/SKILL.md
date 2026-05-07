@@ -15,10 +15,10 @@ finished body in chat for approval, and only then calls
 
 This skill completes the implementation pipeline:
 `/prepare-issue` → `claude-issue-executor` → **`/pr-review-packager`**.
-See [ADR-015](../../Design/adr/adr-015-pr-review-packager-skill.md) for
+See [ADR-015](../../design/adr/adr-015-pr-review-packager-skill.md) for
 the decision record. The skill is also the **preserver** in the
 cross-skill design-question carry-forward chain decided in
-[ADR-040](../../Design/adr/adr-040-cross-skill-design-question-carry-forward.md)
+[ADR-040](../../design/adr/adr-040-cross-skill-design-question-carry-forward.md)
 — it reads the executor's `notes/eval-issue-NNN.md` and emits
 `## Notes for #N` sections in the PR body so the carry-forward
 survives in PR history. See
@@ -138,7 +138,7 @@ The skill consults five sources, in this order:
    pick the most recently modified file. Useful when the branch name
    does not encode the issue number.
 4. **ADR files.** For each `ADR-NNN` token found, glob
-   `Design/adr/adr-<NNN>-*.md` and resolve the full filename.
+   `design/adr/adr-<NNN>-*.md` and resolve the full filename.
 5. **Eval-summary file** (per ADR-040, optional). Once the issue
    number is resolved (step 6 of the execution protocol), read
    `notes/eval-issue-NNN.md` (zero-padded). Parse the
@@ -207,7 +207,7 @@ noted.
 7. **Extract ADR references.** Scan the same sources (branch name,
    commit subjects, most recent prompt file) for `ADR-(\d+)` tokens
    (case-insensitive). Deduplicate, preserve first-seen order. For
-   each unique `NNN`, glob `Design/adr/adr-<NNN>-*.md`. If a file
+   each unique `NNN`, glob `design/adr/adr-<NNN>-*.md`. If a file
    matches, record the path. If none match, keep the `ADR-NNN` token
    and flag it as a TODO in the approval gate. If no ADR tokens are
    found anywhere, set the `## ADR` body to `none`.
@@ -238,7 +238,7 @@ noted.
     |---|---|
     | `{{One-paragraph description of what this PR changes and why.}}` | the Summary draft from step 10 |
     | `{{ISSUE_NUMBER}}` | issue number from step 6 (no `#`) |
-    | `` `Design/adr/adr-{{NNN}}-{{short-title}}.md` `` line | one resolved ADR path per line, each as `Related ADR: Design/adr/adr-NNN-short-title.md`. If no ADRs, the whole line becomes `Related ADR: none`. |
+    | `` `design/adr/adr-{{NNN}}-{{short-title}}.md` `` line | one resolved ADR path per line, each as `Related ADR: design/adr/adr-NNN-short-title.md`. If no ADRs, the whole line becomes `Related ADR: none`. |
     | `{{Bullet the substantive changes, not every file touched.}}` block | the grouped bullets from step 8 |
     | `{{Paste test-runner output: total / passed / failed / skipped.}}` | left as a placeholder `<!-- TODO: paste test-runner output or delete the code fence and write "no code changes — docs only" -->` |
     | `{{Steps a reviewer should run to convince themselves the change works.}}` | `<!-- TODO: list verification steps, or write "none needed" -->` |
@@ -289,8 +289,8 @@ noted.
     ```
     Pass-through flags are the `--label`, `--milestone`, `--reviewer`,
     `--assignee`, `--draft` values the user provided at invocation.
-15. **Update `Design/state.md` if present.** Per
-    [ADR-035](../../Design/adr/adr-035-state-md-session-continuity.md),
+15. **Update `design/state.md` if present.** Per
+    [ADR-035](../../design/adr/adr-035-state-md-session-continuity.md),
     close out the issue in the state file:
     - prepend a one-line entry to the `state:recent` zone of the
       form `#<PR> — ADR-NNN — <commit-summary first sentence>`
@@ -303,7 +303,7 @@ noted.
       pointing at the just-opened PR, e.g. `"Review and merge #<PR>;
       then pick the next issue from the queue."`.
     Marker fences bound each zone; rewrite only the bytes between
-    the fences. If `Design/state.md` is absent, skip silently. If
+    the fences. If `design/state.md` is absent, skip silently. If
     marker fences are broken, do not rewrite; surface the broken
     zone in the final report and suggest `/pause`.
 16. **Report.** Print the PR URL returned by `gh`, plus a one-line
@@ -338,18 +338,18 @@ then commit subjects, then the most recent prompt file.
 Parse tokens with the regex `ADR-0*(\d+)` case-insensitive. Preserve
 first-seen order, deduplicate.
 
-For each unique `NNN`, glob `Design/adr/adr-0*<NNN>-*.md`. If exactly
+For each unique `NNN`, glob `design/adr/adr-0*<NNN>-*.md`. If exactly
 one file matches, use it. If multiple match (should never happen,
 ADR numbers are unique), use the shortest filename. If none match,
 keep the `ADR-NNN` token in the body and append
-`<!-- TODO: ADR file not found in Design/adr/ -->`.
+`<!-- TODO: ADR file not found in design/adr/ -->`.
 
 If multiple ADRs are found, emit one `Related ADR:` line each, in the
 order they were discovered:
 
 ```
-Related ADR: Design/adr/adr-015-pr-review-packager-skill.md
-Related ADR: Design/adr/adr-005-template-architecture.md
+Related ADR: design/adr/adr-015-pr-review-packager-skill.md
+Related ADR: design/adr/adr-005-template-architecture.md
 ```
 
 If zero ADRs are found anywhere, emit the single line
@@ -437,10 +437,10 @@ accept one).
 - [ ] Every placeholder in the rendered body is either filled or
       explicitly marked with a `<!-- TODO: ... -->` comment.
 - [ ] Every referenced ADR either resolves to a file in
-      `Design/adr/` or is explicitly marked TODO.
+      `design/adr/` or is explicitly marked TODO.
 - [ ] **ADR index is in sync.** Run `bin/sync-adr-index --check`. If
       it reports drift (exit 1), the branch added or modified an
-      ADR without updating `Design/adr/README.md`. Run
+      ADR without updating `design/adr/README.md`. Run
       `bin/sync-adr-index`, commit the index update on the same
       branch, and re-show before opening the PR. (ADR-023.)
 - [ ] If `notes/eval-issue-NNN.md` exists and contains a

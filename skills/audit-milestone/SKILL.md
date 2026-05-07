@@ -13,11 +13,11 @@ pass/fail report with a concrete gap list. Three checks:
 2. **ADRs:** every ADR token referenced in milestone issues has at
    least one merged PR that mentions the same token.
 3. **Phases (when applicable):** every `## Phase` block in
-   `Design/build-out-plan.md` whose milestone matches has its exit
+   `design/build-out-plan.md` whose milestone matches has its exit
    criterion satisfied (PRs merged, tag cut, status row updated).
 
 This skill implements the audit half of
-[ADR-037](../../Design/adr/adr-037-milestone-lifecycle.md). It is
+[ADR-037](../../design/adr/adr-037-milestone-lifecycle.md). It is
 **advisory** — the report goes to the user; `/complete-milestone`
 chains it but does not gate on the result.
 
@@ -40,7 +40,7 @@ retrospective summary, that is `/milestone-summary`. This skill
   working tree. Read-only against GitHub and the local repo.
 - Does not block `/complete-milestone`. ADR-037 is explicit:
   audit warns, the user decides.
-- Does not invent phase exit criteria. If `Design/build-out-plan.md`
+- Does not invent phase exit criteria. If `design/build-out-plan.md`
   is absent, the phase check degrades to skipped (kit-only mode).
 - Does not infer a milestone from "current work." The argument is
   required.
@@ -92,14 +92,14 @@ otherwise noted.
 4. **Extract ADR tokens.** From every issue's title and body, grep
    `ADR-[0-9]+` (case-insensitive, deduplicated). For each unique
    token:
-   - Confirm `Design/adr/adr-NNN-*.md` exists. If the file is
+   - Confirm `design/adr/adr-NNN-*.md` exists. If the file is
      missing, record a *referenced-but-missing* gap.
    - Confirm at least one merged PR mentions the token in title or
      body: `gh pr list --search "ADR-NNN" --state merged --limit 5 --json number,title`.
      If no merged PR is found, record an *ADR-without-merged-PR*
      gap.
 5. **Check phase status (optional).** If
-   `Design/build-out-plan.md` exists:
+   `design/build-out-plan.md` exists:
    - Find any `## Phase N: <name>` block whose body or
      `**Milestone:**` field references the milestone (by title or
      number).
@@ -107,7 +107,7 @@ otherwise noted.
      and check the `**Status:**` row. A status of
      `released v<X.Y.Z>` (per `/release --milestone-phase`) is the
      only state that passes; `planned` or `in-progress` is a gap.
-   If `Design/build-out-plan.md` is absent, skip this check and
+   If `design/build-out-plan.md` is absent, skip this check and
    note it in the report (kit-only mode).
 6. **Triage results.**
    - 0 gaps across all three checks → pass.
@@ -122,10 +122,10 @@ Use these fixed phrases so the report is parseable:
 | Category | Fix hint |
 |---|---|
 | Open issue in milestone | *"Issue #NN still open — close it, merge its PR, or move it to a later milestone."* |
-| ADR referenced but missing | *"ADR-NNN referenced in issue #NN but `Design/adr/adr-NNN-*.md` not found. Add the ADR or correct the reference."* |
+| ADR referenced but missing | *"ADR-NNN referenced in issue #NN but `design/adr/adr-NNN-*.md` not found. Add the ADR or correct the reference."* |
 | ADR without merged PR | *"ADR-NNN referenced but no merged PR mentions it. Confirm the implementation PR was merged with `(ADR-NNN, #NN)` in its title or body."* |
-| Phase still in-progress | *"Phase N (<name>) status is `<status>` in `Design/build-out-plan.md`. Run `/release --milestone-phase=N` to mark it `released vX.Y.Z`, or update the row manually."* |
-| Phase missing exit criterion | *"Phase N (<name>) has no `**Exit criteria:**` line in `Design/build-out-plan.md`. Add one before auditing."* |
+| Phase still in-progress | *"Phase N (<name>) status is `<status>` in `design/build-out-plan.md`. Run `/release --milestone-phase=N` to mark it `released vX.Y.Z`, or update the row manually."* |
+| Phase missing exit criterion | *"Phase N (<name>) has no `**Exit criteria:**` line in `design/build-out-plan.md`. Add one before auditing."* |
 
 ## Edge cases
 
@@ -136,10 +136,10 @@ Use these fixed phrases so the report is parseable:
   do not error.
 - **`gh` rate-limited.** Surface the rate-limit notice verbatim
   and stop. Re-run once the limit resets.
-- **`Design/adr/` directory absent.** Skip the ADR-file existence
+- **`design/adr/` directory absent.** Skip the ADR-file existence
   check (record a one-line note); still run the merged-PR check
   against `gh pr list --search "ADR-NNN"`.
-- **`Design/build-out-plan.md` absent.** Skip the phase check;
+- **`design/build-out-plan.md` absent.** Skip the phase check;
   record `phases: skipped (no build-out-plan.md)` in the count
   summary.
 - **Milestone already closed.** The skill still runs — useful for
@@ -169,7 +169,7 @@ Use these fixed phrases so the report is parseable:
   none).
 - [ ] Every unique ADR token from issue bodies was checked for both
   file presence and merged-PR linkage.
-- [ ] If `Design/build-out-plan.md` was present, the phase check
+- [ ] If `design/build-out-plan.md` was present, the phase check
   ran; if absent, the report says so explicitly.
 - [ ] The pass/fail decision matches the gap count: 0 → pass,
   ≥1 → fail.

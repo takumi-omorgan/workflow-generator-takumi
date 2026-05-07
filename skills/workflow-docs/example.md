@@ -1,7 +1,7 @@
 # workflow-docs — worked example
 
 A single run against the **Pace Drift** target project after `prd-to-mvp`
-has produced `Design/mvp.md` and `adr-writer` has produced two ADRs.
+has produced `design/mvp.md` and `adr-writer` has produced two ADRs.
 This example shows (1) a first run from a clean repo, (2) section
 omission when a source is missing, and (3) a re-run that preserves a
 manual edit outside markers.
@@ -13,7 +13,7 @@ manual edit outside markers.
 ```
 pace-drift/
 ├── CLAUDE.md
-├── Design/
+├── design/
 │   ├── adr/
 │   │   ├── adr-001-gpx-parsing-location.md    (accepted)
 │   │   └── adr-002-test-framework.md          (accepted)
@@ -22,13 +22,13 @@ pace-drift/
 └── .claude/skills/workflow-docs/SKILL.md
 ```
 
-No `Design/prd.md` (the user went straight from a rough idea through
-`idea-to-prd` → `prd-normalizer`, producing `Design/prd-normalized.md`
+No `design/prd.md` (the user went straight from a rough idea through
+`idea-to-prd` → `prd-normalizer`, producing `design/prd-normalized.md`
 which was then consumed by `prd-to-mvp`). No `README.md` yet.
 
 Relevant snippets the skill will read:
 
-**`Design/mvp.md`** (relevant lines only):
+**`design/mvp.md`** (relevant lines only):
 
 ```markdown
 # Pace Drift — MVP
@@ -103,8 +103,8 @@ User: /workflow-docs
 The skill:
 
 1. Confirms `.git/` exists.
-2. Reads `Design/mvp.md`, `Design/adr/adr-001-*.md`, `Design/adr/adr-002-*.md`,
-   and `CLAUDE.md`. No `Design/prd.md` → that field stays empty but MVP
+2. Reads `design/mvp.md`, `design/adr/adr-001-*.md`, `design/adr/adr-002-*.md`,
+   and `CLAUDE.md`. No `design/prd.md` → that field stays empty but MVP
    covers the same ground.
 3. Builds the context dict:
    - `PROJECT_NAME = "Pace Drift"`
@@ -125,7 +125,7 @@ The skill:
    then asks:
    > Write these two files?
    > - README.md (new, 50 lines)
-   > - Design/ai-summary.md (new, 38 lines)
+   > - design/ai-summary.md (new, 38 lines)
    > (yes / edit / cancel)
 6. User replies `yes`.
 7. Skill writes both files and reports paths.
@@ -189,20 +189,20 @@ pnpm test
 - ADR-002: Use Vitest as the test framework.
 - ADR-001: Parse GPX files in the browser, not on a server.
 
-See [`Design/adr/`](Design/adr/) for the full list.
+See [`design/adr/`](design/adr/) for the full list.
 <!-- workflow-docs:end:key-decisions -->
 
 <!-- workflow-docs:start:more -->
 ## More
 
 - [`CLAUDE.md`](CLAUDE.md) — project rules for Claude Code
-- [`Design/mvp.md`](Design/mvp.md) — MVP statement
-- [`Design/ai-summary.md`](Design/ai-summary.md) — AI-readable project summary
-- [`Design/adr/`](Design/adr/) — architecture decisions
+- [`design/mvp.md`](design/mvp.md) — MVP statement
+- [`design/ai-summary.md`](design/ai-summary.md) — AI-readable project summary
+- [`design/adr/`](design/adr/) — architecture decisions
 <!-- workflow-docs:end:more -->
 ```
 
-Generated `Design/ai-summary.md` (abridged — the same marker pattern
+Generated `design/ai-summary.md` (abridged — the same marker pattern
 wraps each section; `extension-points` is absent because it had no
 source):
 
@@ -290,7 +290,7 @@ The skill:
      - ADR-002: Use Vitest as the test framework.
      - ADR-001: Parse GPX files in the browser, not on a server.
 
-     See [`Design/adr/`](Design/adr/) for the full list.
+     See [`design/adr/`](design/adr/) for the full list.
      <!-- workflow-docs:end:key-decisions -->
    ```
 4. Notes the manual `### Troubleshooting` section is outside markers
@@ -301,7 +301,7 @@ The skill:
 ## 4. Section omission — a sparse target project
 
 If the user runs `/workflow-docs` before `prd-to-mvp` (so there is a
-`CLAUDE.md` and two ADRs but no `Design/mvp.md` and no PRD), the skill
+`CLAUDE.md` and two ADRs but no `design/mvp.md` and no PRD), the skill
 emits only:
 
 `README.md`:
@@ -330,16 +330,16 @@ Active milestone: `<from CLAUDE.md>`.
 - ADR-002: ...
 - ADR-001: ...
 
-See [`Design/adr/`](Design/adr/) for the full list.
+See [`design/adr/`](design/adr/) for the full list.
 <!-- workflow-docs:end:key-decisions -->
 
 <!-- workflow-docs:start:more -->
 ## More
 
 - [`CLAUDE.md`](CLAUDE.md) — project rules for Claude Code
-- [`Design/mvp.md`](Design/mvp.md) — MVP statement
-- [`Design/ai-summary.md`](Design/ai-summary.md) — AI-readable project summary
-- [`Design/adr/`](Design/adr/) — architecture decisions
+- [`design/mvp.md`](design/mvp.md) — MVP statement
+- [`design/ai-summary.md`](design/ai-summary.md) — AI-readable project summary
+- [`design/adr/`](design/adr/) — architecture decisions
 <!-- workflow-docs:end:more -->
 ```
 
@@ -370,5 +370,5 @@ The skill reports back:
 
 > Wrote 2 files:
 > - /Users/.../pace-drift/README.md (new, 50 lines)
-> - /Users/.../pace-drift/Design/ai-summary.md (new, 38 lines)
-> Sections omitted: Design/ai-summary.md#extension-points (no source data).
+> - /Users/.../pace-drift/design/ai-summary.md (new, 38 lines)
+> Sections omitted: design/ai-summary.md#extension-points (no source data).

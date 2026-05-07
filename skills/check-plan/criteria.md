@@ -38,7 +38,7 @@ The two checklists below are version-locked to two upstream files:
 
 | Checklist | Validates | Locked to |
 |---|---|---|
-| ADR criteria | `Design/adr/adr-NNN-*.md` | `templates/adr-template.md` |
+| ADR criteria | `design/adr/adr-NNN-*.md` | `templates/adr-template.md` |
 | Prompt criteria | `prompts/issue-NNN-*.md` | `prompts/_template.md` |
 
 When either upstream file changes, audit the matching checklist and
@@ -59,7 +59,7 @@ cons; decision names one of the listed options."
 | `ADR-C2` | deterministic | `## Options considered` contains at least two `### Option ` sub-headings. | Add a second option or remove the Options-considered section if the decision is genuinely uncontested (rare; ADRs without alternatives usually mask undisclosed trade-offs). |
 | `ADR-C3` | deterministic | Every `### Option ...` block has both a `Pros:` line and a `Cons:` line (matching the template's `- Pros:` / `- Cons:` shape). | For each option missing one, add the line and at least one bullet. The template's "Option A: …" block is the reference shape. |
 | `ADR-C4` | deterministic | The `## Decision` body names one of the option labels declared in `## Options considered` (e.g. "Adopt **Option B**" matches `### Option B:`). | Either name an option explicitly in the Decision, or rename the chosen option to match. |
-| `ADR-C5` | warning | Every `ADR-NNN` token in the body resolves to a file in `Design/adr/`. | Listed unresolved IDs; either fix the token (typo) or create the missing ADR. Warning only — sometimes ADRs reference ones not yet drafted. |
+| `ADR-C5` | warning | Every `ADR-NNN` token in the body resolves to a file in `design/adr/`. | Listed unresolved IDs; either fix the token (typo) or create the missing ADR. Warning only — sometimes ADRs reference ones not yet drafted. |
 | `ADR-C6` | warning | The Decision does not textually contradict an accepted ADR (best-effort substring check against accepted-ADR Decision sections). | Listed candidate-conflict ADRs. The user is the final judge — if the contradiction is intentional, this ADR should declare itself a *supersedes* of the older one. |
 
 ## Prompt criteria
@@ -72,9 +72,9 @@ no ambiguous TBD placeholders."
 | ID | Determinism | What to check | Fix hint on fail |
 |---|---|---|---|
 | `PROMPT-C1` | deterministic | The `Acceptance criteria` section is present and contains at least one bullet. | Add an Acceptance criteria section listing observable end-state outcomes (not implementation tasks). The template's example is the reference shape. |
-| `PROMPT-C2` | deterministic | The `ADR:` section is present and either resolves to a file in `Design/adr/` (via `File:` line) or explicitly states `ADR: none` with a reason. | Either link the governing ADR, or replace the section with `ADR: none — <reason>` per the template's HTML-comment guidance. |
+| `PROMPT-C2` | deterministic | The `ADR:` section is present and either resolves to a file in `design/adr/` (via `File:` line) or explicitly states `ADR: none` with a reason. | Either link the governing ADR, or replace the section with `ADR: none — <reason>` per the template's HTML-comment guidance. |
 | `PROMPT-C3` | deterministic | No remaining `{{...}}` template placeholders. No unresolved `<!-- TODO: fill in -->` markers. | List the unfilled slots with line numbers; fill or explicitly delete the line if the slot is irrelevant to this issue. |
-| `PROMPT-C4` | warning | When `Design/build-out-plan.md` exists with `## Phase N` blocks, the prompt's stated scope fits within one of those phases. When the build-out-plan is absent or single-phase, this check is silently skipped (not warned). | Listed phase candidates the scope spans. Either narrow the scope to one phase, or split into multiple issues. |
+| `PROMPT-C4` | warning | When `design/build-out-plan.md` exists with `## Phase N` blocks, the prompt's stated scope fits within one of those phases. When the build-out-plan is absent or single-phase, this check is silently skipped (not warned). | Listed phase candidates the scope spans. Either narrow the scope to one phase, or split into multiple issues. |
 | `PROMPT-C5` | warning | Heuristic single-PR scope: combined `Requirements` + `Scope and constraints` body fits a soft cap (≤ ~25 bullets total, ≤ ~80 lines). Exceeds → warning. | Either split the issue, or accept the warning if the work is genuinely cohesive (e.g. a single skill add with many small artefacts, like ADR-035's #44). |
 | `PROMPT-C6` | deterministic | All required sections from `prompts/_template.md` are present: Context, ADR, GitHub Issue, Goal, Why it matters, Requirements, Acceptance criteria, Scope and constraints, Evaluation & testing requirements, Instructions for you. | Add the missing sections. Re-run `/prepare-issue` if the prompt was hand-authored and drifted from the template. |
 

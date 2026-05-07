@@ -11,7 +11,7 @@ generate release notes via the `/changelog` skill, create an annotated
 git tag, push it, and publish a GitHub Release. Every mutating step is
 gated behind a single explicit approval.
 
-This skill implements [ADR-017](../../Design/adr/adr-017-release-skill.md).
+This skill implements [ADR-017](../../design/adr/adr-017-release-skill.md).
 
 ## When to use this skill
 
@@ -78,7 +78,7 @@ Flags:
   Symmetric to `--force-product-shape`. Mutually exclusive with it.
 - `--milestone-phase=N` — optional. If set, after a successful release
   the skill updates the matching phase row in
-  `Design/build-out-plan.md` from `in-progress` (or `planned`) to
+  `design/build-out-plan.md` from `in-progress` (or `planned`) to
   `released <tag>`. Kept minimal; if the file or phase row is not
   found, the skill reports and continues.
 
@@ -88,7 +88,7 @@ If neither `--version` nor `--bump` is supplied, the skill computes a
 ## Default release boundary (per ADR-032)
 
 The default release unit is **one phase**. When
-`Design/build-out-plan.md` has multiple `### Phase N: <name>` blocks
+`design/build-out-plan.md` has multiple `### Phase N: <name>` blocks
 and `--milestone-phase` was not passed explicitly, infer the target
 phase from:
 
@@ -118,12 +118,12 @@ since the last tag (or since the first commit, if no tag exists):
    - A commit message or PR body contains `BREAKING CHANGE` / the PR
      carries a `breaking` label.
    - A previously `accepted` ADR has been `superseded` in this range
-     (detect by scanning `Design/adr/*.md` diffs: a status change from
+     (detect by scanning `design/adr/*.md` diffs: a status change from
      `accepted` to `superseded` or the addition of a `Supersedes:`
      field in a new ADR).
 2. **minor** if:
    - One or more new ADRs have been added in the range (new file in
-     `Design/adr/`), or
+     `design/adr/`), or
    - Any commit begins with `feat(` or uses the `add` verb on a
      user-facing area.
 3. **patch** otherwise (only `fix`, `docs`, `chore`, `refactor`
@@ -147,7 +147,7 @@ Before anything else, verify:
   `skills/changelog/` when running in the kit repo). Abort if missing
   with: *"/release requires the /changelog skill. Install it first
   (ADR-016, Issue #18)."*
-- **ADR index is in sync.** If `Design/adr/` exists, run
+- **ADR index is in sync.** If `design/adr/` exists, run
   `bin/sync-adr-index --check` (or `.claude/bin/sync-adr-index --check`
   in target projects). Refuse if it reports drift (exit 1) — the
   release should not capture a stale index. The user must run
@@ -158,14 +158,14 @@ attempt to fix the environment.
 
 ## Project-shape detection
 
-Per [ADR-042](../../Design/adr/adr-042-project-shape-detection-in-release.md).
+Per [ADR-042](../../design/adr/adr-042-project-shape-detection-in-release.md).
 After Prerequisites check passes, scan the project for non-product
 indicators and classify the release as either *product-shape* (the
 default) or *workflow-shape*. The classification gates the framing of
 the release-body content.
 
 The kit applies to any structured project — software or otherwise (per
-[ADR-028](../../Design/adr/adr-028-workflow-agnostic-framing.md)). On
+[ADR-028](../../design/adr/adr-028-workflow-agnostic-framing.md)). On
 non-product projects (research projects, books, curricula, content
 projects, design system docs, internal-policy documents), defaulting
 to product-shape framing — *"first tagged release of …"*, semver-shaped
@@ -178,13 +178,13 @@ release surface to the project's actual shape.
 `/release` scans for the following four indicators, in any order. Each
 satisfied signal contributes to the threshold count.
 
-1. **PRD language signal.** `Design/prd.md` or
-   `Design/prd-normalized.md` contains any of *"not [shipping|building]
+1. **PRD language signal.** `design/prd.md` or
+   `design/prd-normalized.md` contains any of *"not [shipping|building]
    a product"*, *"workflow"*, *"folder of markdown"*, or equivalent
    language in the project's problem statement or success criteria.
    Match is substring, case-insensitive, scanned over the whole PRD
    body.
-2. **Build-strategy signal.** `Design/build-out-plan.md` "Build
+2. **Build-strategy signal.** `design/build-out-plan.md` "Build
    strategy" section (or equivalent heading) contains *"There is no
    compile / build / deploy step"* or equivalent. Match is substring,
    case-insensitive.
@@ -226,7 +226,7 @@ After scanning, `/release` records one of two values:
 The `shape` value is presented to the user in the release plan, so
 the classification is visible before the approval gate.
 
-If `Design/prd.md` / `Design/prd-normalized.md` / `Design/build-out-plan.md`
+If `design/prd.md` / `design/prd-normalized.md` / `design/build-out-plan.md`
 are missing (e.g. on a fresh project that hasn't run `/idea-to-prd`
 or `/prd-to-mvp` yet), those signals score zero — they neither fire
 nor block. Only the package-manifest signal can fire on a project
@@ -281,7 +281,7 @@ mutation. The user sees the full plan and types `yes` exactly once to
 execute every step.
 
 1. **Run prerequisites check.** Stop on any failure.
-2. **Run project-shape detection** (per [ADR-042](../../Design/adr/adr-042-project-shape-detection-in-release.md)
+2. **Run project-shape detection** (per [ADR-042](../../design/adr/adr-042-project-shape-detection-in-release.md)
    — see "Project-shape detection" section above). Score the four
    signals; record `shape = product` (default) or `shape = workflow`
    (when ≥2 signals fire). Apply `--force-product-shape` or
@@ -393,7 +393,7 @@ if [ -f bin/bootstrap-workflow-kit ]; then
 fi
 
 # 6. Optional: update build-out plan phase status.
-# Only if --milestone-phase=N was passed and Design/build-out-plan.md exists.
+# Only if --milestone-phase=N was passed and design/build-out-plan.md exists.
 ```
 
 Then:
@@ -435,7 +435,7 @@ With `--dry-run`:
 | Project-shape detection scores 0 signals | `shape = product`. Standard product-release framing. No clarifier banner. |
 | Project-shape detection scores ≥2 signals but operator passed `--force-product-shape` | Use `shape = product`. The plan reports the override as `product (overridden from workflow)` so the user sees auto-detection was bypassed. |
 | Project-shape detection scores 0 or 1 signals but operator passed `--force-workflow-shape` | Use `shape = workflow`. The plan reports the override as `workflow (overridden from product)`. The clarifier banner is emitted. |
-| `Design/prd.md` and `Design/build-out-plan.md` both missing | Three of the four signals score zero (PRD-language, build-strategy, success-criteria-shape). Only the package-manifest signal can fire. Threshold not met → `shape = product`. The user can pass `--force-workflow-shape` if the project genuinely is non-product but lacks the kit's PRD/build-out artefacts. |
+| `design/prd.md` and `design/build-out-plan.md` both missing | Three of the four signals score zero (PRD-language, build-strategy, success-criteria-shape). Only the package-manifest signal can fire. Threshold not met → `shape = product`. The user can pass `--force-workflow-shape` if the project genuinely is non-product but lacks the kit's PRD/build-out artefacts. |
 
 ## Invariants
 
@@ -444,7 +444,7 @@ With `--dry-run`:
 - Never mutate without the literal `yes` approval.
 - Never mutate in `--dry-run`.
 - Never touch files outside the working tree except the GitHub Release
-  (and the optional `Design/build-out-plan.md` update).
+  (and the optional `design/build-out-plan.md` update).
 
 ## Self-check before presenting the plan
 

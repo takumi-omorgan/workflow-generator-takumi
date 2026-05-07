@@ -8,7 +8,7 @@ are longer.
 
 ## 1. Inputs
 
-### `Design/prd-normalized.md` (excerpt)
+### `design/prd-normalized.md` (excerpt)
 
 A team-collaboration tool for distributed product squads. Eleven
 canonical fields. Core capabilities: realtime doc editing, threaded
@@ -16,7 +16,7 @@ comments, shared task lists, integrations (Slack, GitHub, Linear).
 Constraints: web + desktop, multi-tenant, must integrate with
 existing SSO. Goal: ship a usable v1 in three months.
 
-### `Design/mvp.md` (excerpt)
+### `design/mvp.md` (excerpt)
 
 In scope: realtime doc editing, threaded comments, shared task
 lists, Slack integration only. Out of scope: GitHub / Linear
@@ -24,7 +24,7 @@ integrations, mobile, offline mode. Three principles: realtime is
 non-negotiable; SSO from day one; ship one integration deeply, not
 three shallowly.
 
-### `Design/build-out-plan.md` (excerpt)
+### `design/build-out-plan.md` (excerpt)
 
 Three phases. Phase 1 — Foundation (auth, SSO, doc storage).
 Phase 2 — Editor (realtime sync, comments, task lists).
@@ -44,14 +44,14 @@ Batched, one turn (≤ 5 questions):
 User answers: CRDT decided; Okta + Google; depth limit 1; assignee
 optional; bidirectional.
 
-## 3. Output — `Design/planning.md` (excerpt)
+## 3. Output — `design/planning.md` (excerpt)
 
 ```markdown
 # Squadly — Planning
 
 **Last updated:** 2026-04-30
-**Source PRD:** Design/prd-normalized.md
-**Source MVP:** Design/mvp.md
+**Source PRD:** design/prd-normalized.md
+**Source MVP:** design/mvp.md
 
 ## Objective
 

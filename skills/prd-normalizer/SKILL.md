@@ -6,7 +6,7 @@ permission-category: 1  # substitutable — local doc rewrite, per workflow-guid
 
 # prd-normalizer
 
-Produce a canonical **Normalized PRD** at `Design/prd-normalized.md`
+Produce a canonical **Normalized PRD** at `design/prd-normalized.md`
 from either a standard-shaped PRD or the user's custom planning notes.
 Downstream skills (`prd-to-mvp`, `adr-writer`) read this artifact only,
 so they do not have to branch on input shape.
@@ -15,14 +15,14 @@ so they do not have to branch on input shape.
 
 Use when the user has *any* PRD-like input:
 
-- the `Design/prd.md` produced by `idea-to-prd` (Issue #5),
+- the `design/prd.md` produced by `idea-to-prd` (Issue #5),
 - a user-written PRD in a conventional shape,
 - a custom document — notes, a product brief, a spec, mixed prose and
   bullets.
 
 If the user does not have any input at all, run `idea-to-prd` first.
 This skill exists to cover the "standard PRD" and "custom PRD" paths
-from [ADR-003](../../Design/adr/adr-003-prd-intake-model.md).
+from [ADR-003](../../design/adr/adr-003-prd-intake-model.md).
 
 ## What this skill does not do
 
@@ -40,7 +40,7 @@ from [ADR-003](../../Design/adr/adr-003-prd-intake-model.md).
 
 ## Output
 
-- **File:** `Design/prd-normalized.md` in the target project.
+- **File:** `design/prd-normalized.md` in the target project.
 - **Shape:** the 11 fields below. Every field is always present; fields
   with no source content and no user answer are marked `[TBD]`.
 
@@ -122,7 +122,7 @@ stop and tell the user — do not write the file.
 
 ## Self-check before finishing
 
-Do not write `Design/prd-normalized.md` until all six hold:
+Do not write `design/prd-normalized.md` until all six hold:
 
 - [ ] Product name is present and not `[TBD]`.
 - [ ] Problem is present and not `[TBD]`.
@@ -134,7 +134,7 @@ Do not write `Design/prd-normalized.md` until all six hold:
 
 ## Handoff to the next skills
 
-Both `prd-to-mvp` and `adr-writer` read `Design/prd-normalized.md` only.
+Both `prd-to-mvp` and `adr-writer` read `design/prd-normalized.md` only.
 Neither re-parses the user's raw input. `adr-writer` pays particular
 attention to "constraints and preferences".
 

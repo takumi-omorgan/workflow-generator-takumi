@@ -1,12 +1,12 @@
 ---
 name: pause
-description: Refresh Design/state.md to current truth (phase, in-flight issue, recent work, blockers, continue-here) and optionally write a richer notes/handoff-YYYY-MM-DD.md for context-window-exhausting session handoffs.
-permission-category: 1  # substitutable — refreshes local Design/state.md, per workflow-guide §7
+description: Refresh design/state.md to current truth (phase, in-flight issue, recent work, blockers, continue-here) and optionally write a richer notes/handoff-YYYY-MM-DD.md for context-window-exhausting session handoffs.
+permission-category: 1  # substitutable — refreshes local design/state.md, per workflow-guide §7
 ---
 
 # pause
 
-Refresh `Design/state.md` so it accurately reflects right now —
+Refresh `design/state.md` so it accurately reflects right now —
 phase, in-flight issue, recent work, blockers, "continue here"
 pointer — and (optionally) write a richer
 `notes/handoff-YYYY-MM-DD.md` that a fresh Claude Code session can
@@ -20,7 +20,7 @@ flow — is owned by `prepare-issue`, `claude-issue-executor`, and
 `pr-review-packager`; `/pause` is for the *manual* refresh moments
 those skills do not cover.
 
-See [ADR-035](../../Design/adr/adr-035-state-md-session-continuity.md).
+See [ADR-035](../../design/adr/adr-035-state-md-session-continuity.md).
 
 ## When to use this skill
 
@@ -33,7 +33,7 @@ See [ADR-035](../../Design/adr/adr-035-state-md-session-continuity.md).
   prepared prompt (e.g. hit a blocker, switched to a sibling issue),
   a manual refresh records what actually happened.
 - **First adoption.** The first time a project adopts ADR-035, run
-  `/pause` to seed `Design/state.md` from the current `gh` and `git
+  `/pause` to seed `design/state.md` from the current `gh` and `git
   log` state.
 
 If the session is short and the next step is in the working tree or
@@ -43,21 +43,21 @@ sufficient.
 
 ## What this skill does not do
 
-- Does not commit `Design/state.md` automatically. The skill writes
+- Does not commit `design/state.md` automatically. The skill writes
   to the working tree; the user decides whether to commit it
   alongside session work or separately.
 - Does not push, open PRs, or call `gh pr` / `gh issue` mutators.
   Read-only against GitHub.
 - Does not rewrite earlier `notes/handoff-*.md` files. Each handoff
   is its own dated file; old ones stay until the user prunes them.
-- Does not create `Design/state.md` from nothing without confirming
+- Does not create `design/state.md` from nothing without confirming
   the project intends to adopt ADR-035. On a project where the file
   is genuinely absent, the skill asks before seeding.
 
 ## Inputs
 
 - **Required:** a git repo whose `origin` points at the GitHub repo.
-- **Optional:** existing `Design/state.md`. If present, only the
+- **Optional:** existing `design/state.md`. If present, only the
   zones whose facts changed are rewritten; other zones (and any
   out-of-fence editorial commentary) are preserved.
 - **Optional:** the path or number of the prompt currently being
@@ -69,7 +69,7 @@ sufficient.
 
 ## Output
 
-- **`Design/state.md`** — refreshed in place. Marker fences
+- **`design/state.md`** — refreshed in place. Marker fences
   preserved; only the zones whose facts changed are rewritten.
 - **`notes/handoff-YYYY-MM-DD.md`** (with `--handoff` only) — a
   free-form richer handoff modelled on
@@ -82,12 +82,12 @@ sufficient.
 1. **Confirm the repo context.** `git rev-parse --show-toplevel` and
    `gh repo view --json nameWithOwner` to confirm we are in a kit
    target project. If either fails, stop and tell the user.
-2. **Detect or seed `Design/state.md`.** If absent, ask the user
+2. **Detect or seed `design/state.md`.** If absent, ask the user
    whether to seed from `templates/state-template.md`. On `no`,
    stop. On `yes`, copy the template and fill the `Last updated`
    header with today's date in `YYYY-MM-DD` form; leave zones empty
    for the next steps to populate.
-3. **Determine current phase.** If `Design/build-out-plan.md` exists
+3. **Determine current phase.** If `design/build-out-plan.md` exists
    and contains `## Phase` blocks (per ADR-032), pick the earliest
    unfinished phase. Otherwise write the literal `single`. Confirm
    with the user before overwriting an existing non-empty `phase`
@@ -113,7 +113,7 @@ sufficient.
 8. **Write the file.** Rewrite only the zones whose contents
    changed. Preserve marker fences; preserve out-of-fence content
    verbatim.
-9. **Line-cap check.** After writing, run `wc -l Design/state.md`.
+9. **Line-cap check.** After writing, run `wc -l design/state.md`.
    If the file exceeds 100 lines, show the user a one-line warning
    and suggest pruning the oldest `recent` entry. Do not auto-prune
    beyond the 5-entry rolling window.
@@ -133,15 +133,15 @@ sufficient.
 
 ## Edge cases
 
-- **`Design/state.md` exists but marker fences are broken.** Stop.
+- **`design/state.md` exists but marker fences are broken.** Stop.
   Tell the user which zone is malformed; do not silently rewrite.
-- **`Design/state.md` over the line cap before this run.** Warn but
+- **`design/state.md` over the line cap before this run.** Warn but
   do not refuse. The skill can still refresh zones; the warning
   guides manual pruning.
 - **No `gh` auth.** The recent-work refresh fails gracefully — the
   zone is left as-is with a one-line note appended ("recent-work
   refresh skipped: gh unavailable"). Other zones are still updated.
-- **Detached HEAD or working tree dirty for `Design/state.md`.**
+- **Detached HEAD or working tree dirty for `design/state.md`.**
   The skill writes to the working tree as usual; the user picks
   whether to stash, commit, or discard.
 - **Multiple open PRs by the user.** The recent-work refresh shows
@@ -167,7 +167,7 @@ sufficient.
 ## Handoff
 
 `/pause` is a leaf — the user reviews the diff (`git diff
-Design/state.md`) and decides whether to commit. The next session
+design/state.md`) and decides whether to commit. The next session
 runs `/resume` to read what was just written.
 
 If `/pause` was invoked because the context window is about to

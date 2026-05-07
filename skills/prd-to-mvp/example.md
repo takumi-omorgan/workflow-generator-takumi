@@ -1,12 +1,12 @@
 # prd-to-mvp — worked example
 
 Continues the Pace Drift scenario. Input is byte-for-byte the
-`Design/prd-normalized.md` shown in
+`design/prd-normalized.md` shown in
 [`prd-normalizer/examples.md`](../prd-normalizer/examples.md) (Example 1).
 
 ---
 
-## 1. Input — `Design/prd-normalized.md`
+## 1. Input — `design/prd-normalized.md`
 
 The Pace Drift normalized PRD: 11 fields covering problem, primary
 user (a solo runner analyzing races on a laptop), goal (single-race
@@ -35,7 +35,7 @@ User answers: weekend project; yes all four capabilities are in
 scope; pick single overall target pace for the first release
 (per-split as Phase 2 work); three phases is fine.
 
-## 3. Output — `Design/mvp.md`
+## 3. Output — `design/mvp.md`
 
 ```markdown
 # Pace Drift — MVP
@@ -133,13 +133,13 @@ This MVP statement is acceptable when it:
 - names a clear product and user — yes,
 - lists what is in and out of scope without ambiguity — yes,
 - and can drive the build-out plan, ADRs, and issue backlog without
-  further interpretation — yes (see Design/build-out-plan.md).
+  further interpretation — yes (see design/build-out-plan.md).
 
 Open items: target input format for the eventual per-split path is
 unresolved (Phase 2 decision).
 ```
 
-## 4. Output — `Design/build-out-plan.md`
+## 4. Output — `design/build-out-plan.md`
 
 ```markdown
 # Pace Drift — Build-Out Plan
@@ -148,7 +148,7 @@ unresolved (Phase 2 decision).
 
 ## Objective
 
-Ship the MVP of Pace Drift defined in Design/mvp.md: a static web app
+Ship the MVP of Pace Drift defined in design/mvp.md: a static web app
 that renders a drift chart and split table from one GPX file and one
 target pace. The plan covers everything from repo bootstrap to a
 locally-runnable first release.
@@ -164,8 +164,8 @@ locally-runnable first release.
 
 ## Scope
 
-- In scope: the five in-scope capabilities from Design/mvp.md.
-- Out of scope: every item in the "Out of scope" list of Design/mvp.md.
+- In scope: the five in-scope capabilities from design/mvp.md.
+- Out of scope: every item in the "Out of scope" list of design/mvp.md.
 - Assumptions: a TypeScript browser app is acceptable; user has a
   local toolchain (Node, browser); user has at least one real GPX
   file to test against.
@@ -191,7 +191,7 @@ pace-drift/
     main.ts        ← entry point
   test/            ← mirrors src/
   public/          ← index.html, assets
-  Design/          ← mvp.md, build-out-plan.md, adr/
+  design/          ← mvp.md, build-out-plan.md, adr/
   README.md
   CLAUDE.md
 ```
@@ -221,7 +221,7 @@ pace-drift/
 - **Goal:** confidence the MVP is correct on real race data.
 - **Deliverables:** dry-run on at least two real races; README; basic
   error messages for unparseable GPX.
-- **Exit criteria:** MVP success criteria from Design/mvp.md hold on
+- **Exit criteria:** MVP success criteria from design/mvp.md hold on
   two distinct GPX files.
 
 ## Milestone recommendation

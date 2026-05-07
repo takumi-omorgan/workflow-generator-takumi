@@ -1,19 +1,19 @@
 ---
 name: milestone-summary
-description: Generate Design/milestones/N-summary.md for a closed or near-closing milestone — what shipped, ADRs adopted, deferred work — from git log, the GitHub milestone, and accepted ADRs in the phase range.
-permission-category: 1  # substitutable — writes Design/milestones/N-summary.md locally; reads gh + git log non-mutating, per workflow-guide §7
+description: Generate design/milestones/N-summary.md for a closed or near-closing milestone — what shipped, ADRs adopted, deferred work — from git log, the GitHub milestone, and accepted ADRs in the phase range.
+permission-category: 1  # substitutable — writes design/milestones/N-summary.md locally; reads gh + git log non-mutating, per workflow-guide §7
 ---
 
 # milestone-summary
 
 Render a retrospective summary for a milestone into
-`Design/milestones/<N>-<slug>.md` using
+`design/milestones/<N>-<slug>.md` using
 [`templates/milestone-summary-template.md`](../../templates/milestone-summary-template.md).
 Sources: `git log` between phase-boundary tags, the GitHub milestone
 (via `gh`), and accepted ADRs in the milestone's date range.
 
 This skill implements the summary half of
-[ADR-037](../../Design/adr/adr-037-milestone-lifecycle.md). It is
+[ADR-037](../../design/adr/adr-037-milestone-lifecycle.md). It is
 **write-once-by-default** and refuses to overwrite an existing
 summary unless `--overwrite` is passed. The `lessons` zone is
 preserved verbatim across re-runs (the user authors it).
@@ -31,7 +31,7 @@ preserved verbatim across re-runs (the user authors it).
 If you only need release notes (a flat list of merged PRs grouped
 by commit prefix), that is `/changelog`. This skill is the broader
 retrospective: it pulls in ADRs, deferred work, and a lessons
-section, and writes a per-milestone artefact under `Design/`.
+section, and writes a per-milestone artefact under `design/`.
 
 ## What this skill does not do
 
@@ -41,7 +41,7 @@ section, and writes a per-milestone artefact under `Design/`.
   shipped users, the other is for the project team.
 - Does not invent lessons. The `lessons` zone is left as a TODO
   pointer for the user to author; subsequent runs preserve it.
-- Does not modify `Design/state.md`. That is owned by `/pause`,
+- Does not modify `design/state.md`. That is owned by `/pause`,
   `prepare-issue`, `claude-issue-executor`, `pr-review-packager`,
   and `/complete-milestone`.
 
@@ -55,14 +55,14 @@ section, and writes a per-milestone artefact under `Design/`.
 
 ## Output
 
-`Design/milestones/<N>-<slug>.md` — one file per milestone, where
+`design/milestones/<N>-<slug>.md` — one file per milestone, where
 `<N>` is the GitHub milestone number and `<slug>` is the
 kebab-cased title (lowercased, non-alphanumeric collapsed to `-`,
 truncated to ~30 chars at a `-` boundary).
 
 Examples:
-- Milestone `v-next` (#3) → `Design/milestones/3-v-next.md`
-- Milestone `Phase 2 — Ingest` (#5) → `Design/milestones/5-phase-2-ingest.md`
+- Milestone `v-next` (#3) → `design/milestones/3-v-next.md`
+- Milestone `Phase 2 — Ingest` (#5) → `design/milestones/5-phase-2-ingest.md`
 
 ## Invocation
 
@@ -95,7 +95,7 @@ Flags:
    then match by number or title. Capture `number`, `title`,
    `description`, `closed_at` (or `null`), `created_at`.
 4. **Determine the tag boundary.**
-   - If `Design/build-out-plan.md` exists and the matching
+   - If `design/build-out-plan.md` exists and the matching
      `## Phase` block has a `**Exit criteria:**` line that names
      a tag (e.g. `released v0.3.0`), use the previous phase's
      tag as the start and this phase's tag as the end.
@@ -116,7 +116,7 @@ Flags:
    Render each as `#NN — ADR-NNN — <one-line summary>` (omit
    `ADR-NNN —` if no ADR token in the title or body).
 6. **List ADRs accepted in the date range.** Glob
-   `Design/adr/adr-*.md` and filter by the `**Date:**` field in
+   `design/adr/adr-*.md` and filter by the `**Date:**` field in
    each file's frontmatter (or first 10 lines). Include only ADRs
    whose date is between the milestone's `created_at` and
    `closed_at` (inclusive). For each, extract the title and the
@@ -135,12 +135,12 @@ Flags:
    `{{MILESTONE_TITLE}}`, `{{MILESTONE_NUMBER}}`,
    `{{YYYY-MM-DD}}` (from `closed_at` or today's date if open).
 9. **Resolve the target path.**
-   `Design/milestones/<N>-<slug>.md`. Compute `<slug>` per the
+   `design/milestones/<N>-<slug>.md`. Compute `<slug>` per the
    "Output" section above.
 10. **Handle file existence.**
     - File absent → proceed.
     - File present and `--overwrite` not set → stop with
-      `"Summary already exists at Design/milestones/<...>.md.
+      `"Summary already exists at design/milestones/<...>.md.
       Pass --overwrite to regenerate (lessons zone is preserved
       regardless)."`
     - File present and `--overwrite` set → read the existing file,
@@ -150,10 +150,10 @@ Flags:
       into the new content before writing. Other zones are
       replaced fresh.
 11. **Show the diff in chat** as a fenced markdown block. Ask
-    explicitly: *"Write this to Design/milestones/<...>.md?
+    explicitly: *"Write this to design/milestones/<...>.md?
     (yes / edit / cancel)"*. Default no.
 12. **On `yes`, write the file.** Create
-    `Design/milestones/` if it does not exist. Report the
+    `design/milestones/` if it does not exist. Report the
     absolute path and a one-line summary of what was filled
     (PR count, ADR count, deferred count) plus a reminder to
     edit the `lessons` zone before committing.
@@ -169,7 +169,7 @@ Flags:
 - **Milestone has no closed_at** (still open) — proceed; use
   today's date in the header. The summary is "as of today";
   re-run with `--overwrite` after close to get the final version.
-- **`Design/build-out-plan.md` absent** — skip the phase-tag
+- **`design/build-out-plan.md` absent** — skip the phase-tag
   detection; rely on date-based tag inference.
 - **No tags at all** — use first commit and HEAD. Note in the
   overview that the project has not cut a release yet.
@@ -188,8 +188,8 @@ Flags:
 - The `lessons` zone is **never** overwritten. Even with
   `--overwrite`, the existing block is read and re-substituted.
 - Read-only against GitHub. No `gh` mutators.
-- Read-only against `Design/state.md`, `Design/adr/`, and
-  `Design/build-out-plan.md`. Only `Design/milestones/<N>-...md`
+- Read-only against `design/state.md`, `design/adr/`, and
+  `design/build-out-plan.md`. Only `design/milestones/<N>-...md`
   is written.
 - The marker fences in the template are preserved verbatim in the
   output — `/milestone-summary` can re-run and only the zones it
@@ -207,7 +207,7 @@ Flags:
   block (re-run with `--overwrite`).
 - [ ] The user explicitly confirmed the write (or `--dry-run`
   was set).
-- [ ] No `Design/state.md` write was attempted.
+- [ ] No `design/state.md` write was attempted.
 
 ## Handoff
 
@@ -216,7 +216,7 @@ Natural next steps after a successful write:
 
 - The user edits the `lessons` zone with their own retrospective.
 - `/complete-milestone <N>` closes the GitHub milestone and
-  archives `Design/state.md` — the summary file is the artefact
+  archives `design/state.md` — the summary file is the artefact
   that closing PR includes.
 - `/release` cuts the next tag if the milestone-to-release
   cadence is one-to-one.

@@ -8,7 +8,7 @@ fictional `acme-platform` project used in
 
 ## 1. Pre-existing state
 
-`Design/state.md` was last touched at the start of the session:
+`design/state.md` was last touched at the start of the session:
 
 ```markdown
 **Last updated:** 2026-04-29
@@ -39,7 +39,7 @@ near exhaustion.
 
 ### Step 3 — Phase
 
-`Design/build-out-plan.md` shows three phases; Phase 2 (Editor) is
+`design/build-out-plan.md` shows three phases; Phase 2 (Editor) is
 the earliest unfinished. The skill writes `Phase 2 — Editor` to the
 `phase` zone (no change from prior run).
 
@@ -54,7 +54,7 @@ issue `#44` and updates `Status` from `prepared` → `executing`.
 
 `gh pr list --state merged --limit 5 --json ...` returns:
 
-- #54 (2026-04-30) — `/clarify` skill producing `Design/decisions.md`
+- #54 (2026-04-30) — `/clarify` skill producing `design/decisions.md`
 - #53 (2026-04-30) — plan-mode rhythm in claude-issue-executor
 - #51 (2026-04-30) — ADR-039 plan-mode-for-significant-tasks
 - #50 (2026-04-30) — implementation phases (ADR-032)
@@ -82,7 +82,7 @@ User accepts.
 
 ### Step 9 — Line-cap check
 
-`wc -l Design/state.md` → 64 lines. Under cap. Silent.
+`wc -l design/state.md` → 64 lines. Under cap. Silent.
 
 ### Step 10 — `--handoff`
 
@@ -118,7 +118,7 @@ Plus a new file: `notes/handoff-2026-04-30.md` (~80 lines).
 ## 4. Report
 
 ```
-Wrote Design/state.md (4 zones changed: in-flight, recent, blockers, continue-here)
+Wrote design/state.md (4 zones changed: in-flight, recent, blockers, continue-here)
 Wrote notes/handoff-2026-04-30.md
 File is 64 lines (cap 100).
 ```

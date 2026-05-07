@@ -14,12 +14,12 @@ issue number, writes tests alongside code where the project supports them,
 and produces an evaluation summary at the end.
 
 This skill is the enforcement mechanism for the execution model decided
-in [ADR-006](../../Design/adr/adr-006-claude-code-execution-model.md) and
+in [ADR-006](../../design/adr/adr-006-claude-code-execution-model.md) and
 the orchestration contract decided in
-[ADR-014](../../Design/adr/adr-014-claude-issue-executor-skill.md). It
+[ADR-014](../../design/adr/adr-014-claude-issue-executor-skill.md). It
 is also the **producer** in the cross-skill design-question
 carry-forward chain decided in
-[ADR-040](../../Design/adr/adr-040-cross-skill-design-question-carry-forward.md)
+[ADR-040](../../design/adr/adr-040-cross-skill-design-question-carry-forward.md)
 — see [`docs/workflow-guide.md` §6](../../docs/workflow-guide.md#6-cross-skill-carry-forward-adr-040)
 for the canonical schema.
 
@@ -62,7 +62,7 @@ If no prompt file exists yet, stop and tell the user to run
   and, as a fallback, `notes/issue*-prompt.md`. Ask the user which to
   use. Do nothing else until they answer.
 
-### Auto-chain `prepare-issue` (per [ADR-038](../../Design/adr/adr-038-tighten-prompt-step.md))
+### Auto-chain `prepare-issue` (per [ADR-038](../../design/adr/adr-038-tighten-prompt-step.md))
 
 When the resolved issue has no `prompts/issue-NNN-*.md` on disk, the
 skill auto-invokes `/prepare-issue NNN` and proceeds. The prep step
@@ -110,7 +110,7 @@ the sections the rest of the skill depends on. Required sections, matched
 case-insensitively by heading or leading bold label:
 
 1. **Context** — what project and what this session is about.
-2. **ADR** — the governing ADR, e.g. `Design/adr/adr-NNN-...md`.
+2. **ADR** — the governing ADR, e.g. `design/adr/adr-NNN-...md`.
 3. **GitHub Issue** — title and number, e.g. `Number: #16`.
 4. **Goal** — what the issue should achieve.
 5. **Requirements** — the work to be done.
@@ -163,8 +163,8 @@ confirming the working tree is clean.
 - **Tests live in the same commit as the code they cover**, not in a
   separate "add tests" commit (see **Test-alongside**).
 - **ADR index sync.** Before any commit that includes a file under
-  `Design/adr/adr-*.md` (new, modified, or status-changed), run
-  `bin/sync-adr-index` and stage `Design/adr/README.md` alongside the
+  `design/adr/adr-*.md` (new, modified, or status-changed), run
+  `bin/sync-adr-index` and stage `design/adr/README.md` alongside the
   ADR files. Per ADR-023; keeps the index in sync with the
   filesystem on every commit that touches ADRs.
 
@@ -244,7 +244,7 @@ user has entered it, so both run together rather than competing.
 
 This section defines when the executor requests plan-mode entry and
 how it routes sessions of different sizes. The rules below implement
-[ADR-039](../../Design/adr/adr-039-plan-mode-for-significant-tasks.md)
+[ADR-039](../../design/adr/adr-039-plan-mode-for-significant-tasks.md)
 and instance the **category-2** rule of the kit-wide auto-mode
 permission contract — see
 [`docs/workflow-guide.md` §7](../../docs/workflow-guide.md#7-auto-mode-permission-contract-adr-041)
@@ -354,7 +354,7 @@ ADR-041).
 
 ## `--no-prompt` mode
 
-Per [ADR-038](../../Design/adr/adr-038-tighten-prompt-step.md), the
+Per [ADR-038](../../design/adr/adr-038-tighten-prompt-step.md), the
 executor accepts a `--no-prompt` flag that **skips prompt generation
 entirely** and runs from the issue body alone. The prompt artefact is
 not written. A one-line breadcrumb — `issue executed without prompt
@@ -406,14 +406,14 @@ the commit message.
 - **`/check-plan`** (ADR-034) does not run when `--no-prompt` is
   set, because there is no rendered prompt to check. The skip is
   noted in the evaluation summary alongside the breadcrumb.
-- **`Design/state.md`** updates (ADR-035) still happen. The
+- **`design/state.md`** updates (ADR-035) still happen. The
   `state:in-flight` zone records `Status: verified` (or `executing`
   mid-session) regardless of whether a prompt was generated.
 
 ## Session protocol — end to end
 
 1. **Resolve the prompt (auto-chain `prepare-issue` per
-   [ADR-038](../../Design/adr/adr-038-tighten-prompt-step.md)).**
+   [ADR-038](../../design/adr/adr-038-tighten-prompt-step.md)).**
    - If the argument is a *path*, treat as the prompt file directly.
    - If the argument is an *issue number*, resolve the prompt at
      `prompts/issue-NNN-*.md`. If absent, **auto-invoke
@@ -453,8 +453,8 @@ the commit message.
 10. **Verify.** Run the project's tests if any exist. Run any
     verification step called out in the prompt's "Evaluation & testing
     requirements" section.
-11. **Update `Design/state.md` if present.** Per
-    [ADR-035](../../Design/adr/adr-035-state-md-session-continuity.md),
+11. **Update `design/state.md` if present.** Per
+    [ADR-035](../../design/adr/adr-035-state-md-session-continuity.md),
     rewrite the `state:in-flight` zone: keep `Issue` and `Prompt`,
     set `Branch` to the current branch, set `Status: verified`. The
     `recent` zone is **not** touched here — it tracks merged PRs and
@@ -526,7 +526,7 @@ question was self-resolved by this issue's commits; (2) no
 upcoming filed-or-planned issue depends on the answer (capture in
 `notes/feature-ideas.md` instead); (3) the question is purely
 implementation tactics with no cross-issue coupling; (4) the
-answer is already in an ADR or `Design/decisions.md`.
+answer is already in an ADR or `design/decisions.md`.
 
 If borderline, **omit** the entry. False positives cost more than
 false negatives — see §6's rationale.
