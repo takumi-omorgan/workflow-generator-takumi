@@ -17,8 +17,8 @@ single
 
 - **Issue:** #89
 - **Prompt:** prompts/issue-089-legacy-prompt-cleanup.md
-- **Branch:** n/a
-- **Status:** prepared
+- **Branch:** legacy-prompt-cleanup
+- **Status:** verified
 
 <!-- state:in-flight:end -->
 
