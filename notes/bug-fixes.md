@@ -42,7 +42,7 @@ Ordered by severity (high → low) then capture date.
 
 ### `notes/` folder cleanup — promote templates out, refresh references
 
-**Status:** superseded — see `refactoring-ideas.md` → entry #8 "Finish the legacy `notes/issue-prompt.md` removal across the kit" (captured 2026-05-06)
+**Status:** resolved-#89 — placeholder-mapping salvage collapsed into `prompts/_template.md` header; standalone `docs/issue-prompt-guide.md` deleted (2026-05-12)
 **Severity:** low
 **Captured:** 2026-05-06
 **Source:** dogfooding
