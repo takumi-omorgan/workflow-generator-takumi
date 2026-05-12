@@ -115,23 +115,6 @@ _Most recent first._
 
 ---
 
-### 4. Refresh `CLAUDE.md` (drop dated stub framing)
-
-**Status:** idea
-**Captured:** 2026-05-06
-
-**Trigger:** While editing CLAUDE.md to reflect doc-cleanup work, noticed it still describes itself as "a stub added in Issue #1" and refers to "later issues" deferrals — anachronistic now that the kit has shipped 70+ issues.
-
-**Current state:** CLAUDE.md still contains "## What this file is NOT" explaining it's a stub awaiting a fuller version. Lines like "This file is a stub added in Issue #1 so Claude Code has a minimal rules baseline ... A fuller `CLAUDE.md` ... will be written alongside the template work in later issues" no longer reflect reality.
-
-**Proposed change:** Surgical removal of dated sections — the "stub" framing, the "What this file is NOT" footer, "later issues" deferrals. Keep load-bearing rules (plan-first per ADR-006, ADR-numbered commit messages, link-skills setup). Optionally rewrite from scratch using `templates/claude-md-template.md` as a starting point.
-
-**Blast radius:** One file (CLAUDE.md). Cosmetic / framing only — rules unchanged.
-
-**Open questions:** Keep the freshly-refreshed "Guiding documents" section, or move that index to a separate doc? How much should CLAUDE.md duplicate vs reference workflow-guide.md and skills.md?
-
----
-
 ### 5. End-to-end skill-chain regression tests on a fixture project
 
 **Status:** idea
@@ -195,6 +178,30 @@ _Most recent first._
 
 _Move entries here when filed as GitHub issues. Includes issue # for
 cross-reference._
+
+### 4. Refresh `CLAUDE.md` (drop dated stub framing)
+
+**Status:** shipped-#94
+**Captured:** 2026-05-06
+**Filed:** #93 (2026-05-12)
+**Shipped:** #94 (2026-05-12, closes #93)
+
+**Trigger:** While editing CLAUDE.md to reflect doc-cleanup work, noticed it still describes itself as "a stub added in Issue #1" and refers to "later issues" deferrals — anachronistic now that the kit has shipped 70+ issues.
+
+**Current state at filing:** CLAUDE.md still contains "## What this file is NOT" (lines 74–79) explaining it's a stub awaiting a fuller version. Lines like "This file is a stub added in Issue #1 so Claude Code has a minimal rules baseline ... A fuller `CLAUDE.md` ... will be written alongside the template work in later issues" no longer reflect reality.
+
+**Proposed change:** Surgical removal of dated sections — the "stub" framing, the "What this file is NOT" footer, "later issues" deferrals. Keep load-bearing rules (plan-first per ADR-006, ADR-numbered commit messages, link-skills setup). Optionally rewrite from scratch using `templates/claude-md-template.md` as a starting point.
+
+**Blast radius:** One file (CLAUDE.md). Cosmetic / framing only — rules unchanged. ~7-line deletion, expected final 73 lines (down from 80).
+
+**Path chosen:** Path A — surgical removal of the `## What this file is NOT` section only. Considered: Path B (rewrite from scratch against `templates/claude-md-template.md`), rejected because the file isn't broken; the load-bearing rules are referenced by skills and a rewrite invites accidental rule drift. Pairs with shipped sibling cleanups #89 (`docs/` slice) and #91 (`examples/` slice).
+
+**Resolution of open questions:**
+
+- *Keep the freshly-refreshed "Guiding documents" section, or move that index to a separate doc?* Keep. It's a slim pointer list (not duplicated prose), recently refreshed during the post-MVP doc-cleanup session, and CLAUDE.md is the natural orientation surface. Moving it to a separate doc would just add a hop without saving meaningful tokens.
+- *How much should CLAUDE.md duplicate vs reference `workflow-guide.md` and `skills.md`?* Reference, don't duplicate. The current shape already follows this — `Working rules` states the rule; procedural detail lives in `docs/workflow-guide.md` and skill `SKILL.md` files. No reshape needed in this issue.
+
+---
 
 ### 12. Repoint `examples/*.md` references to deleted issue-prompt files
 

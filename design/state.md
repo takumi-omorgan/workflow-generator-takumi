@@ -50,6 +50,6 @@ none
 
 ## Continue here
 
-Review and merge #94; then pick the next issue from the queue.
+PR #94 merged (squash `85237f9`); issue #93 closed and `notes/refactoring-ideas.md` entry #4 marked `shipped-#94`. Third in the post-MVP framing-refresh trio (after #89/PR #90 `docs/` slice and #91/PR #92 `examples/` slice) now complete — the dated-stub / shipped-in-later-issues framing is gone from the kit root. No in-flight issue. Next: pick the next item from `notes/refactoring-ideas.md` Unfiled (open entries: #1, #3, #5, #6, #10, #11) when ready.
 
 <!-- state:continue-here:end -->
