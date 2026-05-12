@@ -20,6 +20,17 @@
   Section reference (keep this order): Context, ADR, GitHub Issue, Goal,
   Requirements, Acceptance criteria, Scope, Evaluation, Instructions.
 
+  Placeholder reference (when filling by hand instead of via
+  `/prepare-issue`). The GitHub-issue placeholders are self-evident
+  and omitted; everything else maps as follows:
+    | Placeholder | Source |
+    |---|---|
+    | {{PROJECT_NAME}} | The repo name. |
+    | {{ONE_LINE_PROJECT_DESCRIPTION}} | The one-line description in `design/mvp.md` (or `design/prd-normalized.md` if no MVP yet). |
+    | {{WORKFLOW_DOC_PATH}} | Usually `docs/workflow-guide.md`. For repos that customise this, point at the actual workflow doc. |
+    | {{ADR_FILE}} / {{ADR_ONE_LINE_SUMMARY}} | The ADR(s) driving this issue. Repeat the two-line block per ADR. If none, write `ADR: none — {{REASON}}`. |
+    | {{PRIMARY_FOLDERS}} / {{AVOID_FOLDERS}} | Folders the work should and should not touch. Be specific; the avoid list prevents scope creep. |
+
   Content boundary (ADR-038, audited in notes/adr-038-alignment-review.md).
   The prompt is per-issue and immutable — written once by `/prepare-issue`,
   consumed once by `/claude-issue-executor`. Project- or session-scoped
