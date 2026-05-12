@@ -15,10 +15,10 @@ single
 
 ## In-flight issue
 
-- **Issue:** #89
-- **Prompt:** prompts/issue-089-legacy-prompt-cleanup.md
+- **Issue:** none
+- **Prompt:** n/a
 - **Branch:** n/a
-- **Status:** prepared
+- **Status:** none
 
 <!-- state:in-flight:end -->
 
@@ -30,11 +30,11 @@ Rolling list of the last five issues completed (oldest drops off as
 new entries land). One line each: PR number, ADR if any, one-line
 summary.
 
+- #90 — none — finish legacy notes/issue-prompt.md removal: collapse guide into prompts/_template.md header + fix four broken references (closes #89)
 - #88 — none — unify example.md naming and document orchestration-only skills (#84 Phase 3 — closes #84)
 - #87 — none — bring 4 over-budget SKILL.md files under L2 budget via sidecars (#84 Phase 2)
 - #86 — none — rewrite 19 SKILL.md descriptions to canonical Use-when shape (#84 Phase 1)
 - #85 — none — prune type-3 ADR attributions across 17 SKILL.md files
-- #82 — ADR-045 — rename Design/ → design/ kit-wide for root-directory casing consistency
 
 <!-- state:recent:end -->
 
@@ -50,6 +50,6 @@ none
 
 ## Continue here
 
-Issue #89 prepared: `notes/refactoring-ideas.md` entry #8 (legacy `notes/issue-prompt.md` removal) filed as #89 and the prompt written to `prompts/issue-089-legacy-prompt-cleanup.md`. Path C chosen — collapse the placeholder mapping table from `docs/issue-prompt-guide.md` into `prompts/_template.md`'s existing header, delete the standalone guide, fix four broken references (`docs/README.md:26`, `docs/claude-code-guide.md:147,291`, `docs/workflow-guide.md:1134`), mark the `notes/bug-fixes.md` superseded entry as resolved. Docs-only, no ADR. Next: run `/claude-issue-executor prompts/issue-089-legacy-prompt-cleanup.md` in a fresh session.
+PR #90 opened for issue #89 — awaiting review and merge. Once merged, this knocks out `notes/refactoring-ideas.md` entry #8 (legacy `notes/issue-prompt.md` removal). One open follow-up surfaced during the session: `examples/{idea-only,custom-prd,standard-prd}-example.md` still link to the deleted files — same root cause, out of scope for #89; capture as a refactor entry. Then pick the next item from `notes/refactoring-ideas.md` Unfiled (open entries: #1, #3, #4, #5, #6, #10, #11) when ready.
 
 <!-- state:continue-here:end -->
