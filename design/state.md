@@ -15,10 +15,10 @@ single
 
 ## In-flight issue
 
-- **Issue:** none
-- **Prompt:** n/a
+- **Issue:** #91
+- **Prompt:** prompts/issue-091-examples-prompt-cleanup.md
 - **Branch:** n/a
-- **Status:** none
+- **Status:** prepared
 
 <!-- state:in-flight:end -->
 
@@ -50,6 +50,6 @@ none
 
 ## Continue here
 
-PR #90 opened for issue #89 — awaiting review and merge. Once merged, this knocks out `notes/refactoring-ideas.md` entry #8 (legacy `notes/issue-prompt.md` removal). One open follow-up surfaced during the session: `examples/{idea-only,custom-prd,standard-prd}-example.md` still link to the deleted files — same root cause, out of scope for #89; capture as a refactor entry. Then pick the next item from `notes/refactoring-ideas.md` Unfiled (open entries: #1, #3, #4, #5, #6, #10, #11) when ready.
+Issue #91 prepared: `notes/refactoring-ideas.md` entry #12 (`examples/*.md` broken refs to deleted issue-prompt files) filed as #91 and prompt written to `prompts/issue-091-examples-prompt-cleanup.md`. Same shape as #89 — docs-only, no ADR, ~3 files / ~9 link edits. **Sequencing dependency:** PR #90 (issue #89) is still open against main; #91's narrative rewrites point at `prompts/_template.md`'s self-documenting header which lands via #90, so the executor should merge #90 first or read the PR-#90 branch's version of `_template.md`. Next: run `/claude-issue-executor prompts/issue-091-examples-prompt-cleanup.md` in a fresh session (and merge PR #90 first for cleanest base).
 
 <!-- state:continue-here:end -->
