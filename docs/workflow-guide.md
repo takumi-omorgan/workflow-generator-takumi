@@ -1131,7 +1131,6 @@ and a rejected ADR is still useful as a record of what was considered.
 | Understand a specific skill's interface, inputs, and outputs | `.claude/skills/<name>/SKILL.md` in your target project, or [`skills/README.md`](../skills/README.md) in the kit |
 | Revisit a design decision that shaped this workflow | [`design/adr/`](../design/adr/) |
 | Set up GitHub labels, milestones, and branch protection | [`docs/github-setup.md`](github-setup.md) |
-| Fill a Claude Code session prompt by hand | [`docs/issue-prompt-guide.md`](issue-prompt-guide.md) |
 
 If the flow above doesn't match the skills you have installed, check
 [`skills/README.md`](../skills/README.md) for the current inventory —

@@ -144,9 +144,10 @@ enforced by every build skill.
 The loop has five steps:
 
 1. **Prompt parsed.** You invoke a skill with a prompt file, or paste
-   a filled [`notes/issue-prompt.md`](../notes/issue-prompt.md)
-   manually. The assistant reads `CLAUDE.md`, the referenced ADR, and
-   any files called out by the prompt.
+   a filled `prompts/issue-NNN-*.md` (copied from
+   [`prompts/_template.md`](../prompts/_template.md)) manually. The
+   assistant reads `CLAUDE.md`, the referenced ADR, and any files
+   called out by the prompt.
 2. **Plan proposed.** The assistant produces a single message
    containing a step-by-step plan. It then stops.
 3. **User approves** (or asks for changes). Clarifying questions are
@@ -288,8 +289,6 @@ avoid it.
   per-issue loop → release, plus the steady-state iteration loop).
 - [`skills.md`](skills.md) — functional reference for every skill in
   the kit, grouped by what they do.
-- [`issue-prompt-guide.md`](issue-prompt-guide.md) — how to fill the
-  reusable session prompt that build skills consume.
 - [`../skills/README.md`](../skills/README.md) — source-tree index of
   all installed skills with links to each `SKILL.md`.
 - [`github-setup.md`](github-setup.md) — GitHub labels, branches,
