@@ -17,8 +17,8 @@ single
 
 - **Issue:** #91
 - **Prompt:** prompts/issue-091-examples-prompt-cleanup.md
-- **Branch:** n/a
-- **Status:** prepared
+- **Branch:** examples-issue-prompt-cleanup
+- **Status:** verified
 
 <!-- state:in-flight:end -->
 

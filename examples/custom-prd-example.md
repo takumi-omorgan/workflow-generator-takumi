@@ -110,12 +110,9 @@ geographies. Two-option ADR, terse Consequences.
 
 User accepts both ADRs and picks the first M1 issue
 (*"Slack event subscription"*). Starts a Claude Code session with a
-filled [`notes/issue-prompt.md`](../notes/issue-prompt.md) referencing
-the Slack-API constraints and `design/adr/adr-001-post-storage.md`.
-
-→ Template and guide:
-[`notes/issue-prompt.md`](../notes/issue-prompt.md),
-[`docs/issue-prompt-guide.md`](../docs/issue-prompt-guide.md).
+filled `prompts/issue-NNN-slack-event-subscription.md` (copied from
+[`prompts/_template.md`](../prompts/_template.md)) referencing the
+Slack-API constraints and `design/adr/adr-001-post-storage.md`.
 
 ## Final state of `design/`
 

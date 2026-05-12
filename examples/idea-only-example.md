@@ -84,13 +84,11 @@ The user picks the first issue from M1 of the build-out plan
 (*"Implement GPX parser"*), opens it on GitHub using the
 [`feature-request`](../.github/ISSUE_TEMPLATE/feature-request.md)
 template, and starts a Claude Code session with a filled
-[`notes/issue-prompt.md`](../notes/issue-prompt.md). The filled prompt
-references `design/adr/adr-001-gpx-parsing-location.md` and the M1
-context.
-
-→ Sample filled prompt: [`notes/issue-prompt-sample.md`](../notes/issue-prompt-sample.md).
-→ How to fill it and what the closing evaluation summary must contain:
-[`docs/issue-prompt-guide.md`](../docs/issue-prompt-guide.md).
+`prompts/issue-NNN-implement-gpx-parser.md` (copied from
+[`prompts/_template.md`](../prompts/_template.md) — its header
+comment documents how to fill it and what the closing evaluation
+summary must contain). The filled prompt references
+`design/adr/adr-001-gpx-parsing-location.md` and the M1 context.
 
 ## Final state of `design/`
 
@@ -115,8 +113,9 @@ is never overwritten.
 ## What happens next
 
 The user works through the M1 backlog issue by issue, one Claude Code
-session per issue, using `notes/issue-prompt.md` for each. After M1,
-they move to M2 (UI) and M3 (Validation) per the build-out plan.
+session per issue, copying `prompts/_template.md` to a fresh
+`prompts/issue-NNN-*.md` for each. After M1, they move to M2 (UI) and
+M3 (Validation) per the build-out plan.
 
 `issue-planner`, `claude-issue-executor`, `workflow-docs`, and
 `pr-review-packager` are on the kit's roadmap (see

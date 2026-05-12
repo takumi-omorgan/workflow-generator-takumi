@@ -170,12 +170,9 @@ Same shape as the contentious one because the kit's convention is
 
 User reviews both ADRs and accepts them. Picks the first M1 issue
 (*"Tag-range resolution and PR fetch"*) and starts a Claude Code
-session with a filled [`notes/issue-prompt.md`](../notes/issue-prompt.md)
+session with a filled `prompts/issue-NNN-tag-range-resolution.md`
+(copied from [`prompts/_template.md`](../prompts/_template.md))
 referencing `design/adr/adr-001-implementation-language.md`.
-
-→ Template and guide:
-[`notes/issue-prompt.md`](../notes/issue-prompt.md),
-[`docs/issue-prompt-guide.md`](../docs/issue-prompt-guide.md).
 
 ## Final state of `design/`
 
