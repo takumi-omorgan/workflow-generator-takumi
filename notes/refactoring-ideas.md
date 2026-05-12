@@ -166,23 +166,6 @@ _Most recent first._
 
 ---
 
-### 8. Finish the legacy `notes/issue-prompt.md` removal across the kit
-
-**Status:** idea
-**Captured:** 2026-05-06
-
-**Trigger:** Surfaced 2026-05-06 while cleaning up `notes/`. The legacy manual-fill template `notes/issue-prompt.md` and worked example were deleted in a partial cleanup, but four still-current docs were left referencing them — broken links until this is finished.
-
-**Current state:** Four docs reference the deleted files: `docs/issue-prompt-guide.md` (whole guide built around `notes/issue-prompt.md`), `docs/README.md:26`, `docs/claude-code-guide.md:147,291`, `docs/workflow-guide.md:1134`. Plus a now-superseded `bug-fixes.md` entry whose proposed plan ("promote to `templates/`") is wrong because `prompts/_template.md` (111 lines, ADR-008/031/032/033/035-aware) is the actual successor.
-
-**Proposed change:** Update or delete the four docs. Make a deliberate call on `docs/issue-prompt-guide.md`'s fate — rewrite against `prompts/_template.md`, delete entirely, or collapse manual-fill guidance into the existing "How to use this file" block at the top of `prompts/_template.md`.
-
-**Blast radius:** 4 docs to update + 1 bug-fixes entry to mark resolved. No skills or templates touched. Doing nothing leaves four broken links indefinitely.
-
-**Open questions:** Is the manual-fill flow still a supported path, or has `/prepare-issue` made it vestigial? Does this need a tiny workflow-doc ADR, or is it a docs-cleanup issue?
-
----
-
 ### 10. Kit-wide token-economy framework — measure, budget, audit
 
 **Status:** idea
@@ -212,6 +195,29 @@ _Most recent first._
 
 _Move entries here when filed as GitHub issues. Includes issue # for
 cross-reference._
+
+### 8. Finish the legacy `notes/issue-prompt.md` removal across the kit
+
+**Status:** filed-#89
+**Captured:** 2026-05-06
+**Filed:** #89 (2026-05-12)
+
+**Trigger:** Surfaced 2026-05-06 while cleaning up `notes/`. The legacy manual-fill template `notes/issue-prompt.md` and worked example were deleted in a partial cleanup, but four still-current docs were left referencing them — broken links until this is finished.
+
+**Current state at filing:** Four docs reference the deleted files: `docs/issue-prompt-guide.md` (whole guide built around `notes/issue-prompt.md`), `docs/README.md:26`, `docs/claude-code-guide.md:147,291`, `docs/workflow-guide.md:1134`. Plus a now-superseded `bug-fixes.md` entry whose proposed plan ("promote to `templates/`") is wrong because `prompts/_template.md` (111 lines, ADR-008/031/032/033/035-aware) is the actual successor.
+
+**Proposed change:** Update or delete the four docs. Make a deliberate call on `docs/issue-prompt-guide.md`'s fate — rewrite against `prompts/_template.md`, delete entirely, or collapse manual-fill guidance into the existing "How to use this file" block at the top of `prompts/_template.md`.
+
+**Blast radius:** 4 docs to update + 1 bug-fixes entry to mark resolved. No skills or templates touched. Doing nothing leaves four broken links indefinitely.
+
+**Path chosen:** Path C — collapse manual-fill guidance into `prompts/_template.md`'s header, delete the standalone guide. Considered: Path A (rewrite the guide; keeps two surfaces and risks future drift) and Path B (delete with no replacement; would retire manual-fill and warrant an ADR).
+
+**Resolution of open questions:**
+
+- *Is the manual-fill flow still a supported path, or has `/prepare-issue` made it vestigial?* Still supported, but relocated. The placeholder mapping table moves into `prompts/_template.md`'s existing `<!-- How to use this file -->` header block so the template self-documents; the standalone `docs/issue-prompt-guide.md` is deleted.
+- *Does this need a tiny workflow-doc ADR, or is it a docs-cleanup issue?* Docs-cleanup only. The manual-fill flow is being relocated, not retired — no kit convention that target projects depend on changes shape. Path B (retiring manual-fill entirely) was considered and rejected for that reason.
+
+---
 
 ### 9. Audit all SKILL.md files for structural consistency and token economy
 

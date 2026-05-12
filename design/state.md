@@ -15,10 +15,10 @@ single
 
 ## In-flight issue
 
-- **Issue:** none
-- **Prompt:** n/a
+- **Issue:** #89
+- **Prompt:** prompts/issue-089-legacy-prompt-cleanup.md
 - **Branch:** n/a
-- **Status:** none
+- **Status:** prepared
 
 <!-- state:in-flight:end -->
 
@@ -50,6 +50,6 @@ none
 
 ## Continue here
 
-PR #88 merged (squash `4420a2c`); Phase 3 of issue #84 shipped, **issue #84 closed**. All three phases done: #86 (descriptions), #87 (body slimming), #88 (sidecar consistency). 17/17 sidecar-bearing skills use the singular `example.md`; the no-sidecar pair (`complete-milestone`, `milestone-summary`) is documented as orchestration-only in `docs/skills.md` §5. `notes/refactoring-ideas.md` entry #9 moved from filed → fully shipped. **No in-flight work.** Pick the next item from `notes/refactoring-ideas.md` (open entries: #1, #3, #4, #5, #6, #8, #10, #11) when ready, or capture new ideas as they arise.
+Issue #89 prepared: `notes/refactoring-ideas.md` entry #8 (legacy `notes/issue-prompt.md` removal) filed as #89 and the prompt written to `prompts/issue-089-legacy-prompt-cleanup.md`. Path C chosen — collapse the placeholder mapping table from `docs/issue-prompt-guide.md` into `prompts/_template.md`'s existing header, delete the standalone guide, fix four broken references (`docs/README.md:26`, `docs/claude-code-guide.md:147,291`, `docs/workflow-guide.md:1134`), mark the `notes/bug-fixes.md` superseded entry as resolved. Docs-only, no ADR. Next: run `/claude-issue-executor prompts/issue-089-legacy-prompt-cleanup.md` in a fresh session.
 
 <!-- state:continue-here:end -->
