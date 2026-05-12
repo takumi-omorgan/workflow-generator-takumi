@@ -70,10 +70,3 @@ The `link-skills` tool lives in the personal dotfiles repo so it syncs
 across machines; it is intentionally NOT part of the kit. See the
 dogfooding playbook at `~/dotfiles/claude-config/docs/dogfooding-playbook.md`
 for the full methodology (kit dogfooding and app dogfooding).
-
-## What this file is NOT
-
-This file is a stub added in Issue #1 so Claude Code has a minimal rules
-baseline while working on the kit. A fuller `CLAUDE.md` — with commands,
-testing expectations, and review conventions — will be written alongside
-the template work in later issues.
