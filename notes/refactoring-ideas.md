@@ -196,6 +196,30 @@ _Most recent first._
 _Move entries here when filed as GitHub issues. Includes issue # for
 cross-reference._
 
+### 12. Repoint `examples/*.md` references to deleted issue-prompt files
+
+**Status:** filed-#91
+**Captured:** 2026-05-12
+**Filed:** #91 (2026-05-12)
+
+**Trigger:** PR #90 (issue #89) finished the legacy `notes/issue-prompt.md` removal across `docs/` but the same partial-cleanup pattern lives in `examples/`. Surfaced in #89's eval summary as an explicit out-of-scope follow-up; immediate filing trigger was the PR #90 review comment requesting either an in-PR why-out-of-scope note or a follow-up issue.
+
+**Current state at filing:** Three shipped example walk-throughs in `examples/` still link to deleted files:
+
+- `examples/idea-only-example.md` — lines 87, 91, 93, 118 (`notes/issue-prompt.md`, `notes/issue-prompt-sample.md`, `docs/issue-prompt-guide.md`).
+- `examples/custom-prd-example.md` — lines 113, 117, 118 (`notes/issue-prompt.md` ×2, `docs/issue-prompt-guide.md`).
+- `examples/standard-prd-example.md` — lines 173, 177, 178 (same pattern).
+
+All three render real broken links in `examples/`, which is a primary onboarding surface. The `notes/issue-prompt-sample.md` reference (idea-only-example.md:91) is also a 404.
+
+**Proposed change:** Repoint every reference to its successor — `prompts/_template.md` is now self-documenting (PR #90 absorbed the placeholder-mapping table into its header comment). The narrative steps in each example currently say "starts a Claude Code session with a filled `notes/issue-prompt.md`"; the right rewrite is "with a filled `prompts/issue-NNN-*.md` (copied from `prompts/_template.md`)". The "Template and guide" / "How to fill it" follow-up bullets either rewrite to point at `prompts/_template.md`'s header comment + `/prepare-issue`, or delete (the prose is duplicative now).
+
+**Blast radius:** 3 example files, ~9 link edits, no skill or template changes. Docs-only single PR — same shape as #89 but for the `examples/` slice.
+
+**Open questions at filing:** Keep the "Template and guide" follow-up bullets after the narrative step, or delete (since `prompts/_template.md`'s header comment is now the canonical fill-by-hand reference)? Worth pairing this with a freshness audit of the same three example files (entry #6 — examples freshness on major-release boundaries), or keep narrowly scoped to the broken-refs fix?
+
+---
+
 ### 8. Finish the legacy `notes/issue-prompt.md` removal across the kit
 
 **Status:** filed-#89
