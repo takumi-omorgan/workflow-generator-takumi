@@ -1,0 +1,33 @@
+{
+  "schema": "ai-review-artifact",
+  "version": 1,
+  "summary": "This change removes the ownership authorization check and replaces a soft delete with a permanent hard delete. Both are serious: any authenticated user can now permanently destroy another user's record.",
+  "findings": [
+    {
+      "id": "f1",
+      "classification": "blocking",
+      "severity": "high",
+      "category": "security",
+      "file": "api/records.py",
+      "line": 22,
+      "title": "Authorization check removed before delete",
+      "detail": "The `record.owner_id != request.user.id` guard was deleted, so any authenticated user can delete any record by id (IDOR).",
+      "suggestion": "Restore the ownership check (or an equivalent permission check) before deleting.",
+      "confidence": "high",
+      "commentable": true
+    },
+    {
+      "id": "f2",
+      "classification": "blocking",
+      "severity": "high",
+      "category": "data-loss",
+      "file": "api/records.py",
+      "line": 22,
+      "title": "Hard delete replaces recoverable soft delete",
+      "detail": "Switching from soft_delete() to delete() makes the operation irreversible; previously recoverable records are now permanently destroyed.",
+      "suggestion": "Keep soft_delete() unless there is an explicit, reviewed retention decision.",
+      "confidence": "high",
+      "commentable": true
+    }
+  ]
+}

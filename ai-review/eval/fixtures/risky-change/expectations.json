@@ -1,0 +1,9 @@
+{
+  "description": "Risky behaviour change: at least one high-severity blocking finding, posted inline.",
+  "expect": {
+    "minBlocking": 1,
+    "requireSeverity": "high",
+    "requireCategories": ["security"],
+    "minCommentable": 1
+  }
+}

@@ -1,0 +1,87 @@
+# ai-review-config — provider configuration for AI PR review, version 1
+#
+# The provider-agnostic model configuration consumed by bin/review-pr
+# (Milestone M5, Issue 23, ADR-051). It is designed around OpenAI-compatible
+# chat/completions endpoints, with OpenRouter as the first provider.
+#
+# SECRETS NEVER LIVE HERE. This file (and any config rendered from it) holds
+# only non-secret defaults. The API key is read at call time from the
+# environment variable named by `apiKeyEnv` — the key value itself must never
+# be written to a tracked file or pasted into chat. See docs/ai-review.md.
+#
+# Consumers:
+#   - bin/review-pr reads provider/baseURL/model/apiKeyEnv/timeout/etc.
+#   - ai-review/config.example.json is a conforming, copy-me example.
+#
+# Resolution order (later overrides earlier): built-in defaults →
+# ai-review/config.json (if present) → the file named by --config →
+# explicit CLI flags (--provider/--model/--base-url/--profile).
+
+schema: ai-review-config
+version: 1
+title: Provider configuration for AI PR review
+adr: ADR-051
+spec: docs/ai-review.md
+
+unit: object
+
+item:
+  type: object
+  required:
+    - provider
+    - baseURL
+    - model
+    - apiKeyEnv
+  additionalFields: allow
+  fields:
+    schema:
+      type: string
+      const: ai-review-config
+      description: Optional self-identifying marker; present in the shipped example.
+    version:
+      type: integer
+      const: 1
+      description: Config schema version.
+    provider:
+      type: string
+      description: >-
+        Provider label, e.g. "openrouter". Free-form; used for receipts and
+        the artifact's provenance, not to switch code paths — the transport is
+        the OpenAI-compatible chat/completions API for every provider.
+    baseURL:
+      type: string
+      description: >-
+        Base URL of the OpenAI-compatible API, without a trailing /chat/completions.
+        OpenRouter: https://openrouter.ai/api/v1
+    model:
+      type: string
+      description: Model identifier as the provider expects it, e.g. "openai/gpt-4o-mini".
+    apiKeyEnv:
+      type: string
+      description: >-
+        Name of the environment variable that holds the API key (e.g.
+        OPENROUTER_API_KEY). The key VALUE is never stored here. If the named
+        variable is unset, bin/review-pr fails with a setup message (exit 3).
+    timeoutSeconds:
+      type: integer
+      description: Per-request timeout for the model call. Default 60.
+    maxDiffBytes:
+      type: integer
+      description: >-
+        Maximum diff size sent to the model. Larger diffs are truncated with an
+        explicit, logged notice (the artifact records truncated=true) rather
+        than failing silently. Default 200000.
+    profile:
+      type: string
+      enum:
+        - strict
+        - balanced
+        - lightweight
+      description: >-
+        Review profile controlling the comment threshold (see
+        ai-review/prompts/). Default "balanced". Overridable with --profile.
+    headers:
+      type: object
+      description: >-
+        Optional extra HTTP headers sent with the request (e.g. OpenRouter's
+        HTTP-Referer and X-Title). Values must be non-secret.

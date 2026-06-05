@@ -1,0 +1,8 @@
+{
+  "description": "Simple correct bugfix: no blocking findings; reviewer should flag the missing test.",
+  "expect": {
+    "maxBlocking": 0,
+    "requireCategories": ["test-coverage"],
+    "minFindings": 1
+  }
+}

@@ -1,0 +1,13 @@
+diff --git a/api/records.py b/api/records.py
+index 5555555..6666666 100644
+--- a/api/records.py
++++ b/api/records.py
+@@ -20,10 +20,8 @@ def delete_record(request, record_id):
+     record = Record.objects.get(id=record_id)
+-    if record.owner_id != request.user.id:
+-        return forbidden("not your record")
+-    record.soft_delete()
+-    return ok()
++    # simplified: drop the ownership check and hard-delete
++    record.delete()
++    return ok()

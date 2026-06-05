@@ -12,6 +12,11 @@
 .claude/scheduled_tasks.lock
 .claude/receipts/
 
+# AI PR review — generated artifacts and local provider config (config may
+# be committed if secret-free; the key always lives in an env var, never here)
+ai-review/artifacts/
+ai-review/config.json
+
 # Editor / IDE junk
 *.swp
 *.swo
