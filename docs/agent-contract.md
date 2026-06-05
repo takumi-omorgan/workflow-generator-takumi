@@ -206,6 +206,9 @@ envelope is a tracked follow-up, not a contradiction of this contract.
 | [`bin/check-consistency`](../bin/check-consistency) | standard | 0, 1, 2 | Check docs and metadata agree (skills.md, verb layer, bin registry, schema refs) |
 | [`bin/write-receipt`](../bin/write-receipt) | standard | 0, 1, 2 | Write or look up an idempotency receipt under `.claude/receipts/` ([`docs/receipts.md`](receipts.md)) |
 | [`bin/self-test`](../bin/self-test) | standard | 0, 1, 2 | Run the non-mutating validation surface against the kit + a stub, timed ([`docs/self-test.md`](self-test.md)) |
+| [`bin/review-pr`](../bin/review-pr) | standard | 0, 1, 2, 3 | Generate a dry-run AI review artifact from a PR diff; posts nothing ([`docs/ai-review.md`](ai-review.md)) |
+| [`bin/publish-review`](../bin/publish-review) | standard | 0, 1, 2, 3, 4 | Preview, then post an AI review to a PR on the `--confirm` token; idempotent via receipts |
+| [`bin/review-eval`](../bin/review-eval) | standard | 0, 1, 2 | Offline fixture harness for AI PR review quality |
 | [`bin/check-plan`](../bin/check-plan) | legacy | 0, 1, 2 | Validate an ADR or prompt against criteria |
 | [`bin/sync-adr-index`](../bin/sync-adr-index) | none (text) | 0, 1, 2 | Regenerate the ADR index table |
 

@@ -104,6 +104,7 @@ of what lives in the kit versus what gets generated in your project.
 - [Workflow guide](docs/workflow-guide.md) — idea to release, end to end
 - [Workflow control](docs/workflow-control.md) — operating modes, the approval gate, the verb layer
 - [Skills reference](docs/skills.md) — what every skill does
+- [AI PR review](docs/ai-review.md) — dry-run AI review of a PR, then publish comments safely (`/review-pr`)
 - [Troubleshooting](docs/troubleshooting.md) — fixes organized by symptom
 - [GitHub setup](docs/github-setup.md) — labels, milestones, scopes
 

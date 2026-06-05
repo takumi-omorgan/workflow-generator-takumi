@@ -136,18 +136,19 @@ replacement.
 | `/backlog` | "turn the plan into issues" | `issue-planner` |
 | `/work` | "build the next issue" | `prepare-issue` → `claude-issue-executor` |
 | `/ship` | "open the PR" | `pr-review-packager` |
+| `/review-pr` | "AI-review a PR" | `review-pr` (see [ADR-051](../design/adr/adr-051-operator-driven-ai-pr-review.md)) |
 | `/finish-milestone` | "close out the milestone" | `audit-milestone` → `milestone-summary` → `complete-milestone` |
 | `/feature` | "plan a major feature update" | `feature-prd` (see [ADR-049](../design/adr/adr-049-follow-up-prd-workflow.md)) |
 | `/release` | "cut a release" | `release` |
 | `/resume` | "where were we?" | `resume` |
 | `/pause` | "save the state" | `pause` |
 
-Only **`/start`** (and its `/next` alias) and **`/feature-prd`** are new
-slash commands. The aggregate verbs — `/decide`, `/backlog`, `/work`,
-`/ship`, `/finish-milestone` — are **documentation aliases** for skills
-that already exist; say them in conversation and the assistant runs the
-underlying skill(s). `/release`, `/resume`, and `/pause` map one-to-one
-to the same-named skills.
+Only **`/start`** (and its `/next` alias), **`/feature-prd`**, and
+**`/review-pr`** are new slash commands. The aggregate verbs — `/decide`,
+`/backlog`, `/work`, `/ship`, `/finish-milestone` — are **documentation
+aliases** for skills that already exist; say them in conversation and the
+assistant runs the underlying skill(s). `/release`, `/resume`, and
+`/pause` map one-to-one to the same-named skills.
 
 When you need the precise interface of an underlying skill, follow its
 `SKILL.md` from the [skills reference](skills.md). When an agent needs

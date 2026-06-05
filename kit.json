@@ -628,6 +628,40 @@
       ]
     },
     {
+      "name": "review-pr",
+      "slashCommand": "/review-pr",
+      "permissionCategory": 3,
+      "description": "Generate a dry-run AI review of a GitHub PR; publish comments only after explicit approval.",
+      "inputs": [
+        {
+          "name": "pr",
+          "required": true,
+          "description": "The PR number to review"
+        },
+        {
+          "name": "--profile",
+          "required": false,
+          "description": "Review depth: strict | balanced (default) | lightweight"
+        },
+        {
+          "name": "--publish",
+          "required": false,
+          "description": "After the dry-run, offer to publish (still requires explicit approval before any GitHub write)"
+        }
+      ],
+      "outputs": [
+        {
+          "artefact": "ai-review/artifacts/pr-N-<hash>.json",
+          "description": "Structured dry-run review artifact (also rendered .md); local, posts nothing"
+        },
+        {
+          "artefact": "(GitHub PR review)",
+          "description": "Posted only after explicit approval; records a receipt under .claude/receipts/"
+        }
+      ],
+      "next": []
+    },
+    {
       "name": "start",
       "slashCommand": "/start",
       "permissionCategory": 1,
@@ -787,6 +821,45 @@
         2
       ],
       "description": "Run the kit's non-mutating validation surface against itself and a stub, timing it and listing friction (workflow self-test, ADR-050)."
+    },
+    {
+      "name": "review-pr",
+      "path": "bin/review-pr",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "description": "Generate a DRY-RUN AI review artifact from a PR diff (gh or --diff) via an OpenAI-compatible provider (or --mock); posts nothing (ADR-051)."
+    },
+    {
+      "name": "publish-review",
+      "path": "bin/publish-review",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "description": "Preview an AI review and post it to a GitHub PR only on the deterministic --confirm token; idempotent via receipts (ADR-051, ADR-050)."
+    },
+    {
+      "name": "review-eval",
+      "path": "bin/review-eval",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Offline fixture harness for AI PR review: runs review-pr --mock over ai-review/eval/fixtures and checks expectations + duplicate prevention (ADR-051)."
     }
   ]
 }
