@@ -62,6 +62,8 @@ fences is preserved.
 | [ADR-045](adr-045-rename-design-directory-lowercase.md) | Rename `Design/` → `design/` for root-directory casing consistency | accepted |
 | [ADR-046](adr-046-ai-pr-review-module.md) | Optional AI PR review module | accepted |
 | [ADR-047](adr-047-machine-readable-agent-contract.md) | Machine-readable agent contract (kit.json, skill frontmatter, bin envelope) | accepted |
+| [ADR-048](adr-048-unified-workflow-control.md) | Unified workflow control (operating modes, canonical approval gate, verb layer, next-step routing) | accepted |
+| [ADR-049](adr-049-follow-up-prd-workflow.md) | Follow-up PRD workflow for major feature updates | accepted |
 
 <!-- adr-index:end -->
 
