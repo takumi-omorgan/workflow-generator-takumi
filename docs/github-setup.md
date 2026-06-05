@@ -13,6 +13,7 @@ guide is the practical configuration that makes that decision real.
 
 ## What this guide covers
 
+0. **Credentials and the required `gh` scopes** for every GitHub-integrated skill (read this first)
 1. Creating the GitHub repository for your target project
 2. Picking `main` as the default branch and using a `main + feature branch` model
 3. The six default labels the kit expects
@@ -31,6 +32,73 @@ Two audiences, which the guide keeps separate:
 - **Secondary — you are working on the kit itself.** The kit repo already
   has labels and milestones applied. You do not need to re-apply them.
   Where the two differ (milestones especially), the guide calls it out.
+
+---
+
+## GitHub credentials and required scopes
+
+Every GitHub-integrated skill drives the **GitHub CLI** (`gh`) rather
+than the REST/GraphQL API directly. They all rely on one authenticated
+`gh` session, so getting credentials right once unblocks the whole
+workflow. This is the single place that documents what `gh` needs; the
+agent contract's preflight points here
+([`docs/agent-contract.md`](agent-contract.md#preflight-for-github-integrated-skills)).
+
+### Required scopes
+
+| Scope | Why the kit needs it | Skills |
+|---|---|---|
+| `repo` | Read/write issues, pull requests, releases, and milestones | `prepare-issue`, `resume`, `audit-milestone`, `changelog` (read); `issue-planner`, `pr-review-packager`, `release`, `complete-milestone` (write) |
+| `read:org` | Resolve the org that owns a GitHub **Project** board | `issue-planner` (when it creates/links a Project) |
+| `project` | Create and write to the GitHub **Project** board ([ADR-012](../design/adr/adr-012-github-projects-integration.md)) | `issue-planner` (board creation; skip with `--no-project`) |
+| `workflow` | Push files under `.github/workflows/` | Optional AI PR review module only ([ADR-046](../design/adr/adr-046-ai-pr-review-module.md)); not needed for the core flow |
+
+`repo` alone covers the entire core planning-to-release loop. The extra
+`read:org` + `project` scopes are needed only by `issue-planner`'s
+Project-board step — and only the **first** time, when the board is
+created. If you run `issue-planner --no-project`, `repo` is sufficient.
+
+### Refresh scopes with one command
+
+If you authenticated with `gh auth login` (web/device flow, token in
+the keyring), add the Project-board scopes to your existing token in
+place:
+
+```bash
+gh auth refresh -s project,read:org
+```
+
+If you authenticated with a **Personal Access Token** instead, `gh auth
+refresh` cannot widen it — edit the token's permissions in GitHub
+**Settings → Developer settings → Tokens** (a fine-grained token needs
+*Issues*, *Pull requests*, *Contents*, and *Projects* read/write on the
+target repo), then re-run `gh auth login` with the updated token.
+
+### Preflight checklist
+
+Run this before any GitHub-integrated skill (an agent should run it at
+the start of a session that will touch GitHub):
+
+```bash
+# 1. Authenticated, and as the right account?
+gh auth status
+
+# 2. Does the repo resolve from here?
+gh repo view --json nameWithOwner -q .nameWithOwner
+
+# 3. Only if you will create a Project board (issue-planner):
+#    confirm the Project scopes, and add them if missing.
+gh auth status            # look for 'project' and 'read:org' in Token scopes
+gh auth refresh -s project,read:org   # run if they are absent
+```
+
+`gh auth status` prints the active account and, for classic tokens, the
+granted scopes. If step 2 errors, you are either not inside the target
+git repo or `origin` does not point at GitHub — fix that before running
+any skill, because every GitHub skill infers the repo from the git
+remote. If `issue-planner` fails partway through with a Project-board
+permission error, step 3 is the fix; the issue-creation step itself
+only needs `repo`.
 
 ---
 

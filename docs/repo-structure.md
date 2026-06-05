@@ -56,6 +56,8 @@ workflow-generator/
 | `templates/` | Starter templates | **Yes, selectively** — templates are copied or rendered by skills into the target repo |
 | `examples/` | Reference examples | No |
 | `notes/` | Working notes for building the kit itself | No |
+| `kit.json` | Machine-readable index of skills, permission categories, inputs/outputs/next, and `bin/` surfaces ([ADR-047](../design/adr/adr-047-machine-readable-agent-contract.md)) | No — kit-level in this iteration; target-project agents read per-skill frontmatter, which **is** copied with `skills/` |
+| `bin/` | Programmatic surfaces (`check-plan`, `prepare-issue`, `validate-kit-json`, `sync-adr-index`) | Selectively — only `bin/sync-adr-index` is copied today; the agent-contract scripts are kit-level (see ADR-047 deferrals) |
 
 ---
 
