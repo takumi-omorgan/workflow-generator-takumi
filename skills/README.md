@@ -14,6 +14,7 @@ project-locally (see ADR-001).
 | [`idea-to-prd/`](idea-to-prd/SKILL.md) | Turn a rough idea into a lightweight PRD | Issue #5 |
 | [`prd-normalizer/`](prd-normalizer/SKILL.md) | Normalize standard or custom PRDs into one internal format | Issue #6 |
 | [`prd-to-mvp/`](prd-to-mvp/SKILL.md) | Scope a PRD down to an MVP statement | Issue #7 |
+| [`feature-prd/`](feature-prd/SKILL.md) | Capture a major feature update as an additive PRD addendum under `design/prd-addenda/`, extending the original PRD rather than replacing it | M3 (roadmap Issue 21) |
 | [`planning/`](planning/SKILL.md) | Capture deeper planning context (decomposition, risks, assumptions, sequencing, research questions) — opt-in for non-trivial projects | Issue #40 |
 | [`clarify/`](clarify/SKILL.md) | Surface gray areas, conduct deep-dive resolution, append settled decisions to `design/decisions.md` — opt-in, below-ADR-weight by design | Issue #42 |
 | [`adr-writer/`](adr-writer/SKILL.md) | Draft ADRs from the MVP and key decisions | Issue #7 |
@@ -26,6 +27,7 @@ project-locally (see ADR-001).
 | [`workflow-docs/`](workflow-docs/SKILL.md) | Generate README.md and design/ai-summary.md from project artifacts | Issue #20 |
 | [`resume/`](resume/SKILL.md) | Brief a fresh session by reading `design/state.md` (with `gh` fallback) — no writes | Issue #44 |
 | [`pause/`](pause/SKILL.md) | Refresh `design/state.md` to current truth and optionally write `notes/handoff-YYYY-MM-DD.md` for context-window-exhausting handoffs | Issue #44 |
+| [`start/`](start/SKILL.md) | Inspect project state and recommend (or invoke, for cat-1) the next skill — the kit's `/start` / `/next` router | M3 (roadmap Issue 12) |
 | [`check-plan/`](check-plan/SKILL.md) | Validate ADRs and issue prompts against version-locked checklists; chained as a pre-commit gate from `adr-writer` and `prepare-issue` (`--skip-check` opts out) | Issue #43 |
 | [`audit-milestone/`](audit-milestone/SKILL.md) | Verify a GitHub milestone is complete — issues closed, ADRs linked to merged PRs, phase exit criteria met. Pass/fail with gap list; advisory, does not block close | Issue #46 |
 | [`milestone-summary/`](milestone-summary/SKILL.md) | Generate `design/milestones/N-summary.md` for a closed or near-closing milestone — what shipped, ADRs adopted, deferred work — from git log, the GitHub milestone, and accepted ADRs | Issue #46 |

@@ -70,9 +70,25 @@ A single short message to the user, structured as:
 - **Recent:** up to 5 PRs, one line each (most recent first)
 - **Blockers:** one line per blocker, or `none`
 - **Continue here:** the verbatim text from the `continue-here` zone
+- **Next action:** the proposed skill + args from the `next-action`
+  zone when present (e.g. `Run /prepare-issue 95`), or omit this line
+  when the zone is absent or `skill: none`
 
 The brief is plain markdown — no tables, no banners. The aim is for
 the user to skim it in two seconds and know what to do next.
+
+### Proposing the next action
+
+The `next-action` zone (ADR-048; see
+[`docs/workflow-control.md` §4](../../docs/workflow-control.md#4-finding-the-next-step))
+is the structured complement to `continue-here`. When it is present and
+`skill` is not `none`, render the **Next action** line above from its
+`skill` + `args`. If any `preconditions` are clearly unmet or
+`blocked-by` is not `none`, render the blocker instead of the action —
+e.g. *"Next action blocked: <blocked-by>"* — so the user is not pointed
+at a step that cannot run. The zone is **optional**: older
+`design/state.md` files predate it. Its absence is not a malformed-file
+condition — fall back to `continue-here` alone.
 
 ## Execution protocol
 
@@ -83,10 +99,14 @@ the user to skim it in two seconds and know what to do next.
    `state:blockers`, `state:continue-here` each have a balanced
    `:start` / `:end` pair. If any pair is missing or unbalanced,
    stop with a one-line message naming the broken zone and suggest
-   `/pause` to refresh.
+   `/pause` to refresh. The `state:next-action` zone is **optional**:
+   if present, confirm its fences balance too; its absence is normal
+   for files that predate ADR-048 and is not an error.
 3. **Parse each zone.** Pull the content between fences for every
    zone listed above. Trim whitespace. Skip placeholders that still
-   look like `{{...}}` — treat them as empty.
+   look like `{{...}}` — treat them as empty. When the
+   `state:next-action` zone is present, parse its YAML block (`skill`,
+   `args`, `preconditions`, `blocked-by`) for the **Next action** line.
 4. **Sniff for staleness.** The file is suspect if any of:
    - the in-flight issue is `none` but `continue-here` names a
      specific issue;

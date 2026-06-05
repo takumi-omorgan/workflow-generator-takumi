@@ -86,3 +86,23 @@ prompt path, a skill invocation, or a `gh issue view` pointer. /resume
 reads this verbatim into its brief.}}
 
 <!-- state:continue-here:end -->
+
+<!-- state:next-action:start -->
+
+## Next action
+
+{{Structured, machine-readable complement to `continue-here` (ADR-048).
+A fenced YAML block naming the next skill, its args, preconditions, and
+any blocker. `skill: none` when nothing is queued. /resume and /start
+read this to propose the next action without parsing prose; an unmet
+precondition or non-`none` `blocked-by` is reported as a blocker
+instead. Use exact skill names from kit.json, not verbs.}}
+
+```yaml
+skill: none
+args: n/a
+preconditions: []
+blocked-by: none
+```
+
+<!-- state:next-action:end -->

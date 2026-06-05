@@ -318,6 +318,12 @@ noted.
     - rewrite the `state:continue-here` zone to one short paragraph
       pointing at the just-opened PR, e.g. `"Review and merge #<PR>;
       then pick the next issue from the queue."`.
+    - rewrite the `state:next-action` zone (ADR-048;
+      [`docs/workflow-control.md` §4](../../docs/workflow-control.md#4-finding-the-next-step))
+      to `skill: none`, `args: n/a`, `preconditions: []`,
+      `blocked-by: "PR #<PR> awaiting review/merge"` — the next action
+      is the human review of the open PR, not a skill. Skip this zone
+      if the file predates it (no `state:next-action` fences).
     Marker fences bound each zone; rewrite only the bytes between
     the fences. If `design/state.md` is absent, skip silently. If
     marker fences are broken, do not rewrite; surface the broken

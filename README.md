@@ -77,6 +77,13 @@ following [GitHub Flow](https://docs.github.com/en/get-started/using-github/gith
 The kit covers the whole lifecycle — not just scaffolding, but ongoing
 ADRs, issue-by-issue execution, releases, and session continuity.
 
+Not sure what to run? Type **`/start`** (or `/next`) and the kit
+inspects your project and tells you the next step. The full command set
+sits behind a small **verb layer** — `/start`, `/decide`, `/backlog`,
+`/work`, `/ship`, `/release` — and three **operating modes**
+(interactive, assisted, autonomous) that set how much the assistant does
+without asking. See [workflow control](docs/workflow-control.md).
+
 ## What's in this repo
 
 | Path | What it is |
@@ -95,6 +102,7 @@ of what lives in the kit versus what gets generated in your project.
 - [Install guide](docs/install.md) — all install paths, prerequisites, manual flow
 - [First PR in 15 minutes](docs/tutorial.md) — the fastest happy path
 - [Workflow guide](docs/workflow-guide.md) — idea to release, end to end
+- [Workflow control](docs/workflow-control.md) — operating modes, the approval gate, the verb layer
 - [Skills reference](docs/skills.md) — what every skill does
 - [Troubleshooting](docs/troubleshooting.md) — fixes organized by symptom
 - [GitHub setup](docs/github-setup.md) — labels, milestones, scopes

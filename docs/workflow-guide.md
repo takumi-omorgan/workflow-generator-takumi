@@ -123,7 +123,7 @@ committed pointer file so each new session knows where to pick up.
 /resume              → reads design/state.md at session start
 
 design/state.md zones:
-   phase | in-flight | recent | blockers | continue-here
+   phase | in-flight | recent | blockers | continue-here | next-action
 ```
 
 **Cross-skill carry-forward (§6).** Design questions raised
@@ -617,6 +617,20 @@ need a fresh `/prd-to-mvp` round. If you find yourself reaching for
 `/prd-to-mvp` per feature, you have probably mis-scoped the original
 MVP — see ADR-036's anti-pattern note in §2.c.
 
+**Major feature updates: use `/feature-prd`, not a fresh PRD.** When a
+mature project needs a major feature — a new capability area, a change
+to original-PRD assumptions, work spanning multiple issues and ADRs —
+do **not** overwrite `design/prd.md` and do not force it through
+ordinary one-off issues. Run `/feature` (`/feature-prd`) to capture it
+as an **additive PRD addendum** under `design/prd-addenda/NNN-*.md` that
+extends the original PRD, names ADR impact, and decomposes the feature
+into phased issues. The addendum then feeds the normal flow:
+`/feature-prd` → `/adr-writer` → `/issue-planner` → `/prepare-issue` →
+`/claude-issue-executor` → `/pr-review-packager`. See
+[ADR-049](../design/adr/adr-049-follow-up-prd-workflow.md). One-off
+bugs, small docs fixes, and self-contained issues stay on the ordinary
+loop above — no addendum.
+
 ### Versioning your releases (ADR-026)
 
 `/release` follows a documented MAJOR/MINOR/PATCH policy. Apply the
@@ -723,7 +737,7 @@ a single committed artefact, `design/state.md`, plus two skills.
 ### The artefact
 
 `design/state.md` is a small (under ~100 lines), committed pointer
-holding five zones, each wrapped in marker fences so individual
+holding six zones, each wrapped in marker fences so individual
 skills can rewrite their zone idempotently without disturbing the
 others:
 
@@ -734,6 +748,7 @@ others:
 | `recent` | Rolling list of the last 5 merged PRs | `/pr-review-packager`, `/pause` |
 | `blockers` | One line per blocker, or `none` | `/pause` |
 | `continue-here` | One paragraph naming the next concrete action | `/prepare-issue`, `/pr-review-packager`, `/pause` |
+| `next-action` | Structured next step (`skill`, `args`, `preconditions`, `blocked-by`) — the executable complement to `continue-here`, read by `/resume` and `/start` (ADR-048; [workflow-control §4](workflow-control.md#4-finding-the-next-step)) | `/prepare-issue`, `/claude-issue-executor`, `/pr-review-packager`, `/pause` |
 
 The format spec is [`templates/state-template.md`](../templates/state-template.md).
 The kit ships the template; each target project instantiates its
@@ -931,7 +946,13 @@ and F23-class regressions (strict-mode-vs-runtime mismatch in
 `/pr-review-packager`) from author-discipline failures into
 structural impossibilities.
 
-This section is the single source of truth. Every shipped skill's
+This section is the single source of truth for the permission
+**categories** — a property of each skill *operation*. The named
+**operating modes** (`interactive` / `assisted` / `autonomous`) — a
+property of the *session* — layer over these categories and are defined
+in [`workflow-control.md` §1](workflow-control.md#1-operating-modes);
+`assisted` and `autonomous` are the two shapes this section calls
+"auto-mode". No mode ever relaxes cat-3. Every shipped skill's
 `SKILL.md` declares its `permission-category` in front-matter and
 cross-references this section without restating it. New skill
 operations must be classified at merge time.
@@ -1128,6 +1149,7 @@ and a rejected ADR is still useful as a record of what was considered.
 | You want to… | Go to |
 |---|---|
 | Learn how to run Claude Code skills from inside a target project | [`claude-code-guide.md`](claude-code-guide.md) |
+| Be told which skill to run next, or learn the verb layer and operating modes | `/start`, or [`workflow-control.md`](workflow-control.md) |
 | Understand a specific skill's interface, inputs, and outputs | `.claude/skills/<name>/SKILL.md` in your target project, or [`skills/README.md`](../skills/README.md) in the kit |
 | Revisit a design decision that shaped this workflow | [`design/adr/`](../design/adr/) |
 | Set up GitHub labels, milestones, and branch protection | [`docs/github-setup.md`](github-setup.md) |

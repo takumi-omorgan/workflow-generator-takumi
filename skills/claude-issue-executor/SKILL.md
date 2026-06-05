@@ -311,7 +311,12 @@ alignment-review obligation, and the `--no-prompt` mode rules.
 11. **Update `design/state.md` if present.** Per
     [ADR-035](../../design/adr/adr-035-state-md-session-continuity.md),
     rewrite the `state:in-flight` zone: keep `Issue` and `Prompt`,
-    set `Branch` to the current branch, set `Status: verified`. The
+    set `Branch` to the current branch, set `Status: verified`. Also
+    set the `state:next-action` zone (ADR-048;
+    [`docs/workflow-control.md` §4](../../docs/workflow-control.md#4-finding-the-next-step))
+    to `skill: pr-review-packager`, `args: n/a`,
+    `preconditions: ["branch <name> is ahead of main"]`,
+    `blocked-by: none` — skip that zone if the file predates it. The
     `recent` zone is **not** touched here — it tracks merged PRs and
     is the responsibility of `/pr-review-packager`. If the file is
     absent, skip silently. If marker fences are broken, do not
