@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+# review-eval — offline evaluation harness for AI PR review (M5 Issue 27,
+# ADR-051).
+#
+# Runs bin/review-pr in mocked, offline mode over the fixtures under
+# ai-review/eval/fixtures/ and checks each generated artifact against the
+# fixture's expectations.json. Also runs a duplicate-publish check via
+# bin/publish-review --mock to prove duplicate-comment prevention. Touches no
+# network, no GitHub, and writes only inside a temp dir it cleans up — safe
+# for CI and bin/self-test.
+#
+# Usage:
+#   bin/review-eval [--fixtures DIR] [--format text|json] [-h]
+#
+# Exit codes (shared convention; see lib/json-envelope.sh):
+#   0  every fixture met expectations and duplicate-prevention held
+#   1  one or more fixtures failed, or duplicate-prevention failed
+#   2  invocation error (no fixtures dir, bad flags)
+
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/json-envelope.sh
+. "$SCRIPT_DIR/lib/json-envelope.sh"
+
+usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; }
+
+FIXTURES="ai-review/eval/fixtures"
+FORMAT="text"
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --fixtures) [ $# -ge 2 ] || { printf 'review-eval: --fixtures needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; FIXTURES="$2"; shift 2 ;;
+    --format)   [ $# -ge 2 ] || { printf 'review-eval: --format needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; FORMAT="$2"; shift 2 ;;
+    -h|--help)  usage; exit 0 ;;
+    *) printf 'review-eval: unknown argument: %s\n' "$1" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+  esac
+done
+case "$FORMAT" in text|json) ;; *) printf 'review-eval: --format must be text or json (got: %s)\n' "$FORMAT" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;; esac
+[ -d "$FIXTURES" ] || { printf 'review-eval: fixtures dir not found: %s\n' "$FIXTURES" >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+
+STAGING=$(mktemp -d 2>/dev/null || mktemp -d -t review-eval)
+trap 'rm -rf "$STAGING" 2>/dev/null || true' EXIT
+ART_DIR="$STAGING/artifacts"; mkdir -p "$ART_DIR"
+
+# Build a JSON array of per-fixture run records for the python evaluator.
+RECORDS="[]"
+i=0
+DUP_ARTIFACT=""
+for fdir in "$FIXTURES"/*/; do
+  [ -f "$fdir/input.diff" ] || continue
+  [ -f "$fdir/mock-response.json" ] || continue
+  [ -f "$fdir/expectations.json" ] || continue
+  i=$((i + 1))
+  name=$(basename "$fdir")
+  cfg=()
+  [ -f "$fdir/config.json" ] && cfg=(--config "$fdir/config.json")
+  OUT=$("$SCRIPT_DIR/review-pr" --pr "$i" --diff "$fdir/input.diff" \
+        --mock "$fdir/mock-response.json" "${cfg[@]+"${cfg[@]}"}" \
+        --out "$ART_DIR" --format json 2>/dev/null)
+  rc=$?
+  artifact=$(printf '%s' "$OUT" | jq -r '.outputs.artifactJson // empty' 2>/dev/null)
+  [ -n "$artifact" ] && [ "$name" = "risky-change" ] && DUP_ARTIFACT="$artifact"
+  RECORDS=$(printf '%s' "$RECORDS" | jq -c \
+    --arg name "$name" --arg art "$artifact" --arg exp "$fdir/expectations.json" \
+    --argjson rc "$rc" --argjson pr "$i" \
+    '. + [{name:$name, artifact:$art, expectations:$exp, reviewExit:$rc, pr:$pr}]')
+done
+
+# Fall back to the first fixture's artifact for the duplicate check.
+if [ -z "$DUP_ARTIFACT" ]; then
+  DUP_ARTIFACT=$(printf '%s' "$RECORDS" | jq -r '.[0].artifact // empty')
+fi
+
+# ---- duplicate-publish prevention (offline, --mock) -------------------
+DUP_OK="false"
+DUP_DETAIL="skipped (no artifact)"
+if [ -n "$DUP_ARTIFACT" ] && [ -f "$DUP_ARTIFACT" ]; then
+  DPR=$(jq -r '.pr // 1' "$DUP_ARTIFACT")
+  RDIR="$STAGING/receipts"
+  "$SCRIPT_DIR/publish-review" --artifact "$DUP_ARTIFACT" --pr "$DPR" \
+     --confirm "publish-pr-$DPR" --mock --dir "$RDIR" >/dev/null 2>&1
+  first=$?
+  "$SCRIPT_DIR/publish-review" --artifact "$DUP_ARTIFACT" --pr "$DPR" \
+     --confirm "publish-pr-$DPR" --mock --dir "$RDIR" >/dev/null 2>&1
+  second=$?
+  if [ "$first" -eq 0 ] && [ "$second" -eq 1 ]; then
+    DUP_OK="true"; DUP_DETAIL="first post ok, duplicate refused (exit 1)"
+  else
+    DUP_OK="false"; DUP_DETAIL="expected exits 0 then 1, got $first then $second"
+  fi
+fi
+
+# ---- evaluate expectations --------------------------------------------
+RESULT=$(
+  RECORDS="$RECORDS" DUP_OK="$DUP_OK" DUP_DETAIL="$DUP_DETAIL" \
+  python3 "$SCRIPT_DIR/lib/review-eval-check.py"
+)
+
+EXIT_HINT=$(printf '%s' "$RESULT" | jq -r '.exit')
+STATUS=$(printf '%s' "$RESULT" | jq -r '.status')
+OUTPUTS=$(printf '%s' "$RESULT" | jq -c '.outputs')
+
+if [ "$FORMAT" = "json" ]; then
+  print_envelope "review-eval" "$STATUS" "$OUTPUTS" "[]" "[]"
+else
+  printf '%s' "$RESULT" | jq -r '.text'
+fi
+
+case "$EXIT_HINT" in
+  0) exit "$ENVELOPE_EXIT_OK" ;;
+  1) exit "$ENVELOPE_EXIT_DOMAIN" ;;
+  *) exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac

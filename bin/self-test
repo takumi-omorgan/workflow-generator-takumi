@@ -104,6 +104,7 @@ step "validate-kit-json"       0 bin/validate-kit-json
 step "validate-carry-forward"  0 bin/validate-carry-forward
 step "check-consistency"       0 bin/check-consistency
 step "check-state-cap"         0 bin/check-state-cap --check
+step "review-eval"             0 bin/review-eval
 
 # bash -n across all bin scripts (aggregate step)
 syntax_rc=0
@@ -153,6 +154,29 @@ bin/write-receipt --skill self-test --key stub --status completed --dir "$STUB/r
 record "stub:receipt-write" "stub" "0" "$?"
 bin/write-receipt --find --skill self-test --key stub --status completed --dir "$STUB/receipts" >/dev/null 2>&1
 record "stub:receipt-find" "stub" "0" "$?"
+
+# AI PR review: generate a review artifact offline (mock), then preview the
+# publish (posts nothing). Exercises bin/review-pr and bin/publish-review
+# without a network, a key, or a real PR.
+cat > "$STUB/r.diff" <<'FIX'
+diff --git a/x.py b/x.py
+--- a/x.py
++++ b/x.py
+@@ -1,1 +1,2 @@
+ a = 1
++b = a / 0
+FIX
+cat > "$STUB/r.mock.json" <<'FIX'
+{"schema":"ai-review-artifact","version":1,"summary":"division by zero","findings":[{"id":"f1","classification":"blocking","severity":"high","category":"correctness","file":"x.py","line":2,"title":"div0","detail":"b=a/0 raises","suggestion":"guard b!=0","confidence":"high","commentable":true}]}
+FIX
+bin/review-pr --pr 1 --diff "$STUB/r.diff" --mock "$STUB/r.mock.json" --out "$STUB/art" --format json >/dev/null 2>&1
+record "stub:review-pr-mock" "stub" "0" "$?"
+STUB_ART=$(ls "$STUB"/art/pr-1-*.json 2>/dev/null | head -1)
+bin/publish-review --artifact "$STUB_ART" --pr 1 >/dev/null 2>&1
+record "stub:publish-preview" "stub" "0" "$?"
+# A bad approval token must be refused (exit 4), nothing posted.
+bin/publish-review --artifact "$STUB_ART" --pr 1 --confirm wrong --dir "$STUB/rcpts" >/dev/null 2>&1
+record "stub:publish-bad-token" "stub" "4" "$?"
 
 ELAPSED=$((SECONDS - START))
 

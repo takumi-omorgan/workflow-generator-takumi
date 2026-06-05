@@ -155,6 +155,8 @@ for f in os.environ.get("ENVELOPE_SCRIPTS", "").split():
 schema_homes = {
     "schemas/design-questions.v1.yaml": "docs/workflow-guide.md",
     "schemas/receipt.v1.yaml": "docs/receipts.md",
+    "schemas/ai-review-config.v1.yaml": "docs/ai-review.md",
+    "schemas/ai-review-artifact.v1.yaml": "docs/ai-review.md",
 }
 for schema, home in schema_homes.items():
     if not os.path.isfile(schema):
