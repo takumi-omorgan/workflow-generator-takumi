@@ -1,6 +1,6 @@
 {
   "kit": "claude-code-workflow-kit",
-  "kitVersion": "4.0.0",
+  "kitVersion": "4.1.0",
   "schemaVersion": "1",
   "description": "Machine-readable index of the Claude Code Workflow Kit's skills, permission categories, inputs, outputs, handoffs, and programmatic surfaces. Hand-maintained; validated by bin/validate-kit-json. See ADR-047 and docs/agent-contract.md.",
   "contract": {
@@ -254,6 +254,35 @@
         {
           "skill": "release",
           "when": "--release is set"
+        }
+      ]
+    },
+    {
+      "name": "feature-prd",
+      "slashCommand": "/feature-prd",
+      "permissionCategory": 1,
+      "description": "Capture a major feature update as an additive PRD addendum extending design/prd.md.",
+      "inputs": [
+        {
+          "name": "feature",
+          "required": true,
+          "description": "The major feature or capability area to plan (description, notes, or roadmap reference)"
+        }
+      ],
+      "outputs": [
+        {
+          "artefact": "design/prd-addenda/NNN-feature-name.md",
+          "description": "Numbered PRD addendum extending design/prd.md; original PRD never overwritten"
+        }
+      ],
+      "next": [
+        {
+          "skill": "adr-writer",
+          "when": "the addendum surfaces decisions needing ADRs"
+        },
+        {
+          "skill": "issue-planner",
+          "when": "the decomposition feeds the GitHub backlog"
         }
       ]
     },
@@ -595,6 +624,51 @@
         {
           "skill": "prepare-issue",
           "when": "continue-here points to issue preparation"
+        }
+      ]
+    },
+    {
+      "name": "start",
+      "slashCommand": "/start",
+      "permissionCategory": 1,
+      "description": "Inspect project state and recommend (or invoke, for cat-1) the next skill; the kit's 'what now?' router. Also answers to /next.",
+      "inputs": [
+        {
+          "name": "goal",
+          "required": false,
+          "description": "Optional one-line hint about what to do next (e.g. 'plan a feature', 'ship')"
+        }
+      ],
+      "outputs": [
+        {
+          "artefact": "(routing recommendation)",
+          "description": "The next skill to run, why, and the active operating mode; may directly invoke a cat-1 target"
+        }
+      ],
+      "next": [
+        {
+          "skill": "idea-to-prd",
+          "when": "the project has only an idea"
+        },
+        {
+          "skill": "prd-to-mvp",
+          "when": "a normalized PRD exists but no MVP"
+        },
+        {
+          "skill": "prepare-issue",
+          "when": "an issue is selected but has no prepared prompt"
+        },
+        {
+          "skill": "claude-issue-executor",
+          "when": "a prepared prompt exists on disk"
+        },
+        {
+          "skill": "pr-review-packager",
+          "when": "a branch is ahead of main and ready to ship"
+        },
+        {
+          "skill": "feature-prd",
+          "when": "the user wants a major feature update on a mature project"
         }
       ]
     },
