@@ -1,6 +1,6 @@
 # ADR-046: Optional AI PR review module
 
-**Status:** accepted
+**Status:** superseded by [ADR-051](adr-051-operator-driven-ai-pr-review.md)
 **Date:** 2026-05-07
 
 ## Context
