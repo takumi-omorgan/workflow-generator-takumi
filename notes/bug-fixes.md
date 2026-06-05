@@ -40,6 +40,25 @@ Entries graduate to GitHub issues (or directly to PRs for trivial fixes).
 
 Ordered by severity (high → low) then capture date.
 
+### Installer initial commit omits `design/` — `git add Design` casing
+
+**Status:** unfiled (fix already present on `m1-front-door-simplification`, PR #1 — verify on M1 merge, then drop or file a standalone one-liner if M1 reshapes the line)
+**Severity:** high
+**Captured:** 2026-06-05
+**Source:** dogfooding (M0-3 installer idempotency audit)
+**Cluster:** installer
+**Related:** #60 (installer cluster — missing files); distinct root cause (file is now *created* but not *committed*)
+
+**Symptom:** A fresh `install-workflow-kit` run leaves `design/adr/README.md` untracked after the advertised "initial commit". The seeded ADR-index README (required with marker fences by `bin/sync-adr-index`) is never staged, so a freshly installed project starts in a dirty state.
+
+**Repro:** `install-workflow-kit --target=$TMP --project-name=demo --non-interactive`; then `git -C $TMP status` → `?? design/adr/README.md`. Persists across reruns and `--force`.
+
+**Root cause:** The installer creates `design/adr/` (lowercase, ADR-045 canonical) but its git-staging block lists `Design` (capital): `git add … Design … 2>/dev/null || true`. On a case-sensitive checkout the add no-ops and the error is swallowed.
+
+**Proposed fix:** `Design` → `design` in the installer's `git add` list (`bin/install-workflow-kit`, ~line 552). The same capitalisation defect exists in the manual-install doc `docs/install.md:256` (M1 Issue 5). Both files are in PR #1's change set and the M1 branch already uses lowercase `design`; M0 deferred the fix to avoid a conflicting edit. See `notes/installer-idempotency-audit.md`.
+
+---
+
 ### `notes/` folder cleanup — promote templates out, refresh references
 
 **Status:** resolved-#89 — placeholder-mapping salvage collapsed into `prompts/_template.md` header; standalone `docs/issue-prompt-guide.md` deleted (2026-05-12)
