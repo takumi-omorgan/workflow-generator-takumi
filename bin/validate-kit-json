@@ -1,0 +1,144 @@
+#!/usr/bin/env bash
+# validate-kit-json — verify kit.json agrees with skills/ frontmatter
+# (M2 Issue 6 validation path, ADR-047).
+#
+# Checks, in order:
+#   1. kit.json exists and is well-formed JSON.
+#   2. Its skill set exactly matches the skills/*/SKILL.md directories
+#      (no missing, no extra).
+#   3. For each skill, name and permissionCategory in kit.json match
+#      the skill's frontmatter, and name matches the directory.
+#   4. Every next[].skill target names a skill present in the index.
+#
+# Deeper field-by-field sync (inputs/outputs prose vs. structured) is
+# out of scope here and tracked as the M4 consistency-check issue.
+#
+# Usage:
+#   bin/validate-kit-json [--format text|json] [-h]
+#
+# Exit codes (shared convention; see json-envelope.sh):
+#   0  in sync
+#   1  drift detected (domain failure)
+#   2  invocation error (kit.json missing/unreadable/invalid, bad flags)
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/json-envelope.sh
+. "$SCRIPT_DIR/lib/json-envelope.sh"
+
+usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; }
+
+FORMAT="text"
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --format)
+      [ $# -ge 2 ] || { printf 'validate-kit-json: --format needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+      FORMAT="$2"; shift 2 ;;
+    -h|--help) usage; exit 0 ;;
+    *) printf 'validate-kit-json: unknown argument: %s\n' "$1" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+  esac
+done
+case "$FORMAT" in
+  text|json) ;;
+  *) printf 'validate-kit-json: --format must be text or json (got: %s)\n' "$FORMAT" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac
+
+if [ ! -f kit.json ]; then
+  printf 'validate-kit-json: kit.json not found (run from the kit repo root)\n' >&2
+  exit "$ENVELOPE_EXIT_INVOCATION"
+fi
+
+# All logic in one python pass; prints status/outputs/text and an
+# exit-class hint that bash maps to the shared exit codes.
+RESULT=$(python3 -c '
+import json, os, glob, sys, re
+
+def frontmatter_fields(path):
+    """Tiny line-based extractor for name + permission-category from a
+    SKILL.md frontmatter block. Avoids a YAML dependency."""
+    name = None
+    perm = None
+    with open(path, encoding="utf-8") as fh:
+        lines = fh.read().split("\n")
+    if not lines or lines[0] != "---":
+        return name, perm
+    for ln in lines[1:]:
+        if ln == "---":
+            break
+        m = re.match(r"name:\s*(.+?)\s*$", ln)
+        if m and name is None:
+            name = m.group(1).strip().strip("\"\x27")
+        m = re.match(r"permission-category:\s*([0-9]+)", ln)
+        if m and perm is None:
+            perm = int(m.group(1))
+    return name, perm
+
+try:
+    kit = json.load(open("kit.json", encoding="utf-8"))
+except Exception as e:
+    print(json.dumps({"exit": 2, "status": "invalid-json",
+                      "outputs": {"problems": ["kit.json is not valid JSON: %s" % e]},
+                      "text": "validate-kit-json: kit.json is not valid JSON: %s" % e}))
+    sys.exit(0)
+
+index = {s["name"]: s for s in kit.get("skills", [])}
+index_names = set(index)
+dir_names = set()
+for sk in glob.glob("skills/*/SKILL.md"):
+    dir_names.add(os.path.basename(os.path.dirname(sk)))
+
+problems = []
+
+missing = sorted(dir_names - index_names)
+extra = sorted(index_names - dir_names)
+for m in missing:
+    problems.append("skill %s exists in skills/ but is missing from kit.json" % m)
+for x in extra:
+    problems.append("skill %s is in kit.json but has no skills/%s/SKILL.md" % (x, x))
+
+for name in sorted(dir_names & index_names):
+    entry = index[name]
+    fm_name, fm_perm = frontmatter_fields("skills/%s/SKILL.md" % name)
+    if fm_name != name:
+        problems.append("skills/%s frontmatter name=%r does not match directory" % (name, fm_name))
+    if entry.get("name") != name:
+        problems.append("kit.json entry for %s has name=%r" % (name, entry.get("name")))
+    if fm_perm is not None and entry.get("permissionCategory") != fm_perm:
+        problems.append("permission-category mismatch for %s: frontmatter=%s kit.json=%s"
+                        % (name, fm_perm, entry.get("permissionCategory")))
+
+for name, entry in index.items():
+    for nx in entry.get("next", []):
+        tgt = nx.get("skill")
+        if tgt and tgt not in index_names:
+            problems.append("skill %s lists next.skill=%s which is not in the index" % (name, tgt))
+
+if problems:
+    text = "validate-kit-json: %d problem(s) found:\n" % len(problems) + "\n".join("  - " + p for p in problems)
+    out = {"exit": 1, "status": "drift",
+           "outputs": {"skillCount": len(dir_names), "problems": problems},
+           "text": text}
+else:
+    text = "validate-kit-json: in sync (%d skills; kit.json and frontmatter agree)" % len(dir_names)
+    out = {"exit": 0, "status": "in-sync",
+           "outputs": {"skillCount": len(dir_names), "problems": []},
+           "text": text}
+print(json.dumps(out, ensure_ascii=False))
+')
+
+EXIT_HINT=$(printf '%s' "$RESULT" | jq -r '.exit')
+STATUS=$(printf '%s' "$RESULT" | jq -r '.status')
+OUTPUTS=$(printf '%s' "$RESULT" | jq -c '.outputs')
+
+if [ "$FORMAT" = "json" ]; then
+  print_envelope "validate-kit-json" "$STATUS" "$OUTPUTS" "[]" "[]"
+else
+  printf '%s' "$RESULT" | jq -r '.text'
+fi
+
+case "$EXIT_HINT" in
+  0) exit "$ENVELOPE_EXIT_OK" ;;
+  1) exit "$ENVELOPE_EXIT_DOMAIN" ;;
+  *) exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac

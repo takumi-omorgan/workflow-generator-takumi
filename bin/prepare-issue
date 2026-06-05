@@ -1,0 +1,208 @@
+#!/usr/bin/env bash
+# prepare-issue — read-only programmatic surface for the prepare-issue
+# skill (M2 Issue 9, ADR-047).
+#
+# This is NOT the interactive /prepare-issue skill, which fills and
+# writes the prompt file. This surface only *inspects* the current
+# state for an issue and reports it as structured data: the prompt
+# path, whether the prompt exists, whether it is stale relative to the
+# live GitHub issue, the ADR references found in the issue, any
+# detected gaps, and the recommended next action. It writes nothing.
+#
+# Usage:
+#   bin/prepare-issue --issue N [--format text|json] [-h]
+#
+# Flags:
+#   --issue N            GitHub issue number (positive integer; required)
+#   --format text|json   default text; json emits the standard envelope
+#   -h, --help           print this header
+#
+# Exit codes (subset of the shared convention; see json-envelope.sh):
+#   0  analysis completed (the prompt may be present, missing, or stale —
+#      that is reported in the envelope, not the exit code)
+#   2  invocation error (bad flags, non-numeric issue)
+#   3  auth/service failure (gh missing, unauthenticated, or issue lookup
+#      failed) — a degraded, prompt-only analysis is still emitted
+#
+# Standard envelope `outputs` payload:
+#   { "issue": N, "promptPath": "<path or null>", "promptExists": bool,
+#     "stale": bool|null, "adrReferences": ["ADR-013", ...],
+#     "gaps": ["prompt-missing"|"stale-prompt"|...] }
+# `next` recommends claude-issue-executor. See docs/agent-contract.md.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/json-envelope.sh
+. "$SCRIPT_DIR/lib/json-envelope.sh"
+
+usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; }
+
+ISSUE=""
+FORMAT="text"
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --issue)
+      [ $# -ge 2 ] || { printf 'prepare-issue: --issue needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+      ISSUE="$2"; shift 2 ;;
+    --format)
+      [ $# -ge 2 ] || { printf 'prepare-issue: --format needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+      FORMAT="$2"; shift 2 ;;
+    -h|--help) usage; exit 0 ;;
+    *) printf 'prepare-issue: unknown argument: %s\n' "$1" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+  esac
+done
+
+if [ -z "$ISSUE" ]; then
+  printf 'prepare-issue: --issue is required (a positive integer)\n' >&2
+  exit "$ENVELOPE_EXIT_INVOCATION"
+fi
+case "$ISSUE" in
+  ''|*[!0-9]*) printf 'prepare-issue: --issue must be a positive integer (got: %s)\n' "$ISSUE" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac
+case "$FORMAT" in
+  text|json) ;;
+  *) printf 'prepare-issue: --format must be text or json (got: %s)\n' "$FORMAT" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac
+
+# ---- locate the prompt file -------------------------------------------
+PADDED=$(printf '%03d' "$ISSUE")
+PROMPT_PATH=""
+PROMPT_MTIME=""
+shopt -s nullglob
+matches=(prompts/issue-"$PADDED"-*.md)
+shopt -u nullglob
+if [ "${#matches[@]}" -ge 1 ]; then
+  PROMPT_PATH="${matches[0]}"
+  if stat -f '%m' "$PROMPT_PATH" >/dev/null 2>&1; then
+    PROMPT_MTIME=$(stat -f '%m' "$PROMPT_PATH")
+  else
+    PROMPT_MTIME=$(stat -c '%Y' "$PROMPT_PATH")
+  fi
+fi
+
+# ---- fetch the live issue (best-effort) -------------------------------
+DEGRADED=0
+ISSUE_JSON='{}'
+GH_ERR=""
+if ! command -v gh >/dev/null 2>&1; then
+  DEGRADED=1
+  GH_ERR="gh CLI not found on PATH"
+elif ! ISSUE_JSON=$(gh issue view "$ISSUE" --json title,body,updatedAt,labels,url 2>/tmp/prepare-issue-gh-err.$$); then
+  DEGRADED=1
+  GH_ERR=$(cat /tmp/prepare-issue-gh-err.$$ 2>/dev/null | tr '\n' ' ' | sed 's/  */ /g')
+  ISSUE_JSON='{}'
+fi
+rm -f /tmp/prepare-issue-gh-err.$$ 2>/dev/null || true
+
+# ---- analyze ----------------------------------------------------------
+# A single python pass computes status/outputs/next/errors/text from the
+# gathered inputs. Bash then renders either the envelope or the text.
+RESULT=$(
+  ISSUE="$ISSUE" PROMPT_PATH="$PROMPT_PATH" PROMPT_MTIME="$PROMPT_MTIME" \
+  DEGRADED="$DEGRADED" GH_ERR="$GH_ERR" \
+  python3 -c '
+import os, json, re, sys, datetime
+
+issue = int(os.environ["ISSUE"])
+prompt_path = os.environ.get("PROMPT_PATH") or None
+prompt_mtime = os.environ.get("PROMPT_MTIME") or None
+degraded = os.environ.get("DEGRADED") == "1"
+gh_err = os.environ.get("GH_ERR") or ""
+
+issue_json = sys.stdin.read().strip() or "{}"
+try:
+    data = json.loads(issue_json)
+except Exception:
+    data = {}
+
+prompt_exists = prompt_path is not None
+gaps = []
+errors = []
+stale = None
+adr_refs = []
+
+if not prompt_exists:
+    gaps.append("prompt-missing")
+
+if degraded:
+    errors.append({"code": "gh-unavailable",
+                   "message": gh_err or "GitHub lookup failed; staleness and ADR refs undetermined"})
+    status = "degraded"
+else:
+    body = (data.get("title", "") or "") + "\n" + (data.get("body", "") or "")
+    adr_refs = sorted(set("ADR-%03d" % int(n) for n in re.findall(r"ADR-0*([0-9]+)", body, re.I)),
+                      key=lambda s: int(s.split("-")[1]))
+    updated = data.get("updatedAt")
+    if prompt_exists and updated and prompt_mtime:
+        try:
+            iso = updated.replace("Z", "+00:00")
+            issue_epoch = datetime.datetime.fromisoformat(iso).timestamp()
+            stale = issue_epoch > float(prompt_mtime)
+        except Exception:
+            stale = None
+    if stale:
+        gaps.append("stale-prompt")
+    if not prompt_exists:
+        status = "prompt-missing"
+    elif stale:
+        status = "stale"
+    else:
+        status = "ok"
+
+outputs = {
+    "issue": issue,
+    "promptPath": prompt_path,
+    "promptExists": prompt_exists,
+    "stale": stale,
+    "adrReferences": adr_refs,
+    "gaps": gaps,
+}
+
+# Per ADR-047, the recommended next action is always the executor.
+exec_arg = prompt_path if prompt_path else str(issue)
+if status == "ok":
+    when = "the prepared prompt is current"
+elif status == "stale":
+    when = "after re-running /prepare-issue to refresh the prompt"
+elif status == "prompt-missing":
+    when = "after running /prepare-issue to create the prompt"
+else:
+    when = "after GitHub access is restored and the prompt is prepared"
+nxt = [{"skill": "claude-issue-executor", "args": exec_arg, "when": when}]
+
+# Human-readable text rendering.
+lines = ["prepare-issue: analysis for issue #%d" % issue,
+         "  prompt:   %s" % (prompt_path or "(none — run /prepare-issue %d)" % issue),
+         "  exists:   %s" % ("yes" if prompt_exists else "no")]
+if degraded:
+    lines.append("  stale:    unknown (%s)" % (gh_err or "gh unavailable"))
+    lines.append("  adrs:     unknown (gh unavailable)")
+else:
+    lines.append("  stale:    %s" % ("yes" if stale else ("no" if stale is not None else "n/a")))
+    lines.append("  adrs:     %s" % (", ".join(adr_refs) if adr_refs else "none referenced"))
+lines.append("  gaps:     %s" % (", ".join(gaps) if gaps else "none"))
+lines.append("  next:     /claude-issue-executor %s" % exec_arg)
+text = "\n".join(lines)
+
+print(json.dumps({"status": status, "outputs": outputs, "next": nxt,
+                  "errors": errors, "text": text}, ensure_ascii=False))
+' <<<"$ISSUE_JSON"
+)
+
+STATUS=$(printf '%s' "$RESULT" | jq -r '.status')
+OUTPUTS=$(printf '%s' "$RESULT" | jq -c '.outputs')
+NEXT=$(printf '%s' "$RESULT" | jq -c '.next')
+ERRORS=$(printf '%s' "$RESULT" | jq -c '.errors')
+
+if [ "$FORMAT" = "json" ]; then
+  print_envelope "prepare-issue" "$STATUS" "$OUTPUTS" "$NEXT" "$ERRORS"
+else
+  printf '%s' "$RESULT" | jq -r '.text'
+fi
+
+if [ "$DEGRADED" -eq 1 ]; then
+  exit "$ENVELOPE_EXIT_AUTH"
+fi
+exit "$ENVELOPE_EXIT_OK"
