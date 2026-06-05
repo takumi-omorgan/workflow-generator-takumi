@@ -1,0 +1,9 @@
+{
+  "description": "Large noisy diff: find the buried regression, stay quiet on whitespace, and exercise safe truncation.",
+  "expect": {
+    "minBlocking": 1,
+    "maxFindings": 3,
+    "minCommentable": 1,
+    "truncated": true
+  }
+}

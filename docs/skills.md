@@ -47,6 +47,7 @@ maps to the underlying skill(s):
 | `/backlog` | "turn the plan into issues" | `issue-planner` |
 | `/work` | "build the next issue" | `prepare-issue` → `claude-issue-executor` |
 | `/ship` | "open the PR" | `pr-review-packager` |
+| `/review-pr` | "AI-review a PR" | `review-pr` (dry-run, then approved publish) |
 | `/finish-milestone` | "close out the milestone" | `audit-milestone` → `milestone-summary` → `complete-milestone` |
 | `/feature` | "plan a major feature update" | `feature-prd` |
 | `/release` | "cut a release" | `release` |
@@ -305,6 +306,30 @@ log main..HEAD`, shows the body for approval, and only then calls
   create`.
 - **Spec:** [`skills/pr-review-packager/SKILL.md`](../skills/pr-review-packager/SKILL.md).
 
+### `/review-pr` (cat-3)
+
+AI-review an **already-open** PR. Generates a local dry-run review
+artifact (Markdown + JSON) from the PR diff using a configured
+OpenAI-compatible provider (OpenRouter first), classifies findings as
+**blocking / non-blocking / question / praise**, and — only after you
+preview the exact comments and give explicit approval — publishes a PR
+review. Safe by default: generation posts nothing; publishing is the
+cat-3 GitHub write, gated by a deterministic `--confirm publish-pr-N`
+token and made idempotent by a receipt.
+
+- **Use when:** you want a structured first-pass review of an open PR.
+- **Input:** a PR number; provider config in `ai-review/config.json` with
+  the API key in the env var it names (never pasted into chat or
+  committed). See [`ai-review.md`](ai-review.md).
+- **Output:** `ai-review/artifacts/pr-N-<hash>.{json,md}` always; a posted
+  GitHub review only after explicit approval, plus a receipt.
+- **Permission gate:** dry-run is free; posting always requires an
+  explicit `yes` and the `--confirm` token, in every operating mode.
+- **Tools:** [`bin/review-pr`](../bin/review-pr),
+  [`bin/publish-review`](../bin/publish-review),
+  [`bin/review-eval`](../bin/review-eval).
+- **Spec:** [`skills/review-pr/SKILL.md`](../skills/review-pr/SKILL.md).
+
 ---
 
 ## 5. Closing milestones
@@ -523,6 +548,13 @@ never invoke them directly.
 | `bin/check-plan-criteria-drift` | Detect drift between `/check-plan` criteria and the canonical version-locked checklist |
 | `bin/install-workflow-kit` | Install the kit into a target project |
 | `bin/bootstrap-workflow-kit` | One-shot bootstrap helper for new projects |
+| `bin/review-pr` | Generate a dry-run AI review artifact from a PR diff (backs `/review-pr`) |
+| `bin/publish-review` | Preview, then post an AI review to a PR on explicit approval |
+| `bin/review-eval` | Offline fixture harness for AI PR review quality |
+
+The standard-envelope `bin/*` surfaces (including the three review tools)
+are catalogued in [`agent-contract.md` §4](agent-contract.md#4-programmatic-surfaces);
+the AI-review tools are documented for operators in [`ai-review.md`](ai-review.md).
 
 ---
 
@@ -548,6 +580,7 @@ never invoke them directly.
 | `/prd-to-mvp` | §1 Scoping |
 | `/prepare-issue` | §4 Per-issue execution |
 | `/release` | §6 Cutting releases |
+| `/review-pr` | §4 Per-issue execution |
 | `/resume` | §8 Cross-session continuity and routing |
 | `/start` | §8 Cross-session continuity and routing |
 | `/workflow-docs` | §7 Keeping docs in sync |

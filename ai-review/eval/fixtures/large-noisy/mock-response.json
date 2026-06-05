@@ -1,0 +1,20 @@
+{
+  "schema": "ai-review-artifact",
+  "version": 1,
+  "summary": "Mostly cosmetic/whitespace churn, with one real regression: truncate() now drops a string whose length exactly equals the limit. The noise is not worth commenting on.",
+  "findings": [
+    {
+      "id": "f1",
+      "classification": "blocking",
+      "severity": "high",
+      "category": "regression",
+      "file": "util/format.py",
+      "line": 11,
+      "title": "Off-by-one: truncate() now cuts at exactly the limit",
+      "detail": "Changing `<= limit` to `< limit` makes a string of length == limit get truncated and gain an ellipsis, changing existing behaviour.",
+      "suggestion": "Restore `if len(text) <= limit:`.",
+      "confidence": "high",
+      "commentable": true
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Claude Code Workflow Kit — State
 
-**Last updated:** 2026-05-08
+**Last updated:** 2026-06-05
 **Source of truth:** `gh` is canonical for issue/PR status; this file is a pointer.
 
 <!-- state:phase:start -->
@@ -15,10 +15,10 @@ single
 
 ## In-flight issue
 
-- **Issue:** none
-- **Prompt:** n/a
-- **Branch:** n/a
-- **Status:** none
+- **Issue:** M5 (roadmap Issues 22–28) — AI PR review integration
+- **Prompt:** design/prd-addenda/001-ai-pr-review.md + design/workflow-generator-roadmap-and-issues-20260605.md §M5
+- **Branch:** m5-ai-pr-review-integration
+- **Status:** implemented; PR open for review (not merged)
 
 <!-- state:in-flight:end -->
 
@@ -50,7 +50,7 @@ none
 
 ## Continue here
 
-PR #94 merged (squash `85237f9`); issue #93 closed and `notes/refactoring-ideas.md` entry #4 marked `shipped-#94`. Third in the post-MVP framing-refresh trio (after #89/PR #90 `docs/` slice and #91/PR #92 `examples/` slice) now complete — the dated-stub / shipped-in-later-issues framing is gone from the kit root. No in-flight issue. Next: pick the next item from `notes/refactoring-ideas.md` Unfiled (open entries: #1, #3, #5, #6, #10, #11) when ready.
+M5 (AI PR review integration) is implemented on branch `m5-ai-pr-review-integration` and open as a PR for review (do not merge). Adds the `/review-pr` skill, three `bin/*` surfaces (`review-pr`, `publish-review`, `review-eval`), the `ai-review/` prompt pack + config example + eval fixtures, two schemas, ADR-051 (supersedes ADR-046), and PRD addendum 001. Safe by default: review generation posts nothing; publishing needs the deterministic `--confirm publish-pr-N` token and writes a receipt. Deferred: installer distribution of the review tools to target projects, real diff chunking, full-codebase context (see ADR-051 / addendum Open questions). Next after merge: pick the next item from `notes/refactoring-ideas.md` Unfiled, or address the M5 deferrals.
 
 <!-- state:continue-here:end -->
 

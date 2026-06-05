@@ -1,0 +1,191 @@
+#!/usr/bin/env bash
+# publish-review — preview and (only on explicit approval) post an AI review
+# to a GitHub PR (M5 Issue 25, ADR-051).
+#
+# SAFE BY DEFAULT. With no --confirm it previews the EXACT top-level review
+# body and inline comments and posts NOTHING. Posting to GitHub is a cat-3
+# write that requires the deterministic token `--confirm publish-pr-<N>`
+# (ADR-048). Findings without a valid diff line are folded into the top-level
+# body, never posted as broken inline comments. A successful post records an
+# idempotency receipt (docs/receipts.md, ADR-050) keyed by the PR; a second
+# attempt with the SAME artifact is refused unless --force.
+#
+# Usage:
+#   # preview (default; posts nothing)
+#   bin/publish-review --artifact FILE [--pr N] [--diff FILE] [--format text|json]
+#
+#   # post after reviewing the preview (explicit, deterministic approval)
+#   bin/publish-review --artifact FILE --pr N --confirm publish-pr-N [--force]
+#
+#   # offline simulation (writes a receipt, calls no GitHub API)
+#   bin/publish-review --artifact FILE --pr N --confirm publish-pr-N --mock
+#
+# Flags:
+#   --artifact FILE   review artifact JSON from bin/review-pr (required)
+#   --pr N            PR number (default: the artifact's pr field)
+#   --diff FILE       re-validate inline comment lines against this diff
+#   --confirm TOKEN   deterministic approval token: must be publish-pr-<N>
+#   --force           re-post even if a receipt for the same artifact exists
+#   --mock            simulate posting (no GitHub call); still writes a receipt
+#   --dir DIR         receipts directory (default .claude/receipts)
+#   --format FMT      text (default) | json (standard envelope)
+#   -h, --help        print this header
+#
+# Exit codes (shared convention; see lib/json-envelope.sh):
+#   0  preview shown, or review posted/simulated successfully
+#   1  refused: a receipt for the same artifact already exists (use --force)
+#   2  invocation error (bad flags, unreadable/!artifact)
+#   3  auth/service failure (gh missing/unauthenticated, or the post failed)
+#   4  approval failed: --confirm token missing or did not match publish-pr-<N>
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/json-envelope.sh
+. "$SCRIPT_DIR/lib/json-envelope.sh"
+
+usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; }
+
+ARTIFACT=""
+PR=""
+DIFF_FILE=""
+CONFIRM=""
+FORCE=0
+MOCK=0
+DIR=".claude/receipts"
+FORMAT="text"
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --artifact) [ $# -ge 2 ] || { printf 'publish-review: --artifact needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; ARTIFACT="$2"; shift 2 ;;
+    --pr)       [ $# -ge 2 ] || { printf 'publish-review: --pr needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; PR="$2"; shift 2 ;;
+    --diff)     [ $# -ge 2 ] || { printf 'publish-review: --diff needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; DIFF_FILE="$2"; shift 2 ;;
+    --confirm)  [ $# -ge 2 ] || { printf 'publish-review: --confirm needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; CONFIRM="$2"; shift 2 ;;
+    --force)    FORCE=1; shift ;;
+    --mock)     MOCK=1; shift ;;
+    --dir)      [ $# -ge 2 ] || { printf 'publish-review: --dir needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; DIR="$2"; shift 2 ;;
+    --format)   [ $# -ge 2 ] || { printf 'publish-review: --format needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; FORMAT="$2"; shift 2 ;;
+    -h|--help)  usage; exit 0 ;;
+    *) printf 'publish-review: unknown argument: %s\n' "$1" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+  esac
+done
+
+case "$FORMAT" in text|json) ;; *) printf 'publish-review: --format must be text or json (got: %s)\n' "$FORMAT" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;; esac
+[ -n "$ARTIFACT" ] || { printf 'publish-review: --artifact is required\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+[ -f "$ARTIFACT" ] || { printf 'publish-review: artifact not found: %s\n' "$ARTIFACT" >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+[ -z "$DIFF_FILE" ] || [ -f "$DIFF_FILE" ] || { printf 'publish-review: --diff file not found: %s\n' "$DIFF_FILE" >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+
+# ---- build the publish plan -------------------------------------------
+PLAN=$(ARTIFACT="$ARTIFACT" PR="$PR" DIFF_FILE="$DIFF_FILE" \
+       python3 "$SCRIPT_DIR/lib/review-publish.py") || exit "$ENVELOPE_EXIT_INVOCATION"
+
+PLAN_PR=$(printf '%s' "$PLAN" | jq -r '.pr // empty')
+[ -n "$PR" ] || PR="$PLAN_PR"
+if [ -z "$PR" ]; then
+  printf 'publish-review: no PR number (pass --pr N or use an artifact with a pr field)\n' >&2
+  exit "$ENVELOPE_EXIT_INVOCATION"
+fi
+case "$PR" in ''|*[!0-9]*) printf 'publish-review: --pr must be a positive integer (got: %s)\n' "$PR" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;; esac
+
+ART_HASH=$(printf '%s' "$PLAN" | jq -r '.artifactHash // ""')
+INLINE_COUNT=$(printf '%s' "$PLAN" | jq -r '.counts.inline')
+TOPLEVEL_COUNT=$(printf '%s' "$PLAN" | jq -r '.counts.topLevel')
+TOP_BODY=$(printf '%s' "$PLAN" | jq -r '.topLevelBody')
+EXPECTED_TOKEN="publish-pr-$PR"
+
+render_preview_text() {
+  printf 'publish-review: PREVIEW for PR #%s — nothing has been posted.\n\n' "$PR"
+  printf -- '--- top-level review body ---\n%s\n' "$TOP_BODY"
+  printf -- '--- inline comments (%s) ---\n' "$INLINE_COUNT"
+  printf '%s' "$PLAN" | jq -r '.inlineComments[] | "  \(.path):\(.line)\n    \(.body | gsub("\n"; " ⏎ "))"'
+  [ "$INLINE_COUNT" = "0" ] && printf '  (none)\n'
+  printf '\nTo post these to GitHub, re-run with:  --confirm %s\n' "$EXPECTED_TOKEN"
+}
+
+OUTPUTS_BASE=$(jq -nc --argjson pr "$PR" --arg hash "$ART_HASH" \
+  --argjson inline "$INLINE_COUNT" --argjson top "$TOPLEVEL_COUNT" \
+  '{pr:$pr, artifactHash:$hash, inlineComments:$inline, topLevelFindings:$top}')
+
+# ---- preview mode (default; no approval) -------------------------------
+if [ -z "$CONFIRM" ]; then
+  NEXT=$(jq -nc --arg t "$EXPECTED_TOKEN" --arg a "$ARTIFACT" --argjson pr "$PR" \
+    '[{skill:"publish-review", args:("--artifact "+$a+" --pr "+($pr|tostring)+" --confirm "+$t), when:"after you approve the previewed comments"}]')
+  if [ "$FORMAT" = "json" ]; then
+    OUT=$(printf '%s' "$OUTPUTS_BASE" | jq -c --arg b "$TOP_BODY" --argjson c "$(printf '%s' "$PLAN" | jq -c '.inlineComments')" '. + {topLevelBody:$b, inlineCommentsPreview:$c, posted:false}')
+    print_envelope "publish-review" "preview" "$OUT" "$NEXT" "[]"
+  else
+    render_preview_text
+  fi
+  exit "$ENVELOPE_EXIT_OK"
+fi
+
+# ---- approval check ----------------------------------------------------
+if [ "$CONFIRM" != "$EXPECTED_TOKEN" ]; then
+  printf 'publish-review: approval token mismatch. Expected --confirm %s (got: %s). Nothing posted.\n' "$EXPECTED_TOKEN" "$CONFIRM" >&2
+  if [ "$FORMAT" = "json" ]; then
+    print_envelope "publish-review" "approval-failed" "$OUTPUTS_BASE" "[]" \
+      "$(jq -nc --arg e "$EXPECTED_TOKEN" '[{code:"approval-token-mismatch", message:("expected --confirm "+$e)}]')"
+  fi
+  exit "$ENVELOPE_EXIT_CANCEL"
+fi
+
+# ---- idempotency: refuse a duplicate of the SAME artifact --------------
+PRIOR=$("$SCRIPT_DIR/write-receipt" --find --skill publish-review --key "pr-$PR" --dir "$DIR" --format json 2>/dev/null || true)
+PRIOR_HASH=$(printf '%s' "$PRIOR" | jq -r '.outputs.receipt.outputs.artifactHash // empty' 2>/dev/null || true)
+PRIOR_STATUS=$(printf '%s' "$PRIOR" | jq -r '.outputs.receipt.status // empty' 2>/dev/null || true)
+if [ "$FORCE" -eq 0 ] && [ -n "$PRIOR_HASH" ] && [ "$PRIOR_HASH" = "$ART_HASH" ] && [ "$PRIOR_STATUS" = "completed" ]; then
+  printf 'publish-review: a review for PR #%s with this exact artifact was already posted (receipt exists). Use --force to post again.\n' "$PR" >&2
+  if [ "$FORMAT" = "json" ]; then
+    print_envelope "publish-review" "already-published" \
+      "$(printf '%s' "$OUTPUTS_BASE" | jq -c '. + {posted:false}')" "[]" \
+      '[{"code":"duplicate","message":"matching receipt exists; use --force"}]'
+  fi
+  exit "$ENVELOPE_EXIT_DOMAIN"
+fi
+
+# ---- post (real) or simulate (--mock) ---------------------------------
+REVIEW_ID=""
+if [ "$MOCK" -eq 1 ]; then
+  REVIEW_ID="mock-review-$PR"
+  POST_STATUS="published-mock"
+else
+  if ! command -v gh >/dev/null 2>&1; then
+    printf 'publish-review: gh CLI not found; cannot post (use --mock to simulate)\n' >&2
+    exit "$ENVELOPE_EXIT_AUTH"
+  fi
+  PAYLOAD_FILE=$(mktemp 2>/dev/null || mktemp -t publish-review)
+  trap 'rm -f "$PAYLOAD_FILE" 2>/dev/null || true' EXIT
+  printf '%s' "$PLAN" | jq -c '.ghPayload' > "$PAYLOAD_FILE"
+  # Cat-3 GitHub write. Reached only with a matching --confirm token.
+  if ! REVIEW_ID=$(gh api -X POST "repos/{owner}/{repo}/pulls/$PR/reviews" \
+        --input "$PAYLOAD_FILE" --jq '.id' 2>/tmp/publish-review-gh.$$); then
+    ERR=$(tr '\n' ' ' </tmp/publish-review-gh.$$ 2>/dev/null); rm -f /tmp/publish-review-gh.$$
+    printf 'publish-review: gh review post failed: %s\n' "$ERR" >&2
+    "$SCRIPT_DIR/write-receipt" --skill publish-review --key "pr-$PR" --status failed \
+      --dir "$DIR" --outputs "$(jq -nc --arg h "$ART_HASH" '{artifactHash:$h}')" \
+      --next "retry after fixing the GitHub error" >/dev/null 2>&1 || true
+    exit "$ENVELOPE_EXIT_AUTH"
+  fi
+  rm -f /tmp/publish-review-gh.$$ 2>/dev/null || true
+  POST_STATUS="published"
+fi
+
+# ---- write the success receipt ----------------------------------------
+RC_OUT=$(jq -nc --arg h "$ART_HASH" --arg r "$REVIEW_ID" --argjson i "$INLINE_COUNT" \
+  --argjson pr "$PR" --arg a "$ARTIFACT" \
+  '{artifactHash:$h, reviewId:$r, inlineComments:$i, pr:$pr, artifact:$a}')
+"$SCRIPT_DIR/write-receipt" --skill publish-review --key "pr-$PR" --status completed \
+  --dir "$DIR" --inputs "$(jq -nc --arg a "$ARTIFACT" '{artifact:$a}')" \
+  --outputs "$RC_OUT" --next "none" >/dev/null 2>&1 || true
+
+OUT=$(printf '%s' "$OUTPUTS_BASE" | jq -c --arg r "$REVIEW_ID" --arg s "$POST_STATUS" '. + {posted:true, reviewId:$r, mode:$s}')
+if [ "$FORMAT" = "json" ]; then
+  print_envelope "publish-review" "$POST_STATUS" "$OUT" "[]" "[]"
+else
+  if [ "$MOCK" -eq 1 ]; then
+    printf 'publish-review: SIMULATED post for PR #%s (--mock): %s inline comment(s), review id %s. Receipt written; no GitHub call made.\n' "$PR" "$INLINE_COUNT" "$REVIEW_ID"
+  else
+    printf 'publish-review: posted review %s to PR #%s (%s inline comment(s)). Receipt written.\n' "$REVIEW_ID" "$PR" "$INLINE_COUNT"
+  fi
+fi
+exit "$ENVELOPE_EXIT_OK"

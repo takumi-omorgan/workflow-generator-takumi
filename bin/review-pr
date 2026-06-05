@@ -1,0 +1,232 @@
+#!/usr/bin/env bash
+# review-pr — generate a DRY-RUN AI review of a GitHub PR (M5 Issue 24,
+# ADR-051).
+#
+# This surface NEVER posts to GitHub. It fetches the PR diff and metadata
+# (via gh, or from a local --diff file for offline use), calls the
+# configured OpenAI-compatible model provider (or uses a local --mock
+# response), validates the model output against
+# schemas/ai-review-artifact.v1.yaml, and writes a local review artifact
+# (JSON + Markdown) under ai-review/artifacts/. Publishing the review to
+# GitHub is a separate, approval-gated step: bin/publish-review.
+#
+# Usage:
+#   bin/review-pr --pr N [--diff FILE] [--mock FILE] [--config FILE]
+#                 [--provider P] [--model M] [--base-url URL]
+#                 [--profile strict|balanced|lightweight]
+#                 [--out DIR] [--format text|json|md] [-h]
+#
+# Flags:
+#   --pr N            PR number (required; used as a label when --diff is given)
+#   --diff FILE       read the unified diff from FILE instead of `gh pr diff`
+#   --mock FILE       use FILE as the raw model response instead of calling
+#                     the provider (offline; skips the network and the key)
+#   --config FILE     provider config JSON (schemas/ai-review-config.v1.yaml)
+#   --provider P      override config provider label
+#   --model M         override config model id
+#   --base-url URL    override config baseURL
+#   --profile NAME    override config review profile
+#   --out DIR         artifact output dir (default ai-review/artifacts)
+#   --format FMT      text (default) | json (standard envelope) | md (report)
+#   -h, --help        print this header
+#
+# Config resolution (later overrides earlier): built-in defaults →
+# ai-review/config.json → --config FILE → CLI flags. The API key is read at
+# call time from the env var named by `apiKeyEnv`; it is never read from a
+# file. With no key (and no --mock), the script exits 3 with a setup message.
+#
+# Exit codes (shared convention; see lib/json-envelope.sh):
+#   0  a review artifact was written
+#   1  domain failure (model output could not be parsed/validated)
+#   2  invocation error (bad flags, unreadable input)
+#   3  auth/service failure (no credential, or the provider/gh call failed)
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+KIT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+# shellcheck source=lib/json-envelope.sh
+. "$SCRIPT_DIR/lib/json-envelope.sh"
+
+usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; }
+
+PR=""
+DIFF_FILE=""
+MOCK_FILE=""
+CONFIG_FILE=""
+OPT_PROVIDER=""
+OPT_MODEL=""
+OPT_BASEURL=""
+OPT_PROFILE=""
+OUT_DIR="ai-review/artifacts"
+FORMAT="text"
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --pr)       [ $# -ge 2 ] || { printf 'review-pr: --pr needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; PR="$2"; shift 2 ;;
+    --diff)     [ $# -ge 2 ] || { printf 'review-pr: --diff needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; DIFF_FILE="$2"; shift 2 ;;
+    --mock)     [ $# -ge 2 ] || { printf 'review-pr: --mock needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; MOCK_FILE="$2"; shift 2 ;;
+    --config)   [ $# -ge 2 ] || { printf 'review-pr: --config needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; CONFIG_FILE="$2"; shift 2 ;;
+    --provider) [ $# -ge 2 ] || { printf 'review-pr: --provider needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; OPT_PROVIDER="$2"; shift 2 ;;
+    --model)    [ $# -ge 2 ] || { printf 'review-pr: --model needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; OPT_MODEL="$2"; shift 2 ;;
+    --base-url) [ $# -ge 2 ] || { printf 'review-pr: --base-url needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; OPT_BASEURL="$2"; shift 2 ;;
+    --profile)  [ $# -ge 2 ] || { printf 'review-pr: --profile needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; OPT_PROFILE="$2"; shift 2 ;;
+    --out)      [ $# -ge 2 ] || { printf 'review-pr: --out needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; OUT_DIR="$2"; shift 2 ;;
+    --format)   [ $# -ge 2 ] || { printf 'review-pr: --format needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; FORMAT="$2"; shift 2 ;;
+    -h|--help)  usage; exit 0 ;;
+    *) printf 'review-pr: unknown argument: %s\n' "$1" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+  esac
+done
+
+case "$FORMAT" in text|json|md) ;; *) printf 'review-pr: --format must be text, json, or md (got: %s)\n' "$FORMAT" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;; esac
+[ -n "$PR" ] || { printf 'review-pr: --pr is required (a positive integer)\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+case "$PR" in ''|*[!0-9]*) printf 'review-pr: --pr must be a positive integer (got: %s)\n' "$PR" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;; esac
+if [ -n "$OPT_PROFILE" ]; then
+  case "$OPT_PROFILE" in strict|balanced|lightweight) ;; *) printf 'review-pr: --profile must be strict, balanced, or lightweight\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;; esac
+fi
+[ -z "$DIFF_FILE" ] || [ -f "$DIFF_FILE" ] || { printf 'review-pr: --diff file not found: %s\n' "$DIFF_FILE" >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+[ -z "$MOCK_FILE" ] || [ -f "$MOCK_FILE" ] || { printf 'review-pr: --mock file not found: %s\n' "$MOCK_FILE" >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+[ -z "$CONFIG_FILE" ] || [ -f "$CONFIG_FILE" ] || { printf 'review-pr: --config file not found: %s\n' "$CONFIG_FILE" >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+
+# ---- resolve config ----------------------------------------------------
+CONFIG=$(
+  CFG_FILE="$CONFIG_FILE" OPT_PROVIDER="$OPT_PROVIDER" OPT_MODEL="$OPT_MODEL" \
+  OPT_BASEURL="$OPT_BASEURL" OPT_PROFILE="$OPT_PROFILE" \
+  python3 - <<'PYEOF'
+import os, json, sys
+cfg = {
+    "provider": "openrouter",
+    "baseURL": "https://openrouter.ai/api/v1",
+    "model": "openai/gpt-4o-mini",
+    "apiKeyEnv": "OPENROUTER_API_KEY",
+    "timeoutSeconds": 60,
+    "maxDiffBytes": 200000,
+    "profile": "balanced",
+    "headers": {},
+}
+def merge(path):
+    if path and os.path.isfile(path):
+        try:
+            data = json.load(open(path, encoding="utf-8"))
+        except Exception as e:
+            sys.stderr.write("review-pr: config %s is not valid JSON: %s\n" % (path, e))
+            sys.exit(2)
+        if isinstance(data, dict):
+            for k, v in data.items():
+                if k in ("schema", "version"):
+                    continue
+                cfg[k] = v
+# ai-review/config.json (if present), then explicit --config
+merge("ai-review/config.json")
+merge(os.environ.get("CFG_FILE") or "")
+for env, key in (("OPT_PROVIDER","provider"),("OPT_MODEL","model"),
+                 ("OPT_BASEURL","baseURL"),("OPT_PROFILE","profile")):
+    val = os.environ.get(env)
+    if val:
+        cfg[key] = val
+print(json.dumps(cfg))
+PYEOF
+) || exit "$ENVELOPE_EXIT_INVOCATION"
+
+PROVIDER=$(printf '%s' "$CONFIG" | jq -r '.provider')
+MODEL=$(printf '%s' "$CONFIG" | jq -r '.model')
+BASEURL=$(printf '%s' "$CONFIG" | jq -r '.baseURL')
+APIKEYENV=$(printf '%s' "$CONFIG" | jq -r '.apiKeyEnv')
+TIMEOUT=$(printf '%s' "$CONFIG" | jq -r '.timeoutSeconds')
+MAXDIFF=$(printf '%s' "$CONFIG" | jq -r '.maxDiffBytes')
+PROFILE=$(printf '%s' "$CONFIG" | jq -r '.profile')
+
+# ---- gather the diff + metadata ---------------------------------------
+TITLE=""
+BODY=""
+if [ -n "$DIFF_FILE" ]; then
+  DIFF=$(cat "$DIFF_FILE")
+else
+  if ! command -v gh >/dev/null 2>&1; then
+    printf 'review-pr: gh CLI not found; install it or pass --diff FILE for offline review\n' >&2
+    exit "$ENVELOPE_EXIT_AUTH"
+  fi
+  if ! DIFF=$(gh pr diff "$PR" 2>/tmp/review-pr-gh.$$); then
+    ERR=$(tr '\n' ' ' </tmp/review-pr-gh.$$ 2>/dev/null); rm -f /tmp/review-pr-gh.$$
+    printf 'review-pr: gh pr diff %s failed: %s\n' "$PR" "$ERR" >&2
+    exit "$ENVELOPE_EXIT_AUTH"
+  fi
+  rm -f /tmp/review-pr-gh.$$ 2>/dev/null || true
+  META=$(gh pr view "$PR" --json title,body 2>/dev/null || printf '{}')
+  TITLE=$(printf '%s' "$META" | jq -r '.title // ""')
+  BODY=$(printf '%s' "$META" | jq -r '.body // ""')
+fi
+
+if [ -z "${DIFF//[$'\t\r\n ']/}" ]; then
+  printf 'review-pr: empty diff for PR %s — nothing to review\n' "$PR" >&2
+  exit "$ENVELOPE_EXIT_DOMAIN"
+fi
+
+# ---- obtain the raw model response ------------------------------------
+# MODEL_RAW holds the model's reply text (expected to be one JSON object).
+MODEL_RAW=""
+if [ -n "$MOCK_FILE" ]; then
+  MODEL_RAW=$(cat "$MOCK_FILE")
+else
+  KEY="${!APIKEYENV:-}"
+  if [ -z "$KEY" ]; then
+    printf 'review-pr: no API key — set $%s (see docs/ai-review.md), or pass --mock FILE for offline use.\n' "$APIKEYENV" >&2
+    printf 'review-pr: NEVER paste the key into chat or commit it; export it in your shell.\n' >&2
+    exit "$ENVELOPE_EXIT_AUTH"
+  fi
+  # Build the request payload (system + rubric + profile + user) in python.
+  REQ_FILE=$(mktemp 2>/dev/null || mktemp -t review-pr-req)
+  trap 'rm -f "$REQ_FILE" 2>/dev/null || true' EXIT
+  if ! KIT_ROOT="$KIT_ROOT" CONFIG="$CONFIG" PROFILE="$PROFILE" MAXDIFF="$MAXDIFF" \
+        PR="$PR" TITLE="$TITLE" BODY="$BODY" MODEL="$MODEL" \
+        python3 "$SCRIPT_DIR/lib/review-build-request.py" "$REQ_FILE" <<<"$DIFF"; then
+    printf 'review-pr: failed to build the model request\n' >&2
+    exit "$ENVELOPE_EXIT_DOMAIN"
+  fi
+  RESP_FILE=$(mktemp 2>/dev/null || mktemp -t review-pr-resp)
+  HDRS=()
+  while IFS= read -r h; do [ -n "$h" ] && HDRS+=(-H "$h"); done < <(printf '%s' "$CONFIG" | jq -r '.headers // {} | to_entries[] | "\(.key): \(.value)"')
+  HTTP_CODE=$(curl -sS -o "$RESP_FILE" -w '%{http_code}' \
+      --max-time "$TIMEOUT" \
+      -H "Authorization: Bearer $KEY" \
+      -H "Content-Type: application/json" \
+      "${HDRS[@]}" \
+      --data-binary "@$REQ_FILE" \
+      "$BASEURL/chat/completions" 2>/dev/null) || HTTP_CODE="000"
+  if [ "$HTTP_CODE" != "200" ]; then
+    SNIP=$(head -c 400 "$RESP_FILE" 2>/dev/null | tr '\n' ' ')
+    rm -f "$RESP_FILE" 2>/dev/null || true
+    printf 'review-pr: provider call failed (HTTP %s): %s\n' "$HTTP_CODE" "$SNIP" >&2
+    printf 'review-pr: retry after checking $%s, baseURL (%s), and model (%s).\n' "$APIKEYENV" "$BASEURL" "$MODEL" >&2
+    exit "$ENVELOPE_EXIT_AUTH"
+  fi
+  MODEL_RAW=$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(d["choices"][0]["message"]["content"])' "$RESP_FILE" 2>/dev/null) || {
+    rm -f "$RESP_FILE" 2>/dev/null || true
+    printf 'review-pr: could not extract model content from provider response\n' >&2
+    exit "$ENVELOPE_EXIT_DOMAIN"
+  }
+  rm -f "$RESP_FILE" 2>/dev/null || true
+fi
+
+# ---- validate, recompute commentability, render, write ----------------
+mkdir -p "$OUT_DIR" 2>/dev/null || { printf 'review-pr: cannot create out dir: %s\n' "$OUT_DIR" >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+RESULT=$(
+  PR="$PR" PROVIDER="$PROVIDER" MODEL="$MODEL" PROFILE="$PROFILE" \
+  MAXDIFF="$MAXDIFF" OUT_DIR="$OUT_DIR" TS="$TS" MODEL_RAW="$MODEL_RAW" \
+  python3 "$SCRIPT_DIR/lib/review-render.py" <<<"$DIFF"
+) || { printf 'review-pr: failed to parse/validate the model output as ai-review-artifact JSON\n' >&2; exit "$ENVELOPE_EXIT_DOMAIN"; }
+
+STATUS=$(printf '%s' "$RESULT" | jq -r '.status')
+OUTPUTS=$(printf '%s' "$RESULT" | jq -c '.outputs')
+NEXT=$(printf '%s' "$RESULT" | jq -c '.next')
+ERRORS=$(printf '%s' "$RESULT" | jq -c '.errors')
+
+case "$FORMAT" in
+  json) print_envelope "review-pr" "$STATUS" "$OUTPUTS" "$NEXT" "$ERRORS" ;;
+  md)   printf '%s' "$RESULT" | jq -r '.md' ;;
+  text) printf '%s' "$RESULT" | jq -r '.text' ;;
+esac
+
+exit "$ENVELOPE_EXIT_OK"

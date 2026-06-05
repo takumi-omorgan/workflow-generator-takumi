@@ -60,11 +60,12 @@ fences is preserved.
 | [ADR-043](adr-043-programmatic-check-plan.md) | Programmatic equivalent of `/check-plan` for in-skill invocation | accepted |
 | [ADR-044](adr-044-mechanical-rewrite-immutability-exception.md) | Mechanical path-string rewrite as an exception to ADR immutability | accepted |
 | [ADR-045](adr-045-rename-design-directory-lowercase.md) | Rename `Design/` → `design/` for root-directory casing consistency | accepted |
-| [ADR-046](adr-046-ai-pr-review-module.md) | Optional AI PR review module | accepted |
+| [ADR-046](adr-046-ai-pr-review-module.md) | Optional AI PR review module | superseded by ADR-051 |
 | [ADR-047](adr-047-machine-readable-agent-contract.md) | Machine-readable agent contract (kit.json, skill frontmatter, bin envelope) | accepted |
 | [ADR-048](adr-048-unified-workflow-control.md) | Unified workflow control (operating modes, canonical approval gate, verb layer, next-step routing) | accepted |
 | [ADR-049](adr-049-follow-up-prd-workflow.md) | Follow-up PRD workflow for major feature updates | accepted |
 | [ADR-050](adr-050-reliability-validation-self-test.md) | Reliability layer — canonical schemas, carry-forward and consistency validation, idempotency receipts, and a workflow self-test | accepted |
+| [ADR-051](adr-051-operator-driven-ai-pr-review.md) | Operator-driven, provider-agnostic AI PR review | accepted |
 
 <!-- adr-index:end -->
 

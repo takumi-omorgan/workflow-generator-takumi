@@ -1,0 +1,15 @@
+diff --git a/README.md b/README.md
+index 1111111..2222222 100644
+--- a/README.md
++++ b/README.md
+@@ -10,7 +10,9 @@ Install the tool from PyPI:
+
+ ```bash
+-pip install widgetron
++python -m pip install widgetron
+ ```
+
+-Run `widgetron --start` to launch.
++Run `widgetron start` to launch the server. The legacy `--start` flag was
++removed in 2.0; use the `start` subcommand instead.
++See the migration guide for details.

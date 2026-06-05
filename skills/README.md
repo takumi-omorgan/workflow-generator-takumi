@@ -32,5 +32,6 @@ project-locally (see ADR-001).
 | [`audit-milestone/`](audit-milestone/SKILL.md) | Verify a GitHub milestone is complete — issues closed, ADRs linked to merged PRs, phase exit criteria met. Pass/fail with gap list; advisory, does not block close | Issue #46 |
 | [`milestone-summary/`](milestone-summary/SKILL.md) | Generate `design/milestones/N-summary.md` for a closed or near-closing milestone — what shipped, ADRs adopted, deferred work — from git log, the GitHub milestone, and accepted ADRs | Issue #46 |
 | [`complete-milestone/`](complete-milestone/SKILL.md) | Close a GitHub milestone, archive `design/state.md` per ADR-035, and optionally chain `/release --milestone-phase`. Chains audit + summary; never blocks on audit gaps | Issue #46 |
+| [`review-pr/`](review-pr/SKILL.md) | Generate a dry-run AI review of a GitHub PR (local Markdown/JSON artifact) and publish review comments only after explicit approval | M5 (roadmap Issue 28) |
 
 See ADR-001 for why skills live project-locally under `.claude/skills/`.

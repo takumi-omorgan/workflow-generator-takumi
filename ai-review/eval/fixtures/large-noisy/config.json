@@ -1,0 +1,10 @@
+{
+  "schema": "ai-review-config",
+  "version": 1,
+  "provider": "openrouter",
+  "baseURL": "https://openrouter.ai/api/v1",
+  "model": "openai/gpt-4o-mini",
+  "apiKeyEnv": "OPENROUTER_API_KEY",
+  "maxDiffBytes": 300,
+  "profile": "balanced"
+}

@@ -1,0 +1,33 @@
+{
+  "schema": "ai-review-artifact",
+  "version": 1,
+  "summary": "Docs-only change updating install and run instructions. Reads accurately; one wording nit and a missing migration-guide link.",
+  "findings": [
+    {
+      "id": "f1",
+      "classification": "non-blocking",
+      "severity": "low",
+      "category": "docs",
+      "file": "README.md",
+      "line": 18,
+      "title": "Link the migration guide that is referenced",
+      "detail": "The text says 'See the migration guide for details' but does not link it; readers cannot find it.",
+      "suggestion": "Add a relative link to the migration guide.",
+      "confidence": "high",
+      "commentable": true
+    },
+    {
+      "id": "f2",
+      "classification": "question",
+      "severity": "low",
+      "category": "docs",
+      "file": "README.md",
+      "line": 15,
+      "title": "Is the bare 'start' subcommand correct?",
+      "detail": "Confirm the new invocation is `widgetron start` and not `widgetron server start`.",
+      "suggestion": null,
+      "confidence": "medium",
+      "commentable": false
+    }
+  ]
+}

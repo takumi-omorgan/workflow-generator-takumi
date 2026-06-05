@@ -1,0 +1,146 @@
+# ai-review-artifact — AI PR review artifact, version 1
+#
+# The structured result of a dry-run AI PR review (Milestone M5, Issues 24/26,
+# ADR-051). bin/review-pr writes one JSON document of this shape per review;
+# bin/publish-review reads it to build the GitHub review. It is also the JSON
+# contract the model is prompted to return (ai-review/prompts/), so the same
+# schema spans model output, the on-disk artifact, and the publisher input.
+#
+# Artifacts are local, regenerable outputs written under
+# ai-review/artifacts/ (gitignored). They are not committed.
+
+schema: ai-review-artifact
+version: 1
+title: AI PR review artifact
+adr: ADR-051
+spec: docs/ai-review.md
+
+unit: object
+
+item:
+  type: object
+  required:
+    - schema
+    - version
+    - summary
+    - findings
+  additionalFields: allow
+  fields:
+    schema:
+      type: string
+      const: ai-review-artifact
+      description: Always the literal "ai-review-artifact".
+    version:
+      type: integer
+      const: 1
+      description: Artifact schema version.
+    pr:
+      type: integer
+      description: PR number the review targets (when known).
+    provider:
+      type: string
+      description: Provider label the review was generated with.
+    model:
+      type: string
+      description: Model identifier used.
+    profile:
+      type: string
+      description: Review profile in effect (strict|balanced|lightweight).
+    generatedAt:
+      type: string
+      description: ISO 8601 UTC instant the artifact was written.
+    artifactHash:
+      type: string
+      description: >-
+        Stable hash over the reviewed diff + provider + model, used by
+        bin/publish-review as the idempotency key so a re-publish of the same
+        review is detected.
+    truncated:
+      type: boolean
+      description: True when the diff exceeded maxDiffBytes and was truncated before review.
+    stats:
+      type: object
+      description: >-
+        Counts by classification, e.g. {"blocking":1,"non-blocking":2,
+        "question":1,"praise":1}. Derived from findings.
+    summary:
+      type: string
+      description: One-paragraph overall assessment; becomes the review's top-level body lead.
+    findings:
+      type: array
+      description: Zero or more findings.
+      items:
+        type: object
+        required:
+          - classification
+          - title
+          - detail
+        fields:
+          id:
+            type: string
+            description: Stable within-artifact id (e.g. "f1").
+          classification:
+            type: string
+            enum:
+              - blocking
+              - non-blocking
+              - question
+              - praise
+            description: >-
+              blocking = must fix before merge; non-blocking = suggestion;
+              question = needs author clarification; praise = positive note.
+          severity:
+            type: string
+            enum:
+              - high
+              - medium
+              - low
+            description: Impact if unaddressed. Praise/question may omit or set low.
+          category:
+            type: string
+            enum:
+              - correctness
+              - security
+              - data-loss
+              - regression
+              - test-coverage
+              - api-compat
+              - maintainability
+              - docs
+              - style
+            description: The risk area; "style" is reserved for explicitly-requested nits.
+          file:
+            type: string
+            description: Repo-relative path the finding refers to, or null for a general note.
+          line:
+            type: integer
+            description: >-
+              Line in the file the finding refers to, or null. Only findings
+              with a file+line present in the diff hunks are eligible for inline
+              comments; the rest go to the top-level body.
+          title:
+            type: string
+            description: Short, specific headline.
+          detail:
+            type: string
+            description: The concrete failure mode or observation.
+          suggestion:
+            type: string
+            description: Concrete suggested fix, or null. Required for blocking findings.
+          confidence:
+            type: string
+            enum:
+              - high
+              - medium
+              - low
+            description: >-
+              Reviewer confidence. Speculative (low/medium) findings are NOT
+              posted inline by default — they stay in the top-level body.
+          commentable:
+            type: boolean
+            description: >-
+              True when the finding may be posted as an inline comment: it has a
+              valid file+line in the diff and high confidence and is not pure
+              praise. False routes it to the top-level body. bin/publish-review
+              recomputes this against the actual diff and never trusts a
+              commentable=true that lacks a matching diff line.

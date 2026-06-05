@@ -1,0 +1,8 @@
+{
+  "description": "Docs-only diff: the reviewer must not invent code-level bugs and must not block.",
+  "expect": {
+    "maxBlocking": 0,
+    "forbidCategories": ["correctness", "security", "data-loss", "regression", "api-compat"],
+    "minFindings": 0
+  }
+}
