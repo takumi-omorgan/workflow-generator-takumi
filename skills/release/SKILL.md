@@ -367,6 +367,20 @@ force-shape flag conflicts, PRD/build-out-plan missing), the invariant
 list (never force-push, never mutate in dry-run), and the pre-plan
 and post-execution self-check checklists.
 
+## Receipts
+
+Cutting a release (git tag + GitHub Release) is a mutating (cat-3)
+action, so the skill records an idempotency receipt keyed by the
+**release tag**, per [`docs/receipts.md`](../../docs/receipts.md):
+
+- **Before** tagging, check for an existing receipt
+  (`bin/write-receipt --find --skill release --key <tag>`, or read
+  `.claude/receipts/release__<tag>.json`). A `completed` receipt means the
+  tag was already cut — stop rather than creating a duplicate tag/Release.
+- **On completion**, write a `completed` receipt with the tag and Release
+  URL in `outputs`. Writing it is best-effort and never blocks the
+  handoff; receipts are local, gitignored state.
+
 ## Handoff
 
 `/release` is the terminus of the delivery chain. After it succeeds,

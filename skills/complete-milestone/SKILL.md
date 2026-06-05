@@ -248,6 +248,21 @@ With `--dry-run`:
 - [ ] Working tree has the state.md change (uncommitted is fine —
   the user decides whether to commit it now or with the next PR).
 
+## Receipts
+
+Closing a milestone is a mutating (cat-3) action, so the skill records an
+idempotency receipt keyed by the **milestone number**, per
+[`docs/receipts.md`](../../docs/receipts.md):
+
+- **Before** closing, check for an existing receipt
+  (`bin/write-receipt --find --skill complete-milestone --key <milestone>`,
+  or read `.claude/receipts/complete-milestone__<milestone>.json`). A
+  `completed` receipt means the milestone was already closed — report it
+  rather than re-running.
+- **On completion**, write a `completed` receipt. Writing it is
+  best-effort and never blocks the handoff; receipts are local, gitignored
+  state.
+
 ## Handoff
 
 `/complete-milestone` is the terminus of the milestone chain. After

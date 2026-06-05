@@ -1,0 +1,79 @@
+# design-questions — canonical carry-forward schema, version 1
+#
+# This is the machine-readable home of the cross-skill design-question
+# carry-forward unit codified in ADR-040. The prose specification — when
+# to populate, when not to, and how each stage renders the data — lives
+# in docs/workflow-guide.md §6. This file is the structured mirror of
+# that spec's "Canonical schema (version 1)" subsection: the two must
+# agree, and bin/check-consistency fails if the file is not referenced
+# from §6.
+#
+# Consumers:
+#   - bin/validate-carry-forward reads `item.required`, the field
+#     `pattern`s, and `item.additionalFields` from this file to check
+#     that a `### design-questions` YAML block conforms. Changing this
+#     file changes what the validator enforces — there is no second copy
+#     of the rules in the script.
+#   - Authors and agents read it (or §6) to produce conforming blocks.
+#
+# The carry-forward unit is a YAML *sequence* (`unit: list`); each
+# element is one design-question entry. The block is omitted entirely
+# when there are no entries (never emit `design-questions: []`).
+
+schema: design-questions
+version: 1
+title: Cross-skill design-question carry-forward entry
+adr: ADR-040
+spec: docs/workflow-guide.md#6-cross-skill-carry-forward-adr-040
+
+# How the unit appears in source: a YAML sequence under a
+# `### design-questions` heading, inside a fenced ```yaml block, under
+# `## Follow-ups` of notes/eval-issue-NNN.md.
+unit: list
+
+item:
+  type: object
+  required:
+    - title
+    - target-issue
+    - context
+  additionalFields: forbid
+  fields:
+    title:
+      type: string
+      description: >-
+        One-line problem statement, written so a reader of the target
+        issue's prompt can grasp the question without opening the source PR.
+    target-issue:
+      type: string
+      pattern: '^#[0-9]+$'
+      description: >-
+        The issue number whose plan or implementation the question
+        affects. Quoted with a leading '#' (e.g. "#5") so YAML does not
+        lex the '#' as a comment. One issue per entry; create separate
+        entries when a single question affects multiple upcoming issues.
+    context:
+      type: string
+      description: >-
+        One-paragraph context note (YAML literal '|' in source so
+        embedded newlines and markdown survive). Captures why the
+        question matters for the target issue — the cross-issue coupling,
+        not the question's general background.
+
+# How each stage of the chain renders the same canonical content. The
+# producer form is the machine-readable one validated by
+# bin/validate-carry-forward; the preserver and consumer forms are
+# human-readable renderings checked structurally by --against.
+stages:
+  producer:
+    skill: claude-issue-executor
+    location: notes/eval-issue-NNN.md
+    form: "### design-questions heading + fenced YAML block under ## Follow-ups"
+  preserver:
+    skill: pr-review-packager
+    location: PR body
+    form: "one '## Notes for #<N>' section per unique target-issue"
+  consumer:
+    skill: prepare-issue
+    location: generated prompt
+    form: "'## Design questions carried forward from PR #M' subsection before ## Requirements"

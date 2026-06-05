@@ -1,0 +1,381 @@
+#!/usr/bin/env bash
+# validate-carry-forward — check cross-skill design-question carry-forward
+# data against the canonical schema (M4 Issue 17, ADR-050).
+#
+# The carry-forward unit (ADR-040) flows producer -> preserver ->
+# consumer: claude-issue-executor writes a `### design-questions` YAML
+# block in notes/eval-issue-NNN.md, pr-review-packager renders it as
+# `## Notes for #N` sections in the PR body, and prepare-issue embeds it
+# in the next prompt. This script validates the producer blocks against
+# schemas/design-questions.v1.yaml and, with --against, confirms a
+# preserver/consumer artefact carries every referenced target-issue.
+#
+# The schema's required fields, the target-issue pattern, and the
+# extra-field policy are read FROM the schema file — there is no second
+# copy of the rules here, so editing the schema changes what is enforced.
+#
+# Usage:
+#   bin/validate-carry-forward [--format text|json] [--file PATH]
+#                              [--against PATH] [--schema PATH] [-h]
+#
+# Modes:
+#   (no --file)      scan notes/eval-issue-*.md for design-questions blocks
+#   --file PATH      validate the design-questions block(s) in PATH only
+#   --against PATH   additionally require PATH (a PR body or generated
+#                    prompt) to contain a `## Notes for #N` section for
+#                    every unique target-issue found in the producer
+#                    file(s); a missing one fails with a clear error
+#   --schema PATH    override the schema file (default: kit schemas/)
+#
+# Exit codes (shared convention; see lib/json-envelope.sh):
+#   0  conforms (or no carry-forward data to check)
+#   1  non-conformant data found (domain failure)
+#   2  invocation error (bad flags, unreadable input/schema, no --file for
+#      --against)
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/json-envelope.sh
+. "$SCRIPT_DIR/lib/json-envelope.sh"
+
+usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; }
+
+FORMAT="text"
+FILE=""
+AGAINST=""
+SCHEMA="$SCRIPT_DIR/../schemas/design-questions.v1.yaml"
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --format)
+      [ $# -ge 2 ] || { printf 'validate-carry-forward: --format needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+      FORMAT="$2"; shift 2 ;;
+    --file)
+      [ $# -ge 2 ] || { printf 'validate-carry-forward: --file needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+      FILE="$2"; shift 2 ;;
+    --against)
+      [ $# -ge 2 ] || { printf 'validate-carry-forward: --against needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+      AGAINST="$2"; shift 2 ;;
+    --schema)
+      [ $# -ge 2 ] || { printf 'validate-carry-forward: --schema needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+      SCHEMA="$2"; shift 2 ;;
+    -h|--help) usage; exit 0 ;;
+    *) printf 'validate-carry-forward: unknown argument: %s\n' "$1" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+  esac
+done
+
+case "$FORMAT" in
+  text|json) ;;
+  *) printf 'validate-carry-forward: --format must be text or json (got: %s)\n' "$FORMAT" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac
+
+if [ ! -f "$SCHEMA" ]; then
+  printf 'validate-carry-forward: schema not found: %s\n' "$SCHEMA" >&2
+  exit "$ENVELOPE_EXIT_INVOCATION"
+fi
+if [ -n "$FILE" ] && [ ! -f "$FILE" ]; then
+  printf 'validate-carry-forward: --file not found: %s\n' "$FILE" >&2
+  exit "$ENVELOPE_EXIT_INVOCATION"
+fi
+if [ -n "$AGAINST" ] && [ ! -f "$AGAINST" ]; then
+  printf 'validate-carry-forward: --against not found: %s\n' "$AGAINST" >&2
+  exit "$ENVELOPE_EXIT_INVOCATION"
+fi
+if [ -n "$AGAINST" ] && [ -z "$FILE" ]; then
+  printf 'validate-carry-forward: --against requires --file (the producer file to trace)\n' >&2
+  exit "$ENVELOPE_EXIT_INVOCATION"
+fi
+
+# Build the file list. Default scan: notes/eval-issue-*.md (the producer
+# location). Glob may match nothing — that is success (nothing to check).
+FILES=()
+if [ -n "$FILE" ]; then
+  FILES=("$FILE")
+else
+  shopt -s nullglob
+  FILES=(notes/eval-issue-*.md)
+  shopt -u nullglob
+fi
+
+RESULT=$(
+  SCHEMA="$SCHEMA" AGAINST="$AGAINST" FILES_NL="$(printf '%s\n' "${FILES[@]+"${FILES[@]}"}")" \
+  python3 <<'PYEOF'
+import os, re, sys, json
+
+schema_path = os.environ["SCHEMA"]
+against = os.environ.get("AGAINST") or ""
+files = [f for f in os.environ.get("FILES_NL", "").split("\n") if f]
+
+# ---- read the constraints we need from the schema file -----------------
+# Targeted line-based extraction (same dependency-free approach as
+# bin/validate-kit-json). We need: item.required (list), the per-field
+# pattern map, item.additionalFields, and the set of declared field names.
+def read_schema(path):
+    required, patterns, fields = [], {}, []
+    additional = "allow"
+    with open(path, encoding="utf-8") as fh:
+        lines = fh.read().split("\n")
+    section = None          # "required" | "fields" | None
+    cur_field = None
+    for ln in lines:
+        if re.match(r"^  required:\s*$", ln):
+            section = "required"; continue
+        if re.match(r"^  fields:\s*$", ln):
+            section = "fields"; cur_field = None; continue
+        m = re.match(r"^  additionalFields:\s*(\S+)", ln)
+        if m:
+            additional = m.group(1).strip(); section = None; continue
+        # any other 2-space top-level key under item: ends a section
+        if re.match(r"^  [A-Za-z]", ln) and not re.match(r"^   ", ln):
+            section = None
+        if section == "required":
+            m = re.match(r"^    - (.+?)\s*$", ln)
+            if m:
+                required.append(m.group(1).strip().strip("\"\x27"))
+        elif section == "fields":
+            m = re.match(r"^    ([A-Za-z][\w-]*):\s*$", ln)
+            if m:
+                cur_field = m.group(1); fields.append(cur_field); continue
+            m = re.match(r"^      pattern:\s*(.+?)\s*$", ln)
+            if m and cur_field:
+                patterns[cur_field] = m.group(1).strip().strip("\"\x27")
+    return required, patterns, fields, additional
+
+try:
+    required, patterns, fields, additional = read_schema(schema_path)
+except Exception as e:
+    print(json.dumps({"exit": 2, "status": "schema-error", "outputs": {},
+        "text": "validate-carry-forward: cannot read schema: %s" % e,
+        "errors": [{"code": "schema-unreadable", "message": str(e)}], "next": []}))
+    sys.exit(0)
+if not required or not fields:
+    print(json.dumps({"exit": 2, "status": "schema-error", "outputs": {},
+        "text": "validate-carry-forward: schema has no required/fields (unreadable shape): %s" % schema_path,
+        "errors": [{"code": "schema-empty", "message": "no required fields parsed from schema"}], "next": []}))
+    sys.exit(0)
+
+# ---- find design-questions blocks in a markdown file -------------------
+# A block is the body of a fenced ```yaml ... ``` that immediately follows
+# a `### design-questions` heading (blank lines allowed between).
+def find_blocks(text):
+    lines = text.split("\n")
+    blocks = []
+    i, n = 0, len(lines)
+    while i < n:
+        if re.match(r"^###\s+design-questions\s*$", lines[i]):
+            j = i + 1
+            while j < n and lines[j].strip() == "":
+                j += 1
+            if j < n and re.match(r"^```", lines[j]):
+                start = j + 1
+                k = start
+                while k < n and not re.match(r"^```\s*$", lines[k]):
+                    k += 1
+                blocks.append((start + 1, lines[start:k]))  # 1-based start line
+                i = k + 1
+                continue
+        i += 1
+    return blocks
+
+# ---- parse the constrained block grammar (no YAML dependency) ----------
+# Grammar (docs/workflow-guide.md §6):
+#   - title: <scalar>
+#     target-issue: "#N"
+#     context: |
+#       <one paragraph, possibly multi-line>
+# Returns (entries, parse_errors). Each entry is a dict of field->value.
+def parse_block(block_lines):
+    entries, errs = [], []
+    # base indent = indent of the first "- " item line
+    base = None
+    items = []  # list of (start_idx, lines_for_item)
+    cur = None
+    for idx, raw in enumerate(block_lines):
+        if "\t" in raw:
+            errs.append("line %d: tab character (use spaces)" % (idx + 1))
+        if raw.strip() == "":
+            if cur is not None:
+                cur[1].append(raw)
+            continue
+        indent = len(raw) - len(raw.lstrip(" "))
+        stripped = raw.lstrip(" ")
+        if stripped.startswith("- "):
+            if base is None:
+                base = indent
+            if indent == base:
+                if cur is not None:
+                    items.append(cur)
+                cur = (idx + 1, [raw])
+                continue
+        if cur is not None:
+            cur[1].append(raw)
+        else:
+            errs.append("line %d: content before first list item" % (idx + 1))
+    if cur is not None:
+        items.append(cur)
+
+    for start_line, ilines in items:
+        entry = {}
+        # normalise: drop the "- " from the first line, then every key
+        # sits at item-indent+2.
+        norm = []
+        for n_i, raw in enumerate(ilines):
+            if n_i == 0:
+                pre = raw[:base] + "  "
+                norm.append(pre + raw.lstrip(" ")[2:])
+            else:
+                norm.append(raw)
+        key_indent = base + 2
+        p = 0
+        m = len(norm)
+        while p < m:
+            raw = norm[p]
+            if raw.strip() == "":
+                p += 1; continue
+            indent = len(raw) - len(raw.lstrip(" "))
+            stripped = raw.lstrip(" ")
+            km = re.match(r"^([A-Za-z][\w-]*):\s*(.*)$", stripped)
+            if indent == key_indent and km:
+                key, val = km.group(1), km.group(2)
+                if val in ("|", "|-", ">", ">-"):
+                    # literal/folded block: gather deeper-indented lines
+                    body = []
+                    p += 1
+                    while p < m:
+                        bl = norm[p]
+                        if bl.strip() == "":
+                            body.append("")
+                            p += 1
+                            continue
+                        bindent = len(bl) - len(bl.lstrip(" "))
+                        if bindent > key_indent:
+                            body.append(bl[key_indent + 2:] if len(bl) > key_indent + 2 else bl.strip())
+                            p += 1
+                        else:
+                            break
+                    # trim trailing blanks
+                    while body and body[-1] == "":
+                        body.pop()
+                    sep = " " if val in (">", ">-") else "\n"
+                    entry[key] = sep.join(body).strip()
+                else:
+                    entry[key] = val.strip().strip("\"\x27")
+                    p += 1
+            else:
+                errs.append("line %d: unexpected line in entry (not a key at the right indent): %r"
+                            % (start_line + p, stripped[:50]))
+                p += 1
+        entry["__line__"] = start_line
+        entries.append(entry)
+    return entries, errs
+
+# ---- validate one entry against the schema constraints -----------------
+def validate_entry(entry):
+    problems = []
+    for req in required:
+        if req not in entry or entry.get(req) in (None, ""):
+            problems.append("missing required field %r" % req)
+    if additional == "forbid":
+        for k in entry:
+            if k == "__line__":
+                continue
+            if k not in fields:
+                problems.append("unknown field %r (schema forbids extra fields)" % k)
+    for fld, pat in patterns.items():
+        if fld in entry and entry[fld] not in (None, ""):
+            if not re.match(pat, str(entry[fld])):
+                problems.append("field %r value %r does not match pattern %s"
+                                % (fld, entry[fld], pat))
+    return problems
+
+# ---- run over the file list --------------------------------------------
+problems = []          # list of {file, line, message}
+blocks_found = 0
+entries_checked = 0
+targets = []           # unique target-issues across producer files
+
+for path in files:
+    try:
+        with open(path, encoding="utf-8") as fh:
+            text = fh.read()
+    except Exception as e:
+        problems.append({"file": path, "line": 0, "message": "cannot read file: %s" % e})
+        continue
+    for start, blines in find_blocks(text):
+        blocks_found += 1
+        entries, perrs = parse_block(blines)
+        for pe in perrs:
+            problems.append({"file": path, "line": start, "message": pe})
+        if not entries and not perrs:
+            problems.append({"file": path, "line": start,
+                "message": "empty design-questions block; omit it entirely per §6 rather than emitting an empty block"})
+        for entry in entries:
+            entries_checked += 1
+            for pr in validate_entry(entry):
+                problems.append({"file": path, "line": entry.get("__line__", start), "message": pr})
+            ti = entry.get("target-issue")
+            if ti and ti not in targets:
+                targets.append(ti)
+
+# ---- optional --against cross-check ------------------------------------
+if against:
+    try:
+        with open(against, encoding="utf-8") as fh:
+            atext = fh.read()
+    except Exception as e:
+        problems.append({"file": against, "line": 0, "message": "cannot read --against file: %s" % e})
+        atext = ""
+    for ti in targets:
+        num = ti.lstrip("#")
+        if not re.search(r"(?m)^##\s+Notes for #%s\b" % re.escape(num), atext):
+            problems.append({"file": against, "line": 0,
+                "message": "carry-forward for %s is not preserved in %s (expected a '## Notes for #%s' section)"
+                           % (ti, against, num)})
+
+# ---- assemble result ---------------------------------------------------
+outputs = {
+    "filesScanned": len(files),
+    "blocksFound": blocks_found,
+    "entriesChecked": entries_checked,
+    "targets": targets,
+    "problems": problems,
+}
+
+if problems:
+    status = "invalid"
+    exit_code = 1
+    head = "validate-carry-forward: %d problem(s) in %d block(s):" % (len(problems), blocks_found)
+    body = "\n".join("  - %s:%s %s" % (p["file"], p["line"], p["message"]) for p in problems)
+    text = head + "\n" + body
+elif blocks_found == 0:
+    status = "none"
+    exit_code = 0
+    text = "validate-carry-forward: no design-questions blocks found in %d file(s) — nothing to validate" % len(files)
+else:
+    status = "ok"
+    exit_code = 0
+    text = ("validate-carry-forward: ok — %d entry(ies) in %d block(s) across %d file(s) conform; targets: %s"
+            % (entries_checked, blocks_found, len(files), ", ".join(targets) if targets else "none"))
+
+print(json.dumps({"exit": exit_code, "status": status, "outputs": outputs,
+                  "text": text, "errors": [], "next": []}, ensure_ascii=False))
+PYEOF
+)
+
+EXIT_HINT=$(printf '%s' "$RESULT" | jq -r '.exit')
+STATUS=$(printf '%s' "$RESULT" | jq -r '.status')
+OUTPUTS=$(printf '%s' "$RESULT" | jq -c '.outputs')
+ERRORS=$(printf '%s' "$RESULT" | jq -c '.errors')
+
+if [ "$FORMAT" = "json" ]; then
+  print_envelope "validate-carry-forward" "$STATUS" "$OUTPUTS" "[]" "$ERRORS"
+else
+  printf '%s\n' "$(printf '%s' "$RESULT" | jq -r '.text')"
+fi
+
+case "$EXIT_HINT" in
+  0) exit "$ENVELOPE_EXIT_OK" ;;
+  1) exit "$ENVELOPE_EXIT_DOMAIN" ;;
+  *) exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac

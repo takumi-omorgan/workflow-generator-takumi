@@ -359,9 +359,12 @@ When the executor session raises a design question that affects an
 upcoming issue, append a structured `design-questions` block under
 `## Follow-ups` of the eval summary. The canonical schema, field
 semantics, and `target-issue` quoting rule live in
-[`docs/workflow-guide.md` §6](../../docs/workflow-guide.md#6-cross-skill-carry-forward-adr-040)
-— do not restate them here. The reader's-aid example below shows
-the on-disk shape only:
+[`docs/workflow-guide.md` §6](../../docs/workflow-guide.md#6-cross-skill-carry-forward-adr-040),
+whose machine-readable mirror is
+[`schemas/design-questions.v1.yaml`](../../schemas/design-questions.v1.yaml)
+— the block this skill writes is what `bin/validate-carry-forward`
+checks against that schema. Do not restate the rules here. The
+reader's-aid example below shows the on-disk shape only:
 
 ````markdown
 ### design-questions
@@ -382,6 +385,23 @@ the When-to-populate / When-NOT-to-populate / Empty-case rules.
 See [`reference.md`](reference.md#edge-cases) for the full list:
 prompt not found, prompt malformed, dirty working tree, branch already
 exists, plan denial, test failures, missing ADR/issue numbers.
+
+## Receipts
+
+This is a mutating (cat-2) skill, so it records an idempotency receipt
+keyed by the **issue number**, per
+[`docs/receipts.md`](../../docs/receipts.md):
+
+- **Before** starting branch/commit work, check for an existing receipt
+  (`bin/write-receipt --find --skill claude-issue-executor --key <issue>`,
+  or read `.claude/receipts/claude-issue-executor__<issue>.json`). A
+  `completed` receipt means the issue's work already landed — stop and
+  report rather than re-running it on a resumed session.
+- **On completion**, write a `completed` receipt recording the branch and
+  any PR in `outputs`. On an interrupted run leave a `partial`/`failed`
+  receipt whose `next-action` names what remains. Receipts are local
+  state (gitignored); writing one is best-effort and never blocks the
+  handoff.
 
 ## Handoff
 

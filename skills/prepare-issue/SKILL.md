@@ -260,7 +260,7 @@ See [`reference.md`](reference.md) for:
 
 - **Short-title derivation** — kebab-case algorithm with worked examples.
 - **Template-filling rules** — full `{{PLACEHOLDER}}`-to-source slot map and the multi-ADR repetition rule.
-- **Carry-forward subsection** — format, placement (immediately before `Requirements`), and the schema source-of-truth pointer to [`docs/workflow-guide.md` §6](../../docs/workflow-guide.md#6-cross-skill-carry-forward-adr-040).
+- **Carry-forward subsection** — format, placement (immediately before `Requirements`), and the schema source-of-truth pointer to [`docs/workflow-guide.md` §6](../../docs/workflow-guide.md#6-cross-skill-carry-forward-adr-040) (machine-readable mirror: [`schemas/design-questions.v1.yaml`](../../schemas/design-questions.v1.yaml)).
 - **Edge cases** — invalid argument, gh auth/lookup failures, missing ADR file, missing build-out-plan, file-exists handling, /check-plan gate yields, --skip-check breadcrumb, PR-scan errors, multi-PR carry-forward.
 - **Self-check before writing** — the 8-item pre-write checklist.
 

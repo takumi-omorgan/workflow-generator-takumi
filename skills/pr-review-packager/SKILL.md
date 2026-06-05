@@ -164,7 +164,9 @@ The skill consults five sources, in this order:
    rendered PR body. If the file is absent or has no
    `### design-questions` block, skip silently — most issues have
    no entries. Schema source of truth:
-   [`docs/workflow-guide.md` §6](../../docs/workflow-guide.md#6-cross-skill-carry-forward-adr-040).
+   [`docs/workflow-guide.md` §6](../../docs/workflow-guide.md#6-cross-skill-carry-forward-adr-040),
+   mirrored machine-readably in
+   [`schemas/design-questions.v1.yaml`](../../schemas/design-questions.v1.yaml).
 
 `gh` is the only allowed tool for creating the PR. Do not call the
 REST/GraphQL API directly.
@@ -349,6 +351,21 @@ The user always sees the rendered title and body in chat before
 ADR-015's chosen option. Never skip this step — not even when the
 draft looks clean, not even with a `--yes` flag (the skill does not
 accept one).
+
+## Receipts
+
+Opening a PR is a mutating (cat-3) action, so the skill records an
+idempotency receipt keyed by the **issue (or PR) number**, per
+[`docs/receipts.md`](../../docs/receipts.md):
+
+- **Before** creating the PR, check for an existing receipt
+  (`bin/write-receipt --find --skill pr-review-packager --key <issue>`,
+  or read `.claude/receipts/pr-review-packager__<issue>.json`). A
+  `completed` receipt naming an open PR means one already exists — surface
+  it instead of opening a duplicate.
+- **On completion**, write a `completed` receipt with the PR number in
+  `outputs`. Writing it is best-effort and never blocks the handoff;
+  receipts are local, gitignored state.
 
 ## Handoff
 
