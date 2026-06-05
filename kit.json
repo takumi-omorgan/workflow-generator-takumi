@@ -739,6 +739,54 @@
         2
       ],
       "description": "Regenerate the ADR index table in design/adr/README.md (see ADR-023)."
+    },
+    {
+      "name": "validate-carry-forward",
+      "path": "bin/validate-carry-forward",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Validate cross-skill carry-forward design-questions blocks against schemas/design-questions.v1.yaml; --against traces a producer file into a PR body or prompt (ADR-040, ADR-050)."
+    },
+    {
+      "name": "write-receipt",
+      "path": "bin/write-receipt",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Write or look up an idempotency receipt for a mutating skill under .claude/receipts/ (schemas/receipt.v1.yaml, docs/receipts.md, ADR-050)."
+    },
+    {
+      "name": "check-consistency",
+      "path": "bin/check-consistency",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Verify docs and metadata agree: skills.md vs kit.json, the verb layer, the bin registry, schema references, and category legend (ADR-050)."
+    },
+    {
+      "name": "self-test",
+      "path": "bin/self-test",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Run the kit's non-mutating validation surface against itself and a stub, timing it and listing friction (workflow self-test, ADR-050)."
     }
   ]
 }

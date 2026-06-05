@@ -1,0 +1,209 @@
+#!/usr/bin/env bash
+# write-receipt — write or look up an idempotency receipt for a mutating
+# skill (M4 Issue 18, ADR-050).
+#
+# A receipt is a small JSON file under `.claude/receipts/` recording that
+# a unit of work was started / completed / failed, so a later run can
+# inspect what was already done and avoid duplicating a hard-to-reverse
+# action. The schema is schemas/receipt.v1.yaml; the convention (which
+# skills write receipts, and how a resuming run reads them) is
+# docs/receipts.md.
+#
+# One receipt file per (skill, key): the file is overwritten as the
+# status advances (started -> completed/partial/failed), so the file
+# always holds the latest state for that unit of work. The filename is
+# `<skill>__<sanitised-key>.json`.
+#
+# Writing a receipt with this script is OPTIONAL: a skill running in a
+# target project that does not ship this helper writes the same JSON file
+# directly, following docs/receipts.md. This script is the deterministic
+# reference writer/reader used in the kit's own dogfooding and self-test.
+#
+# Usage:
+#   # write / update a receipt
+#   bin/write-receipt --skill S --key K --status STATUS \
+#       [--inputs JSON] [--outputs JSON] [--next "text"] \
+#       [--dir DIR] [--format text|json]
+#
+#   # look up a receipt (idempotency check)
+#   bin/write-receipt --find --skill S --key K \
+#       [--status STATUS] [--dir DIR] [--format text|json]
+#
+# Flags:
+#   --skill S            producing skill / script name (required)
+#   --key K              idempotency key for the unit of work (required)
+#   --status STATUS      started|completed|failed|partial (required to write;
+#                        optional filter for --find)
+#   --inputs JSON        JSON object of arguments the run used
+#   --outputs JSON       JSON object of what the run produced
+#   --next TEXT          one line for what a resuming run should do next
+#   --dir DIR            receipts directory (default .claude/receipts)
+#   --find               look up instead of write
+#   --format text|json   default text; json emits the standard envelope
+#
+# Exit codes (shared convention; see lib/json-envelope.sh):
+#   0  receipt written, or (with --find) a matching receipt exists
+#   1  --find: no matching receipt (domain "not found")
+#   2  invocation error (missing/!invalid flags, bad JSON, unwritable dir)
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/json-envelope.sh
+. "$SCRIPT_DIR/lib/json-envelope.sh"
+
+usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; }
+
+SKILL=""
+KEY=""
+STATUS=""
+INPUTS="{}"
+OUTPUTS="{}"
+NEXT=""
+DIR=".claude/receipts"
+FIND=0
+FORMAT="text"
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --skill)   [ $# -ge 2 ] || { printf 'write-receipt: --skill needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; SKILL="$2"; shift 2 ;;
+    --key)     [ $# -ge 2 ] || { printf 'write-receipt: --key needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; KEY="$2"; shift 2 ;;
+    --status)  [ $# -ge 2 ] || { printf 'write-receipt: --status needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; STATUS="$2"; shift 2 ;;
+    --inputs)  [ $# -ge 2 ] || { printf 'write-receipt: --inputs needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; INPUTS="$2"; shift 2 ;;
+    --outputs) [ $# -ge 2 ] || { printf 'write-receipt: --outputs needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; OUTPUTS="$2"; shift 2 ;;
+    --next)    [ $# -ge 2 ] || { printf 'write-receipt: --next needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; NEXT="$2"; shift 2 ;;
+    --dir)     [ $# -ge 2 ] || { printf 'write-receipt: --dir needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; DIR="$2"; shift 2 ;;
+    --format)  [ $# -ge 2 ] || { printf 'write-receipt: --format needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; FORMAT="$2"; shift 2 ;;
+    --find)    FIND=1; shift ;;
+    -h|--help) usage; exit 0 ;;
+    *) printf 'write-receipt: unknown argument: %s\n' "$1" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+  esac
+done
+
+case "$FORMAT" in
+  text|json) ;;
+  *) printf 'write-receipt: --format must be text or json (got: %s)\n' "$FORMAT" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac
+[ -n "$SKILL" ] || { printf 'write-receipt: --skill is required\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+[ -n "$KEY" ]   || { printf 'write-receipt: --key is required\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+
+VALID_STATUS="started completed failed partial"
+if [ "$FIND" -eq 0 ]; then
+  [ -n "$STATUS" ] || { printf 'write-receipt: --status is required to write (one of: %s)\n' "$VALID_STATUS" >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+fi
+if [ -n "$STATUS" ]; then
+  case " $VALID_STATUS " in
+    *" $STATUS "*) ;;
+    *) printf 'write-receipt: --status must be one of: %s (got: %s)\n' "$VALID_STATUS" "$STATUS" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+  esac
+fi
+
+# Sanitise the key into a filename-safe token (keep alnum, dash, dot).
+SAFE_KEY=$(printf '%s' "$KEY" | tr -c 'A-Za-z0-9.-' '-' | sed 's/--*/-/g; s/^-//; s/-$//')
+SAFE_SKILL=$(printf '%s' "$SKILL" | tr -c 'A-Za-z0-9.-' '-' | sed 's/--*/-/g; s/^-//; s/-$//')
+RECEIPT_PATH="$DIR/${SAFE_SKILL}__${SAFE_KEY}.json"
+
+# ---- find mode ---------------------------------------------------------
+if [ "$FIND" -eq 1 ]; then
+  if [ ! -f "$RECEIPT_PATH" ]; then
+    OUT=$(printf '{"skill":"%s","key":"%s","found":false,"path":"%s"}' "$SKILL" "$KEY" "$RECEIPT_PATH")
+    if [ "$FORMAT" = "json" ]; then
+      print_envelope "write-receipt" "not-found" "$OUT" "[]" "[]"
+    else
+      printf 'write-receipt: no receipt for skill=%s key=%s (%s)\n' "$SKILL" "$KEY" "$RECEIPT_PATH"
+    fi
+    exit "$ENVELOPE_EXIT_DOMAIN"
+  fi
+  RESULT=$(
+    RECEIPT_PATH="$RECEIPT_PATH" WANT_STATUS="$STATUS" SKILL="$SKILL" KEY="$KEY" \
+    python3 <<'PYEOF'
+import os, json, sys
+path = os.environ["RECEIPT_PATH"]
+want = os.environ.get("WANT_STATUS") or ""
+try:
+    rec = json.load(open(path, encoding="utf-8"))
+except Exception as e:
+    print(json.dumps({"exit": 2, "found": False,
+        "outputs": {"path": path, "error": "receipt is not valid JSON: %s" % e},
+        "text": "write-receipt: receipt is not valid JSON: %s" % e}))
+    sys.exit(0)
+status = rec.get("status")
+if want and status != want:
+    print(json.dumps({"exit": 1, "found": False,
+        "outputs": {"path": path, "found": False, "status": status, "wanted": want, "receipt": rec},
+        "text": "write-receipt: receipt for %s/%s has status %r, not %r"
+                % (rec.get("skill"), rec.get("key"), status, want)}))
+    sys.exit(0)
+print(json.dumps({"exit": 0, "found": True,
+    "outputs": {"path": path, "found": True, "status": status, "receipt": rec},
+    "text": "write-receipt: found %s/%s status=%s (%s)"
+            % (rec.get("skill"), rec.get("key"), status, path)}))
+PYEOF
+  )
+  EXIT_HINT=$(printf '%s' "$RESULT" | jq -r '.exit')
+  OUTPUTS=$(printf '%s' "$RESULT" | jq -c '.outputs')
+  if [ "$FORMAT" = "json" ]; then
+    case "$EXIT_HINT" in 0) ST="found" ;; 1) ST="status-mismatch" ;; *) ST="error" ;; esac
+    print_envelope "write-receipt" "$ST" "$OUTPUTS" "[]" "[]"
+  else
+    printf '%s\n' "$(printf '%s' "$RESULT" | jq -r '.text')"
+  fi
+  case "$EXIT_HINT" in 0) exit "$ENVELOPE_EXIT_OK" ;; 1) exit "$ENVELOPE_EXIT_DOMAIN" ;; *) exit "$ENVELOPE_EXIT_INVOCATION" ;; esac
+fi
+
+# ---- write mode --------------------------------------------------------
+if ! mkdir -p "$DIR" 2>/dev/null; then
+  printf 'write-receipt: cannot create receipts dir: %s\n' "$DIR" >&2
+  exit "$ENVELOPE_EXIT_INVOCATION"
+fi
+
+TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+RESULT=$(
+  R_SKILL="$SKILL" R_KEY="$KEY" R_STATUS="$STATUS" R_INPUTS="$INPUTS" \
+  R_OUTPUTS="$OUTPUTS" R_NEXT="$NEXT" R_TS="$TIMESTAMP" R_PATH="$RECEIPT_PATH" \
+  python3 <<'PYEOF'
+import os, json, sys
+def parse(name):
+    raw = os.environ.get(name) or "{}"
+    try:
+        v = json.loads(raw)
+    except Exception as e:
+        sys.stderr.write("write-receipt: invalid JSON for %s: %s\n" % (name, e))
+        sys.exit(2)
+    if not isinstance(v, dict):
+        sys.stderr.write("write-receipt: %s must be a JSON object\n" % name)
+        sys.exit(2)
+    return v
+
+rec = {
+    "schema": "receipt",
+    "version": 1,
+    "skill": os.environ["R_SKILL"],
+    "key": os.environ["R_KEY"],
+    "status": os.environ["R_STATUS"],
+    "timestamp": os.environ["R_TS"],
+    "inputs": parse("R_INPUTS"),
+    "outputs": parse("R_OUTPUTS"),
+    "next-action": os.environ.get("R_NEXT") or "none",
+}
+path = os.environ["R_PATH"]
+try:
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(rec, fh, indent=2, ensure_ascii=False)
+        fh.write("\n")
+except Exception as e:
+    sys.stderr.write("write-receipt: cannot write %s: %s\n" % (path, e))
+    sys.exit(2)
+print(json.dumps({"path": path, "receipt": rec}))
+PYEOF
+) || exit "$ENVELOPE_EXIT_INVOCATION"
+
+OUTPUTS=$(printf '%s' "$RESULT" | jq -c '{path: .path, status: .receipt.status, key: .receipt.key, skill: .receipt.skill, timestamp: .receipt.timestamp}')
+
+if [ "$FORMAT" = "json" ]; then
+  print_envelope "write-receipt" "$STATUS" "$OUTPUTS" "[]" "[]"
+else
+  printf 'write-receipt: wrote %s (status=%s)\n' "$RECEIPT_PATH" "$STATUS"
+fi
+exit "$ENVELOPE_EXIT_OK"

@@ -1,0 +1,203 @@
+#!/usr/bin/env bash
+# check-consistency — verify the kit's docs and metadata agree (M4 Issue
+# 20, ADR-050).
+#
+# This is the umbrella doc<->metadata checker. It complements, and does
+# not duplicate, bin/validate-kit-json: that script owns skills/ <->
+# kit.json agreement on names, permission categories, and next targets.
+# This script covers the surfaces validate-kit-json deliberately leaves
+# out (its own header, and ADR-047's deferral of "field-by-field
+# consistency checks ... M4, Issue 20"):
+#
+#   C1  every kit.json skill is documented in docs/skills.md, and every
+#       skill docs/skills.md links to exists in kit.json
+#   C2  every underlying skill named in the verb layer
+#       (docs/workflow-control.md §3) exists in kit.json
+#   C3  bin registry integrity: each kit.json bin path exists and is
+#       executable, and every bin/* that speaks the standard envelope
+#       (sources lib/json-envelope.sh) is registered in kit.json
+#   C4  each canonical schema file is referenced from its prose home
+#   C5  every skill's permissionCategory is a defined legend value
+#
+# Usage:
+#   bin/check-consistency [--format text|json] [-h]
+#
+# Exit codes (shared convention; see lib/json-envelope.sh):
+#   0  consistent
+#   1  inconsistency found (domain failure)
+#   2  invocation error (kit.json missing/unreadable, bad flags)
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/json-envelope.sh
+. "$SCRIPT_DIR/lib/json-envelope.sh"
+
+usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; }
+
+FORMAT="text"
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --format)
+      [ $# -ge 2 ] || { printf 'check-consistency: --format needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+      FORMAT="$2"; shift 2 ;;
+    -h|--help) usage; exit 0 ;;
+    *) printf 'check-consistency: unknown argument: %s\n' "$1" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+  esac
+done
+case "$FORMAT" in
+  text|json) ;;
+  *) printf 'check-consistency: --format must be text or json (got: %s)\n' "$FORMAT" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac
+
+if [ ! -f kit.json ]; then
+  printf 'check-consistency: kit.json not found (run from the kit repo root)\n' >&2
+  exit "$ENVELOPE_EXIT_INVOCATION"
+fi
+
+# Which bin scripts source the standard envelope (and therefore must be
+# registered)? Compute in bash so python need not walk the tree.
+ENVELOPE_SCRIPTS=""
+for f in bin/*; do
+  [ -f "$f" ] || continue
+  case "$f" in */lib/*) continue ;; esac
+  if grep -q 'lib/json-envelope.sh' "$f" 2>/dev/null; then
+    ENVELOPE_SCRIPTS="$ENVELOPE_SCRIPTS $f"
+  fi
+done
+
+RESULT=$(
+  ENVELOPE_SCRIPTS="$ENVELOPE_SCRIPTS" \
+  python3 <<'PYEOF'
+import json, os, re, sys
+
+problems = []
+
+try:
+    kit = json.load(open("kit.json", encoding="utf-8"))
+except Exception as e:
+    print(json.dumps({"exit": 2, "status": "invalid-json",
+        "outputs": {"problems": ["kit.json is not valid JSON: %s" % e]},
+        "text": "check-consistency: kit.json is not valid JSON: %s" % e}))
+    sys.exit(0)
+
+skill_names = set(s.get("name") for s in kit.get("skills", []))
+legend = set(str(k) for k in (kit.get("permissionCategories") or {}).keys())
+
+def read(path):
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return fh.read()
+    except Exception:
+        return None
+
+# ---- C1: kit.json skills <-> docs/skills.md ----------------------------
+skills_doc = read("docs/skills.md")
+if skills_doc is None:
+    problems.append("C1: docs/skills.md is missing or unreadable")
+else:
+    documented = set(re.findall(r"skills/([a-z0-9-]+)/SKILL\.md", skills_doc))
+    for name in sorted(skill_names):
+        if name and name not in documented:
+            problems.append("C1: skill %r is in kit.json but not documented in docs/skills.md" % name)
+    for name in sorted(documented):
+        if name not in skill_names:
+            problems.append("C1: docs/skills.md references skills/%s but it is not in kit.json" % name)
+
+# ---- C2: verb layer (workflow-control.md §3) -> existing skills ---------
+wc = read("docs/workflow-control.md")
+if wc is None:
+    problems.append("C2: docs/workflow-control.md is missing or unreadable")
+else:
+    lines = wc.split("\n")
+    # bound to the verb-layer section (## 3 ... until the next "## ")
+    start = end = None
+    for i, ln in enumerate(lines):
+        if re.match(r"^##\s+3\.", ln):
+            start = i
+        elif start is not None and i > start and re.match(r"^##\s+\d", ln):
+            end = i
+            break
+    if start is None:
+        problems.append("C2: could not locate the verb-layer section (## 3.) in docs/workflow-control.md")
+    else:
+        region = lines[start:end] if end else lines[start:]
+        # The underlying-skill column lists bare backtick-quoted skill
+        # names (no leading slash). Verbs are written with a leading
+        # slash; skip those. \x60 is the backtick (kept out of the source
+        # so it never confuses the shell heredoc parser).
+        for ln in region:
+            if not ln.lstrip().startswith("|"):
+                continue
+            for tok in re.findall(r"\x60([^\x60]+)\x60", ln):
+                tok = tok.strip()
+                if tok.startswith("/") or " " in tok or "(" in tok:
+                    continue
+                if re.fullmatch(r"[a-z0-9-]+", tok) and tok not in skill_names:
+                    # only flag tokens that look like skill names but are unknown
+                    if "-" in tok or tok in {"start", "clarify", "release", "resume", "pause"}:
+                        problems.append("C2: verb layer names skill %r which is not in kit.json" % tok)
+
+# ---- C3: bin registry integrity ----------------------------------------
+bin_entries = kit.get("bin", [])
+registered_paths = set(b.get("path") for b in bin_entries)
+for b in bin_entries:
+    p = b.get("path")
+    if not p or not os.path.isfile(p):
+        problems.append("C3: kit.json bin entry %r has no file at %s" % (b.get("name"), p))
+    elif not os.access(p, os.X_OK):
+        problems.append("C3: bin %s is registered but not executable" % p)
+for f in os.environ.get("ENVELOPE_SCRIPTS", "").split():
+    if f not in registered_paths:
+        problems.append("C3: %s speaks the standard envelope but is not registered in kit.json bin[]" % f)
+
+# ---- C4: schema files referenced from their prose homes ----------------
+schema_homes = {
+    "schemas/design-questions.v1.yaml": "docs/workflow-guide.md",
+    "schemas/receipt.v1.yaml": "docs/receipts.md",
+}
+for schema, home in schema_homes.items():
+    if not os.path.isfile(schema):
+        problems.append("C4: canonical schema %s is missing" % schema)
+        continue
+    home_text = read(home)
+    if home_text is None:
+        problems.append("C4: prose home %s for %s is missing" % (home, schema))
+    elif schema not in home_text:
+        problems.append("C4: %s is not referenced from its prose home %s" % (schema, home))
+
+# ---- C5: permission categories are defined legend values ---------------
+for s in kit.get("skills", []):
+    pc = s.get("permissionCategory")
+    if legend and str(pc) not in legend:
+        problems.append("C5: skill %r has permissionCategory %r not in the kit.json legend %s"
+                        % (s.get("name"), pc, sorted(legend)))
+
+# ---- assemble ----------------------------------------------------------
+if problems:
+    text = "check-consistency: %d inconsistency(ies):\n" % len(problems) + "\n".join("  - " + p for p in problems)
+    out = {"exit": 1, "status": "inconsistent",
+           "outputs": {"skillCount": len(skill_names), "problems": problems}, "text": text}
+else:
+    text = "check-consistency: consistent (%d skills; docs and metadata agree)" % len(skill_names)
+    out = {"exit": 0, "status": "consistent",
+           "outputs": {"skillCount": len(skill_names), "problems": []}, "text": text}
+print(json.dumps(out, ensure_ascii=False))
+PYEOF
+)
+
+EXIT_HINT=$(printf '%s' "$RESULT" | jq -r '.exit')
+STATUS=$(printf '%s' "$RESULT" | jq -r '.status')
+OUTPUTS=$(printf '%s' "$RESULT" | jq -c '.outputs')
+
+if [ "$FORMAT" = "json" ]; then
+  print_envelope "check-consistency" "$STATUS" "$OUTPUTS" "[]" "[]"
+else
+  printf '%s' "$RESULT" | jq -r '.text'
+fi
+
+case "$EXIT_HINT" in
+  0) exit "$ENVELOPE_EXIT_OK" ;;
+  1) exit "$ENVELOPE_EXIT_DOMAIN" ;;
+  *) exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac

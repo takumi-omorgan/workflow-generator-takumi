@@ -17,6 +17,9 @@
 # Note: .claude/skills/ is NOT ignored — that's where the installed kit lives.
 .claude/worktrees/
 .claude/settings.local.json
+# Idempotency receipts are local per-run state, not committed artefacts
+# (see docs/receipts.md).
+.claude/receipts/
 
 # Common build outputs (uncomment as your project requires)
 # node_modules/

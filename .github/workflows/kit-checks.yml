@@ -1,0 +1,58 @@
+# Kit consistency and validation checks (M4 Issue 20, ADR-050).
+#
+# Wires the kit's own read-only validators into CI so docs/schema/metadata
+# drift is caught on every push and PR — the CI wiring deferred to M4 in
+# ADR-047. All steps are non-mutating and need no secrets: they run the
+# standard-envelope validators and the non-mutating self-test, which the
+# kit ships and tests locally too. gh is intentionally not used.
+name: kit-checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show tool versions
+        run: |
+          bash --version | head -1
+          python3 --version
+          jq --version
+
+      - name: bash -n on all bin scripts
+        run: |
+          rc=0
+          for f in bin/* bin/lib/*; do
+            [ -f "$f" ] || continue
+            case "$f" in *.md) continue ;; esac
+            if head -1 "$f" | grep -q '^#!.*sh'; then
+              bash -n "$f" || { echo "syntax error in $f"; rc=1; }
+            fi
+          done
+          exit $rc
+
+      - name: kit.json is valid JSON
+        run: python3 -c "import json; json.load(open('kit.json'))"
+
+      - name: validate-kit-json (index ↔ frontmatter)
+        run: bin/validate-kit-json
+
+      - name: validate-carry-forward (carry-forward schema)
+        run: bin/validate-carry-forward
+
+      - name: check-consistency (docs ↔ metadata)
+        run: bin/check-consistency
+
+      - name: check-state-cap
+        run: bin/check-state-cap --check
+
+      - name: self-test (non-mutating surface + stub)
+        run: bin/self-test

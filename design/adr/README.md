@@ -64,6 +64,7 @@ fences is preserved.
 | [ADR-047](adr-047-machine-readable-agent-contract.md) | Machine-readable agent contract (kit.json, skill frontmatter, bin envelope) | accepted |
 | [ADR-048](adr-048-unified-workflow-control.md) | Unified workflow control (operating modes, canonical approval gate, verb layer, next-step routing) | accepted |
 | [ADR-049](adr-049-follow-up-prd-workflow.md) | Follow-up PRD workflow for major feature updates | accepted |
+| [ADR-050](adr-050-reliability-validation-self-test.md) | Reliability layer — canonical schemas, carry-forward and consistency validation, idempotency receipts, and a workflow self-test | accepted |
 
 <!-- adr-index:end -->
 

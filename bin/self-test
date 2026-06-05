@@ -1,0 +1,243 @@
+#!/usr/bin/env bash
+# self-test — exercise the kit's non-mutating validation surface against
+# itself and a throwaway stub, timing it and listing friction (M4 Issue
+# 19, ADR-050).
+#
+# This is the automatable half of the "time-to-first-PR" self-test. It
+# does NOT touch GitHub and writes nothing outside a temp dir it cleans
+# up, so it is safe to run on every change and in CI. It runs the kit's
+# read-only programmatic surface (validate-kit-json, validate-carry-forward,
+# check-consistency, check-state-cap), plus a stub self-check that proves
+# the new validators and the receipt writer behave on throwaway data
+# without any real project or network. It records elapsed time, the number
+# of steps ("commands") run, and any friction (a step whose result was not
+# what the self-test expected, or a missing required tool).
+#
+# The full, manual time-to-first-PR protocol — the mutating walk from idea
+# to an open PR — lives in docs/self-test.md; its results are logged in
+# notes/self-test-log.md and summarised in release notes.
+#
+# Usage:
+#   bin/self-test [--format text|json] [--append-log PATH] [-h]
+#
+# Flags:
+#   --format text|json   default text; json emits the standard envelope
+#   --append-log PATH    append a one-line dated summary to PATH (the only
+#                        write outside the temp dir; off by default)
+#
+# Exit codes (shared convention; see lib/json-envelope.sh):
+#   0  all steps met expectations (status ok), or only optional tools absent
+#      (status degraded)
+#   1  one or more steps did not meet expectations (status fail / friction)
+#   2  invocation error (not at a kit root, bad flags)
+
+set -uo pipefail   # not -e: steps are expected to fail and are scored
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/json-envelope.sh
+. "$SCRIPT_DIR/lib/json-envelope.sh"
+
+usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; }
+
+FORMAT="text"
+APPEND_LOG=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --format)
+      [ $# -ge 2 ] || { printf 'self-test: --format needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+      FORMAT="$2"; shift 2 ;;
+    --append-log)
+      [ $# -ge 2 ] || { printf 'self-test: --append-log needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+      APPEND_LOG="$2"; shift 2 ;;
+    -h|--help) usage; exit 0 ;;
+    *) printf 'self-test: unknown argument: %s\n' "$1" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+  esac
+done
+case "$FORMAT" in
+  text|json) ;;
+  *) printf 'self-test: --format must be text or json (got: %s)\n' "$FORMAT" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac
+
+if [ ! -f kit.json ] || [ ! -d bin ]; then
+  printf 'self-test: run from the kit repo root (kit.json and bin/ must be present)\n' >&2
+  exit "$ENVELOPE_EXIT_INVOCATION"
+fi
+
+START=$SECONDS
+STAGING=$(mktemp -d 2>/dev/null || mktemp -d -t self-test)
+RESULTS="$STAGING/results.tsv"   # name<TAB>kind<TAB>expected<TAB>actual<TAB>ok
+: > "$RESULTS"
+cleanup() { rm -rf "$STAGING" 2>/dev/null || true; }
+trap cleanup EXIT
+
+# record NAME KIND EXPECTED ACTUAL  -> ok = (expected == actual)
+record() {
+  local name="$1" kind="$2" expected="$3" actual="$4" ok="false"
+  [ "$expected" = "$actual" ] && ok="true"
+  printf '%s\t%s\t%s\t%s\t%s\n' "$name" "$kind" "$expected" "$actual" "$ok" >> "$RESULTS"
+}
+
+# run a command, expecting a specific exit code
+step() {
+  local name="$1" expected="$2"; shift 2
+  "$@" >/dev/null 2>&1
+  record "$name" "surface" "$expected" "$?"
+}
+
+# ---- required-tool presence -------------------------------------------
+for tool in python3 jq bash; do
+  if command -v "$tool" >/dev/null 2>&1; then
+    record "tool:$tool" "tool-required" "present" "present"
+  else
+    record "tool:$tool" "tool-required" "present" "absent"
+  fi
+done
+# optional tools (absence degrades, does not fail)
+if command -v gh >/dev/null 2>&1; then
+  record "tool:gh" "tool-optional" "present" "present"
+else
+  record "tool:gh" "tool-optional" "present" "absent"
+fi
+
+# ---- surface checks (read-only, against this kit) ----------------------
+step "validate-kit-json"       0 bin/validate-kit-json
+step "validate-carry-forward"  0 bin/validate-carry-forward
+step "check-consistency"       0 bin/check-consistency
+step "check-state-cap"         0 bin/check-state-cap --check
+
+# bash -n across all bin scripts (aggregate step)
+syntax_rc=0
+for f in bin/* bin/lib/*; do
+  [ -f "$f" ] || continue
+  case "$f" in *.md) continue ;; esac
+  if head -1 "$f" 2>/dev/null | grep -q '^#!.*sh'; then
+    bash -n "$f" >/dev/null 2>&1 || syntax_rc=1
+  fi
+done
+record "bash-n-all-bin" "surface" "0" "$syntax_rc"
+
+# ---- stub self-checks (throwaway data; no project, no network) ---------
+STUB="$STAGING/stub"; mkdir -p "$STUB"
+
+# valid carry-forward fixture -> expect exit 0
+cat > "$STUB/eval-valid.md" <<'FIX'
+## Follow-ups
+
+### design-questions
+
+```yaml
+- title: Stub question
+  target-issue: "#1"
+  context: |
+    A throwaway entry used by self-test to confirm the validator accepts
+    a well-formed block.
+```
+FIX
+bin/validate-carry-forward --file "$STUB/eval-valid.md" >/dev/null 2>&1
+record "stub:carry-forward-valid" "stub" "0" "$?"
+
+# invalid carry-forward fixture (missing target-issue) -> expect exit 1
+cat > "$STUB/eval-bad.md" <<'FIX'
+### design-questions
+
+```yaml
+- title: Missing target
+  context: nope
+```
+FIX
+bin/validate-carry-forward --file "$STUB/eval-bad.md" >/dev/null 2>&1
+record "stub:carry-forward-invalid" "stub" "1" "$?"
+
+# receipt write + find round-trip in a throwaway dir
+bin/write-receipt --skill self-test --key stub --status completed --dir "$STUB/receipts" >/dev/null 2>&1
+record "stub:receipt-write" "stub" "0" "$?"
+bin/write-receipt --find --skill self-test --key stub --status completed --dir "$STUB/receipts" >/dev/null 2>&1
+record "stub:receipt-find" "stub" "0" "$?"
+
+ELAPSED=$((SECONDS - START))
+
+# ---- assemble report ---------------------------------------------------
+RESULT=$(
+  RESULTS="$RESULTS" ELAPSED="$ELAPSED" \
+  python3 <<'PYEOF'
+import os, json
+
+rows = []
+with open(os.environ["RESULTS"], encoding="utf-8") as fh:
+    for line in fh:
+        line = line.rstrip("\n")
+        if not line:
+            continue
+        name, kind, expected, actual, ok = line.split("\t")
+        rows.append({"name": name, "kind": kind, "expected": expected,
+                     "actual": actual, "ok": ok == "true"})
+
+steps = [r for r in rows if r["kind"] in ("surface", "stub")]
+req_tools = [r for r in rows if r["kind"] == "tool-required"]
+opt_tools = [r for r in rows if r["kind"] == "tool-optional"]
+
+friction = []
+for r in steps:
+    if not r["ok"]:
+        friction.append("%s: expected exit %s, got %s" % (r["name"], r["expected"], r["actual"]))
+missing_required = [r["name"].split(":", 1)[1] for r in req_tools if not r["ok"]]
+for t in missing_required:
+    friction.append("required tool missing: %s" % t)
+missing_optional = [r["name"].split(":", 1)[1] for r in opt_tools if not r["ok"]]
+
+if friction:
+    status, exit_code = "fail", 1
+elif missing_optional:
+    status, exit_code = "degraded", 0
+else:
+    status, exit_code = "ok", 0
+
+outputs = {
+    "elapsedSeconds": int(os.environ["ELAPSED"]),
+    "stepCount": len(steps),
+    "passed": sum(1 for r in steps if r["ok"]),
+    "steps": [{"name": r["name"], "expectedExit": int(r["expected"]),
+               "actualExit": int(r["actual"]), "ok": r["ok"]} for r in steps],
+    "toolsPresent": {r["name"].split(":", 1)[1]: r["ok"] for r in (req_tools + opt_tools)},
+    "friction": friction,
+    "optionalToolsMissing": missing_optional,
+}
+
+if status == "ok":
+    text = "self-test: ok — %d/%d steps passed in %ss; no friction" % (
+        outputs["passed"], outputs["stepCount"], outputs["elapsedSeconds"])
+elif status == "degraded":
+    text = "self-test: degraded — %d/%d steps passed in %ss; optional tools missing: %s" % (
+        outputs["passed"], outputs["stepCount"], outputs["elapsedSeconds"], ", ".join(missing_optional))
+else:
+    text = ("self-test: FAIL — %d/%d steps passed in %ss; friction:\n" % (
+        outputs["passed"], outputs["stepCount"], outputs["elapsedSeconds"])
+        + "\n".join("  - " + f for f in friction))
+
+print(json.dumps({"exit": exit_code, "status": status, "outputs": outputs, "text": text}, ensure_ascii=False))
+PYEOF
+)
+
+EXIT_HINT=$(printf '%s' "$RESULT" | jq -r '.exit')
+STATUS=$(printf '%s' "$RESULT" | jq -r '.status')
+OUTPUTS=$(printf '%s' "$RESULT" | jq -c '.outputs')
+
+if [ "$FORMAT" = "json" ]; then
+  print_envelope "self-test" "$STATUS" "$OUTPUTS" "[]" "[]"
+else
+  printf '%s\n' "$(printf '%s' "$RESULT" | jq -r '.text')"
+fi
+
+if [ -n "$APPEND_LOG" ]; then
+  STAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+  PASSED=$(printf '%s' "$OUTPUTS" | jq -r '.passed')
+  TOTAL=$(printf '%s' "$OUTPUTS" | jq -r '.stepCount')
+  printf -- '- %s — status=%s, %s/%s steps, %ss elapsed\n' "$STAMP" "$STATUS" "$PASSED" "$TOTAL" "$ELAPSED" >> "$APPEND_LOG" 2>/dev/null \
+    || printf 'self-test: could not append to %s\n' "$APPEND_LOG" >&2
+fi
+
+case "$EXIT_HINT" in
+  0) exit "$ENVELOPE_EXIT_OK" ;;
+  1) exit "$ENVELOPE_EXIT_DOMAIN" ;;
+  *) exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac

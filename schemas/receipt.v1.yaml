@@ -1,0 +1,86 @@
+# receipt — idempotency-receipt schema, version 1
+#
+# A receipt is a small JSON file a mutating skill writes when it finishes
+# (or partially finishes) a unit of work, so a later run can inspect what
+# was already done and avoid duplicating a hard-to-reverse action (a
+# GitHub issue, PR, milestone, release, or a branch's commits). The prose
+# specification — which skills write receipts, where, and how a resuming
+# run reads them — lives in docs/receipts.md (ADR-050). This file is the
+# structured mirror of that doc's field list.
+#
+# Receipts are written as JSON (one object per file) under
+# `.claude/receipts/` in the project being worked on. They are local,
+# per-run audit/idempotency state, not committed artefacts — the target
+# .gitignore excludes `.claude/receipts/`.
+#
+# Consumers:
+#   - bin/write-receipt writes a conforming receipt and, with --find,
+#     looks one up by skill + key to answer "was this already done?".
+#   - A resuming agent (or a human auditor) reads the JSON directly.
+
+schema: receipt
+version: 1
+title: Idempotency receipt for a mutating skill
+adr: ADR-050
+spec: docs/receipts.md
+
+# One JSON object per file (`unit: object`).
+unit: object
+
+item:
+  type: object
+  required:
+    - schema
+    - version
+    - skill
+    - key
+    - status
+    - timestamp
+  additionalFields: allow
+  fields:
+    schema:
+      type: string
+      const: receipt
+      description: Always the literal "receipt" so a reader can recognise the file.
+    version:
+      type: integer
+      const: 1
+      description: Receipt schema version.
+    skill:
+      type: string
+      description: The skill (or bin script) that produced the receipt.
+    key:
+      type: string
+      description: >-
+        Idempotency key — a stable identifier for the unit of work, so a
+        later run can ask "is there already a terminal receipt for this
+        key?". Convention: the primary input, e.g. an issue number ("42"),
+        a PR number ("#118"), a milestone slug, or a release tag.
+    status:
+      type: string
+      enum:
+        - started
+        - completed
+        - failed
+        - partial
+      description: >-
+        Lifecycle state. `started` is written before the mutation;
+        `completed` after it succeeds; `partial` when some sub-steps
+        succeeded and others did not; `failed` when it did not complete.
+        A run that finds a `completed` receipt for its key skips the work.
+    timestamp:
+      type: string
+      description: ISO 8601 UTC instant the receipt was written (e.g. 2026-06-05T14:03:00Z).
+    inputs:
+      type: object
+      description: The arguments/flags the skill ran with. Optional but recommended.
+    outputs:
+      type: object
+      description: >-
+        What the run produced — e.g. {"pr": "#118", "branch": "m4-..."}.
+        Recommended on `completed`/`partial`.
+    next-action:
+      type: string
+      description: >-
+        One line naming what a resuming run should do next, or "none" when
+        the unit is complete. Mirrors design/state.md's next-action zone.

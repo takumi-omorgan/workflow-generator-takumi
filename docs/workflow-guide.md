@@ -809,6 +809,15 @@ specs cross-reference it without restating.
 
 ### Canonical schema (version 1)
 
+The machine-readable mirror of this subsection is
+[`schemas/design-questions.v1.yaml`](../schemas/design-questions.v1.yaml):
+it declares the required fields, the `target-issue` pattern, and the
+no-extra-fields rule in structured form, and is what
+[`bin/validate-carry-forward`](../bin/validate-carry-forward) enforces.
+This prose and that file must agree — `bin/check-consistency` fails if
+the file is not referenced here. When the schema changes, update both
+(see [Schema versioning](#schema-versioning) below).
+
 The carry-forward unit is one or more entries in a
 `design-questions` block. The block lives under `## Follow-ups` of
 the executor's eval summary file (`notes/eval-issue-NNN.md`) as a
@@ -907,12 +916,15 @@ etc. — there is no per-skill or per-stage renumbering.
 
 The schema above is **version 1**. When it evolves (new fields,
 renamed fields, semantic changes to existing fields), update **§6
-first** as the canonical spec, then update the three SKILL.md
-cross-references in lockstep within the same change. Spec drift
-between §6 and any one SKILL.md silently breaks the carry-forward
-loop; PR review is the enforcement point until ADR-034's
-plan-checker grows a structural rule for it (deferred per ADR-040's
-"Maintain" paragraph).
+first** as the canonical spec, then update its machine-readable mirror
+[`schemas/design-questions.v1.yaml`](../schemas/design-questions.v1.yaml)
+and the three SKILL.md cross-references in lockstep within the same
+change. A breaking change adds `schemas/design-questions.v2.yaml`
+beside the v1 file rather than editing v1 in place. Spec drift between
+§6 and any one SKILL.md silently breaks the carry-forward loop;
+`bin/validate-carry-forward` now mechanically checks producer blocks
+against the schema file, and PR review remains the enforcement point
+for the prose↔SKILL.md cross-references.
 
 ### `--no-prompt` interaction
 
@@ -928,6 +940,8 @@ run `prepare-issue` explicitly.
 ### Pointers
 
 - ADR: [`design/adr/adr-040-cross-skill-design-question-carry-forward.md`](../design/adr/adr-040-cross-skill-design-question-carry-forward.md)
+- Canonical schema file: [`schemas/design-questions.v1.yaml`](../schemas/design-questions.v1.yaml)
+- Validator: [`bin/validate-carry-forward`](../bin/validate-carry-forward)
 - Producer skill: [`skills/claude-issue-executor/SKILL.md`](../skills/claude-issue-executor/SKILL.md)
 - Preserver skill: [`skills/pr-review-packager/SKILL.md`](../skills/pr-review-packager/SKILL.md)
 - Consumer skill: [`skills/prepare-issue/SKILL.md`](../skills/prepare-issue/SKILL.md)

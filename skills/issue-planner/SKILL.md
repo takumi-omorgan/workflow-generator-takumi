@@ -255,6 +255,13 @@ At the approval step:
 - The user can re-include them by running with `--force`, which skips
   this check entirely and creates duplicates.
 
+The live `gh issue list` query above is the primary duplicate guard. As a
+complement, the skill records an idempotency **receipt** keyed by the
+plan/milestone id after a creation run, per
+[`docs/receipts.md`](../../docs/receipts.md) — a local audit trail of what
+this plan already filed, readable on a resumed session. Writing it is
+best-effort and never blocks creation.
+
 ## Approval flow
 
 The skill MUST present the full batch **before** making any mutating

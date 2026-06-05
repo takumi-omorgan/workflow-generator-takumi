@@ -202,8 +202,17 @@ envelope is a tracked follow-up, not a contradiction of this contract.
 |---|---|---|---|
 | [`bin/prepare-issue`](../bin/prepare-issue) | standard | 0, 2, 3 | Read-only analysis of an issue's prepared prompt |
 | [`bin/validate-kit-json`](../bin/validate-kit-json) | standard | 0, 1, 2 | Check `kit.json` agrees with frontmatter |
+| [`bin/validate-carry-forward`](../bin/validate-carry-forward) | standard | 0, 1, 2 | Check carry-forward design-questions blocks against [`schemas/design-questions.v1.yaml`](../schemas/design-questions.v1.yaml) |
+| [`bin/check-consistency`](../bin/check-consistency) | standard | 0, 1, 2 | Check docs and metadata agree (skills.md, verb layer, bin registry, schema refs) |
+| [`bin/write-receipt`](../bin/write-receipt) | standard | 0, 1, 2 | Write or look up an idempotency receipt under `.claude/receipts/` ([`docs/receipts.md`](receipts.md)) |
+| [`bin/self-test`](../bin/self-test) | standard | 0, 1, 2 | Run the non-mutating validation surface against the kit + a stub, timed ([`docs/self-test.md`](self-test.md)) |
 | [`bin/check-plan`](../bin/check-plan) | legacy | 0, 1, 2 | Validate an ADR or prompt against criteria |
 | [`bin/sync-adr-index`](../bin/sync-adr-index) | none (text) | 0, 1, 2 | Regenerate the ADR index table |
+
+The standard-envelope validators (`validate-kit-json`,
+`validate-carry-forward`, `check-consistency`) and `self-test` are the
+checks wired into CI ([`.github/workflows/kit-checks.yml`](../.github/workflows/kit-checks.yml)).
+The canonical schemas they read live under [`schemas/`](../schemas/).
 
 ### `bin/prepare-issue --issue N --format json`
 
@@ -258,9 +267,12 @@ matches the `skills/` directories, that each skill's `name` and
 add, rename, remove, or re-categorise a skill, or edit a skill's
 frontmatter.
 
-Deeper field-by-field consistency (the prose in `docs/skills.md`
-vs. the structured fields) is tracked as the M4 consistency-check
-issue and is out of scope for this validator.
+Deeper doc↔metadata consistency (the prose in `docs/skills.md` and the
+verb layer vs. the structured index, the `bin` registry, and the schema
+references) is the job of its sibling
+[`bin/check-consistency`](../bin/check-consistency), added in M4. Run both:
+`validate-kit-json` owns `skills/` ↔ `kit.json` agreement, and
+`check-consistency` owns the surrounding docs and registry.
 
 ---
 
