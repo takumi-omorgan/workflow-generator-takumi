@@ -83,6 +83,24 @@ target-project agents read the per-skill frontmatter instead, which
 The full classification rules are in
 [`workflow-guide.md` §7](workflow-guide.md#7-auto-mode-permission-contract-adr-041).
 
+### Operating modes and routing (for agents)
+
+An agent driving the kit should read two more things from
+[`workflow-control.md`](workflow-control.md) (ADR-048):
+
+- **Operating mode** — the session runs in `interactive` (default),
+  `assisted`, or `autonomous`. The mode relaxes friction on cat-1/cat-2
+  operations but **never** on cat-3: regardless of mode, every cat-3
+  skill requires explicit operator approval. Treat the permission
+  `category` in this index as the hard constraint; the mode only changes
+  how cat-1/cat-2 work is gated.
+- **Next action** — `design/state.md` carries an optional, marker-fenced
+  `next-action` zone (`skill`, `args`, `preconditions`, `blocked-by`).
+  When present and unblocked it is the deterministic next step; the
+  `start` skill is the router that turns it (or, in its absence, the
+  project's artefacts) into a recommendation. Use exact skill names from
+  this index, not the human verb layer, when acting on it.
+
 ---
 
 ## 2. Skill frontmatter

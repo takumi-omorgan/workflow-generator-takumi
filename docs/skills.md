@@ -34,6 +34,34 @@ The full classification rules are in
 
 ---
 
+## Start here: the verb layer
+
+You do not need to memorise all nineteen-plus skills below. A small
+**verb layer** sits in front of the inventory — reach for a verb and it
+maps to the underlying skill(s):
+
+| Verb | What you mean | Underlying skill(s) |
+|---|---|---|
+| `/start`, `/next` | "what do I run now?" | `start` (router) |
+| `/decide` | "capture a decision" | `clarify` → `adr-writer` → `check-plan` |
+| `/backlog` | "turn the plan into issues" | `issue-planner` |
+| `/work` | "build the next issue" | `prepare-issue` → `claude-issue-executor` |
+| `/ship` | "open the PR" | `pr-review-packager` |
+| `/finish-milestone` | "close out the milestone" | `audit-milestone` → `milestone-summary` → `complete-milestone` |
+| `/feature` | "plan a major feature update" | `feature-prd` |
+| `/release` | "cut a release" | `release` |
+| `/resume`, `/pause` | "where were we?" / "save state" | the same-named skills |
+
+New to the kit? Run `/start` — it inspects your project and tells you
+which step to run next. The full reference below stays the source of
+truth for each skill's exact interface, and agents read exact names from
+[`kit.json`](../kit.json). The verb layer, the three **operating modes**
+(interactive / assisted / autonomous), and the canonical **approval
+gate** are defined together in
+[`workflow-control.md`](workflow-control.md).
+
+---
+
 ## 1. Scoping a project (idea → MVP)
 
 Skills that turn a rough thought or external PRD into a scoped MVP
@@ -86,6 +114,25 @@ in-scope work into phases that downstream skills (`/issue-planner`,
 - **Example:** `/prd-to-mvp --granularity=fine` for a multi-quarter
   project where each phase warrants its own milestone.
 - **Spec:** [`skills/prd-to-mvp/SKILL.md`](../skills/prd-to-mvp/SKILL.md).
+
+### `/feature-prd` (cat-1)
+
+Capture a **major feature update** to a mature project as an additive
+PRD addendum at `design/prd-addenda/NNN-<feature-name>.md` that extends
+`design/prd.md` rather than replacing it. Identifies ADR impact
+(create / revise-via-supersession), records affected assumptions and an
+explicit "what does not change" section, and decomposes the feature into
+phased issues. This is the steady-state **expansion** path — the
+`/feature` verb — distinct from the first-definition intake above.
+
+- **Use when:** a change adds a capability area, alters original-PRD
+  assumptions, or needs multiple issues/ADRs. **Not** for one-off bugs,
+  small fixes, or a single self-contained issue.
+- **Input:** a feature description; reads `design/prd.md`, accepted
+  ADRs, and `design/state.md` (none modified).
+- **Output:** `design/prd-addenda/NNN-<feature-name>.md`.
+- **Next:** `/adr-writer` for surfaced decisions, then `/issue-planner`.
+- **Spec:** [`skills/feature-prd/SKILL.md`](../skills/feature-prd/SKILL.md).
 
 ### `/planning` (cat-1, opt-in)
 
@@ -401,11 +448,29 @@ are omitted entirely rather than left blank.
 
 ---
 
-## 8. Cross-session continuity
+## 8. Cross-session continuity and routing
 
 Skills that bridge multiple Claude Code sessions, so a fresh session
-can pick up exactly where the last one left off. Backed by a single
-committed pointer file, `design/state.md`.
+can pick up exactly where the last one left off, and route you to the
+next step. Backed by a single committed pointer file, `design/state.md`.
+
+### `/start` (cat-1)
+
+The kit's front door and "what now?" router. Inspects project state —
+`design/state.md` (especially the `next-action` zone), the PRD/MVP
+artefacts, prepared prompts, and open branches — and recommends, or for
+cat-1 targets invokes, the next appropriate skill. States the active
+operating mode and asks one clarifying question when the next step is
+ambiguous rather than dumping the skill list. Also answers to `/next`.
+
+- **Use when:** at the start of a session, after finishing a step, or
+  any time the next move is unclear. On an empty project it doubles as
+  onboarding (routes toward `/idea-to-prd`).
+- **Input:** an optional one-line goal hint; reads state and artefacts
+  (never mutates).
+- **Output:** a routing recommendation (and, for cat-1 targets, an offer
+  to run them).
+- **Spec:** [`skills/start/SKILL.md`](../skills/start/SKILL.md).
 
 ### `/resume` (cat-1)
 
@@ -472,15 +537,17 @@ never invoke them directly.
 | `/clarify` | §1 Scoping (opt-in) |
 | `/claude-issue-executor` | §4 Per-issue execution |
 | `/complete-milestone` | §5 Closing milestones |
+| `/feature-prd` | §1 Scoping (expansion) |
 | `/idea-to-prd` | §1 Scoping |
 | `/issue-planner` | §3 Generating the backlog |
 | `/milestone-summary` | §5 Closing milestones |
-| `/pause` | §8 Cross-session continuity |
+| `/pause` | §8 Cross-session continuity and routing |
 | `/planning` | §1 Scoping (opt-in) |
 | `/pr-review-packager` | §4 Per-issue execution |
 | `/prd-normalizer` | §1 Scoping |
 | `/prd-to-mvp` | §1 Scoping |
 | `/prepare-issue` | §4 Per-issue execution |
 | `/release` | §6 Cutting releases |
-| `/resume` | §8 Cross-session continuity |
+| `/resume` | §8 Cross-session continuity and routing |
+| `/start` | §8 Cross-session continuity and routing |
 | `/workflow-docs` | §7 Keeping docs in sync |
