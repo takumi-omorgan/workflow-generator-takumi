@@ -138,8 +138,13 @@ The installer's behaviour itself is unchanged from ADR-009:
 4. Seeds `prompts/_template.md` so new per-issue prompts stay
    consistent (ADR-008).
 5. Renders `CLAUDE.md` from `templates/claude-md-template.md`
-   (ADR-007). You are prompted for any `{{UPPER_SNAKE}}` placeholder
-   not provided on the command line, unless `--non-interactive` is set.
+   (ADR-007). You are prompted only for the four day-one required
+   fields — `PROJECT_NAME`, `GITHUB_OWNER`, `GITHUB_REPO`, and
+   `DEFAULT_BRANCH` (owner/repo are pre-filled from the `origin`
+   remote when present). Every other placeholder is filled with the
+   `_TBD_` marker, so the rendered file never carries unresolved
+   `{{...}}` syntax. Supply any optional value up front with
+   `--set KEY=VALUE`, or fill it in later as the project settles.
 6. `git init`s the target if it is not already a git repo, then
    creates an initial commit `chore: install workflow kit
    (project-local)`.
@@ -253,7 +258,7 @@ substitution for you.
 #### 3C.4 Commit the install and clean up
 
 ```bash
-git add .claude CLAUDE.md Design prompts notes
+git add .claude CLAUDE.md design prompts notes
 git commit -m "chore: install workflow kit (project-local)"
 rm -rf "$TMPKIT"
 ```

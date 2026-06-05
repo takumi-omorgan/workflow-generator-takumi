@@ -45,6 +45,16 @@ declare -a CLI_VALUES=()
 # Supported license SPDX identifiers (templates/licenses/<id>.txt must exist).
 SUPPORTED_LICENSES="mit"
 
+# Placeholders that must hold a real value on day one. Everything else in the
+# template is optional and is filled with the _TBD_ marker if left unset, so a
+# freshly rendered CLAUDE.md never carries unresolved {{PLACEHOLDER}} syntax.
+# Required values either derive a sensible default (PROJECT_NAME, GITHUB_REPO,
+# DEFAULT_BRANCH) or are prompted for (GITHUB_OWNER). See ADR-007.
+REQUIRED_PLACEHOLDERS="PROJECT_NAME GITHUB_OWNER GITHUB_REPO DEFAULT_BRANCH"
+
+# Marker substituted for any optional placeholder the user does not supply.
+TBD_MARKER="_TBD_"
+
 # ---------------------------------------------------------------------------
 # Output helpers
 # ---------------------------------------------------------------------------
@@ -201,14 +211,6 @@ info "license:    ${LICENSE_ID:-none}"
 
 TEMPLATE_FILE="$KIT_ROOT/templates/claude-md-template.md"
 
-# Discover every {{UPPER_SNAKE}} placeholder in the template. Uses a portable
-# grep -o pipeline; works on BSD and GNU grep.
-discover_placeholders() {
-  grep -oE '\{\{[A-Z][A-Z0-9_]*\}\}' "$TEMPLATE_FILE" \
-    | sed -e 's/^{{//' -e 's/}}$//' \
-    | awk '!seen[$0]++'
-}
-
 # Seed the KEY=VALUE map from CLI flags.
 declare -a PH_KEYS=()
 declare -a PH_VALS=()
@@ -234,6 +236,42 @@ ph_get() {
     fi
   done
   return 1
+}
+
+# Best-effort owner/repo discovery from the target's `origin` remote. Lets the
+# installer default GITHUB_OWNER / GITHUB_REPO when the project was cloned from
+# GitHub (the recommended `gh repo create --clone` flow), so the user is not
+# prompted for values the repo already knows. Empty on a remote-less repo.
+REMOTE_OWNER=""
+REMOTE_REPO=""
+parse_remote() {
+  local url
+  url="$(git -C "$TARGET_DIR" remote get-url origin 2>/dev/null)" || return 0
+  url="${url%.git}"
+  case "$url" in
+    *github.com:*) url="${url##*github.com:}" ;;  # ssh: git@github.com:owner/repo
+    *github.com/*) url="${url##*github.com/}" ;;  # https://github.com/owner/repo
+    *) return 0 ;;
+  esac
+  # Expect exactly owner/repo after the host; ignore anything more nested.
+  case "$url" in
+    */*/*) return 0 ;;
+    */*)
+      REMOTE_OWNER="${url%%/*}"
+      REMOTE_REPO="${url##*/}"
+      ;;
+  esac
+}
+
+# Default value for a required placeholder, or empty if none can be derived.
+required_default() {
+  case "$1" in
+    PROJECT_NAME)   basename "$TARGET_DIR" ;;
+    GITHUB_OWNER)   printf '%s' "$REMOTE_OWNER" ;;
+    GITHUB_REPO)    printf '%s' "${REMOTE_REPO:-$(basename "$TARGET_DIR")}" ;;
+    DEFAULT_BRANCH) printf 'main' ;;
+    *)              printf '' ;;
+  esac
 }
 
 # Apply --project-name.
@@ -409,36 +447,41 @@ CLAUDE_DEST="$TARGET_DIR/CLAUDE.md"
 if [ -f "$CLAUDE_DEST" ] && [ "$FORCE" -ne 1 ]; then
   info "skip CLAUDE.md (exists; pass --force to overwrite)"
 else
-  # Gather required values. Prompt for any placeholder whose value is not
-  # already known, unless --non-interactive is set.
-  placeholders="$(discover_placeholders || true)"
-  # Default PROJECT_NAME to the target directory basename if still missing.
-  if ! ph_get "PROJECT_NAME" >/dev/null 2>&1; then
-    default_name="$(basename "$TARGET_DIR")"
-    if [ "$NON_INTERACTIVE" -eq 1 ] || [ ! -t 0 ]; then
-      ph_set "PROJECT_NAME" "$default_name"
-    else
-      printf 'Project name [%s]: ' "$default_name" >&2
-      read -r answer || answer=""
-      ph_set "PROJECT_NAME" "${answer:-$default_name}"
-    fi
+  # Gather only the required placeholders (REQUIRED_PLACEHOLDERS). Every other
+  # {{UPPER_SNAKE}} token is optional and is filled with the _TBD_ marker during
+  # render below, so day-one setup never asks the user for values they cannot
+  # yet know, and the rendered file never carries unresolved {{...}} syntax.
+  parse_remote
+  non_interactive_render=0
+  if [ "$NON_INTERACTIVE" -eq 1 ] || [ ! -t 0 ]; then
+    non_interactive_render=1
   fi
 
-  if [ -n "$placeholders" ]; then
-    while IFS= read -r key; do
-      [ -z "$key" ] && continue
-      if ph_get "$key" >/dev/null 2>&1; then continue; fi
-      if [ "$NON_INTERACTIVE" -eq 1 ] || [ ! -t 0 ]; then
-        warn "placeholder {{$key}} left unfilled (use --set $key=VALUE)"
-        continue
+  for key in $REQUIRED_PLACEHOLDERS; do
+    if ph_get "$key" >/dev/null 2>&1; then continue; fi
+    default_val="$(required_default "$key")"
+    if [ "$non_interactive_render" -eq 1 ]; then
+      if [ -n "$default_val" ]; then
+        ph_set "$key" "$default_val"
+      else
+        warn "required placeholder {{$key}} has no default; rendered as $TBD_MARKER (use --set $key=VALUE)"
       fi
-      printf 'Value for {{%s}} (blank to leave unfilled): ' "$key" >&2
+      continue
+    fi
+    if [ -n "$default_val" ]; then
+      printf 'Value for {{%s}} [%s]: ' "$key" "$default_val" >&2
+      read -r answer || answer=""
+      ph_set "$key" "${answer:-$default_val}"
+    else
+      printf 'Value for {{%s}} (required): ' "$key" >&2
       read -r answer || answer=""
       if [ -n "$answer" ]; then
         ph_set "$key" "$answer"
+      else
+        warn "required placeholder {{$key}} left blank; rendered as $TBD_MARKER"
       fi
-    done <<< "$placeholders"
-  fi
+    fi
+  done
 
   info "render CLAUDE.md from templates/claude-md-template.md"
   tmp="$(mktemp "${TMPDIR:-/tmp}/claude-md.XXXXXX")"
@@ -450,18 +493,30 @@ else
     # Write KEY<TAB>VALUE pairs to a temp file and pass both paths to
     # python. This avoids fighting over stdin vs. a heredoc for code.
     pairs_file="$(mktemp "${TMPDIR:-/tmp}/claude-md-pairs.XXXXXX")"
-    for i in "${!PH_KEYS[@]+"${!PH_KEYS[@]}"}"; do
-      printf '%s\t%s\n' "${PH_KEYS[$i]}" "${PH_VALS[$i]}" >> "$pairs_file"
-    done
-    python3 - "$tmp" "$pairs_file" <<'PY'
-import sys
-path, pairs_path = sys.argv[1], sys.argv[2]
+    # Count-guard the index expansion: the nested ${!arr[@]+...} idiom
+    # mis-expands to only the first index under macOS bash 3.2, and plain
+    # "${!arr[@]}" trips `set -u` when the array is empty. ${#arr[@]} is
+    # safe either way.
+    if [ "${#PH_KEYS[@]}" -gt 0 ]; then
+      for i in "${!PH_KEYS[@]}"; do
+        printf '%s\t%s\n' "${PH_KEYS[$i]}" "${PH_VALS[$i]}" >> "$pairs_file"
+      done
+    fi
+    python3 - "$tmp" "$pairs_file" "$TBD_MARKER" <<'PY'
+import re, sys
+path, pairs_path, tbd = sys.argv[1], sys.argv[2], sys.argv[3]
 with open(pairs_path, "r", encoding="utf-8") as f:
     pairs = [line.rstrip("\n").split("\t", 1) for line in f if line.strip()]
 with open(path, "r", encoding="utf-8") as f:
     data = f.read()
+# Drop the leading template-authoring HTML comment: it documents placeholders
+# for people editing the template and is noise in a rendered project file.
+data = re.sub(r"^\s*<!--.*?-->\s*", "", data, count=1, flags=re.DOTALL)
 for k, v in pairs:
     data = data.replace("{{" + k + "}}", v)
+# Any {{UPPER_SNAKE}} token still present was optional and unsupplied: fill it
+# with the _TBD_ marker so no unresolved template syntax reaches the project.
+data = re.sub(r"\{\{[A-Z][A-Z0-9_]*\}\}", tbd, data)
 with open(path, "w", encoding="utf-8") as f:
     f.write(data)
 PY
@@ -469,13 +524,17 @@ PY
   else
     # Portable sed fallback. Escape & / and \ in replacement strings, and
     # pick a delimiter unlikely to appear in typical values.
-    for i in "${!PH_KEYS[@]}"; do
+    # Drop the leading template-authoring HTML comment block (top of file).
+    sed '/<!--/,/-->/d' "$tmp" > "$tmp.new" && mv "$tmp.new" "$tmp"
+    for i in $( [ "${#PH_KEYS[@]}" -gt 0 ] && echo "${!PH_KEYS[@]}" ); do
       key="${PH_KEYS[$i]}"
       val="${PH_VALS[$i]}"
       # Escape backslashes, pipes, and ampersands for sed replacement.
       esc="$(printf '%s' "$val" | sed -e 's/[\\|&]/\\&/g' -e 's/$/\\/' -e '$s/\\$//' | tr '\n' '|' | sed 's/|$//')"
       sed -e "s|{{${key}}}|${esc}|g" "$tmp" > "$tmp.new" && mv "$tmp.new" "$tmp"
     done
+    # Fill any remaining optional {{UPPER_SNAKE}} placeholder with the marker.
+    sed -E "s/\{\{[A-Z][A-Z0-9_]*\}\}/${TBD_MARKER}/g" "$tmp" > "$tmp.new" && mv "$tmp.new" "$tmp"
   fi
   mv "$tmp" "$CLAUDE_DEST"
 fi
@@ -549,7 +608,7 @@ if [ "$NO_COMMIT" -ne 1 ] && in_git_repo; then
     .claude \
     .github \
     .gitignore \
-    Design \
+    design \
     prompts \
     notes \
     templates 2>/dev/null || true

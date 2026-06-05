@@ -13,8 +13,23 @@
       grep -E '\{\{[A-Z_]+\}\}' CLAUDE.md
   ------------------------------------------------------------------------
 
-  Required — the template is not useful until these are filled:
+  The installer (bin/install-workflow-kit) gathers only the four day-one
+  required fields below and fills every other placeholder with the marker
+  `_TBD_`. A rendered CLAUDE.md therefore never contains unresolved
+  {{...}} syntax: a value is either real or an explicit `_TBD_` that means
+  "unknown but acceptable — fill in when the answer is known." (This whole
+  authoring comment is stripped from the rendered file.)
+
+  Required on day one — the installer prompts for these (deriving a default
+  where it can) because a new project always knows them:
     {{PROJECT_NAME}}          Human-readable project name. Example: "Acme Notes"
+    {{GITHUB_OWNER}}          GitHub user or org. Example: "acme-labs"
+    {{GITHUB_REPO}}           Repo slug. Example: "acme-notes"
+    {{DEFAULT_BRANCH}}        Example: "main"
+
+  Optional / progressively fillable — left as `_TBD_` until known. Replace
+  each with a real value (or `--set KEY=VALUE` at install time) as the
+  project's stack and conventions settle:
     {{PROJECT_TAGLINE}}       One-line elevator pitch. Example: "A local-first
                               Markdown note-taking app for researchers."
     {{PRIMARY_LANGUAGE}}      Main runtime / language. Example: "Node.js 22 + TypeScript"
@@ -33,14 +48,9 @@
     {{TEST_LOCATION}}         Example: "test/ mirroring src/"
     {{FORMATTER}}             Example: "prettier", "black", "rustfmt", "none"
     {{MODULE_SYSTEM}}         Example: "ESM", "CommonJS", "N/A"
-    {{GITHUB_OWNER}}          GitHub user or org. Example: "acme-labs"
-    {{GITHUB_REPO}}           Repo slug. Example: "acme-notes"
-    {{DEFAULT_BRANCH}}        Example: "main"
     {{CURRENT_MILESTONE}}     Example: "Foundation", "MVP", "v0.2"
     {{CURRENT_PHASE}}         One short line describing what the project is
                               focused on right now. Update as work moves.
-
-  Optional — safe to leave as-is early on, revisit as the project matures:
     {{DEPLOY_TARGET}}         Example: "Vercel", "Fly.io", "n/a (local only)"
     {{SECRETS_LOCATION}}      Example: ".env.local (gitignored), 1Password vault
                               'Acme Notes'"
@@ -58,6 +68,10 @@
 This file is the project rules for [Claude Code](https://claude.com/product/claude-code).
 Claude reads it on every session. Keep it current — stale rules produce
 worse output than no rules.
+
+> Any field still showing `_TBD_` is an optional value left to fill in
+> later. `_TBD_` means "unknown but acceptable" — safe to defer, not a
+> blocker. Replace it with a real answer once the project settles.
 
 ## What this is
 
