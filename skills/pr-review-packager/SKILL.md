@@ -2,6 +2,22 @@
 name: pr-review-packager
 description: Draft a pull-request body from templates/pr-template.md, auto-fill the Closes line and ADR references from branch and commit history, show the draft for approval, then open the PR via gh pr create. Use when packaging a feature branch into a PR after implementation commits land.
 permission-category: 3  # non-substitutable — gh pr create is public, hard-to-reverse, per workflow-guide §7
+inputs:
+  - name: "--label / --milestone / --reviewer"
+    required: false
+    description: "Pass-through flags to gh pr create"
+  - name: "--draft"
+    required: false
+    description: "Open the PR as a draft"
+  - name: "--base"
+    required: false
+    description: "Override the base branch (default main)"
+outputs:
+  - artefact: "(GitHub PR)"
+    description: "PR opened via gh pr create"
+  - artefact: "design/state.md"
+    description: "Updated (in-flight cleared, recent prepended)"
+next: []
 ---
 
 # pr-review-packager

@@ -2,6 +2,18 @@
 name: planning
 description: Capture deeper planning context — requirements decomposition, risks, assumptions, sequencing rationale, open research questions — into design/planning.md. Use when project scope warrants deeper preparation before ADR drafting; for resolving specific open questions use /clarify; for committing a decision to an ADR use /adr-writer.
 permission-category: 1  # substitutable — writes design/planning.md locally, per workflow-guide §7
+inputs:
+  - name: "--granularity"
+    required: false
+    description: "Decomposition depth: coarse | standard | fine"
+outputs:
+  - artefact: "design/planning.md"
+    description: "Decomposition, risks, sequencing (marker-fenced)"
+next:
+  - skill: adr-writer
+    when: "decisions surface that need ADRs"
+  - skill: issue-planner
+    when: "the sequencing feeds the backlog"
 ---
 
 # planning

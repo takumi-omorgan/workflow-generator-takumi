@@ -2,6 +2,22 @@
 name: changelog
 description: Parse git log between two refs and emit grouped, readable release notes in markdown to stdout, a file, or a GitHub Release body. Use when generating release notes only; for tagging and publishing use /release instead.
 permission-category: 1  # substitutable — renders to stdout / file / Release-body draft; publishing is /release's job, per workflow-guide §7
+inputs:
+  - name: "--from / --to"
+    required: true
+    description: "Commit range to render (or --since-last-release)"
+  - name: "--output"
+    required: false
+    description: "Write to FILE instead of stdout"
+  - name: "--github-release"
+    required: false
+    description: "Use the output as the body for GitHub Release TAG"
+outputs:
+  - artefact: "(stdout)"
+    description: "Grouped release notes (or FILE / GitHub Release body)"
+next:
+  - skill: release
+    when: "publishing the release"
 ---
 
 # changelog

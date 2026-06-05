@@ -2,6 +2,13 @@
 name: workflow-docs
 description: Generate README.md and design/ai-summary.md for a target project from PRD, MVP, ADRs, and CLAUDE.md — re-runnable with marker-fenced sections that preserve manual edits. Use when generating or refreshing the project's user-facing docs.
 permission-category: 1  # substitutable — generates README.md and design/ai-summary.md locally, per workflow-guide §7
+inputs: []
+outputs:
+  - artefact: "README.md"
+    description: "Generated (marker-fenced)"
+  - artefact: "design/ai-summary.md"
+    description: "AI-readable project summary (marker-fenced)"
+next: []
 ---
 
 # workflow-docs

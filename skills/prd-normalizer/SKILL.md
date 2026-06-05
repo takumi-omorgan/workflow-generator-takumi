@@ -2,6 +2,18 @@
 name: prd-normalizer
 description: Normalize a standard or custom PRD into a single canonical form (design/prd-normalized.md). Use when preparing a PRD before MVP scoping — after /idea-to-prd or against a hand-authored PRD.
 permission-category: 1  # substitutable — local doc rewrite, per workflow-guide §7
+inputs:
+  - name: "prd"
+    required: true
+    description: "A PRD-like document (standard or custom shape)"
+outputs:
+  - artefact: "design/prd-normalized.md"
+    description: "Canonical 11-field normalized PRD"
+next:
+  - skill: prd-to-mvp
+    when: "scoping the MVP"
+  - skill: adr-writer
+    when: "decisions are already clear"
 ---
 
 # prd-normalizer

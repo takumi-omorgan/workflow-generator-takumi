@@ -2,6 +2,16 @@
 name: idea-to-prd
 description: Turn a rough idea into a lightweight PRD draft suitable for prd-normalizer. Use when starting from a rough idea before formal PRD intake.
 permission-category: 1  # substitutable — drafts a PRD locally, per workflow-guide §7
+inputs:
+  - name: "idea"
+    required: true
+    description: "A rough idea in any form (paragraph, notes, conversation)"
+outputs:
+  - artefact: "design/prd.md"
+    description: "Lightweight PRD draft"
+next:
+  - skill: prd-normalizer
+    when: "the PRD draft is ready"
 ---
 
 # idea-to-prd
