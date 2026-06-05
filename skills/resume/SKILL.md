@@ -2,6 +2,13 @@
 name: resume
 description: Brief a fresh Claude Code session by reading design/state.md and emitting a short summary of phase, in-flight issue, recent work, blockers, and the next concrete action. Falls back to `gh` if state.md is missing, empty, or suspect. Use when starting a fresh session; pair with /pause at session end.
 permission-category: 1  # substitutable — reads state.md and emits a summary; falls back to gh reads (non-mutating), per workflow-guide §7
+inputs: []
+outputs:
+  - artefact: "(session brief)"
+    description: "Phase, in-flight issue, recent PRs, blockers, next action"
+next:
+  - skill: prepare-issue
+    when: "continue-here points to issue preparation"
 ---
 
 # resume

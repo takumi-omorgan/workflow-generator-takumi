@@ -2,6 +2,19 @@
 name: adr-writer
 description: Draft one or more ADRs from architectural decision topics, using the repo's ADR template, written to design/adr/adr-NNN-short-title.md. Use when committing a settled architectural choice; for pre-decision context use /planning or /clarify first.
 permission-category: 1  # substitutable — drafts ADRs locally; user accepts manually, per workflow-guide §7
+inputs:
+  - name: "decision-topics"
+    required: true
+    description: "One or more architectural decision topics (often the 'Decisions needing ADRs' list from prd-to-mvp)"
+  - name: "--skip-check"
+    required: false
+    description: "Opt out of the /check-plan pre-write gate"
+outputs:
+  - artefact: "design/adr/adr-NNN-short-title.md"
+    description: "One ADR per decision, status: proposed"
+  - artefact: "design/adr/README.md"
+    description: "ADR index re-synced via bin/sync-adr-index"
+next: []
 ---
 
 # adr-writer

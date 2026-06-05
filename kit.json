@@ -1,0 +1,670 @@
+{
+  "kit": "claude-code-workflow-kit",
+  "kitVersion": "4.0.0",
+  "schemaVersion": "1",
+  "description": "Machine-readable index of the Claude Code Workflow Kit's skills, permission categories, inputs, outputs, handoffs, and programmatic surfaces. Hand-maintained; validated by bin/validate-kit-json. See ADR-047 and docs/agent-contract.md.",
+  "contract": {
+    "adr": "design/adr/adr-047-machine-readable-agent-contract.md",
+    "doc": "docs/agent-contract.md",
+    "validator": "bin/validate-kit-json"
+  },
+  "permissionCategories": {
+    "1": "substitutable — local and reversible; auto-mode runs without asking",
+    "2": "operator-acknowledged-bypass — auto-mode proceeds but pauses to acknowledge a bypass in chat",
+    "3": "non-substitutable — public or hard-to-reverse; always requires explicit approval"
+  },
+  "exitCodes": {
+    "0": "success",
+    "1": "domain failure",
+    "2": "invocation error",
+    "3": "auth/service failure",
+    "4": "user cancellation"
+  },
+  "workflowOrder": [
+    "idea-to-prd",
+    "prd-normalizer",
+    "prd-to-mvp",
+    "planning",
+    "clarify",
+    "adr-writer",
+    "check-plan",
+    "issue-planner",
+    "prepare-issue",
+    "claude-issue-executor",
+    "pr-review-packager",
+    "audit-milestone",
+    "milestone-summary",
+    "complete-milestone",
+    "release"
+  ],
+  "skills": [
+    {
+      "name": "adr-writer",
+      "slashCommand": "/adr-writer",
+      "permissionCategory": 1,
+      "description": "Draft ADRs from settled architectural decisions.",
+      "inputs": [
+        {
+          "name": "decision-topics",
+          "required": true,
+          "description": "One or more architectural decision topics (often the 'Decisions needing ADRs' list from prd-to-mvp)"
+        },
+        {
+          "name": "--skip-check",
+          "required": false,
+          "description": "Opt out of the /check-plan pre-write gate"
+        }
+      ],
+      "outputs": [
+        {
+          "artefact": "design/adr/adr-NNN-short-title.md",
+          "description": "One ADR per decision, status: proposed"
+        },
+        {
+          "artefact": "design/adr/README.md",
+          "description": "ADR index re-synced via bin/sync-adr-index"
+        }
+      ],
+      "next": []
+    },
+    {
+      "name": "audit-milestone",
+      "slashCommand": "/audit-milestone",
+      "permissionCategory": 1,
+      "description": "Verify a GitHub milestone is complete; advisory pass/fail.",
+      "inputs": [
+        {
+          "name": "milestone",
+          "required": true,
+          "description": "Milestone number or title to audit"
+        }
+      ],
+      "outputs": [
+        {
+          "artefact": "(report)",
+          "description": "Pass/fail audit with a gap list; advisory, no files written"
+        }
+      ],
+      "next": [
+        {
+          "skill": "milestone-summary",
+          "when": "audit passes"
+        },
+        {
+          "skill": "complete-milestone",
+          "when": "audit passes and summary is reviewed"
+        },
+        {
+          "skill": "release",
+          "when": "the milestone delivers a release"
+        }
+      ]
+    },
+    {
+      "name": "changelog",
+      "slashCommand": "/changelog",
+      "permissionCategory": 1,
+      "description": "Render grouped release notes from a git commit range.",
+      "inputs": [
+        {
+          "name": "--from / --to",
+          "required": true,
+          "description": "Commit range to render (or --since-last-release)"
+        },
+        {
+          "name": "--output",
+          "required": false,
+          "description": "Write to FILE instead of stdout"
+        },
+        {
+          "name": "--github-release",
+          "required": false,
+          "description": "Use the output as the body for GitHub Release TAG"
+        }
+      ],
+      "outputs": [
+        {
+          "artefact": "(stdout)",
+          "description": "Grouped release notes (or FILE / GitHub Release body)"
+        }
+      ],
+      "next": [
+        {
+          "skill": "release",
+          "when": "publishing the release"
+        }
+      ]
+    },
+    {
+      "name": "check-plan",
+      "slashCommand": "/check-plan",
+      "permissionCategory": 1,
+      "description": "Validate an ADR or issue prompt against version-locked criteria.",
+      "inputs": [
+        {
+          "name": "artefact",
+          "required": true,
+          "description": "Path to the ADR or prompt to validate, or - for stdin"
+        },
+        {
+          "name": "--criteria-set",
+          "required": true,
+          "description": "Which checklist to apply: adr or prompt"
+        },
+        {
+          "name": "--format",
+          "required": false,
+          "description": "Output format: text (default) or json"
+        }
+      ],
+      "outputs": [
+        {
+          "artefact": "(report)",
+          "description": "Pass/fail/warn report; advisory only, no files written"
+        }
+      ],
+      "next": []
+    },
+    {
+      "name": "clarify",
+      "slashCommand": "/clarify",
+      "permissionCategory": 1,
+      "description": "Resolve below-ADR gray areas into design/decisions.md (opt-in).",
+      "inputs": [],
+      "outputs": [
+        {
+          "artefact": "design/decisions.md",
+          "description": "Settled below-ADR decisions appended (marker-fenced)"
+        }
+      ],
+      "next": [
+        {
+          "skill": "adr-writer",
+          "when": "a decision graduates to an ADR"
+        }
+      ]
+    },
+    {
+      "name": "claude-issue-executor",
+      "slashCommand": "/claude-issue-executor",
+      "permissionCategory": 2,
+      "description": "Plan-first, test-alongside implementation for one issue.",
+      "inputs": [
+        {
+          "name": "prompt-or-issue",
+          "required": false,
+          "description": "Path to prompts/issue-NNN-*.md, or the issue number"
+        },
+        {
+          "name": "--no-prompt",
+          "required": false,
+          "description": "Run without a prepared prompt file"
+        }
+      ],
+      "outputs": [
+        {
+          "artefact": "(branch + commits)",
+          "description": "Feature branch, incremental commits, tests alongside"
+        },
+        {
+          "artefact": "notes/eval-issue-NNN.md",
+          "description": "Evaluation summary"
+        }
+      ],
+      "next": [
+        {
+          "skill": "pr-review-packager",
+          "when": "implementation is complete"
+        }
+      ]
+    },
+    {
+      "name": "complete-milestone",
+      "slashCommand": "/complete-milestone",
+      "permissionCategory": 3,
+      "description": "Close a GitHub milestone and optionally chain /release.",
+      "inputs": [
+        {
+          "name": "milestone",
+          "required": true,
+          "description": "Milestone number or title"
+        },
+        {
+          "name": "--release / --no-release",
+          "required": false,
+          "description": "Whether to chain /release on close"
+        },
+        {
+          "name": "--dry-run",
+          "required": false,
+          "description": "Preview without closing the milestone"
+        }
+      ],
+      "outputs": [
+        {
+          "artefact": "(GitHub milestone)",
+          "description": "Milestone closed via gh"
+        },
+        {
+          "artefact": "design/state.md",
+          "description": "Updated (in-flight, recent, continue-here zones)"
+        }
+      ],
+      "next": [
+        {
+          "skill": "release",
+          "when": "--release is set"
+        }
+      ]
+    },
+    {
+      "name": "idea-to-prd",
+      "slashCommand": "/idea-to-prd",
+      "permissionCategory": 1,
+      "description": "Turn a rough idea into a lightweight PRD draft.",
+      "inputs": [
+        {
+          "name": "idea",
+          "required": true,
+          "description": "A rough idea in any form (paragraph, notes, conversation)"
+        }
+      ],
+      "outputs": [
+        {
+          "artefact": "design/prd.md",
+          "description": "Lightweight PRD draft"
+        }
+      ],
+      "next": [
+        {
+          "skill": "prd-normalizer",
+          "when": "the PRD draft is ready"
+        }
+      ]
+    },
+    {
+      "name": "issue-planner",
+      "slashCommand": "/issue-planner",
+      "permissionCategory": 3,
+      "description": "Turn MVP + build-out plan into a GitHub issue backlog and board.",
+      "inputs": [
+        {
+          "name": "--dry-run",
+          "required": false,
+          "description": "Draft the issue batch without creating it"
+        },
+        {
+          "name": "--no-project",
+          "required": false,
+          "description": "Skip GitHub Project board creation"
+        },
+        {
+          "name": "--force",
+          "required": false,
+          "description": "Recreate issues even if a backlog exists"
+        }
+      ],
+      "outputs": [
+        {
+          "artefact": "(GitHub issues)",
+          "description": "Batch of issues created via gh issue create"
+        },
+        {
+          "artefact": "(GitHub Project board)",
+          "description": "Project board for the issues"
+        }
+      ],
+      "next": [
+        {
+          "skill": "prepare-issue",
+          "when": "the backlog is created"
+        },
+        {
+          "skill": "workflow-docs",
+          "when": "documenting the project"
+        }
+      ]
+    },
+    {
+      "name": "milestone-summary",
+      "slashCommand": "/milestone-summary",
+      "permissionCategory": 1,
+      "description": "Write a milestone retrospective summary.",
+      "inputs": [
+        {
+          "name": "milestone",
+          "required": true,
+          "description": "Milestone number or title"
+        },
+        {
+          "name": "--dry-run",
+          "required": false,
+          "description": "Preview without writing the file"
+        },
+        {
+          "name": "--overwrite",
+          "required": false,
+          "description": "Replace an existing summary (lessons zone preserved)"
+        }
+      ],
+      "outputs": [
+        {
+          "artefact": "design/milestones/N-slug.md",
+          "description": "Milestone summary; lessons zone preserved on re-run"
+        }
+      ],
+      "next": [
+        {
+          "skill": "complete-milestone",
+          "when": "the summary is reviewed"
+        }
+      ]
+    },
+    {
+      "name": "pause",
+      "slashCommand": "/pause",
+      "permissionCategory": 1,
+      "description": "Refresh design/state.md (and an optional handoff note).",
+      "inputs": [
+        {
+          "name": "--handoff",
+          "required": false,
+          "description": "Also write notes/handoff-YYYY-MM-DD.md"
+        }
+      ],
+      "outputs": [
+        {
+          "artefact": "design/state.md",
+          "description": "Refreshed in place (marker-fenced)"
+        },
+        {
+          "artefact": "notes/handoff-YYYY-MM-DD.md",
+          "description": "Optional handoff note (--handoff)"
+        }
+      ],
+      "next": [
+        {
+          "skill": "resume",
+          "when": "resuming in a later session"
+        }
+      ]
+    },
+    {
+      "name": "planning",
+      "slashCommand": "/planning",
+      "permissionCategory": 1,
+      "description": "Capture deeper decomposition, risks, and sequencing (opt-in).",
+      "inputs": [
+        {
+          "name": "--granularity",
+          "required": false,
+          "description": "Decomposition depth: coarse | standard | fine"
+        }
+      ],
+      "outputs": [
+        {
+          "artefact": "design/planning.md",
+          "description": "Decomposition, risks, sequencing (marker-fenced)"
+        }
+      ],
+      "next": [
+        {
+          "skill": "adr-writer",
+          "when": "decisions surface that need ADRs"
+        },
+        {
+          "skill": "issue-planner",
+          "when": "the sequencing feeds the backlog"
+        }
+      ]
+    },
+    {
+      "name": "pr-review-packager",
+      "slashCommand": "/pr-review-packager",
+      "permissionCategory": 3,
+      "description": "Package a branch into a GitHub PR with a filled template.",
+      "inputs": [
+        {
+          "name": "--label / --milestone / --reviewer",
+          "required": false,
+          "description": "Pass-through flags to gh pr create"
+        },
+        {
+          "name": "--draft",
+          "required": false,
+          "description": "Open the PR as a draft"
+        },
+        {
+          "name": "--base",
+          "required": false,
+          "description": "Override the base branch (default main)"
+        }
+      ],
+      "outputs": [
+        {
+          "artefact": "(GitHub PR)",
+          "description": "PR opened via gh pr create"
+        },
+        {
+          "artefact": "design/state.md",
+          "description": "Updated (in-flight cleared, recent prepended)"
+        }
+      ],
+      "next": []
+    },
+    {
+      "name": "prd-normalizer",
+      "slashCommand": "/prd-normalizer",
+      "permissionCategory": 1,
+      "description": "Rewrite any PRD or notes into the canonical normalized PRD.",
+      "inputs": [
+        {
+          "name": "prd",
+          "required": true,
+          "description": "A PRD-like document (standard or custom shape)"
+        }
+      ],
+      "outputs": [
+        {
+          "artefact": "design/prd-normalized.md",
+          "description": "Canonical 11-field normalized PRD"
+        }
+      ],
+      "next": [
+        {
+          "skill": "prd-to-mvp",
+          "when": "scoping the MVP"
+        },
+        {
+          "skill": "adr-writer",
+          "when": "decisions are already clear"
+        }
+      ]
+    },
+    {
+      "name": "prd-to-mvp",
+      "slashCommand": "/prd-to-mvp",
+      "permissionCategory": 1,
+      "description": "Scope a normalized PRD into an MVP and a phased build-out plan.",
+      "inputs": [
+        {
+          "name": "--granularity",
+          "required": false,
+          "description": "Decomposition depth: coarse | standard | fine"
+        }
+      ],
+      "outputs": [
+        {
+          "artefact": "design/mvp.md",
+          "description": "Scoped MVP capabilities and principles"
+        },
+        {
+          "artefact": "design/build-out-plan.md",
+          "description": "Phased plan plus the 'Decisions needing ADRs' list"
+        }
+      ],
+      "next": [
+        {
+          "skill": "adr-writer",
+          "when": "the surfaced decisions need ADRs"
+        }
+      ]
+    },
+    {
+      "name": "prepare-issue",
+      "slashCommand": "/prepare-issue",
+      "permissionCategory": 1,
+      "description": "Auto-fill an implementation prompt from a GitHub issue and ADRs.",
+      "inputs": [
+        {
+          "name": "issue-number",
+          "required": true,
+          "description": "GitHub issue number (no #)"
+        },
+        {
+          "name": "--skip-check",
+          "required": false,
+          "description": "Opt out of the /check-plan pre-write gate"
+        },
+        {
+          "name": "--pr-scan-limit",
+          "required": false,
+          "description": "Merged-PR scan window for carry-forward notes (default 30)"
+        }
+      ],
+      "outputs": [
+        {
+          "artefact": "prompts/issue-NNN-short-title.md",
+          "description": "Filled implementation prompt"
+        },
+        {
+          "artefact": "design/state.md",
+          "description": "Updated (in-flight issue, continue-here)"
+        }
+      ],
+      "next": [
+        {
+          "skill": "claude-issue-executor",
+          "when": "the prompt file is written"
+        }
+      ]
+    },
+    {
+      "name": "release",
+      "slashCommand": "/release",
+      "permissionCategory": 3,
+      "description": "Tag a semver release and publish a GitHub Release.",
+      "inputs": [
+        {
+          "name": "--version / --bump",
+          "required": false,
+          "description": "Explicit X.Y.Z, or major | minor | patch"
+        },
+        {
+          "name": "--draft / --prerelease",
+          "required": false,
+          "description": "Release visibility flags"
+        },
+        {
+          "name": "--dry-run",
+          "required": false,
+          "description": "Preview without tagging or publishing"
+        }
+      ],
+      "outputs": [
+        {
+          "artefact": "(git tag + GitHub Release)",
+          "description": "Annotated tag pushed; Release published via gh"
+        }
+      ],
+      "next": []
+    },
+    {
+      "name": "resume",
+      "slashCommand": "/resume",
+      "permissionCategory": 1,
+      "description": "Brief a fresh session from design/state.md (gh fallback).",
+      "inputs": [],
+      "outputs": [
+        {
+          "artefact": "(session brief)",
+          "description": "Phase, in-flight issue, recent PRs, blockers, next action"
+        }
+      ],
+      "next": [
+        {
+          "skill": "prepare-issue",
+          "when": "continue-here points to issue preparation"
+        }
+      ]
+    },
+    {
+      "name": "workflow-docs",
+      "slashCommand": "/workflow-docs",
+      "permissionCategory": 1,
+      "description": "Generate README.md and design/ai-summary.md for the project.",
+      "inputs": [],
+      "outputs": [
+        {
+          "artefact": "README.md",
+          "description": "Generated (marker-fenced)"
+        },
+        {
+          "artefact": "design/ai-summary.md",
+          "description": "AI-readable project summary (marker-fenced)"
+        }
+      ],
+      "next": []
+    }
+  ],
+  "bin": [
+    {
+      "name": "check-plan",
+      "path": "bin/check-plan",
+      "format": "json",
+      "envelope": "legacy-check-plan",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Validate an ADR or prompt against version-locked criteria (predates the standard envelope; see ADR-043)."
+    },
+    {
+      "name": "prepare-issue",
+      "path": "bin/prepare-issue",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        2,
+        3
+      ],
+      "description": "Read-only analysis of an issue's prepared prompt: path, staleness, ADR references, gaps, and next action."
+    },
+    {
+      "name": "validate-kit-json",
+      "path": "bin/validate-kit-json",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Check kit.json agrees with skills/ frontmatter (names, permission categories, next targets)."
+    },
+    {
+      "name": "sync-adr-index",
+      "path": "bin/sync-adr-index",
+      "format": "text",
+      "envelope": "none",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Regenerate the ADR index table in design/adr/README.md (see ADR-023)."
+    }
+  ]
+}

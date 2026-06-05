@@ -2,6 +2,13 @@
 name: clarify
 description: Surface unresolved implementation questions ("gray areas") and conduct deep-dive resolution per question, appending settled decisions to design/decisions.md. Use when specific open questions need resolution between MVP scoping and ADR drafting; for broader project context use /planning; for committing a settled decision use /adr-writer.
 permission-category: 1  # substitutable — local conversation; appends to design/decisions.md, per workflow-guide §7
+inputs: []
+outputs:
+  - artefact: "design/decisions.md"
+    description: "Settled below-ADR decisions appended (marker-fenced)"
+next:
+  - skill: adr-writer
+    when: "a decision graduates to an ADR"
 ---
 
 # clarify

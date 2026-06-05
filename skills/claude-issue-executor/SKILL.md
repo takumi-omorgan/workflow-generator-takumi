@@ -2,6 +2,21 @@
 name: claude-issue-executor
 description: Drive a disciplined implementation session from a prepared issue prompt — plan-first, branch, incremental commits, tests alongside, evaluation summary. Use when running the implementation session for an issue whose prompt artefact already exists; use /prepare-issue first if no prompt is on disk.
 permission-category: 2  # operator-acknowledged-bypass — significant-task plan-mode gate per workflow-guide §7
+inputs:
+  - name: "prompt-or-issue"
+    required: false
+    description: "Path to prompts/issue-NNN-*.md, or the issue number"
+  - name: "--no-prompt"
+    required: false
+    description: "Run without a prepared prompt file"
+outputs:
+  - artefact: "(branch + commits)"
+    description: "Feature branch, incremental commits, tests alongside"
+  - artefact: "notes/eval-issue-NNN.md"
+    description: "Evaluation summary"
+next:
+  - skill: pr-review-packager
+    when: "implementation is complete"
 ---
 
 # claude-issue-executor

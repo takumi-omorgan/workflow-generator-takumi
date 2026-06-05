@@ -2,6 +2,20 @@
 name: release
 description: Tag a semver release, generate release notes via /changelog, and publish a GitHub Release. Use when ready to cut, tag, and publish a release; for release notes alone use /changelog instead.
 permission-category: 3  # non-substitutable — git tag, git push, gh release create — maximum public visibility, per workflow-guide §7
+inputs:
+  - name: "--version / --bump"
+    required: false
+    description: "Explicit X.Y.Z, or major | minor | patch"
+  - name: "--draft / --prerelease"
+    required: false
+    description: "Release visibility flags"
+  - name: "--dry-run"
+    required: false
+    description: "Preview without tagging or publishing"
+outputs:
+  - artefact: "(git tag + GitHub Release)"
+    description: "Annotated tag pushed; Release published via gh"
+next: []
 ---
 
 # release

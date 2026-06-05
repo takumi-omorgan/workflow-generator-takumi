@@ -2,6 +2,26 @@
 name: issue-planner
 description: Turn design/mvp.md and design/build-out-plan.md into a reviewed batch of GitHub issues, plus a Project board. Use when filing the issue backlog after the MVP and build-out plan have been finalized.
 permission-category: 3  # non-substitutable — gh issue create is public-visibility; existing approval gate is correct, per workflow-guide §7
+inputs:
+  - name: "--dry-run"
+    required: false
+    description: "Draft the issue batch without creating it"
+  - name: "--no-project"
+    required: false
+    description: "Skip GitHub Project board creation"
+  - name: "--force"
+    required: false
+    description: "Recreate issues even if a backlog exists"
+outputs:
+  - artefact: "(GitHub issues)"
+    description: "Batch of issues created via gh issue create"
+  - artefact: "(GitHub Project board)"
+    description: "Project board for the issues"
+next:
+  - skill: prepare-issue
+    when: "the backlog is created"
+  - skill: workflow-docs
+    when: "documenting the project"
 ---
 
 # issue-planner

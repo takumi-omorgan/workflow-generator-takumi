@@ -2,6 +2,22 @@
 name: milestone-summary
 description: Generate design/milestones/N-summary.md for a closed or near-closing milestone — what shipped, ADRs adopted, deferred work — from git log, the GitHub milestone, and accepted ADRs in the phase range. Use when writing a retrospective for a closed milestone; for the close itself use /complete-milestone; for readiness checks use /audit-milestone.
 permission-category: 1  # substitutable — writes design/milestones/N-summary.md locally; reads gh + git log non-mutating, per workflow-guide §7
+inputs:
+  - name: "milestone"
+    required: true
+    description: "Milestone number or title"
+  - name: "--dry-run"
+    required: false
+    description: "Preview without writing the file"
+  - name: "--overwrite"
+    required: false
+    description: "Replace an existing summary (lessons zone preserved)"
+outputs:
+  - artefact: "design/milestones/N-slug.md"
+    description: "Milestone summary; lessons zone preserved on re-run"
+next:
+  - skill: complete-milestone
+    when: "the summary is reviewed"
 ---
 
 # milestone-summary

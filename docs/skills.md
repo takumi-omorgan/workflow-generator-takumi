@@ -11,6 +11,11 @@ inventory ordered by source-tree layout, see
 [`../skills/README.md`](../skills/README.md). For the full
 interface spec of any individual skill, follow its `SKILL.md` link.
 
+**For agents:** the same inventory is available as structured data in
+[`kit.json`](../kit.json) — skills, permission categories, inputs,
+outputs, and handoffs — so you can build the workflow graph without
+reading each `SKILL.md`. See [`agent-contract.md`](agent-contract.md).
+
 Each skill has a permission category that tells Claude Code how to
 treat it under auto-mode (when you've authorised the assistant to
 skip per-tool approval prompts). The category appears as `cat-N` next

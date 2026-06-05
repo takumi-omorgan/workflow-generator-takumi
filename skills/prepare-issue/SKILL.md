@@ -2,6 +2,24 @@
 name: prepare-issue
 description: Auto-fill an implementation prompt file from a GitHub issue number, linked ADRs, and the build-out plan, written to prompts/issue-NNN-short-title.md. Use when preparing to work on an issue before implementation; use /claude-issue-executor after prompts/issue-NNN-*.md exists.
 permission-category: 1  # substitutable — reads gh non-mutating; writes prompt file locally, per workflow-guide §7
+inputs:
+  - name: "issue-number"
+    required: true
+    description: "GitHub issue number (no #)"
+  - name: "--skip-check"
+    required: false
+    description: "Opt out of the /check-plan pre-write gate"
+  - name: "--pr-scan-limit"
+    required: false
+    description: "Merged-PR scan window for carry-forward notes (default 30)"
+outputs:
+  - artefact: "prompts/issue-NNN-short-title.md"
+    description: "Filled implementation prompt"
+  - artefact: "design/state.md"
+    description: "Updated (in-flight issue, continue-here)"
+next:
+  - skill: claude-issue-executor
+    when: "the prompt file is written"
 ---
 
 # prepare-issue
