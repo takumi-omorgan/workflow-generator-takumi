@@ -72,10 +72,9 @@ sufficient.
 - **`design/state.md`** — refreshed in place. Marker fences
   preserved; only the zones whose facts changed are rewritten.
 - **`notes/handoff-YYYY-MM-DD.md`** (with `--handoff` only) — a
-  free-form richer handoff modelled on
-  [`notes/handoff-2026-04-30-v-next-batch-resume.md`](../../notes/handoff-2026-04-30-v-next-batch-resume.md).
-  Covers state of work, what's open, recommended next step, standing
-  rules, working-tree state, and "what NOT to do".
+  free-form richer handoff. Covers state of work, what's open,
+  recommended next step, standing rules, working-tree state, and
+  "what NOT to do".
 
 ## Execution protocol
 
