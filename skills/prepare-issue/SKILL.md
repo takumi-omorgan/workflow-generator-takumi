@@ -240,6 +240,12 @@ noted.
       `Status: prepared`.
     - `state:continue-here` → one short paragraph naming the next
       action: `"Run /claude-issue-executor prompts/issue-NNN-…md"`.
+    - `state:next-action` → the structured complement (ADR-048;
+      [`docs/workflow-control.md` §4](../../docs/workflow-control.md#4-finding-the-next-step)):
+      `skill: claude-issue-executor`, `args: "<prompt path or NNN>"`,
+      `preconditions: ["prompt prompts/issue-NNN-…md exists"]`,
+      `blocked-by: none`. Skip this zone if the file predates it
+      (no `state:next-action` fences) — do not add it here.
     Marker fences (`<!-- state:<zone>:start --> / :end -->`) bound
     each zone; rewrite only the bytes between the fences. Other
     zones (`phase`, `recent`, `blockers`) are left untouched. If

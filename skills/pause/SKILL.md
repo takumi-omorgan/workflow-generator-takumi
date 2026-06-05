@@ -121,6 +121,16 @@ sufficient.
    the next concrete action. Inputs: the in-flight issue's prompt
    path, the branch name, and any outstanding step the user names.
    Show the proposed paragraph and confirm before writing.
+7b. **Refresh `next-action`.** Write the structured complement to
+   `continue-here` into the `state:next-action` zone (ADR-048; see
+   [`docs/workflow-control.md` §4](../../docs/workflow-control.md#4-finding-the-next-step)):
+   a fenced YAML block with `skill` (an exact skill name from
+   `kit.json`, not a verb — or `none` when nothing is queued), `args`,
+   `preconditions`, and `blocked-by`. Derive it from the same inputs
+   as `continue-here`. If no concrete next action can be determined,
+   write `skill: none` rather than guessing. If the project's
+   `design/state.md` predates the zone (no `state:next-action` fences),
+   append the zone after `continue-here`.
 8. **Write the file.** Rewrite only the zones whose contents
    changed. Preserve marker fences; preserve out-of-fence content
    verbatim.
@@ -171,6 +181,8 @@ sufficient.
 - [ ] The `recent` zone has at most 5 entries.
 - [ ] The `continue-here` paragraph names a *concrete* next action,
   not a vague aspiration.
+- [ ] The `next-action` zone holds a valid YAML block (`skill`, `args`,
+  `preconditions`, `blocked-by`) with an exact skill name or `none`.
 - [ ] If `--handoff` was passed, the handoff file is dated, named
   `notes/handoff-YYYY-MM-DD-<slug>.md` if a slug is supplied, else
   `notes/handoff-YYYY-MM-DD.md`.

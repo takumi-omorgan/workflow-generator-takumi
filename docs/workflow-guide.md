@@ -123,7 +123,7 @@ committed pointer file so each new session knows where to pick up.
 /resume              → reads design/state.md at session start
 
 design/state.md zones:
-   phase | in-flight | recent | blockers | continue-here
+   phase | in-flight | recent | blockers | continue-here | next-action
 ```
 
 **Cross-skill carry-forward (§6).** Design questions raised
@@ -723,7 +723,7 @@ a single committed artefact, `design/state.md`, plus two skills.
 ### The artefact
 
 `design/state.md` is a small (under ~100 lines), committed pointer
-holding five zones, each wrapped in marker fences so individual
+holding six zones, each wrapped in marker fences so individual
 skills can rewrite their zone idempotently without disturbing the
 others:
 
@@ -734,6 +734,7 @@ others:
 | `recent` | Rolling list of the last 5 merged PRs | `/pr-review-packager`, `/pause` |
 | `blockers` | One line per blocker, or `none` | `/pause` |
 | `continue-here` | One paragraph naming the next concrete action | `/prepare-issue`, `/pr-review-packager`, `/pause` |
+| `next-action` | Structured next step (`skill`, `args`, `preconditions`, `blocked-by`) — the executable complement to `continue-here`, read by `/resume` and `/start` (ADR-048; [workflow-control §4](workflow-control.md#4-finding-the-next-step)) | `/prepare-issue`, `/claude-issue-executor`, `/pr-review-packager`, `/pause` |
 
 The format spec is [`templates/state-template.md`](../templates/state-template.md).
 The kit ships the template; each target project instantiates its
