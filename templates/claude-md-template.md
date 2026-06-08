@@ -75,9 +75,12 @@ worse output than no rules.
 
 ## What this is
 
-{{One paragraph: what the project does, for whom, and roughly how. Link to
-the PRD, MVP doc, or AI summary if they exist — `design/mvp.md` and
-`design/ai-summary.md` are the standard locations in a kit-installed project.}}
+<!-- FILL: one paragraph describing what this project does, for whom, and roughly how. Link to the PRD, MVP doc, or AI summary once they exist. -->
+
+## First run
+
+New project? Open Claude Code in this repo and run `/start`. It will inspect
+the installed kit surface and route you to the next workflow step.
 
 ## Current phase
 
@@ -123,20 +126,23 @@ Active milestone: `{{CURRENT_MILESTONE}}`.
 
 ```
 {{PROJECT_NAME}}/
-  {{top-level directory tree with one-line descriptions. Keep it short —
-    three or four entries is enough. Example:
-    src/            application code
-    test/           unit and integration tests
-    design/         ADRs, MVP doc, AI summary
-    notes/          per-issue prompts and process notes
-    .claude/skills/ installed workflow skills
-  }}
+  src/            <!-- FILL: application/library code, if applicable -->
+  test/           <!-- FILL: unit/integration tests, if applicable -->
+  design/         ADRs and workflow design artefacts
+  prompts/        per-issue prompts (`prompts/issue-NNN-short-title.md`)
+  notes/          working notes and evaluation logs
+  .claude/skills/ installed workflow skills
 ```
 
 See also:
 
-- `design/` — ADRs (`design/adr/`), MVP (`design/mvp.md`), AI summary (`design/ai-summary.md`)
-- `notes/` — per-issue prompts and working notes
+- `design/adr/` — ADRs and ADR index, available on day one
+- `design/prd.md` — product requirements, created later by the workflow
+- `design/mvp.md` — MVP scope, created later by the workflow
+- `design/build-out-plan.md` — phased backlog plan, created later by the workflow
+- `design/ai-summary.md` — compact project summary, created later by the workflow
+- `prompts/` — per-issue prompts (`prompts/issue-NNN-short-title.md`)
+- `notes/` — working notes and evaluation logs
 - `.claude/skills/` — installed workflow skills (do not edit by hand)
 
 ## Workflow rules
@@ -148,7 +154,7 @@ as hard requirements unless a human overrides them in the session.
 - **Plan-first execution.** When given a non-trivial task, propose a short
   step-by-step plan and wait for explicit approval before editing files.
 - **Issue-by-issue.** Work is scoped to one GitHub issue at a time.
-  Per-issue prompts live in `notes/issueNN-prompt.md`.
+  Per-issue prompts live in `prompts/issue-NNN-short-title.md`.
 - **Consult ADRs before changing load-bearing behaviour.** If a change
   touches architecture, installation, or conventions, check
   `design/adr/` first. Never edit an accepted ADR in place — supersede it

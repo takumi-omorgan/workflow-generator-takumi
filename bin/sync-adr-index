@@ -20,8 +20,8 @@
 #   - Editorial text outside the fence is preserved.
 #
 # Exit codes:
-#   0  no changes were needed (index already in sync)
-#   1  index was rewritten OR an error occurred (see stderr)
+#   0  success (index already in sync, or rewritten successfully)
+#   1  check-mode drift (only with --check; see stderr)
 #   2  invocation error (missing files, malformed input)
 #
 # Usage:
@@ -252,4 +252,4 @@ fi
 
 printf '%s\n' "$new_content" > "$INDEX_FILE"
 printf 'sync-adr-index: rewrote %s\n' "$INDEX_FILE"
-exit 1
+exit 0

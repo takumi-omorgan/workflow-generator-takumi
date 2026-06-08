@@ -104,6 +104,7 @@ step "validate-kit-json"       0 bin/validate-kit-json
 step "validate-carry-forward"  0 bin/validate-carry-forward
 step "check-consistency"       0 bin/check-consistency
 step "check-state-cap"         0 bin/check-state-cap --check
+step "check-install-render"    0 bin/check-install-render
 step "review-eval"             0 bin/review-eval
 
 # bash -n across all bin scripts (aggregate step)

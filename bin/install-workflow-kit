@@ -626,3 +626,9 @@ if [ "$NO_COMMIT" -ne 1 ] && in_git_repo; then
 fi
 
 info "done. target: $TARGET_DIR"
+log ""
+log "Next steps:"
+log "1. Open the target project in Claude Code."
+log "2. Run /start."
+log "3. Fill optional _TBD_ values in CLAUDE.md as the project settles."
+log "4. If GitHub metadata is still _TBD_, re-run with --set GITHUB_OWNER=... when ready."
