@@ -198,8 +198,8 @@ convention observed in this kit's own issues #11–#25:
      deliverables or the skill's own decomposition; 2–6 items.
   6. **Acceptance criteria** — observable, not a restatement of tasks.
   7. **Notes** — labels and milestone echoed for human readers. Add a
-     `Prompt:` line pointing at `notes/issue<N>-prompt.md` **only if**
-     that file already exists; do not invent one.
+     `Prompt:` line pointing at `prompts/issue-NNN-short-title.md`
+     **only if** that file already exists; do not invent one.
 - **Labels:** default to `feature` + a kind label (`design`, `docs`,
   `infra`, `chore`, `test`). Infer the kind from the work item's text
   and the plan's phase context. Never invent labels that do not exist
@@ -383,7 +383,7 @@ If any fail, stop and report.
 The backlog this skill creates is the input to:
 
 - **`prepare-issue`** (Issue #15) — reads one issue at a time and
-  produces a per-issue prompt under `notes/issue<N>-prompt.md`.
+  produces a per-issue prompt under `prompts/issue-NNN-short-title.md`.
 - **`workflow-docs`** (Issue #20) — may cross-reference the issue
   backlog and Project board in generated README / workflow-guide
   content.

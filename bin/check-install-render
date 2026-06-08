@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+# check-install-render — regression check for target-project install output.
+#
+# Exercises bin/install-workflow-kit against a throwaway target and verifies
+# the rendered day-one surface stays coherent after evaluation-driven fixes.
+#
+# Exit codes:
+#   0  rendered install surface is consistent
+#   1  rendered install surface has one or more regressions
+#   2  invocation/environment error
+
+set -uo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." >/dev/null 2>&1 && pwd)"
+if [ ! -x "$ROOT/bin/install-workflow-kit" ]; then
+  printf 'check-install-render: install-workflow-kit not found or not executable\n' >&2
+  exit 2
+fi
+
+WORK="$(mktemp -d 2>/dev/null || mktemp -d -t check-install-render)"
+cleanup() { rm -rf "$WORK" 2>/dev/null || true; }
+trap cleanup EXIT
+
+TARGET="$WORK/target"
+mkdir -p "$TARGET"
+
+OUT="$WORK/install.out"
+ERR="$WORK/install.err"
+"$ROOT/bin/install-workflow-kit" \
+  --target "$TARGET" \
+  --project-name "Render Check" \
+  --set GITHUB_OWNER=example-owner \
+  --set GITHUB_REPO=render-check \
+  --set DEFAULT_BRANCH=main \
+  --non-interactive \
+  --no-commit \
+  --no-git-init >"$OUT" 2>"$ERR"
+install_rc=$?
+
+problems=()
+add_problem() { problems+=("$1"); }
+
+if [ "$install_rc" -ne 0 ]; then
+  add_problem "installer exited $install_rc"
+fi
+
+CLAUDE="$TARGET/CLAUDE.md"
+if [ ! -f "$CLAUDE" ]; then
+  add_problem "CLAUDE.md was not rendered"
+else
+  if ! grep -q 'prompts/issue-NNN-short-title.md' "$CLAUDE"; then
+    add_problem "CLAUDE.md does not name canonical prompts/issue-NNN-short-title.md path"
+  fi
+  if grep -q 'notes/issueNN-prompt.md' "$CLAUDE"; then
+    add_problem "CLAUDE.md still advertises stale notes/issueNN-prompt.md path"
+  fi
+  if grep -Eq '\{\{[^}]+\}\}' "$CLAUDE"; then
+    add_problem "CLAUDE.md contains ambiguous {{...}} template syntax after render"
+  fi
+  if ! grep -q 'created later by the workflow' "$CLAUDE"; then
+    add_problem "CLAUDE.md does not label day-one missing design artefacts as workflow-created later"
+  fi
+fi
+
+if ! grep -q 'Next steps:' "$OUT"; then
+  add_problem "installer output does not include a Next steps stanza"
+fi
+
+ADR="$TARGET/design/adr/adr-001-render-check.md"
+cat > "$ADR" <<'ADR'
+# ADR-001: Render check
+
+**Status:** proposed
+
+## Context
+
+Fixture ADR used by check-install-render.
+
+## Decision
+
+Use this ADR to exercise sync-adr-index rewrite semantics.
+ADR
+
+if [ ! -x "$TARGET/.claude/bin/sync-adr-index" ]; then
+  add_problem "target .claude/bin/sync-adr-index missing or not executable"
+else
+  (cd "$TARGET" && .claude/bin/sync-adr-index >"$WORK/sync.out" 2>"$WORK/sync.err")
+  sync_rc=$?
+  if [ "$sync_rc" -ne 0 ]; then
+    add_problem "sync-adr-index rewrite exited $sync_rc, expected 0"
+  fi
+  (cd "$TARGET" && .claude/bin/sync-adr-index --check >"$WORK/sync-check.out" 2>"$WORK/sync-check.err")
+  check_rc=$?
+  if [ "$check_rc" -ne 0 ]; then
+    add_problem "sync-adr-index --check after rewrite exited $check_rc, expected 0"
+  fi
+fi
+
+if [ "${#problems[@]}" -gt 0 ]; then
+  printf 'check-install-render: %d problem(s):\n' "${#problems[@]}"
+  for p in "${problems[@]}"; do
+    printf '  - %s\n' "$p"
+  done
+  exit 1
+fi
+
+printf 'check-install-render: ok\n'
+exit 0
