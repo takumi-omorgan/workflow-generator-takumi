@@ -1,11 +1,13 @@
 ---
 name: workflow-docs
-description: Generate README.md and design/ai-summary.md for a target project from PRD, MVP, ADRs, and CLAUDE.md — re-runnable with marker-fenced sections that preserve manual edits. Use when generating or refreshing the project's user-facing docs.
-permission-category: 1  # substitutable — generates README.md and design/ai-summary.md locally, per workflow-guide §7
+description: Generate README.md, design/architecture.md, and design/ai-summary.md for a target project from PRD, MVP, ADRs, planning docs, and CLAUDE.md — re-runnable with marker-fenced sections that preserve manual edits. Use when generating or refreshing the project's user-facing and AI-facing docs.
+permission-category: 1  # substitutable — generates README.md, design/architecture.md, and design/ai-summary.md locally, per workflow-guide §7
 inputs: []
 outputs:
   - artefact: "README.md"
     description: "Generated (marker-fenced)"
+  - artefact: "design/architecture.md"
+    description: "Current architecture/design reference (marker-fenced)"
   - artefact: "design/ai-summary.md"
     description: "AI-readable project summary (marker-fenced)"
 next: []
@@ -13,10 +15,11 @@ next: []
 
 # workflow-docs
 
-Generate two project-level documents in a target project by reading the
+Generate three project-level documents in a target project by reading the
 artifacts the kit already produces and filling templates:
 
 - `README.md` (public entry point for humans)
+- `design/architecture.md` (current architecture/design reference)
 - `design/ai-summary.md` (AI-readable project summary)
 
 The skill is **re-runnable**. Generated regions are wrapped in comment
@@ -26,16 +29,17 @@ entirely (heading + body) rather than left blank or filled with
 placeholders.
 
 See [ADR-018](../../design/adr/adr-018-workflow-docs-skill.md) for the
-decision to consolidate both outputs into one skill instead of two.
+decision to consolidate all outputs into one skill instead of two.
 
 ## When to use this skill
 
 - After `prd-to-mvp` has produced `design/mvp.md`, to generate a real
-  README and AI summary.
-- After landing one or more ADRs, to refresh the "Key decisions" section
-  in both outputs.
-- Whenever `CLAUDE.md`, the PRD, or the MVP statement has materially
-  changed and the generated docs should reflect that change.
+  README, current architecture reference, and AI summary.
+- After landing one or more ADRs, to refresh the current architecture and
+  "Key decisions" sections in generated docs.
+- Whenever `CLAUDE.md`, the PRD, the MVP statement, planning docs, or the
+  implemented architecture has materially changed and the generated docs
+  should reflect that change.
 
 Typical invocation:
 
@@ -52,8 +56,8 @@ working directory (the target project root).
   are **read-only inputs**.
 - Does not invent content. A missing section source → the section is
   omitted, not filled with a placeholder or TODO.
-- Does not overwrite files without explicit user approval. Both
-  generated files are shown in full before any write.
+- Does not overwrite files without explicit user approval. All generated
+  files are shown in full before any write.
 - Does not publish, deploy, or push. Output is local files only.
 - Does not touch content outside its `<!-- workflow-docs:start:... -->`
   / `<!-- workflow-docs:end:... -->` markers on re-run.
@@ -72,6 +76,9 @@ omitted.
 | `design/prd.md` or `design/prd-normalized.md` | Project description, primary user, problem statement |
 | `design/mvp.md`       | Product name, tagline, principles, In-scope, Out-of-scope, success criteria |
 | `design/adr/*.md`     | "Key decisions" bullets — one line per ADR, newest first     |
+| `design/build-out-plan.md` | Roadmap and phase context for architecture status           |
+| `design/planning.md` / `design/decisions.md` | Current architecture context, constraints, open questions |
+| `design/milestones/*.md` / `design/state.md` | Recent evolution and in-flight architecture status        |
 | `CLAUDE.md`           | Tech stack, commands (install, dev, test), current phase, milestone |
 
 If **none** of these exist, stop with a clear message pointing the user
@@ -80,11 +87,13 @@ generate from an empty kit.
 
 ## Outputs
 
-Both outputs are written to the **target project** root, next to the
+Outputs are written to the **target project** root, next to the
 inputs:
 
 - `README.md` — rendered from
   [`templates/readme-template.md`](../../templates/readme-template.md).
+- `design/architecture.md` — rendered from
+  [`templates/architecture-template.md`](../../templates/architecture-template.md).
 - `design/ai-summary.md` — rendered from
   [`templates/ai-summary-template.md`](../../templates/ai-summary-template.md).
 
@@ -138,6 +147,20 @@ Each generated section has a deterministic rule for when it appears:
 | `roadmap`       | `design/build-out-plan.md` has 2+ `### Phase N` blocks (per ADR-032). Single-phase / no-phase plans omit this section. |
 | `more`          | Always — static pointers to `CLAUDE.md`, `design/`          |
 
+### `design/architecture.md`
+
+| Section | Appears when |
+|---|---|
+| `overview` | PRD, MVP, `CLAUDE.md`, planning docs, or ADRs describe the system shape |
+| `system-boundaries` | PRD/MVP/planning docs define in-scope, out-of-scope, users, integrations, or deployment boundaries |
+| `major-components` | `CLAUDE.md`, planning docs, or repo structure identify components/modules/services |
+| `data-and-control-flow` | Sources describe data flow, request flow, jobs, agents, pipelines, or state transitions |
+| `external-dependencies` | Sources mention APIs, vendors, databases, hosted services, models, or infrastructure |
+| `key-constraints` | MVP principles, PRD constraints, ADR consequences, or `CLAUDE.md` rules apply to architecture |
+| `extension-points` | Sources identify plugin/module boundaries or safe places to add features |
+| `current-decisions` | ADRs or `design/decisions.md` contain current load-bearing decisions |
+| `open-questions` | Planning docs, state, milestones, or PR follow-ups list unresolved architecture questions |
+
 ### `design/ai-summary.md`
 
 | Section          | Appears when                                              |
@@ -179,7 +202,12 @@ Run these steps in order. Stop on the first failure unless noted.
 2. **Collect inputs.** Read these files if they exist:
    - `design/prd.md` (fall back to `design/prd-normalized.md`)
    - `design/mvp.md`
+   - `design/build-out-plan.md`
+   - `design/planning.md`
+   - `design/decisions.md`
    - Every file matching `design/adr/adr-*.md`
+   - Every file matching `design/milestones/*.md`
+   - `design/state.md`
    - `CLAUDE.md`
 
    If none exist, stop with the message "No PRD, MVP, ADRs, or
@@ -188,10 +216,11 @@ Run these steps in order. Stop on the first failure unless noted.
    listed under "Template variables" below. Any field whose source is
    missing is left as `None`. Do **not** substitute placeholder text.
 4. **Determine which sections to include.** Apply the omission rules
-   above to both outputs. Produce an ordered list of `(section_id,
+   above to all outputs. Produce an ordered list of `(section_id,
    rendered_content)` tuples for each file.
-5. **Render both files in memory.**
-   - Read `templates/readme-template.md` and
+5. **Render all files in memory.**
+   - Read `templates/readme-template.md`,
+     `templates/architecture-template.md`, and
      `templates/ai-summary-template.md` from the kit's
      `.claude/skills/workflow-docs/` copy or from the templates
      directory if running from the kit repo.
@@ -201,7 +230,7 @@ Run these steps in order. Stop on the first failure unless noted.
    - Collapse any resulting run of more than one blank line to exactly
      one blank line.
 6. **Check for existing files and merge markers.**
-   - If `README.md` or `design/ai-summary.md` already exists **and
+   - If `README.md`, `design/architecture.md`, or `design/ai-summary.md` already exists **and
      contains** the skill's markers: parse the existing file, replace
      only the content between each `start:/end:` pair, leave
      everything else alone.
@@ -213,7 +242,7 @@ Run these steps in order. Stop on the first failure unless noted.
    - If a section is in the existing file but the new run **omits** it
      (source disappeared), delete the block between markers including
      the markers themselves.
-7. **Show both full file contents in chat** as fenced markdown blocks
+7. **Show all generated file contents in chat** as fenced markdown blocks
    — or show a diff if the file already exists. Ask explicitly:
    "Write these files? (yes / edit / cancel)". Default: no.
 8. **Write only after confirmation.** Report the absolute paths and a
@@ -242,6 +271,22 @@ field is optional; missing fields drive section omission (see above).
 | `{{TEST_COMMAND}}`     | `CLAUDE.md` test command                                  |
 | `{{KEY_ADR_BULLETS}}`  | One bullet per `design/adr/adr-NNN-*.md`, newest first: `- ADR-NNN: <one-line decision>` |
 
+### Architecture (`templates/architecture-template.md`)
+
+| Placeholder | Source |
+|---|---|
+| `{{PROJECT_NAME}}` | Same as README |
+| `{{YYYY-MM-DD}}` | Today's date |
+| `{{ARCHITECTURE_OVERVIEW}}` | PRD/MVP goal plus `CLAUDE.md` project structure and tech stack |
+| `{{SYSTEM_BOUNDARIES}}` | MVP in/out-of-scope, PRD users/integrations, deploy target |
+| `{{MAJOR_COMPONENTS}}` | `CLAUDE.md` repo structure, planning docs, implemented module/service names |
+| `{{DATA_AND_CONTROL_FLOW}}` | Planning docs, PRD workflows, ADR consequences, relevant milestone summaries |
+| `{{EXTERNAL_DEPENDENCIES}}` | Tech stack, APIs, databases, vendors, hosted services, infra |
+| `{{KEY_CONSTRAINTS}}` | MVP principles, PRD constraints, ADR consequences, `CLAUDE.md` rules |
+| `{{EXTENSION_POINTS}}` | PRD/CLAUDE/planning notes about module, plugin, API, or workflow boundaries |
+| `{{CURRENT_DECISION_BULLETS}}` | Concise current decisions from ADRs and `design/decisions.md`; not every historical detail |
+| `{{OPEN_ARCHITECTURE_QUESTIONS}}` | Open questions from planning docs, `design/state.md`, milestone summaries, or PR follow-ups |
+
 ### AI summary (`templates/ai-summary-template.md`)
 
 | Placeholder            | Source                                                    |
@@ -265,10 +310,11 @@ rendering. Section ids mirror the template headings in kebab-case.
 - **No PRD, no MVP, no ADRs, no CLAUDE.md** → stop; tell the user to
   run `prd-normalizer` / `prd-to-mvp` first. Do not write empty docs.
 - **Only `CLAUDE.md` exists** → generate a minimal README (tagline +
-  how-to-run + more) and a minimal AI summary (tech stack + current
-  status). Omit all other sections.
+  how-to-run + more), a minimal architecture doc (system shape from
+  project structure / tech stack), and a minimal AI summary (tech stack +
+  current status). Omit all other sections.
 - **Only ADRs exist** → generate only the `key-decisions` section in
-  both outputs. Ask the user whether that is useful before writing.
+  all outputs. Ask the user whether that is useful before writing.
 - **Existing README has no markers** → treat as first run; show diff;
   require explicit confirmation; do not silently overwrite.
 - **Existing README has markers but they are malformed** (missing
@@ -287,12 +333,12 @@ rendering. Section ids mirror the template headings in kebab-case.
 
 ## Review-before-write checkpoint
 
-The user always sees both generated files (as full content on first
+The user always sees all generated files (as full content on first
 run, or as a diff against the existing file on re-run) before any
 write. This is the approval gate for ADR-018.
 
 Never skip this step, even if the content looks clean. Never write one
-file while deferring the other — both go out together after one
+file while deferring the other — all go out together after one
 confirmation, or neither.
 
 ## Self-check before writing
@@ -313,6 +359,10 @@ If any fail, fix and re-show before writing.
 
 ## Running against the kit repo itself
 
+This repo (`workflow-generator`) has its own public architecture document at
+`docs/architecture.md`. Do not use this skill to generate the kit repo's own
+`docs/architecture.md`; maintain it directly as part of kit-release docs work.
+
 This repo (`workflow-generator`) has `CLAUDE.md` and `design/adr/*.md`
 but no `design/prd.md` or `design/mvp.md`. Running the skill here would
 produce:
@@ -325,6 +375,9 @@ produce:
   would be included — and because the kit repo already has a rich
   hand-written README, the skill would detect the missing markers and
   refuse to overwrite without an explicit "yes, replace".
+- **design/architecture.md**: would be sparse and source-heavy because the kit
+  repo does not follow the target-project PRD/MVP shape. Maintain
+  `docs/architecture.md` directly instead.
 - **design/ai-summary.md**: only `key-decisions` (from ADRs) and a
   minimal `current-status` section would be included. Objectives,
   architecture, tech stack, constraints, and extension points would
@@ -336,7 +389,7 @@ on itself. The skill is aimed at target projects that have already run
 
 ## Handoff
 
-Once the two files are written, the user can edit outside markers
+Once the files are written, the user can edit outside markers
 freely. Re-running the skill will only touch marked regions. If a
 future run needs to add a new section, this skill's next release will
 add a new marker id — unrecognised existing markers are left

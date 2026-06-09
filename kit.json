@@ -9,9 +9,9 @@
     "validator": "bin/validate-kit-json"
   },
   "permissionCategories": {
-    "1": "substitutable — local and reversible; auto-mode runs without asking",
-    "2": "operator-acknowledged-bypass — auto-mode proceeds but pauses to acknowledge a bypass in chat",
-    "3": "non-substitutable — public or hard-to-reverse; always requires explicit approval"
+    "1": "substitutable \u2014 local and reversible; auto-mode runs without asking",
+    "2": "operator-acknowledged-bypass \u2014 auto-mode proceeds but pauses to acknowledge a bypass in chat",
+    "3": "non-substitutable \u2014 public or hard-to-reverse; always requires explicit approval"
   },
   "exitCodes": {
     "0": "success",
@@ -710,12 +710,16 @@
       "name": "workflow-docs",
       "slashCommand": "/workflow-docs",
       "permissionCategory": 1,
-      "description": "Generate README.md and design/ai-summary.md for the project.",
+      "description": "Generate README.md, design/architecture.md, and design/ai-summary.md for the project.",
       "inputs": [],
       "outputs": [
         {
           "artefact": "README.md",
           "description": "Generated (marker-fenced)"
+        },
+        {
+          "artefact": "design/architecture.md",
+          "description": "Current architecture/design reference (marker-fenced)"
         },
         {
           "artefact": "design/ai-summary.md",

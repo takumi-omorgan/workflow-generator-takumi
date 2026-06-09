@@ -128,7 +128,7 @@ Active milestone: `{{CURRENT_MILESTONE}}`.
 {{PROJECT_NAME}}/
   src/            <!-- FILL: application/library code, if applicable -->
   test/           <!-- FILL: unit/integration tests, if applicable -->
-  design/         ADRs and workflow design artefacts
+  design/         architecture, ADRs, and workflow design artefacts
   prompts/        per-issue prompts (`prompts/issue-NNN-short-title.md`)
   notes/          working notes and evaluation logs
   .claude/skills/ installed workflow skills
@@ -136,6 +136,7 @@ Active milestone: `{{CURRENT_MILESTONE}}`.
 
 See also:
 
+- `design/architecture.md` — current architecture/design reference, maintained by `/workflow-docs`
 - `design/adr/` — ADRs and ADR index, available on day one
 - `design/prd.md` — product requirements, created later by the workflow
 - `design/mvp.md` — MVP scope, created later by the workflow
@@ -155,10 +156,13 @@ as hard requirements unless a human overrides them in the session.
   step-by-step plan and wait for explicit approval before editing files.
 - **Issue-by-issue.** Work is scoped to one GitHub issue at a time.
   Per-issue prompts live in `prompts/issue-NNN-short-title.md`.
+- **Keep architecture docs current.** If a change materially alters the
+  system shape, update or re-run `/workflow-docs` so `design/architecture.md`
+  and `design/ai-summary.md` reflect reality.
 - **Consult ADRs before changing load-bearing behaviour.** If a change
   touches architecture, installation, or conventions, check
   `design/adr/` first. Never edit an accepted ADR in place — supersede it
-  with a new ADR.
+  with a new ADR, then refresh `design/architecture.md`.
 - **Stay in scope.** Do not refactor unrelated code, rename files, or add
   speculative abstractions while working on an issue. If something is
   out of scope, note it for a follow-up issue.
@@ -211,7 +215,8 @@ A task is **done** when:
 
 ## What this file is NOT
 
-- Not a spec — architectural decisions live in `design/adr/`.
+- Not the architecture reference — that is `design/architecture.md`.
+- Not a spec — architectural decision history lives in `design/adr/`.
 - Not a roadmap — phased plans live in `design/build-out-plan.md`.
 - Not an AI-readable summary — that is `design/ai-summary.md`.
 

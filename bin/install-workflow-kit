@@ -450,6 +450,7 @@ fi
 RUNTIME_TEMPLATES=(
   adr-template.md
   ai-summary-template.md
+  architecture-template.md
   build-out-plan-template.md
   decisions-template.md
   issue-template.md

@@ -457,18 +457,20 @@ single explicit approval.
 
 ### `/workflow-docs` (cat-1)
 
-Re-render `README.md` and `design/ai-summary.md` from the project's
-current artefacts (PRD, MVP, accepted ADRs, `CLAUDE.md`). Generated
+Re-render `README.md`, `design/architecture.md`, and
+`design/ai-summary.md` from the project's current artefacts (PRD, MVP,
+accepted ADRs, planning docs, `CLAUDE.md`). Generated
 regions are wrapped in marker fences so manual edits outside those
 regions are preserved across re-runs. Sections with no source data
 are omitted entirely rather than left blank.
 
 - **Use when:** the project's shape has changed meaningfully — new
   ADRs accepted, a major feature shipped, a pivot in scope. The
+  architecture doc is the current human-readable system shape;
   `ai-summary.md` is what you paste into external AIs for
   second-opinion design reviews, so it's worth keeping current.
-- **Input:** project artefacts (PRD, MVP, ADRs, `CLAUDE.md`).
-- **Output:** updated `README.md` and `design/ai-summary.md`.
+- **Input:** project artefacts (PRD, MVP, planning docs, decisions, ADRs, `CLAUDE.md`).
+- **Output:** updated `README.md`, `design/architecture.md`, and `design/ai-summary.md`.
 - **Spec:** [`skills/workflow-docs/SKILL.md`](../skills/workflow-docs/SKILL.md).
 
 ---

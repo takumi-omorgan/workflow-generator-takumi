@@ -4,7 +4,8 @@ A toolkit of Claude Code skills, templates, and docs that gives any
 **new, structured project** — software or not — a disciplined,
 GitHub-first path from a rough idea to a tagged release. You install it
 into your own project; it drives the flow through a PRD, recorded
-decisions (ADRs), GitHub issues, and pull requests.
+decisions (ADRs), a continuously maintained architecture document, GitHub
+issues, and pull requests.
 
 ## Who it's for
 
@@ -71,13 +72,14 @@ the life of the project:
 | Decide | `/adr-writer` | ADRs in `design/adr/` |
 | Backlog | `/issue-planner` | GitHub issues + project board |
 | Implement | `/prepare-issue`, `/claude-issue-executor` | feature branch, tests, commits |
-| Ship | `/pr-review-packager`, `/changelog`, `/release` | PR, release notes, tagged release |
+| Ship | `/pr-review-packager`, `/changelog`, `/release`, `/workflow-docs` | PR, release notes, refreshed README/architecture/AI summary, tagged release |
 
 Plan-first throughout: Claude Code proposes a plan, you approve, then
 it implements. Work is scoped one GitHub issue per branch and PR,
 following [GitHub Flow](https://docs.github.com/en/get-started/using-github/github-flow).
 The kit covers the whole lifecycle — not just scaffolding, but ongoing
-ADRs, issue-by-issue execution, releases, and session continuity.
+ADRs, continuous architecture-document maintenance, issue-by-issue execution,
+releases, and session continuity.
 
 Not sure what to run? Type **`/start`** (or `/next`) and the kit
 inspects your project and tells you the next step. The full command set
@@ -92,7 +94,7 @@ without asking. See [workflow control](docs/workflow-control.md).
 |---|---|
 | `skills/` | The Claude Code skills the kit ships |
 | `templates/` | Starter templates rendered into your project |
-| `docs/` | Install, tutorial, workflow, troubleshooting, skills |
+| `docs/` | Install, architecture, tutorial, workflow, troubleshooting, skills |
 | `design/adr/` | Accepted ADRs that govern the kit |
 | `examples/` | [Worked end-to-end projects](examples/README.md) |
 
@@ -103,6 +105,7 @@ of what lives in the kit versus what gets generated in your project.
 
 - [Install guide](docs/install.md) — all install paths, prerequisites, manual flow
 - [First PR in 15 minutes](docs/tutorial.md) — the fastest happy path
+- [Architecture](docs/architecture.md) — how the kit itself is organized
 - [Workflow guide](docs/workflow-guide.md) — idea to release, end to end
 - [Workflow control](docs/workflow-control.md) — operating modes, the approval gate, the verb layer
 - [Skills reference](docs/skills.md) — what every skill does

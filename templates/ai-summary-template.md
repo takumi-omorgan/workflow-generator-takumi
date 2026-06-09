@@ -6,7 +6,9 @@
   ChatGPT, other Claude instances) read it when helping to design a
   feature or review an ADR. Prioritise structure, concrete facts, and
   unambiguous language over readability for humans.
-  Regenerate after each significant architectural change.
+  Pair with design/architecture.md: the architecture doc is the current
+  human-readable shape; this summary is the compact AI handoff.
+  Regenerate both after each significant architectural change.
 -->
 
 # {{PROJECT_NAME}} — AI Summary

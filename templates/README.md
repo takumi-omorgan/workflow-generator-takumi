@@ -20,7 +20,8 @@ for the documentation-and-template architecture.
 | [`adr-template.md`](adr-template.md) | Architecture Decision Record | `design/adr/adr-NNN-short-title.md` | `adr-writer` skill (Issue #7) / human |
 | [`issue-template.md`](issue-template.md) | GitHub issue body | Pasted into `gh issue create --body` | `issue-planner` skill / human |
 | [`pr-template.md`](pr-template.md) | Pull request body | [`.github/pull_request_template.md`](../.github/pull_request_template.md) | PR author / `pr-review-packager` skill |
-| [`claude-md-template.md`](claude-md-template.md) | Project rules for Claude Code | `CLAUDE.md` at target project root | `workflow-docs` skill / human |
+| [`claude-md-template.md`](claude-md-template.md) | Project rules for Claude Code | `CLAUDE.md` at target project root | installer / human |
+| [`architecture-template.md`](architecture-template.md) | Current architecture/design reference | `design/architecture.md` | `workflow-docs` skill / human |
 | [`ai-summary-template.md`](ai-summary-template.md) | AI-readable project summary | `design/ai-summary.md` | `workflow-docs` skill / human |
 | [`prd-template.md`](prd-template.md) | Product Requirements Document | `design/prd.md` | external LLM / human; consumed by `prd-normalizer` |
 | [`mvp-template.md`](mvp-template.md) | MVP statement | `design/mvp.md` | `prd-to-mvp` skill (Issue #7) / human |
