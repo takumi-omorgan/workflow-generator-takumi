@@ -912,6 +912,29 @@
         2
       ],
       "description": "Allocate the next ADR number, date, slug, filename, and index-row stub by scanning design/adr/; writes nothing (ADR-054)."
+    },
+    {
+      "name": "changelog-collect",
+      "path": "bin/changelog-collect",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        2
+      ],
+      "description": "Parse git history into grouped, deduped, categorized commit data as JSON for the changelog/release skills; offline via --git-log-file/--gh-mock (ADR-054)."
+    },
+    {
+      "name": "collect-eval",
+      "path": "bin/collect-eval",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Offline fixture harness asserting changelog-collect and pr-context outputs match expected.json byte-for-byte (ADR-054)."
     }
   ]
 }

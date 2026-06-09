@@ -1,0 +1,151 @@
+{
+  "range": {
+    "from": "v1.2.0",
+    "to": "HEAD",
+    "title": "Changelog since v1.2.0",
+    "empty": false
+  },
+  "origin": "https://github.com/o/r",
+  "ghAvailable": true,
+  "sections": [
+    {
+      "id": "features",
+      "title": "Features",
+      "entries": [
+        {
+          "canonicalSubject": "add GPX support (ADR-013, #20)",
+          "shas": [
+            "h1"
+          ],
+          "fullShas": [
+            "f1f1f1f1f1"
+          ],
+          "issues": [
+            "20"
+          ],
+          "adrs": [
+            "ADR-013"
+          ],
+          "prRef": null
+        },
+        {
+          "canonicalSubject": "Add GPX support via parser",
+          "shas": [
+            "h2"
+          ],
+          "fullShas": [
+            "f2f2f2f2f2"
+          ],
+          "issues": [
+            "20",
+            "21"
+          ],
+          "adrs": [],
+          "prRef": "21"
+        },
+        {
+          "canonicalSubject": "add export button to toolbar",
+          "shas": [
+            "h8",
+            "h9"
+          ],
+          "fullShas": [
+            "f8f8f8f8f8",
+            "f9f9f9f9f9"
+          ],
+          "issues": [],
+          "adrs": [],
+          "prRef": null
+        }
+      ]
+    },
+    {
+      "id": "fixes",
+      "title": "Fixes",
+      "entries": [
+        {
+          "canonicalSubject": "handle null",
+          "shas": [
+            "h3",
+            "h4"
+          ],
+          "fullShas": [
+            "f3f3f3f3f3",
+            "f4f4f4f4f4"
+          ],
+          "issues": [
+            "30"
+          ],
+          "adrs": [],
+          "prRef": "30"
+        }
+      ]
+    },
+    {
+      "id": "docs",
+      "title": "Docs",
+      "entries": [
+        {
+          "canonicalSubject": "update readme",
+          "shas": [
+            "h5"
+          ],
+          "fullShas": [
+            "f5f5f5f5f5"
+          ],
+          "issues": [],
+          "adrs": [],
+          "prRef": null
+        }
+      ]
+    },
+    {
+      "id": "security",
+      "title": "Security",
+      "entries": [
+        {
+          "canonicalSubject": "bump dep",
+          "shas": [
+            "h7"
+          ],
+          "fullShas": [
+            "f7f7f7f7f7"
+          ],
+          "issues": [
+            "40"
+          ],
+          "adrs": [],
+          "prRef": "40"
+        }
+      ]
+    },
+    {
+      "id": "other",
+      "title": "Other",
+      "entries": [
+        {
+          "canonicalSubject": "Some unconventional subject",
+          "shas": [
+            "h6"
+          ],
+          "fullShas": [
+            "f6f6f6f6f6"
+          ],
+          "issues": [],
+          "adrs": [],
+          "prRef": null
+        }
+      ]
+    }
+  ],
+  "counts": {
+    "features": 3,
+    "fixes": 1,
+    "docs": 1,
+    "refactoring": 0,
+    "chores": 0,
+    "security": 1,
+    "other": 1
+  },
+  "warnings": []
+}

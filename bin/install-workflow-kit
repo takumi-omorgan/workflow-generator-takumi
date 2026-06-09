@@ -372,7 +372,7 @@ ensure_gitignore_line() {
 #      shell out to these for parse/count/fence-splice mechanics, so the
 #      scripts and the shared JSON-envelope + fences libraries travel with the
 #      kit on every install. Per ADR-054.
-DEFAULT_BIN="fence adr-alloc"
+DEFAULT_BIN="fence adr-alloc changelog-collect"
 DEFAULT_LIB="json-envelope.sh fences.py"
 mkdir -p "$TARGET_DIR/.claude/bin/lib"
 for script in $DEFAULT_BIN; do
