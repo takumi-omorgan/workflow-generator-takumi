@@ -18,6 +18,9 @@
 #       (sources lib/json-envelope.sh) is registered in kit.json
 #   C4  each canonical schema file is referenced from its prose home
 #   C5  every skill's permissionCategory is a defined legend value
+#   C6  every `bin/<name> --flag` a SKILL.md documents is a flag the
+#       script's --help actually accepts (closes ADR-043's spec/runtime
+#       divergence: a skill cannot reference a flag the helper lacks)
 #
 # Usage:
 #   bin/check-consistency [--format text|json] [-h]
@@ -69,7 +72,7 @@ done
 RESULT=$(
   ENVELOPE_SCRIPTS="$ENVELOPE_SCRIPTS" \
   python3 <<'PYEOF'
-import json, os, re, sys
+import json, os, re, sys, glob, subprocess
 
 problems = []
 
@@ -174,6 +177,36 @@ for s in kit.get("skills", []):
     if legend and str(pc) not in legend:
         problems.append("C5: skill %r has permissionCategory %r not in the kit.json legend %s"
                         % (s.get("name"), pc, sorted(legend)))
+
+# ---- C6: skill-documented bin flags exist in the script's --help -------
+bin_names = [b.get("name") for b in bin_entries if b.get("name")]
+help_cache = {}
+
+def get_help(name):
+    if name in help_cache:
+        return help_cache[name]
+    path = os.path.join("bin", name)
+    txt = ""
+    if os.path.isfile(path) and os.access(path, os.X_OK):
+        try:
+            r = subprocess.run([path, "--help"], capture_output=True, text=True, timeout=20)
+            txt = (r.stdout or "") + (r.stderr or "")
+        except Exception:
+            txt = ""
+    help_cache[name] = txt
+    return txt
+
+for skill_md in sorted(glob.glob("skills/*/SKILL.md")):
+    sname = os.path.basename(os.path.dirname(skill_md))
+    text = read(skill_md) or ""
+    for line in text.split("\n"):
+        for name in bin_names:
+            if re.search(r"(?<![\w/-])bin/%s(?![\w-])" % re.escape(name), line):
+                for fl in re.findall(r"(--[a-z][a-z-]+)", line):
+                    if fl not in get_help(name):
+                        problems.append(
+                            "C6: skills/%s/SKILL.md documents `bin/%s %s` but the script's "
+                            "--help does not list %s" % (sname, name, fl, fl))
 
 # ---- assemble ----------------------------------------------------------
 if problems:
