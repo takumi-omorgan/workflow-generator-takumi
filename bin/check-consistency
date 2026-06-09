@@ -61,7 +61,7 @@ ENVELOPE_SCRIPTS=""
 for f in bin/*; do
   [ -f "$f" ] || continue
   case "$f" in */lib/*) continue ;; esac
-  if grep -q 'lib/json-envelope.sh' "$f" 2>/dev/null; then
+  if grep -Eq '^[[:space:]]*\. .*/?lib/json-envelope\.sh' "$f" 2>/dev/null; then
     ENVELOPE_SCRIPTS="$ENVELOPE_SCRIPTS $f"
   fi
 done

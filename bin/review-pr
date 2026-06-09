@@ -31,9 +31,10 @@
 #   -h, --help        print this header
 #
 # Config resolution (later overrides earlier): built-in defaults →
-# ai-review/config.json → --config FILE → CLI flags. The API key is read at
-# call time from the env var named by `apiKeyEnv`; it is never read from a
-# file. With no key (and no --mock), the script exits 3 with a setup message.
+# $KIT_ROOT/ai-review/config.json → --config FILE → CLI flags. The API key
+# is read at call time from the env var named by `apiKeyEnv`; it is never
+# read from a file. With no key (and no --mock), the script exits 3 with a
+# setup message.
 #
 # Exit codes (shared convention; see lib/json-envelope.sh):
 #   0  a review artifact was written
@@ -58,7 +59,7 @@ OPT_PROVIDER=""
 OPT_MODEL=""
 OPT_BASEURL=""
 OPT_PROFILE=""
-OUT_DIR="ai-review/artifacts"
+OUT_DIR="$KIT_ROOT/ai-review/artifacts"
 FORMAT="text"
 
 while [ $# -gt 0 ]; do
@@ -90,7 +91,7 @@ fi
 
 # ---- resolve config ----------------------------------------------------
 CONFIG=$(
-  CFG_FILE="$CONFIG_FILE" OPT_PROVIDER="$OPT_PROVIDER" OPT_MODEL="$OPT_MODEL" \
+  CFG_FILE="$CONFIG_FILE" KIT_ROOT="$KIT_ROOT" OPT_PROVIDER="$OPT_PROVIDER" OPT_MODEL="$OPT_MODEL" \
   OPT_BASEURL="$OPT_BASEURL" OPT_PROFILE="$OPT_PROFILE" \
   python3 - <<'PYEOF'
 import os, json, sys
@@ -116,8 +117,8 @@ def merge(path):
                 if k in ("schema", "version"):
                     continue
                 cfg[k] = v
-# ai-review/config.json (if present), then explicit --config
-merge("ai-review/config.json")
+# $KIT_ROOT/ai-review/config.json (if present), then explicit --config
+merge(os.path.join(os.environ.get("KIT_ROOT", "."), "ai-review", "config.json"))
 merge(os.environ.get("CFG_FILE") or "")
 for env, key in (("OPT_PROVIDER","provider"),("OPT_MODEL","model"),
                  ("OPT_BASEURL","baseURL"),("OPT_PROFILE","profile")):
@@ -170,7 +171,7 @@ if [ -n "$MOCK_FILE" ]; then
 else
   KEY="${!APIKEYENV:-}"
   if [ -z "$KEY" ]; then
-    printf 'review-pr: no API key — set $%s (see docs/ai-review.md), or pass --mock FILE for offline use.\n' "$APIKEYENV" >&2
+    printf 'review-pr: no API key — set $%s (see .claude/ai-review/README.md or docs/ai-review.md), or pass --mock FILE for offline use.\n' "$APIKEYENV" >&2
     printf 'review-pr: NEVER paste the key into chat or commit it; export it in your shell.\n' >&2
     exit "$ENVELOPE_EXIT_AUTH"
   fi
@@ -190,7 +191,7 @@ else
       --max-time "$TIMEOUT" \
       -H "Authorization: Bearer $KEY" \
       -H "Content-Type: application/json" \
-      "${HDRS[@]}" \
+      ${HDRS[@]+"${HDRS[@]}"} \
       --data-binary "@$REQ_FILE" \
       "$BASEURL/chat/completions" 2>/dev/null) || HTTP_CODE="000"
   if [ "$HTTP_CODE" != "200" ]; then

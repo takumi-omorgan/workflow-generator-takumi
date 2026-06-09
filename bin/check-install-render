@@ -66,6 +66,23 @@ if ! grep -q 'Next steps:' "$OUT"; then
   add_problem "installer output does not include a Next steps stanza"
 fi
 
+if grep -q 'AI PR review installed' "$OUT"; then
+  add_problem "default installer output includes AI-review setup noise"
+fi
+
+for unexpected in \
+  "$TARGET/.claude/bin/review-pr" \
+  "$TARGET/.claude/bin/publish-review" \
+  "$TARGET/.claude/bin/review-eval" \
+  "$TARGET/.claude/bin/write-receipt" \
+  "$TARGET/.claude/bin/lib/json-envelope.sh" \
+  "$TARGET/.claude/ai-review" \
+  "$TARGET/.claude/skills/review-pr"; do
+  if [ -e "$unexpected" ]; then
+    add_problem "default install unexpectedly includes ${unexpected#$TARGET/}"
+  fi
+done
+
 ADR="$TARGET/design/adr/adr-001-render-check.md"
 cat > "$ADR" <<'ADR'
 # ADR-001: Render check
@@ -93,6 +110,217 @@ else
   check_rc=$?
   if [ "$check_rc" -ne 0 ]; then
     add_problem "sync-adr-index --check after rewrite exited $check_rc, expected 0"
+  fi
+fi
+
+TARGET_AI="$WORK/target-ai"
+mkdir -p "$TARGET_AI"
+AI_OUT="$WORK/install-ai.out"
+AI_ERR="$WORK/install-ai.err"
+"$ROOT/bin/install-workflow-kit" \
+  --target "$TARGET_AI" \
+  --project-name "AI Review Check" \
+  --set GITHUB_OWNER=example-owner \
+  --set GITHUB_REPO=ai-review-check \
+  --set DEFAULT_BRANCH=main \
+  --with-ai-review \
+  --non-interactive \
+  --no-commit \
+  --no-git-init >"$AI_OUT" 2>"$AI_ERR"
+ai_install_rc=$?
+
+if [ "$ai_install_rc" -ne 0 ]; then
+  add_problem "installer --with-ai-review exited $ai_install_rc"
+fi
+if ! grep -q 'AI PR review installed' "$AI_OUT"; then
+  add_problem "--with-ai-review output does not include AI-review next steps"
+fi
+
+for required in \
+  "$TARGET_AI/.claude/bin/review-pr" \
+  "$TARGET_AI/.claude/bin/publish-review" \
+  "$TARGET_AI/.claude/bin/review-eval" \
+  "$TARGET_AI/.claude/bin/write-receipt" \
+  "$TARGET_AI/.claude/bin/lib/json-envelope.sh" \
+  "$TARGET_AI/.claude/bin/lib/review_common.py" \
+  "$TARGET_AI/.claude/bin/lib/review-build-request.py" \
+  "$TARGET_AI/.claude/bin/lib/review-render.py" \
+  "$TARGET_AI/.claude/bin/lib/review-publish.py" \
+  "$TARGET_AI/.claude/bin/lib/review-eval-check.py" \
+  "$TARGET_AI/.claude/ai-review/config.example.json" \
+  "$TARGET_AI/.claude/ai-review/prompts/system.md" \
+  "$TARGET_AI/.claude/ai-review/prompts/rubric.md" \
+  "$TARGET_AI/.claude/ai-review/prompts/profiles.md" \
+  "$TARGET_AI/.claude/ai-review/eval/fixtures/simple-bugfix/input.diff" \
+  "$TARGET_AI/.claude/skills/review-pr/SKILL.md"; do
+  if [ ! -e "$required" ]; then
+    add_problem "--with-ai-review missing ${required#$TARGET_AI/}"
+  fi
+done
+
+for executable in \
+  "$TARGET_AI/.claude/bin/review-pr" \
+  "$TARGET_AI/.claude/bin/publish-review" \
+  "$TARGET_AI/.claude/bin/review-eval" \
+  "$TARGET_AI/.claude/bin/write-receipt" \
+  "$TARGET_AI/.claude/bin/lib/json-envelope.sh"; do
+  if [ -e "$executable" ] && [ ! -x "$executable" ]; then
+    add_problem "--with-ai-review installed non-executable ${executable#$TARGET_AI/}"
+  fi
+done
+
+if [ -e "$TARGET_AI/.claude/ai-review/config.json" ]; then
+  add_problem "--with-ai-review created secret-bearing .claude/ai-review/config.json"
+fi
+cat > "$TARGET_AI/.claude/ai-review/config.json" <<'JSON'
+{"apiKeyEnv":"LOCAL_TEST_KEY","userEdited":true}
+JSON
+"$ROOT/bin/install-workflow-kit" \
+  --target "$TARGET_AI" \
+  --project-name "AI Review Check" \
+  --set GITHUB_OWNER=example-owner \
+  --set GITHUB_REPO=ai-review-check \
+  --set DEFAULT_BRANCH=main \
+  --with-ai-review \
+  --force \
+  --non-interactive \
+  --no-commit \
+  --no-git-init >"$WORK/install-ai-force.out" 2>"$WORK/install-ai-force.err"
+force_rc=$?
+if [ "$force_rc" -ne 0 ]; then
+  add_problem "installer --with-ai-review --force exited $force_rc"
+elif ! grep -q 'userEdited' "$TARGET_AI/.claude/ai-review/config.json"; then
+  add_problem "--with-ai-review --force did not preserve user-edited .claude/ai-review/config.json"
+fi
+(cd "$TARGET_AI" && .claude/bin/review-pr \
+  --pr 1 \
+  --diff .claude/ai-review/eval/fixtures/simple-bugfix/input.diff \
+  --format text) >"$WORK/review-pr-no-key.out" 2>"$WORK/review-pr-no-key.err"
+no_key_rc=$?
+if [ "$no_key_rc" -ne 3 ]; then
+  add_problem "target review-pr config preflight exited $no_key_rc, expected 3 without LOCAL_TEST_KEY"
+elif ! grep -q 'LOCAL_TEST_KEY' "$WORK/review-pr-no-key.err"; then
+  add_problem "target review-pr did not read .claude/ai-review/config.json apiKeyEnv"
+fi
+if ! grep -q '.claude/ai-review/artifacts/' "$TARGET_AI/.gitignore" 2>/dev/null; then
+  add_problem "target .gitignore does not ignore .claude/ai-review/artifacts/"
+fi
+if ! grep -q '.claude/ai-review/config.json' "$TARGET_AI/.gitignore" 2>/dev/null; then
+  add_problem "target .gitignore does not ignore .claude/ai-review/config.json"
+fi
+
+STUB="$WORK/provider-stub.py"
+cat > "$STUB" <<'PY'
+import http.server, json, os, socketserver
+
+headers_path = os.environ["HEADERS_PATH"]
+port_path = os.environ["PORT_PATH"]
+mock_path = os.environ["MOCK_PATH"]
+
+class Handler(http.server.BaseHTTPRequestHandler):
+    def log_message(self, *args):
+        return
+    def do_POST(self):
+        length = int(self.headers.get("Content-Length", "0"))
+        self.rfile.read(length)
+        with open(headers_path, "w", encoding="utf-8") as fh:
+            json.dump({"authorization": self.headers.get("Authorization"), "contentType": self.headers.get("Content-Type")}, fh)
+        with open(mock_path, encoding="utf-8") as fh:
+            content = fh.read()
+        body = json.dumps({"choices": [{"message": {"content": content}}]}).encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+with socketserver.TCPServer(("127.0.0.1", 0), Handler) as httpd:
+    with open(port_path, "w", encoding="utf-8") as fh:
+        fh.write(str(httpd.server_address[1]))
+    httpd.handle_request()
+PY
+PORT_FILE="$WORK/provider.port"
+HEADERS_FILE="$WORK/provider-headers.json"
+HEADERS_PATH="$HEADERS_FILE" PORT_PATH="$PORT_FILE" MOCK_PATH="$TARGET_AI/.claude/ai-review/eval/fixtures/simple-bugfix/mock-response.json" \
+  python3 "$STUB" >"$WORK/provider.out" 2>"$WORK/provider.err" &
+stub_pid=$!
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+  [ -s "$PORT_FILE" ] && break
+  sleep 0.1
+done
+if [ ! -s "$PORT_FILE" ]; then
+  add_problem "local provider stub did not start"
+  kill "$stub_pid" 2>/dev/null || true
+else
+  port="$(cat "$PORT_FILE")"
+  cat > "$TARGET_AI/.claude/ai-review/config.json" <<JSON
+{"apiKeyEnv":"LOCAL_TEST_KEY","baseURL":"http://127.0.0.1:$port","model":"local/test","userEdited":true}
+JSON
+  (cd "$TARGET_AI" && LOCAL_TEST_KEY="local-test-key" .claude/bin/review-pr \
+    --pr 1 \
+    --diff .claude/ai-review/eval/fixtures/simple-bugfix/input.diff \
+    --format text) >"$WORK/review-pr-provider.out" 2>"$WORK/review-pr-provider.err"
+  provider_rc=$?
+  kill "$stub_pid" 2>/dev/null || true
+  wait "$stub_pid" 2>/dev/null || true
+  if [ "$provider_rc" -ne 0 ]; then
+    add_problem "target review-pr provider-stub run exited $provider_rc"
+  elif ! python3 - "$HEADERS_FILE" <<'PY' >/dev/null 2>&1
+import json, sys
+h = json.load(open(sys.argv[1], encoding="utf-8"))
+if h.get("authorization") != "Bearer local-test-key":
+    raise SystemExit(1)
+if h.get("contentType") != "application/json":
+    raise SystemExit(1)
+PY
+  then
+    add_problem "target review-pr did not send provider Authorization/Content-Type headers correctly"
+  fi
+fi
+
+REQ="$WORK/request.json"
+if [ -x "$TARGET_AI/.claude/bin/lib/review-build-request.py" ]; then
+  (cd "$TARGET_AI" && KIT_ROOT="$TARGET_AI/.claude" MODEL="test/model" PROFILE="balanced" MAXDIFF=200000 PR=1 TITLE="Prompt check" BODY="" \
+    python3 .claude/bin/lib/review-build-request.py "$REQ" < .claude/ai-review/eval/fixtures/simple-bugfix/input.diff) \
+    >"$WORK/request.out" 2>"$WORK/request.err"
+  req_rc=$?
+  if [ "$req_rc" -ne 0 ]; then
+    add_problem "target prompt-pack resolution failed with exit $req_rc"
+  elif ! python3 - "$REQ" <<'PY' >/dev/null 2>&1
+import json, sys
+payload = json.load(open(sys.argv[1], encoding="utf-8"))
+content = payload["messages"][0]["content"]
+if "Review rubric" not in content or "Active profile: balanced" not in content:
+    raise SystemExit(1)
+PY
+  then
+    add_problem "target prompt-pack resolution did not load rubric/profile prompts"
+  fi
+fi
+
+if [ -x "$TARGET_AI/.claude/bin/review-pr" ]; then
+  (cd "$TARGET_AI" && .claude/bin/review-pr \
+    --pr 1 \
+    --diff .claude/ai-review/eval/fixtures/simple-bugfix/input.diff \
+    --mock .claude/ai-review/eval/fixtures/simple-bugfix/mock-response.json \
+    --format text) >"$WORK/review-pr.out" 2>"$WORK/review-pr.err"
+  review_rc=$?
+  if [ "$review_rc" -ne 0 ]; then
+    add_problem "target .claude/bin/review-pr mocked run exited $review_rc"
+  fi
+  artifact="$(find "$TARGET_AI/.claude/ai-review/artifacts" -name 'pr-1-*.json' -print -quit 2>/dev/null || true)"
+  if [ -z "$artifact" ]; then
+    add_problem "target review-pr did not write artifact under .claude/ai-review/artifacts/"
+  elif [ -x "$TARGET_AI/.claude/bin/publish-review" ]; then
+    (cd "$TARGET_AI" && .claude/bin/publish-review \
+      --artifact "${artifact#$TARGET_AI/}" \
+      --pr 1 \
+      --confirm publish-pr-1 \
+      --mock) >"$WORK/publish-review.out" 2>"$WORK/publish-review.err"
+    publish_rc=$?
+    if [ "$publish_rc" -ne 0 ]; then
+      add_problem "target publish-review mock receipt path exited $publish_rc"
+    fi
   fi
 fi
 

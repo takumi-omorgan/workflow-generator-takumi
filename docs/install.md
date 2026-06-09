@@ -133,7 +133,8 @@ The installer's behaviour itself is unchanged from ADR-009:
 
 1. Creates `design/adr/`, `prompts/`, `notes/`, and `.claude/skills/`
    in the target project.
-2. Copies every skill from the kit's `skills/` into `.claude/skills/`.
+2. Copies every non-optional skill from the kit's `skills/` into `.claude/skills/`.
+   The `/review-pr` skill is optional and installs only with `--with-ai-review`.
 3. Copies `bin/sync-adr-index` into `.claude/bin/` (ADR-023).
 4. Seeds `prompts/_template.md` so new per-issue prompts stay
    consistent (ADR-008).
@@ -157,7 +158,8 @@ Useful installer flags (forwarded by the bootstrap):
 | `--project-name=NAME` | Value for `{{PROJECT_NAME}}` in `CLAUDE.md` |
 | `--set KEY=VALUE` | Provide a value for any other `{{UPPER_SNAKE}}` placeholder. Repeatable. |
 | `--with-docs` | Also copy kit docs to `docs/workflow-kit/` in the target (ADR-010) |
-| `--force` | Overwrite existing `CLAUDE.md` and re-copy skills |
+| `--with-ai-review` | Install the optional AI PR review runtime and `/review-pr` skill under `.claude/` for this target. Default: off. |
+| `--force` | Overwrite existing `CLAUDE.md` and re-copy skills/runtime files; preserves user-edited `.claude/ai-review/config.json` |
 | `--no-commit` | Skip the initial commit |
 | `--non-interactive` | Never prompt; fall back to defaults |
 | `--license=ID` | Scaffold a starter `LICENSE` in the target. Supported: `mit`. Default: no `LICENSE` is written (license choice is the project author's call, per ADR-025). |
@@ -176,7 +178,39 @@ Useful installer flags (forwarded by the bootstrap):
 
 The installer is idempotent: re-running on an already-installed target
 skips files that already exist and makes no commit if nothing changed.
-Pass `--force` to re-render `CLAUDE.md` or re-copy the skills.
+Pass `--force` to re-render `CLAUDE.md` or refresh installed kit files.
+If AI review is installed, `--force` refreshes runtime scripts, prompt
+packs, schemas, and `config.example.json`, but preserves any user-edited
+`.claude/ai-review/config.json`.
+
+### Optional AI PR review
+
+AI PR review is an explicit per-target choice. To install it:
+
+```bash
+bash <(curl -fsSL https://github.com/olivermorgan2/workflow-generator/releases/download/v3.3.0/bootstrap-workflow-kit) \
+  --project-name=my-project \
+  --with-ai-review
+```
+
+This installs the `/review-pr` skill plus the target-local runtime under
+`.claude/bin/` and `.claude/ai-review/`. Provider config stays secret-free:
+
+```bash
+cp .claude/ai-review/config.example.json .claude/ai-review/config.json
+export OPENROUTER_API_KEY=sk-or-...   # shell or secret manager only; never commit it
+.claude/bin/review-pr --pr 123 --profile balanced --format md
+```
+
+Persistent secret options:
+
+- shell profile export in `~/.zshrc` or `~/.bashrc`
+- `direnv` / `.envrc` if `.envrc` is gitignored
+- CI secret store for automation
+
+Never put API keys in `.claude/ai-review/config.json`; `apiKeyEnv` names the
+environment variable only. See [`docs/ai-review.md`](ai-review.md) for the
+review/publish flow.
 
 ### 3B. Explicit fetch alternative
 
