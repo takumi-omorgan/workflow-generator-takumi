@@ -120,15 +120,17 @@ The skill:
    - `TEST_COMMAND = "pnpm test"`
    - `KEY_ADR_BULLETS = ["- ADR-002: Use Vitest as the test framework.", "- ADR-001: Parse GPX files in the browser, not on a server."]` (newest first)
 4. Omission rules: every README section has source data → all included.
-   For the AI summary, `extension-points` has no source → omitted.
-5. Renders both files in memory and shows them in chat as fenced blocks,
-   then asks:
-   > Write these two files?
+   For the architecture doc and AI summary, `extension-points` has no
+   source → omitted.
+5. Renders all three files in memory and shows them in chat as fenced
+   blocks, then asks:
+   > Write these files?
    > - README.md (new, 50 lines)
+   > - design/architecture.md (new, 55 lines)
    > - design/ai-summary.md (new, 38 lines)
    > (yes / edit / cancel)
 6. User replies `yes`.
-7. Skill writes both files and reports paths.
+7. Skill writes all three files and reports paths.
 
 Generated `README.md`:
 
@@ -197,9 +199,41 @@ See [`design/adr/`](design/adr/) for the full list.
 
 - [`CLAUDE.md`](CLAUDE.md) — project rules for Claude Code
 - [`design/mvp.md`](design/mvp.md) — MVP statement
+- [`design/architecture.md`](design/architecture.md) — current architecture/design reference
 - [`design/ai-summary.md`](design/ai-summary.md) — AI-readable project summary
-- [`design/adr/`](design/adr/) — architecture decisions
+- [`design/adr/`](design/adr/) — decision history and rationale
 <!-- workflow-docs:end:more -->
+```
+
+Generated `design/architecture.md` (abridged):
+
+```markdown
+# Pace Drift — Architecture
+
+**Last updated:** 2026-04-17
+
+<!-- workflow-docs:start:overview -->
+## Overview
+
+Pace Drift is a local-only browser app that loads one GPX file and shows where
+a runner drifted from target pace.
+<!-- workflow-docs:end:overview -->
+
+<!-- workflow-docs:start:major-components -->
+## Major components
+
+- GPX file loader and parser
+- Pace-drift computation module
+- Single-page visualisation layer
+<!-- workflow-docs:end:major-components -->
+
+<!-- workflow-docs:start:key-constraints -->
+## Key constraints
+
+- No server-side persistence.
+- No AI smoothing or interpretation of running data.
+- One runner, one race, one view for the MVP.
+<!-- workflow-docs:end:key-constraints -->
 ```
 
 Generated `design/ai-summary.md` (abridged — the same marker pattern
@@ -252,9 +286,8 @@ source):
 <!-- workflow-docs:end:key-decisions -->
 ```
 
-Note there is no `## Architecture` and no `## Extension points` block —
-the skill had no source data for either and omitted the heading, body,
-and markers cleanly.
+Note that sections with no source data are omitted from each generated
+file — heading, body, and markers are all removed cleanly.
 
 ## 3. Re-run after a manual edit
 
@@ -276,7 +309,7 @@ re-runs `/workflow-docs`.
 
 The skill:
 
-1. Reads the existing `README.md` and detects all eight
+1. Reads the existing generated docs and detects their
    `start:/end:` marker pairs are intact.
 2. Regenerates `key-decisions` (now three ADRs, newest first) and
    re-checks every other section for changes. Only `key-decisions`
@@ -338,8 +371,9 @@ See [`design/adr/`](design/adr/) for the full list.
 
 - [`CLAUDE.md`](CLAUDE.md) — project rules for Claude Code
 - [`design/mvp.md`](design/mvp.md) — MVP statement
+- [`design/architecture.md`](design/architecture.md) — current architecture/design reference
 - [`design/ai-summary.md`](design/ai-summary.md) — AI-readable project summary
-- [`design/adr/`](design/adr/) — architecture decisions
+- [`design/adr/`](design/adr/) — decision history and rationale
 <!-- workflow-docs:end:more -->
 ```
 
@@ -358,7 +392,7 @@ For the first-run README:
 - [x] (N/A on first run) No content outside markers to preserve.
 - [x] User explicitly confirmed the write.
 
-For the first-run AI summary:
+For the first-run architecture doc and AI summary:
 
 - [x] Every `{{PLACEHOLDER}}` in included sections is filled.
 - [x] `extension-points` section omitted — heading, body, markers all
@@ -368,7 +402,8 @@ For the first-run AI summary:
 
 The skill reports back:
 
-> Wrote 2 files:
+> Wrote 3 files:
 > - /Users/.../pace-drift/README.md (new, 50 lines)
+> - /Users/.../pace-drift/design/architecture.md (new, 55 lines)
 > - /Users/.../pace-drift/design/ai-summary.md (new, 38 lines)
-> Sections omitted: design/ai-summary.md#extension-points (no source data).
+> Sections omitted: design/architecture.md#extension-points, design/ai-summary.md#extension-points (no source data).

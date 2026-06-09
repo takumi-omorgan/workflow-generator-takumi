@@ -67,6 +67,7 @@ fences is preserved.
 | [ADR-050](adr-050-reliability-validation-self-test.md) | Reliability layer — canonical schemas, carry-forward and consistency validation, idempotency receipts, and a workflow self-test | accepted |
 | [ADR-051](adr-051-operator-driven-ai-pr-review.md) | Operator-driven, provider-agnostic AI PR review | accepted |
 | [ADR-052](adr-052-ai-review-target-install.md) | Target-local AI review installer option | accepted |
+| [ADR-053](adr-053-workflow-docs-architecture-document.md) | Maintain a current architecture document via workflow-docs | accepted |
 
 <!-- adr-index:end -->
 

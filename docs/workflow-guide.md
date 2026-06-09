@@ -21,10 +21,12 @@ piecing the flow together from individual skill docs.
 release on GitHub with an accompanying PRD, MVP scope, ADRs, issues,
 and PRs. From the steady-state loop onward, a continuously evolving
 project with versioned releases (per the MAJOR/MINOR/PATCH policy in
-§3) and a documented idea backlog (§4) feeding the next round of work.
+§3), a continuously maintained architecture document, and a documented
+idea backlog (§4) feeding the next round of work.
 
-This guide focuses on *what to run next*. For the *why* behind the
-workflow's design choices, see the ADRs in [`design/adr/`](../design/adr/).
+This guide focuses on *what to run next*. For the kit's current architecture, see [`docs/architecture.md`](architecture.md).
+For detailed decision history in a target project, see that project's
+`design/adr/` directory.
 Skills are referenced by their slash name (e.g. `/idea-to-prd`); each
 one has its own `SKILL.md` under `.claude/skills/<name>/` in your
 target project with the full interface spec.
@@ -107,7 +109,8 @@ IDEA OR PRD
    ├─ /changelog            → release notes (grouped by verb / ADR / issue)
    ├─ /release  ⚠cat-3      → git tag + gh release create
    │                          (auto-detects product vs workflow shape)
-   └─ /workflow-docs        → README.md + design/ai-summary.md
+   └─ /workflow-docs        → README.md + design/architecture.md
+                              + design/ai-summary.md
    │
    ▼
 TAGGED RELEASE ON GITHUB
@@ -1016,7 +1019,7 @@ in the same PR that ships the skill.
 | 1 | `/prd-to-mvp` | Local doc creation (`design/mvp.md`, `design/build-out-plan.md`) |
 | 1 | `/prepare-issue` | Reads `gh` and ADRs (non-mutating); writes prompt file locally |
 | 1 | `/resume` | Reads `design/state.md` and emits a summary; falls back to `gh` reads |
-| 1 | `/workflow-docs` | Generates `README.md` and `design/ai-summary.md` locally |
+| 1 | `/workflow-docs` | Generates `README.md`, `design/architecture.md`, and `design/ai-summary.md` locally |
 | **2** | `/claude-issue-executor` | Significant-task plan-mode gate (ADR-039); local file edits and `git` commits but no push |
 | **3** | `/complete-milestone` | Closes a GitHub milestone via `gh`; chains `/release` when `--release` is passed |
 | **3** | `/issue-planner` | Calls `gh issue create` for each issue and creates a Project board |

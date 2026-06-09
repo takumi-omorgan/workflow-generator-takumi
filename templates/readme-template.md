@@ -29,6 +29,7 @@
     {{IN_SCOPE_BULLETS}}      Bulleted "In scope" list from design/mvp.md.
     {{OUT_OF_SCOPE_BULLETS}}  Bulleted "Out of scope" list from design/mvp.md.
     {{KEY_ADR_BULLETS}}       One bullet per ADR, newest first.
+    design/architecture.md     Generated current architecture/design reference.
 
   The workflow-docs skill wraps each generated section in marker fences
   of the form:
@@ -98,6 +99,7 @@ See [`design/adr/`](design/adr/) for the full list.
 
 - [`CLAUDE.md`](CLAUDE.md) — project rules for Claude Code
 - [`design/mvp.md`](design/mvp.md) — MVP statement
+- [`design/architecture.md`](design/architecture.md) — current architecture/design reference
 - [`design/ai-summary.md`](design/ai-summary.md) — AI-readable project summary
-- [`design/adr/`](design/adr/) — architecture decisions
+- [`design/adr/`](design/adr/) — decision history and rationale
 <!-- workflow-docs:end:more -->
