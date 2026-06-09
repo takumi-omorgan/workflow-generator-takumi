@@ -1,0 +1,4 @@
+Issue: #2
+Prompt: prompts/issue-002-y.md
+Branch: feat/issue-2-y
+Status: verified

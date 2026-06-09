@@ -1,0 +1,6 @@
+{
+  "op": "replace",
+  "dialect": "state",
+  "zone": "in-flight",
+  "bodyFile": "body.txt"
+}

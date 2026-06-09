@@ -864,6 +864,30 @@
         2
       ],
       "description": "Offline fixture harness for AI PR review: runs review-pr --mock over ai-review/eval/fixtures and checks expectations + duplicate prevention (ADR-051)."
+    },
+    {
+      "name": "fence",
+      "path": "bin/fence",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Read and splice marker-fenced zones (state/summary/workflow-docs/adr-index) without clobbering surrounding prose; skills shell out to it (ADR-054)."
+    },
+    {
+      "name": "fences-eval",
+      "path": "bin/fences-eval",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Offline golden-fixture harness proving byte-stable marker-fence round-trip and splice behavior (ADR-054)."
     }
   ]
 }

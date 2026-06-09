@@ -106,6 +106,7 @@ step "check-consistency"       0 bin/check-consistency
 step "check-state-cap"         0 bin/check-state-cap --check
 step "check-install-render"    0 bin/check-install-render
 step "review-eval"             0 bin/review-eval
+step "fences-eval"             0 bin/fences-eval
 
 # bash -n across all bin scripts (aggregate step)
 syntax_rc=0
