@@ -99,49 +99,20 @@ else
 fi
 
 RESULT=$(
-  SCHEMA="$SCHEMA" AGAINST="$AGAINST" FILES_NL="$(printf '%s\n' "${FILES[@]+"${FILES[@]}"}")" \
+  SCHEMA="$SCHEMA" AGAINST="$AGAINST" LIB_DIR="$SCRIPT_DIR/lib" FILES_NL="$(printf '%s\n' "${FILES[@]+"${FILES[@]}"}")" \
   python3 <<'PYEOF'
 import os, re, sys, json
+sys.path.insert(0, os.environ["LIB_DIR"])
+from schema_read import read_schema  # shared, dependency-free schema reader (ADR-054)
 
 schema_path = os.environ["SCHEMA"]
 against = os.environ.get("AGAINST") or ""
 files = [f for f in os.environ.get("FILES_NL", "").split("\n") if f]
 
 # ---- read the constraints we need from the schema file -----------------
-# Targeted line-based extraction (same dependency-free approach as
-# bin/validate-kit-json). We need: item.required (list), the per-field
-# pattern map, item.additionalFields, and the set of declared field names.
-def read_schema(path):
-    required, patterns, fields = [], {}, []
-    additional = "allow"
-    with open(path, encoding="utf-8") as fh:
-        lines = fh.read().split("\n")
-    section = None          # "required" | "fields" | None
-    cur_field = None
-    for ln in lines:
-        if re.match(r"^  required:\s*$", ln):
-            section = "required"; continue
-        if re.match(r"^  fields:\s*$", ln):
-            section = "fields"; cur_field = None; continue
-        m = re.match(r"^  additionalFields:\s*(\S+)", ln)
-        if m:
-            additional = m.group(1).strip(); section = None; continue
-        # any other 2-space top-level key under item: ends a section
-        if re.match(r"^  [A-Za-z]", ln) and not re.match(r"^   ", ln):
-            section = None
-        if section == "required":
-            m = re.match(r"^    - (.+?)\s*$", ln)
-            if m:
-                required.append(m.group(1).strip().strip("\"\x27"))
-        elif section == "fields":
-            m = re.match(r"^    ([A-Za-z][\w-]*):\s*$", ln)
-            if m:
-                cur_field = m.group(1); fields.append(cur_field); continue
-            m = re.match(r"^      pattern:\s*(.+?)\s*$", ln)
-            if m and cur_field:
-                patterns[cur_field] = m.group(1).strip().strip("\"\x27")
-    return required, patterns, fields, additional
-
+# read_schema (item.required, the per-field pattern map, item.additionalFields,
+# and the declared field names) lives in bin/lib/schema_read.py so this script
+# and bin/validate-schema share one dependency-free reader (ADR-054).
 try:
     required, patterns, fields, additional = read_schema(schema_path)
 except Exception as e:

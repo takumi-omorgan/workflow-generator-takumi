@@ -151,6 +151,18 @@ FIX
 bin/validate-carry-forward --file "$STUB/eval-bad.md" >/dev/null 2>&1
 record "stub:carry-forward-invalid" "stub" "1" "$?"
 
+# validate-schema: a conforming receipt -> exit 0, a malformed one -> exit 1
+cat > "$STUB/receipt-ok.json" <<'FIX'
+{"schema":"receipt","version":1,"skill":"self-test","key":"stub","status":"completed","timestamp":"2026-06-09T00:00:00Z"}
+FIX
+bin/validate-schema --schema schemas/receipt.v1.yaml --data "$STUB/receipt-ok.json" >/dev/null 2>&1
+record "stub:validate-schema-ok" "stub" "0" "$?"
+cat > "$STUB/receipt-bad.json" <<'FIX'
+{"schema":"receipt","version":2,"skill":"self-test","status":"done","timestamp":"t"}
+FIX
+bin/validate-schema --schema schemas/receipt.v1.yaml --data "$STUB/receipt-bad.json" >/dev/null 2>&1
+record "stub:validate-schema-bad" "stub" "1" "$?"
+
 # receipt write + find round-trip in a throwaway dir
 bin/write-receipt --skill self-test --key stub --status completed --dir "$STUB/receipts" >/dev/null 2>&1
 record "stub:receipt-write" "stub" "0" "$?"

@@ -888,6 +888,18 @@
         2
       ],
       "description": "Offline golden-fixture harness proving byte-stable marker-fence round-trip and splice behavior (ADR-054)."
+    },
+    {
+      "name": "validate-schema",
+      "path": "bin/validate-schema",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Validate a JSON data file against a kit schema (unit/required/type/const/enum/pattern) so schemas/*.yaml are executable contracts (ADR-054)."
     }
   ]
 }

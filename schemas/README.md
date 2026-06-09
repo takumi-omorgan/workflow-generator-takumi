@@ -16,8 +16,8 @@ drift.
 
 | File | Shape | Prose home | Validated by |
 |---|---|---|---|
-| [`design-questions.v1.yaml`](design-questions.v1.yaml) | Cross-skill design-question carry-forward entry (ADR-040) | [`docs/workflow-guide.md` §6](../docs/workflow-guide.md#6-cross-skill-carry-forward-adr-040) | [`bin/validate-carry-forward`](../bin/validate-carry-forward) |
-| [`receipt.v1.yaml`](receipt.v1.yaml) | Idempotency receipt for a mutating skill (ADR-050) | [`docs/receipts.md`](../docs/receipts.md) | [`bin/write-receipt`](../bin/write-receipt) |
+| [`design-questions.v1.yaml`](design-questions.v1.yaml) | Cross-skill design-question carry-forward entry (ADR-040) | [`docs/workflow-guide.md` §6](../docs/workflow-guide.md#6-cross-skill-carry-forward-adr-040) | [`bin/validate-carry-forward`](../bin/validate-carry-forward), [`bin/validate-schema`](../bin/validate-schema) |
+| [`receipt.v1.yaml`](receipt.v1.yaml) | Idempotency receipt for a mutating skill (ADR-050) | [`docs/receipts.md`](../docs/receipts.md) | [`bin/write-receipt`](../bin/write-receipt), [`bin/validate-schema`](../bin/validate-schema) |
 | [`ai-review-config.v1.yaml`](ai-review-config.v1.yaml) | Provider configuration for AI PR review (ADR-051) | [`docs/ai-review.md`](../docs/ai-review.md) | [`bin/review-pr`](../bin/review-pr) |
 | [`ai-review-artifact.v1.yaml`](ai-review-artifact.v1.yaml) | AI PR review artifact / finding shape (ADR-051) | [`docs/ai-review.md`](../docs/ai-review.md) | [`bin/review-pr`](../bin/review-pr), [`bin/publish-review`](../bin/publish-review) |
 
