@@ -13,7 +13,7 @@ inputs:
     required: false
     description: "After the dry-run, offer to publish — still requires explicit approval before any GitHub write"
 outputs:
-  - artefact: "ai-review/artifacts/pr-N-<hash>.json"
+  - artefact: ".claude/ai-review/artifacts/pr-N-<hash>.json"
     description: "Structured review artifact (also rendered as .md); local, posts nothing"
   - artefact: "(GitHub PR review)"
     description: "Posted only after explicit approval; records a receipt under .claude/receipts/"
@@ -25,10 +25,11 @@ next: []
 Run an AI-assisted review of a GitHub pull request and, if you choose,
 publish the comments — **safely**. Review generation is local and posts
 nothing; publishing to GitHub requires you to preview the exact comments
-and give explicit approval. Governed by
-[ADR-051](../../design/adr/adr-051-operator-driven-ai-pr-review.md); the
-operator guide is [`docs/ai-review.md`](../../docs/ai-review.md). It is the
-`/review-pr` verb.
+and give explicit approval. It is the `/review-pr` verb.
+
+In a target project this skill is installed only when the project was
+installed with `--with-ai-review`. In the kit repo it can also dogfood the
+repo-local `bin/review-pr` runtime.
 
 ## When to use this skill
 
@@ -48,18 +49,38 @@ operator guide is [`docs/ai-review.md`](../../docs/ai-review.md). It is the
 
 - **Required:** the PR number.
 - **Optional:** `--profile strict|balanced|lightweight`, `--publish`.
-- **Provider config (read):** `ai-review/config.json` (or the shipped
-  `ai-review/config.example.json`). The API key is read from the env var
-  named by `apiKeyEnv` — **never** ask the user to paste a key into chat,
-  and never commit one. If the key is missing, point the user to
-  [`docs/ai-review.md`](../../docs/ai-review.md) setup, do not proceed.
+- **Provider config (read):** `.claude/ai-review/config.json` in target
+  projects, or `ai-review/config.json` in the kit repo. The API key is read
+  from the env var named by `apiKeyEnv` — **never** ask the user to paste a
+  key into chat, and never commit one. If the key is missing, point the user
+  to the AI-review setup docs and stop.
+
+## Runtime resolution
+
+Before running commands, resolve the runtime path:
+
+```bash
+if [ -x .claude/bin/review-pr ]; then
+  REVIEW_PR=.claude/bin/review-pr
+  PUBLISH_REVIEW=.claude/bin/publish-review
+elif [ -x bin/review-pr ]; then
+  REVIEW_PR=bin/review-pr
+  PUBLISH_REVIEW=bin/publish-review
+else
+  echo "AI PR review runtime is not installed. Re-run bin/install-workflow-kit --with-ai-review for this target project." >&2
+  exit 2
+fi
+```
+
+Use `$REVIEW_PR` and `$PUBLISH_REVIEW` in the protocol below, not hardcoded
+repo-local paths.
 
 ## What this skill produces
 
-1. A **dry-run review artifact** at `ai-review/artifacts/pr-N-<hash>.json`
-   (and `.md`), with a summary and findings classified **blocking /
-   non-blocking / question / praise**, each with severity, category,
-   file/line, suggestion, confidence, and a `commentable` flag.
+1. A **dry-run review artifact** at `.claude/ai-review/artifacts/pr-N-<hash>.json`
+   in target projects (and `.md`), with a summary and findings classified
+   **blocking / non-blocking / question / praise**, each with severity,
+   category, file/line, suggestion, confidence, and a `commentable` flag.
 2. **Only on explicit approval:** a GitHub PR review with the previewed
    comments, plus an idempotency receipt under `.claude/receipts/`.
 
@@ -68,13 +89,14 @@ operator guide is [`docs/ai-review.md`](../../docs/ai-review.md). It is the
 1. **State the mode up front.** Tell the user this run is a *dry-run* that
    posts nothing unless they later approve publishing. Default to dry-run.
 2. **Preflight provider config.** Confirm a config exists and the key env
-   var is set (`bin/review-pr` will exit 3 with a setup message if not).
-   If missing, link [`docs/ai-review.md`](../../docs/ai-review.md) and stop
-   — do not ask for secrets in chat.
+   var is set (`review-pr` exits 3 with a setup message if not). If missing,
+   explain how to copy `.claude/ai-review/config.example.json` to
+   `.claude/ai-review/config.json`, export the env var named by `apiKeyEnv`,
+   and stop — do not ask for secrets in chat.
 3. **Generate the review (cat-1, safe):**
 
    ```bash
-   bin/review-pr --pr N --profile balanced --format md
+   "$REVIEW_PR" --pr N --profile balanced --format md
    ```
 
    This fetches the diff via `gh`, calls the provider, and writes the
@@ -86,7 +108,7 @@ operator guide is [`docs/ai-review.md`](../../docs/ai-review.md). It is the
 6. **Preview the exact comments (still posts nothing):**
 
    ```bash
-   bin/publish-review --artifact ai-review/artifacts/pr-N-<hash>.json --pr N
+   "$PUBLISH_REVIEW" --artifact .claude/ai-review/artifacts/pr-N-<hash>.json --pr N
    ```
 
    Show the exact top-level body and inline comments.
@@ -95,7 +117,7 @@ operator guide is [`docs/ai-review.md`](../../docs/ai-review.md). It is the
    mode. Only after approval, post with the deterministic token:
 
    ```bash
-   bin/publish-review --artifact ai-review/artifacts/pr-N-<hash>.json \
+   "$PUBLISH_REVIEW" --artifact .claude/ai-review/artifacts/pr-N-<hash>.json \
      --pr N --confirm publish-pr-N
    ```
 
@@ -114,7 +136,7 @@ operator guide is [`docs/ai-review.md`](../../docs/ai-review.md). It is the
 
 ## Handoff
 
-The artifact path and the next recommended action (`bin/publish-review …`)
-are reported by `bin/review-pr`. After publishing, the receipt under
-`.claude/receipts/` records what was posted. See
-[`example.md`](example.md) for a worked dry-run → preview → publish walk.
+The artifact path and the next recommended action are reported by
+`review-pr`. After publishing, the receipt under `.claude/receipts/` records
+what was posted. See `example.md` for a worked dry-run → preview → publish
+walk.

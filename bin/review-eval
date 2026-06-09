@@ -20,12 +20,13 @@
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+KIT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 # shellcheck source=lib/json-envelope.sh
 . "$SCRIPT_DIR/lib/json-envelope.sh"
 
 usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; }
 
-FIXTURES="ai-review/eval/fixtures"
+FIXTURES="$KIT_ROOT/ai-review/eval/fixtures"
 FORMAT="text"
 while [ $# -gt 0 ]; do
   case "$1" in

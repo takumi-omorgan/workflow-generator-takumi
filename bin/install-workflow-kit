@@ -33,6 +33,7 @@ KIT_ROOT="$(cd -P "$SCRIPT_DIR/.." >/dev/null 2>&1 && pwd)"
 # Default flag values.
 TARGET_DIR="$PWD"
 WITH_DOCS=0
+WITH_AI_REVIEW=0
 FORCE=0
 NO_COMMIT=0
 NO_GIT_INIT=0
@@ -86,6 +87,9 @@ OPTIONS
                            repeated. Example: --set DATABASE=Postgres
   --with-docs              Also copy the kit's docs/ to docs/workflow-kit/
                            in the target (ADR-010).
+  --with-ai-review         Also install the target-local AI PR review
+                           runtime under .claude/ai-review/ and the
+                           /review-pr skill. Default: not installed.
   --force                  Overwrite existing CLAUDE.md and re-copy skills
                            on top of what is already there. By default the
                            installer preserves existing files.
@@ -146,6 +150,7 @@ while [ $# -gt 0 ]; do
     --set)             CLI_VALUES+=("${2:?--set requires KEY=VALUE}"); shift 2 ;;
     --set=*)           CLI_VALUES+=("${1#*=}"); shift ;;
     --with-docs)       WITH_DOCS=1; shift ;;
+    --with-ai-review)  WITH_AI_REVIEW=1; shift ;;
     --force)           FORCE=1; shift ;;
     --no-commit)       NO_COMMIT=1; shift ;;
     --no-git-init)     NO_GIT_INIT=1; shift ;;
@@ -202,6 +207,7 @@ fi
 info "kit root:   $KIT_ROOT"
 info "target:     $TARGET_DIR"
 info "with-docs:  $([ "$WITH_DOCS" -eq 1 ] && echo yes || echo no)"
+info "ai-review:  $([ "$WITH_AI_REVIEW" -eq 1 ] && echo yes || echo no)"
 info "force:      $([ "$FORCE" -eq 1 ] && echo yes || echo no)"
 info "license:    ${LICENSE_ID:-none}"
 
@@ -303,6 +309,10 @@ info "copying skills into .claude/skills/"
 for skill_dir in "$KIT_ROOT/skills"/*/; do
   [ -d "$skill_dir" ] || continue
   name="$(basename "$skill_dir")"
+  if [ "$name" = "review-pr" ] && [ "$WITH_AI_REVIEW" -ne 1 ]; then
+    info "  skip (ai-review disabled): .claude/skills/$name"
+    continue
+  fi
   dest="$TARGET_DIR/.claude/skills/$name"
   if [ -d "$dest" ] && [ "$FORCE" -ne 1 ]; then
     info "  skip (exists): .claude/skills/$name"
@@ -333,6 +343,82 @@ if [ -f "$SYNC_SRC" ]; then
   fi
 else
   warn "kit bin/sync-adr-index not found; skipping ADR-index sync helper"
+fi
+
+# 1c. Optional: copy AI PR review runtime into target-local .claude/.
+#     Default-off because it needs provider setup and extra runtime assets.
+copy_file_preserving_existing() {
+  local src="$1" dest="$2" label="$3"
+  mkdir -p "$(dirname "$dest")"
+  if [ -f "$dest" ] && [ "$FORCE" -ne 1 ]; then
+    info "skip $label (exists)"
+  else
+    info "copy $label"
+    cp "$src" "$dest"
+  fi
+}
+
+ensure_gitignore_line() {
+  local line="$1"
+  touch "$GITIGNORE_DEST"
+  if ! grep -Fxq "$line" "$GITIGNORE_DEST" 2>/dev/null; then
+    printf '%s\n' "$line" >> "$GITIGNORE_DEST"
+  fi
+}
+
+if [ "$WITH_AI_REVIEW" -eq 1 ]; then
+  info "copying AI PR review runtime into .claude/"
+  mkdir -p "$TARGET_DIR/.claude/bin/lib" "$TARGET_DIR/.claude/ai-review" "$TARGET_DIR/.claude/schemas"
+
+  for script in review-pr publish-review review-eval write-receipt; do
+    src="$KIT_ROOT/bin/$script"
+    dest="$TARGET_DIR/.claude/bin/$script"
+    if [ ! -f "$src" ]; then
+      warn "  kit AI-review script missing: bin/$script"
+      continue
+    fi
+    copy_file_preserving_existing "$src" "$dest" ".claude/bin/$script"
+    chmod +x "$dest"
+  done
+
+  for helper in json-envelope.sh review_common.py review-build-request.py review-render.py review-publish.py review-eval-check.py; do
+    src="$KIT_ROOT/bin/lib/$helper"
+    dest="$TARGET_DIR/.claude/bin/lib/$helper"
+    if [ ! -f "$src" ]; then
+      warn "  kit AI-review helper missing: bin/lib/$helper"
+      continue
+    fi
+    copy_file_preserving_existing "$src" "$dest" ".claude/bin/lib/$helper"
+    case "$helper" in *.sh|*.py) chmod +x "$dest" ;; esac
+  done
+
+  for dir in prompts eval; do
+    src="$KIT_ROOT/ai-review/$dir"
+    dest="$TARGET_DIR/.claude/ai-review/$dir"
+    if [ ! -d "$src" ]; then
+      warn "  kit AI-review directory missing: ai-review/$dir"
+      continue
+    fi
+    if [ -d "$dest" ] && [ "$FORCE" -ne 1 ]; then
+      info "skip .claude/ai-review/$dir (exists)"
+    else
+      info "copy .claude/ai-review/$dir"
+      rm -rf "$dest"
+      cp -R "$src" "$dest"
+    fi
+  done
+
+  for file in README.md config.example.json; do
+    src="$KIT_ROOT/ai-review/$file"
+    [ -f "$src" ] || continue
+    copy_file_preserving_existing "$src" "$TARGET_DIR/.claude/ai-review/$file" ".claude/ai-review/$file"
+  done
+
+  for schema in ai-review-config.v1.yaml ai-review-artifact.v1.yaml; do
+    src="$KIT_ROOT/schemas/$schema"
+    [ -f "$src" ] || continue
+    copy_file_preserving_existing "$src" "$TARGET_DIR/.claude/schemas/$schema" ".claude/schemas/$schema"
+  done
 fi
 
 # 2. Seed prompts/_template.md. Prefer the canonical kit location; fall
@@ -424,6 +510,13 @@ if [ -f "$GITIGNORE_SRC" ]; then
   fi
 else
   warn "kit templates/gitignore.target not found; .gitignore not seeded"
+fi
+
+if [ "$WITH_AI_REVIEW" -eq 1 ]; then
+  ensure_gitignore_line ""
+  ensure_gitignore_line "# Optional AI PR review — generated artifacts and user-local config."
+  ensure_gitignore_line ".claude/ai-review/artifacts/"
+  ensure_gitignore_line ".claude/ai-review/config.json"
 fi
 
 # 2e. Seed design/adr/README.md so bin/sync-adr-index has the marker
@@ -632,3 +725,11 @@ log "1. Open the target project in Claude Code."
 log "2. Run /start."
 log "3. Fill optional _TBD_ values in CLAUDE.md as the project settles."
 log "4. If GitHub metadata is still _TBD_, re-run with --set GITHUB_OWNER=... when ready."
+if [ "$WITH_AI_REVIEW" -eq 1 ]; then
+  log ""
+  log "AI PR review installed."
+  log "1. Copy .claude/ai-review/config.example.json to .claude/ai-review/config.json."
+  log "2. Set OPENROUTER_API_KEY in your shell or secret manager. Never paste or commit it."
+  log "3. Run .claude/bin/review-pr --pr <N> --profile balanced --format md."
+  log "4. Publish only after preview using .claude/bin/publish-review --confirm publish-pr-<N>."
+fi

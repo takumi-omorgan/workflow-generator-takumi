@@ -39,7 +39,9 @@ bash <(curl -fsSL https://github.com/olivermorgan2/workflow-generator/releases/d
 
 That one command fetches the kit at a pinned version, copies the
 skills into `.claude/skills/`, renders your `CLAUDE.md`, and makes the
-first commit. It is idempotent — re-running skips existing files.
+first commit. It is idempotent — re-running skips existing files. Optional
+AI PR review is off by default; add `--with-ai-review` if you want the
+project-local `/review-pr` runtime installed under `.claude/`.
 Verify the install from the terminal (`.claude/` is hidden in file
 browsers):
 

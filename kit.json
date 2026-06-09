@@ -651,8 +651,8 @@
       ],
       "outputs": [
         {
-          "artefact": "ai-review/artifacts/pr-N-<hash>.json",
-          "description": "Structured dry-run review artifact (also rendered .md); local, posts nothing"
+          "artefact": ".claude/ai-review/artifacts/pr-N-<hash>.json",
+          "description": "Structured dry-run review artifact in target installs (also rendered .md); local, posts nothing"
         },
         {
           "artefact": "(GitHub PR review)",
