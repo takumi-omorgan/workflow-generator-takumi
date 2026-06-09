@@ -246,13 +246,14 @@ noted.
       `preconditions: ["prompt prompts/issue-NNN-…md exists"]`,
       `blocked-by: none`. Skip this zone if the file predates it
       (no `state:next-action` fences) — do not add it here.
-    Marker fences (`<!-- state:<zone>:start --> / :end -->`) bound
-    each zone; rewrite only the bytes between the fences. Other
-    zones (`phase`, `recent`, `blockers`) are left untouched. If
-    `design/state.md` is absent, skip silently — this is normal in
-    a kit repo or a project that has not adopted ADR-035. If the
-    file exists but its marker fences are broken, do not attempt to
-    repair; tell the user and suggest `/pause` to refresh.
+    Rewrite each zone with `bin/fence` rather than editing markers in
+    the prompt — it replaces only the bytes between a zone's fences:
+    `bin/fence replace --file design/state.md --dialect state --zone <zone> --body-file <tmp>`.
+    Other zones (`phase`, `recent`, `blockers`) are left untouched. If
+    `design/state.md` is absent, skip silently — this is normal in a
+    kit repo or a project that has not adopted ADR-035. If the file
+    exists but its marker fences are broken, `bin/fence` exits 1
+    instead of writing; tell the user and suggest `/pause` to refresh.
 
 ## Reference: derivation, template-filling, edge cases, self-check
 

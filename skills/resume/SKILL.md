@@ -94,19 +94,21 @@ condition — fall back to `continue-here` alone.
 
 1. **Locate `design/state.md`.** If absent, jump to step 7
    (`gh` fallback).
-2. **Read the file.** Confirm the marker fences are intact:
-   `state:phase`, `state:in-flight`, `state:recent`,
-   `state:blockers`, `state:continue-here` each have a balanced
-   `:start` / `:end` pair. If any pair is missing or unbalanced,
-   stop with a one-line message naming the broken zone and suggest
-   `/pause` to refresh. The `state:next-action` zone is **optional**:
-   if present, confirm its fences balance too; its absence is normal
-   for files that predate ADR-048 and is not an error.
-3. **Parse each zone.** Pull the content between fences for every
-   zone listed above. Trim whitespace. Skip placeholders that still
-   look like `{{...}}` — treat them as empty. When the
-   `state:next-action` zone is present, parse its YAML block (`skill`,
-   `args`, `preconditions`, `blocked-by`) for the **Next action** line.
+2. **Read the file.** Confirm the marker fences are intact with
+   `bin/fence list --file design/state.md --dialect state` — it exits 1
+   (malformed) if any zone's `:start` / `:end` pair is missing or
+   unbalanced, in which case stop with a one-line message naming the
+   broken zone and suggest `/pause` to refresh. The expected zones are
+   `state:phase`, `state:in-flight`, `state:recent`, `state:blockers`,
+   `state:continue-here`; `state:next-action` is **optional** (its
+   absence is normal for files that predate ADR-048 and is not an
+   error).
+3. **Parse each zone.** Read each zone's body with
+   `bin/fence read --file design/state.md --dialect state --zone <zone>`.
+   Trim whitespace. Skip placeholders that still look like `{{...}}` —
+   treat them as empty. When the `state:next-action` zone is present,
+   parse its YAML block (`skill`, `args`, `preconditions`, `blocked-by`)
+   for the **Next action** line.
 4. **Sniff for staleness.** The file is suspect if any of:
    - the in-flight issue is `none` but `continue-here` names a
      specific issue;

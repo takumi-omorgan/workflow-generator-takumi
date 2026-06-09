@@ -316,10 +316,12 @@ noted.
       `blocked-by: "PR #<PR> awaiting review/merge"` — the next action
       is the human review of the open PR, not a skill. Skip this zone
       if the file predates it (no `state:next-action` fences).
-    Marker fences bound each zone; rewrite only the bytes between
-    the fences. If `design/state.md` is absent, skip silently. If
-    marker fences are broken, do not rewrite; surface the broken
-    zone in the final report and suggest `/pause`.
+    Rewrite each zone with `bin/fence replace --file design/state.md
+    --dialect state --zone <zone> --body-file <tmp>` rather than editing
+    markers in the prompt; it replaces only the bytes between a zone's
+    fences. If `design/state.md` is absent, skip silently. If marker
+    fences are broken, `bin/fence` exits 1 instead of writing; surface
+    the broken zone in the final report and suggest `/pause`.
 16. **Report.** Print the PR URL returned by `gh`, plus a one-line
     summary of what was filled vs. what was left as TODO. Done.
 
