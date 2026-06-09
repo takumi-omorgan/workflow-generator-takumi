@@ -135,7 +135,12 @@ gate, and anything destructive.
 
 ## Data sources and how the skill reads them
 
-The skill consults five sources, in this order:
+The deterministic extraction — the issue-number fallback, ADR-token
+resolution, commit grouping, the PR-title draft, and the
+design-questions carry-forward read — is done by `bin/pr-context`
+(`bin/pr-context --base <base> --format json`); the skill consumes its
+`outputs` and writes the narrative. The five underlying sources
+`pr-context` reads, in priority order, are:
 
 1. **Current branch and git history.**
    - `git symbolic-ref --short HEAD` → current branch name. A detached
@@ -193,57 +198,42 @@ noted.
    `git log <base>..HEAD --format="%H%x09%s"`. If the output is empty,
    abort with:
    `"No commits on <branch> ahead of <base>. Nothing to package."`
-6. **Extract the issue number.** In priority order, use the first hit:
-   1. **Branch name.** Match the pattern
-      `issue-(\d+)-` or a trailing `-(\d+)$` against the current
-      branch name, or an explicit `#(\d+)` token.
-   2. **Commit messages.** Scan the commit subjects in
-      `git log <base>..HEAD` for `#(\d+)` tokens (typically the
-      trailing `(ADR-NNN, #N)` convention this repo uses). Use the
-      first unique number seen, most-recent commit first.
-   3. **Most recent issue prompt.** Glob `prompts/issue-(\d+)-*.md`,
-      pick the file with the newest mtime, and read `NNN` from its
-      filename. Strip leading zeros for the PR body.
-   If no hit is found, leave `{{ISSUE_NUMBER}}` as
-   `<!-- TODO: fill in issue number -->` and flag it during the
-   approval gate rather than blocking.
-6.5. **Scan for design-questions.** With the issue
-    number resolved, read `notes/eval-issue-NNN.md` (zero-padded).
-    If the file is absent, skip silently and continue to step 7.
-    If present, locate the `### design-questions` heading under
-    `## Follow-ups` and parse the fenced YAML block beneath. Each
-    entry is a `(title, target-issue, context)` triple. Group
-    entries by `target-issue`; preserve in-block order within a
-    group. The result is a map from target-issue number to a list
-    of entries, used in step 11 to emit `## Notes for #M` sections.
-    A malformed YAML block surfaces a one-line warning to the user
-    at the approval gate but does not abort the skill — the rest of
-    the PR body still renders. The canonical schema and field
-    semantics live in
+6. **Gather deterministic context.** Run
+   `bin/pr-context --base <base> --format json` and read its `outputs`
+   for the rest of this section — it performs the issue/ADR/commit
+   extraction the skill used to describe inline. The issue number is
+   `outputs.issueNumber` (no `#`); `outputs.issueSource` names which
+   priority source won (branch name → commit subjects → newest issue
+   prompt → `none`). When `issueSource` is `none`, leave
+   `{{ISSUE_NUMBER}}` as `<!-- TODO: fill in issue number -->` and flag
+   it during the approval gate rather than blocking.
+6.5. **Carry-forward design questions.** Read `outputs.carryForward[]`
+    — `pr-context` already read `notes/eval-issue-NNN.md`, parsed the
+    `### design-questions` block under `## Follow-ups`, and grouped
+    entries by `target-issue` (ascending). Each group is
+    `{targetIssue, entries:[{title, context}]}` and becomes one
+    `## Notes for #M` section in step 11. An empty list means none
+    (skip silently). If `outputs.warnings` reports a malformed block,
+    surface it at the approval gate; do not abort. The canonical schema
+    and field semantics live in
     [`docs/workflow-guide.md` §6](../../docs/workflow-guide.md#6-cross-skill-carry-forward-adr-040).
 
-7. **Extract ADR references.** Scan the same sources (branch name,
-   commit subjects, most recent prompt file) for `ADR-(\d+)` tokens
-   (case-insensitive). Deduplicate, preserve first-seen order. For
-   each unique `NNN`, glob `design/adr/adr-<NNN>-*.md`. If a file
-   matches, record the path. If none match, keep the `ADR-NNN` token
-   and flag it as a TODO in the approval gate. If no ADR tokens are
-   found anywhere, set the `## ADR` body to `none`.
-8. **Derive the change summary.** From the commit subjects, group by
-   conventional-commit verb prefix: `feat`, `fix`, `docs`, `refactor`,
-   `chore`, `test`, `perf`, `ci`, `build`, `infra`, `style`. (`infra`
-   is included to match the kit's canonical label set in
-   `templates/claude-md-template.md` — `infra(scope):` commits go in
-   their own group rather than `other`.) Any commit without a
-   recognised prefix goes under a final `other` group. Within each
-   group, keep one bullet per commit, preserving commit order
-   (oldest-first) and stripping the trailing `(ADR-NNN, #N)` suffix
-   for readability. If there is only one group, omit the group
-   heading and just list the bullets.
-9. **Derive the PR title.** Use the newest commit subject on the
-   branch, stripped of the trailing `(ADR-NNN, #N)` suffix. If the
-   title still ends with something like `(#NN)`, strip that too. The
-   user can override during approval.
+7. **ADR references.** Read `outputs.adrs[]` — each is
+   `{token, path, resolved}`, deduped in first-seen order across the
+   branch, commit subjects, and newest prompt. Record each resolved
+   `path` as a `Related ADR:` line; flag an unresolved token as a TODO
+   at the approval gate. If the list is empty, set the `## ADR` body to
+   `none`.
+8. **Change summary.** Read `outputs.commitGroups[]` — each is
+   `{verb, bullets[]}` with bullets oldest-first and the trailing
+   `(ADR-NNN, #N)` already stripped. (`infra` is one of the recognised
+   verbs, matching the kit's canonical label set; unrecognised prefixes
+   group under `other`.) Render one bullet per entry under its group.
+   If there is only one group, omit the group heading and just list the
+   bullets.
+9. **PR title.** Use `outputs.prTitle` — the newest commit subject with
+   the trailing `(ADR-NNN, #N)`/`(#N)` already stripped. The user can
+   override during approval.
 10. **Draft the Summary paragraph.** One sentence: take the verb and
     object from the PR title, plus the issue number if known. Example:
     `"Adds the pr-review-packager skill that packages feature

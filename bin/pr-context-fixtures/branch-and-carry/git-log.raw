@@ -1,0 +1,3 @@
+sha1	feat(core): add thing (ADR-013, #17)
+sha2	docs: note it (#17)
+sha3	fix: tweak (ADR-7, #17)

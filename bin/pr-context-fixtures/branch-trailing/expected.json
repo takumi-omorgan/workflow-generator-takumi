@@ -1,0 +1,18 @@
+{
+  "branch": "cool-feature-42",
+  "base": "main",
+  "issueNumber": "42",
+  "issueSource": "branch",
+  "adrs": [],
+  "commitGroups": [
+    {
+      "verb": "chore",
+      "bullets": [
+        "chore: stuff"
+      ]
+    }
+  ],
+  "prTitle": "chore: stuff",
+  "carryForward": [],
+  "warnings": []
+}

@@ -118,8 +118,10 @@ for required in \
   "$TARGET/.claude/bin/fence" \
   "$TARGET/.claude/bin/adr-alloc" \
   "$TARGET/.claude/bin/changelog-collect" \
+  "$TARGET/.claude/bin/pr-context" \
   "$TARGET/.claude/bin/lib/json-envelope.sh" \
-  "$TARGET/.claude/bin/lib/fences.py"; do
+  "$TARGET/.claude/bin/lib/fences.py" \
+  "$TARGET/.claude/bin/lib/carryforward_read.py"; do
   if [ ! -e "$required" ]; then
     add_problem "default install missing ${required#$TARGET/}"
   fi

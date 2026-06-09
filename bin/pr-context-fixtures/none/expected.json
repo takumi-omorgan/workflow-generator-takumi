@@ -1,0 +1,18 @@
+{
+  "branch": "wip",
+  "base": "main",
+  "issueNumber": null,
+  "issueSource": "none",
+  "adrs": [],
+  "commitGroups": [
+    {
+      "verb": "docs",
+      "bullets": [
+        "docs: nothing"
+      ]
+    }
+  ],
+  "prTitle": "docs: nothing",
+  "carryForward": [],
+  "warnings": []
+}

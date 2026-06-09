@@ -71,11 +71,11 @@ def prcontext_cmd(fixdir, args):
     if args.get("branch") is not None:
         cmd += ["--branch", args["branch"]]
     cmd += ["--git-log-file", os.path.join(fixdir, "git-log.raw")]
+    # Always pin the lookup dirs into the fixture (even when absent) so the
+    # collector never reads the real repo's prompts/notes/design dirs.
     for opt, sub in (("--prompts-dir", "prompts"), ("--notes-dir", "notes"),
                      ("--adr-dir", "adr")):
-        p = os.path.join(fixdir, sub)
-        if os.path.isdir(p):
-            cmd += [opt, p]
+        cmd += [opt, os.path.join(fixdir, sub)]
     cmd += ["--format", "json"]
     return cmd
 

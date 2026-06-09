@@ -1,0 +1,60 @@
+{
+  "branch": "issue-17-add-thing",
+  "base": "main",
+  "issueNumber": "17",
+  "issueSource": "branch",
+  "adrs": [
+    {
+      "token": "ADR-013",
+      "path": "bin/pr-context-fixtures/branch-and-carry/adr/adr-013-x.md",
+      "resolved": true
+    },
+    {
+      "token": "ADR-007",
+      "path": "bin/pr-context-fixtures/branch-and-carry/adr/adr-007-y.md",
+      "resolved": true
+    }
+  ],
+  "commitGroups": [
+    {
+      "verb": "feat",
+      "bullets": [
+        "feat(core): add thing"
+      ]
+    },
+    {
+      "verb": "fix",
+      "bullets": [
+        "fix: tweak"
+      ]
+    },
+    {
+      "verb": "docs",
+      "bullets": [
+        "docs: note it"
+      ]
+    }
+  ],
+  "prTitle": "feat(core): add thing",
+  "carryForward": [
+    {
+      "targetIssue": "5",
+      "entries": [
+        {
+          "title": "Shared config shape",
+          "context": "#5 must read the same config."
+        }
+      ]
+    },
+    {
+      "targetIssue": "8",
+      "entries": [
+        {
+          "title": "Coupling with auth",
+          "context": "The token format affects #8."
+        }
+      ]
+    }
+  ],
+  "warnings": []
+}
