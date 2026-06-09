@@ -123,11 +123,13 @@ Rules:
 - The `start` marker precedes the section heading (not inside it), so
   the heading itself is regeneratable — this is what lets the skill
   cleanly **omit** a section on re-run if its source disappears.
-- Content outside markers is never touched on re-run.
+- Content outside markers is never touched on re-run — `bin/docs-render`
+  guarantees this byte-for-byte.
 - If the user has moved markers or deleted the closing `end` marker,
-  the skill flags the file as "manual edits — cannot safely update"
-  and asks the user to either restore the markers or delete the
-  generated file and regenerate.
+  `bin/docs-render` exits 1 (malformed / no markers); the skill then
+  flags the file as "manual edits — cannot safely update" and asks the
+  user to either restore the markers or delete the generated file and
+  regenerate.
 
 ## Section omission logic
 
@@ -173,10 +175,11 @@ Each generated section has a deterministic rule for when it appears:
 | `current-status` | `CLAUDE.md` has a current phase, or ADRs are dated        |
 | `key-decisions`  | `design/adr/` contains at least one ADR                   |
 
-A section is **omitted** by removing its heading, body, and both
-markers — the file skips straight from the previous section to the
-next. The template is written so adjacent omitted sections leave no
-stray blank lines.
+A section is **omitted** simply by leaving it out of the `{id, body}`
+array passed to `bin/docs-render`; the splicer removes its heading,
+body, and both markers and collapses the gap so adjacent omissions
+leave no stray blank lines. The skill decides *which* sections to omit
+(the rules above); `docs-render` performs the removal.
 
 ### Roadmap section content
 
@@ -218,36 +221,40 @@ Run these steps in order. Stop on the first failure unless noted.
 4. **Determine which sections to include.** Apply the omission rules
    above to all outputs. Produce an ordered list of `(section_id,
    rendered_content)` tuples for each file.
-5. **Render all files in memory.**
-   - Read `templates/readme-template.md`,
-     `templates/architecture-template.md`, and
-     `templates/ai-summary-template.md` from the kit's
-     `.claude/skills/workflow-docs/` copy or from the templates
-     directory if running from the kit repo.
-   - For each included section, fill `{{PLACEHOLDERS}}` from the
-     context dict and wrap in its markers.
-   - Drop the heading, body, and both markers for any omitted section.
-   - Collapse any resulting run of more than one blank line to exactly
-     one blank line.
-6. **Check for existing files and merge markers.**
-   - If `README.md`, `design/architecture.md`, or `design/ai-summary.md` already exists **and
-     contains** the skill's markers: parse the existing file, replace
-     only the content between each `start:/end:` pair, leave
-     everything else alone.
-   - If the file exists but has **no markers** (e.g. a human-written
-     README from before the skill was run): treat it as a first run —
-     show a diff against the generated content, warn the user that
-     accepting will replace the existing file, and require an explicit
-     "yes, replace".
-   - If a section is in the existing file but the new run **omits** it
-     (source disappeared), delete the block between markers including
-     the markers themselves.
+5. **Render each section body.** Read `templates/readme-template.md`,
+   `templates/architecture-template.md`, and
+   `templates/ai-summary-template.md` from the kit's
+   `.claude/skills/workflow-docs/` copy (or the templates directory
+   when running from the kit repo). For each section the omission rules
+   **include**, fill its `{{PLACEHOLDERS}}` from the context dict to
+   produce that section's body (heading included). Collect the included
+   sections, in template order, as a JSON array of `{id, body}` objects
+   per output file.
+6. **Splice with `bin/docs-render`.** Hand each file's `{id, body}`
+   array to the deterministic splicer rather than editing markers in
+   the prompt:
+   ```
+   bin/docs-render --file <output> --sections <sections.json> --dry-run --format json
+   ```
+   It owns the marker mechanics: on a first run it wraps each section in
+   its `<!-- workflow-docs:start:ID -->` / `:end` markers; on a re-run
+   it replaces only the body between existing markers, omits the block
+   (markers included) for any section the new run dropped, inserts new
+   sections, and collapses blank-line runs — never touching content
+   outside the markers. `--dry-run` returns the rendered result for the
+   approval gate without writing. If `docs-render` exits 1 because the
+   file exists with **no** markers (a hand-written file) or with
+   **malformed** markers, do not overwrite: show the diff and ask the
+   user to consent or restore the markers. `--check-markers` reports a
+   file's marker health on its own.
 7. **Show all generated file contents in chat** as fenced markdown blocks
    — or show a diff if the file already exists. Ask explicitly:
    "Write these files? (yes / edit / cancel)". Default: no.
-8. **Write only after confirmation.** Report the absolute paths and a
-   one-line summary of what was written, regenerated, or omitted per
-   file.
+8. **Write only after confirmation.** Re-run `bin/docs-render` for each
+   file **without** `--dry-run` to write it atomically. Report the
+   absolute paths and a one-line summary (from `outputs.sectionsReplaced`
+   / `sectionsAdded` / `sectionsOmitted`) of what was written,
+   regenerated, or omitted per file.
 
 ## Template variables
 

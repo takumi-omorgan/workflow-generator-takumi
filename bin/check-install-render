@@ -119,6 +119,7 @@ for required in \
   "$TARGET/.claude/bin/adr-alloc" \
   "$TARGET/.claude/bin/changelog-collect" \
   "$TARGET/.claude/bin/pr-context" \
+  "$TARGET/.claude/bin/docs-render" \
   "$TARGET/.claude/bin/lib/json-envelope.sh" \
   "$TARGET/.claude/bin/lib/fences.py" \
   "$TARGET/.claude/bin/lib/carryforward_read.py"; do
@@ -159,6 +160,41 @@ STATE
   fi
   if ! diff -q "$WORK/state.orig" "$STATE_FIX" >/dev/null 2>&1; then
     add_problem "installed fence round-trip changed the file (expected byte-identity)"
+  fi
+fi
+
+# Installed-layout docs-render omit/collapse: a re-run that drops a section
+# must remove its block and leave no stray blank-line run.
+if [ -x "$TARGET/.claude/bin/docs-render" ]; then
+  DOCS_FIX="$WORK/readme.md"
+  cat > "$DOCS_FIX" <<'DOCS'
+<!-- workflow-docs:start:overview -->
+## Overview
+
+Old overview.
+<!-- workflow-docs:end:overview -->
+
+<!-- workflow-docs:start:more -->
+## More
+
+Pointers.
+<!-- workflow-docs:end:more -->
+DOCS
+  printf '[{"id":"overview","body":"## Overview\\n\\nNew overview."}]' \
+    | "$TARGET/.claude/bin/docs-render" --file "$DOCS_FIX" --sections - >/dev/null 2>&1
+  docs_rc=$?
+  if [ "$docs_rc" -ne 0 ]; then
+    add_problem "installed docs-render exited $docs_rc, expected 0"
+  fi
+  if grep -q 'workflow-docs:start:more' "$DOCS_FIX"; then
+    add_problem "installed docs-render did not omit the dropped section"
+  fi
+  if ! grep -q 'New overview' "$DOCS_FIX"; then
+    add_problem "installed docs-render did not replace the overview body"
+  fi
+  # No run of more than one blank line should remain (portable check).
+  if awk 'prev==""&&$0==""{f=1} {prev=$0} END{exit f?0:1}' "$DOCS_FIX"; then
+    add_problem "installed docs-render left a stray blank-line run"
   fi
 fi
 

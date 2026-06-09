@@ -946,6 +946,18 @@
         2
       ],
       "description": "Extract PR-packaging context (issue number via 3-priority fallback, ADR refs, commit groups, PR title, carry-forward) as JSON; writes nothing (ADR-054)."
+    },
+    {
+      "name": "docs-render",
+      "path": "bin/docs-render",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Splice marker-fenced doc sections (omit/merge/collapse) for the workflow-docs skill, preserving content outside the markers (ADR-054)."
     }
   ]
 }
