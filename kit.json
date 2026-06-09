@@ -900,6 +900,18 @@
         2
       ],
       "description": "Validate a JSON data file against a kit schema (unit/required/type/const/enum/pattern) so schemas/*.yaml are executable contracts (ADR-054)."
+    },
+    {
+      "name": "adr-alloc",
+      "path": "bin/adr-alloc",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Allocate the next ADR number, date, slug, filename, and index-row stub by scanning design/adr/; writes nothing (ADR-054)."
     }
   ]
 }

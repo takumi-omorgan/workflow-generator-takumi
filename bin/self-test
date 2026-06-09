@@ -163,6 +163,11 @@ FIX
 bin/validate-schema --schema schemas/receipt.v1.yaml --data "$STUB/receipt-bad.json" >/dev/null 2>&1
 record "stub:validate-schema-bad" "stub" "1" "$?"
 
+# adr-alloc: next number in a throwaway adr dir -> exit 0, returns 001
+mkdir -p "$STUB/adr"
+bin/adr-alloc --dir "$STUB/adr" --title "Self test stub" >/dev/null 2>&1
+record "stub:adr-alloc" "stub" "0" "$?"
+
 # receipt write + find round-trip in a throwaway dir
 bin/write-receipt --skill self-test --key stub --status completed --dir "$STUB/receipts" >/dev/null 2>&1
 record "stub:receipt-write" "stub" "0" "$?"

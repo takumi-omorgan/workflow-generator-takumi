@@ -86,10 +86,14 @@ just summarises the alternatives that were considered.
 
 - **Files:** `design/adr/adr-NNN-short-title.md`, one per decision
   topic, rendered from `templates/adr-template.md`.
-- **Numbering:** sequential, never reused. The skill scans
-  `design/adr/` for the highest existing `adr-NNN-*.md` and starts
-  numbering from the next integer. Within a batch, numbers increment
-  in the order topics were given.
+- **Numbering:** sequential, never reused. Do not count files by
+  hand — call `bin/adr-alloc --title "<topic>" --format json` and read
+  `outputs.number`, `outputs.date`, `outputs.slug`, `outputs.filename`,
+  and `outputs.indexRowStub`. For a batch, the first call gives the
+  starting number; assign that number to the first topic and increment
+  by one for each subsequent topic in the confirmed order (the files are
+  not yet on disk), reusing each topic's own `--title` call for its slug
+  and index-row stub.
 - **Status:** `proposed` for every ADR this skill produces.
 - **Date:** today's date in `YYYY-MM-DD`.
 
@@ -118,7 +122,9 @@ If a future ADR amends the template, this skill follows the template.
 
 Repeat for every topic in the input batch:
 
-1. Restate the decision topic as a one-line problem statement.
+1. Restate the decision topic as a one-line problem statement, and
+   call `bin/adr-alloc --title "<topic>" --format json` to allocate
+   the number, date, slug, and filename (see **Numbering** above).
 2. Pull relevant constraints from `design/prd-normalized.md`'s
    "Constraints and preferences" field. Pull product principles from
    `design/mvp.md` if it exists. These populate `## Context`.
@@ -194,7 +200,8 @@ the current decision; do not block on it.
 
 Per file:
 
-- [ ] `NNN` is the next unused number in `design/adr/`.
+- [ ] `NNN` is the number `bin/adr-alloc` returned (next unused in
+  `design/adr/`).
 - [ ] Status is `proposed`.
 - [ ] At least 2 options are listed, each with both Pros and Cons.
 - [ ] Decision names one of the listed options (no hybrid unless the

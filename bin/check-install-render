@@ -116,6 +116,7 @@ fi
 # default install (ADR-054): default-installed skills shell out to them.
 for required in \
   "$TARGET/.claude/bin/fence" \
+  "$TARGET/.claude/bin/adr-alloc" \
   "$TARGET/.claude/bin/lib/json-envelope.sh" \
   "$TARGET/.claude/bin/lib/fences.py"; do
   if [ ! -e "$required" ]; then
