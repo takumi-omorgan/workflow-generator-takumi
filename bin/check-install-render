@@ -257,6 +257,46 @@ done
 if [ -e "$TARGET_AI/.claude/ai-review/config.json" ]; then
   add_problem "--with-ai-review created secret-bearing .claude/ai-review/config.json"
 fi
+
+# The shipped example config must onboard users without ever modelling a
+# secret in a tracked file: it names the env var that holds the key
+# (apiKeyEnv) and carries no inline secret value or secret-like literal. A
+# regression here would teach users to paste a key into a committed file.
+EXAMPLE_CFG="$TARGET_AI/.claude/ai-review/config.example.json"
+if [ ! -f "$EXAMPLE_CFG" ]; then
+  add_problem "--with-ai-review missing .claude/ai-review/config.example.json"
+else
+  secret_scan=$(python3 - "$EXAMPLE_CFG" <<'PY'
+import json, re, sys
+raw = open(sys.argv[1], encoding="utf-8").read()
+try:
+    cfg = json.loads(raw)
+except Exception as exc:  # malformed example config is itself a problem
+    print("example config is not valid JSON: %s" % exc)
+    raise SystemExit(1)
+problems = []
+if not cfg.get("apiKeyEnv"):
+    problems.append("does not name apiKeyEnv (the env var holding the key)")
+# The key value must live only in the env var, never inline in the config.
+for field in ("apiKey", "api_key", "apikey", "key", "token", "secret",
+              "password", "authorization", "Authorization"):
+    if field in cfg:
+        problems.append("carries an inline secret field: %s" % field)
+# No secret-like literal anywhere in the file text.
+for pattern, why in ((r"sk-[A-Za-z0-9]", "an OpenAI/OpenRouter-style key literal"),
+                     (r"Bearer\s+[A-Za-z0-9]", "an inline Bearer token")):
+    if re.search(pattern, raw):
+        problems.append("contains %s" % why)
+if problems:
+    print("; ".join(problems))
+    raise SystemExit(1)
+PY
+)
+  if [ $? -ne 0 ]; then
+    add_problem "--with-ai-review example config is not secret-free: $secret_scan"
+  fi
+fi
+
 cat > "$TARGET_AI/.claude/ai-review/config.json" <<'JSON'
 {"apiKeyEnv":"LOCAL_TEST_KEY","userEdited":true}
 JSON

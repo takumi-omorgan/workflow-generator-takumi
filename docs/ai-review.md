@@ -13,6 +13,29 @@ follow-on installer distribution decision in
 entry point is the `/review-pr` verb. In target projects it is installed
 only when the operator passes `--with-ai-review` during install.
 
+## What to expect
+
+AI PR review is **optional** and **bring-your-own-provider**. Before you
+turn it on:
+
+- **You supply the credentials.** The kit ships no API key and no provider
+  account. You create an account with an OpenAI-compatible provider
+  (OpenRouter is the documented first choice), generate your own key, and
+  the provider — not the kit — bills you for the model calls it makes.
+- **Your key never enters the kit's files.** It lives only in the
+  environment variable named by `apiKeyEnv`. Nothing the kit writes —
+  config, artifacts, receipts, or logs — contains the key, and the tools
+  never ask you to paste it into chat.
+- **The model only ever sees the PR diff and metadata** you point it at,
+  sent to the provider endpoint you configure. No other repo content is
+  transmitted.
+- **Nothing is posted without you.** Review generation is local and posts
+  nothing; publishing a comment requires a separate, explicit approval
+  token (see §3).
+- **It is off until you opt in.** A default install never copies this
+  runtime, so the criteria above only apply once you pass
+  `--with-ai-review` and configure a provider yourself.
+
 ## Install mode
 
 Default installs stay lightweight:
