@@ -1,0 +1,13 @@
+{
+  "range": {
+    "from": "v4.0.0",
+    "to": "HEAD",
+    "empty": true
+  },
+  "suggestedBump": null,
+  "confidence": "none",
+  "signals": [],
+  "warnings": [
+    "no commits in range — nothing to release"
+  ]
+}

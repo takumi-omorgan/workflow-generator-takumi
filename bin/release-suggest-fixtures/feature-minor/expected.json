@@ -1,0 +1,22 @@
+{
+  "range": {
+    "from": "v1.1.0",
+    "to": "HEAD",
+    "empty": false
+  },
+  "suggestedBump": "minor",
+  "confidence": "high",
+  "signals": [
+    {
+      "signal": "feature-commits",
+      "tier": "minor",
+      "detail": "1 feature commit(s) categorized by changelog-collect"
+    },
+    {
+      "signal": "new-adr",
+      "tier": "minor",
+      "detail": "new ADR(s) introduced: ADR-013"
+    }
+  ],
+  "warnings": []
+}

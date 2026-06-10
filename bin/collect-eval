@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # collect-eval — offline fixture harness for the deterministic collectors
-# (changelog-collect, pr-context) (ADR-054).
+# (changelog-collect, release-suggest, pr-context) (ADR-054).
 #
 # Mirrors bin/review-eval: it drives each collector over its fixture tree
 # with fully offline inputs (--git-log-file / --gh-mock) and asserts the

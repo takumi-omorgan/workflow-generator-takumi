@@ -948,6 +948,17 @@
       "description": "Extract PR-packaging context (issue number via 3-priority fallback, ADR refs, commit groups, PR title, carry-forward) as JSON; writes nothing (ADR-054)."
     },
     {
+      "name": "release-suggest",
+      "path": "bin/release-suggest",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        2
+      ],
+      "description": "Collect version-bump signals (BREAKING markers, breaking labels, ADR supersede, new ADRs, feature commits) and suggest major/minor/patch with confidence; advisory, writes nothing, offline via --git-log-file/--gh-mock (ADR-054)."
+    },
+    {
       "name": "docs-render",
       "path": "bin/docs-render",
       "format": "json",

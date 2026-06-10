@@ -1,0 +1,1 @@
+c1c1c1c1c1c15000feat(api)!: drop legacy v1 endpoints (#42)BREAKING CHANGE: the /v1 routes are removed.c2c2c2c2c2c24000feat: add v2 paginationc3c3c3c3c3c33000fix: correct header casing

@@ -125,11 +125,29 @@ for every phase in the bundle are updated to `released <tag>`.
 
 ## Suggested-version heuristic
 
-When no version is supplied the skill proposes major / minor / patch
-by inspecting commits, ADR additions, and BREAKING-CHANGE markers
-since the last tag. Conservative: it proposes, the user confirms or
-overrides. See [`reference.md`](reference.md#suggested-version-heuristic)
-for the full rule set.
+When no version is supplied the skill proposes major / minor / patch.
+The deterministic signal collection runs in `bin/release-suggest` (in
+target projects: `.claude/bin/release-suggest`), not in this prompt:
+
+```
+bin/release-suggest --since-last-release --format json
+```
+
+The helper reads the commit range, reuses `bin/changelog-collect` for
+the categorized commit tally, and scans for BREAKING-CHANGE markers,
+`breaking` PR labels, ADR supersede/status-change markers, and new
+ADRs. It emits a JSON envelope whose `outputs` carry `suggestedBump`,
+`confidence`, `signals`, and `warnings`. It is **advisory only**: it
+writes nothing, tags nothing, and publishes nothing.
+
+This skill consumes that output as the starting point and keeps the
+judgment: present the suggested bump, its confidence, and the signals
+to the user, then let `--version` / `--bump` or the user's confirmation
+override it. Treat a `low`/`medium` confidence, any `warnings`, or an
+empty range (`suggestedBump: null`) as a cue to look closer before
+settling — never tag on the suggestion alone. See
+[`reference.md`](reference.md#suggested-version-heuristic) for the
+signal-to-tier rules and how to read the envelope.
 
 ## Prerequisites check
 
@@ -234,7 +252,11 @@ execute every step.
 4. **Determine the target version.**
    - If `--version` is set, use it.
    - Else if `--bump` is set, apply it to the last tag.
-   - Else compute the suggested bump and present it for confirmation.
+   - Else run `bin/release-suggest --since-last-release --format json`,
+     read `suggestedBump` / `confidence` / `signals` / `warnings` from
+     its `outputs`, and present the suggestion (with its signals and
+     confidence) for confirmation. The suggestion is advisory — the
+     user confirms or overrides it.
 5. **Refuse if `vX.Y.Z` already exists** as a local or remote tag
    (`git tag -l vX.Y.Z` or `git ls-remote --tags origin vX.Y.Z`).
    Suggest the next patch and exit; do not prompt for overwrite.
