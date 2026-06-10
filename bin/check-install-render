@@ -75,7 +75,6 @@ for unexpected in \
   "$TARGET/.claude/bin/publish-review" \
   "$TARGET/.claude/bin/review-eval" \
   "$TARGET/.claude/bin/write-receipt" \
-  "$TARGET/.claude/bin/lib/json-envelope.sh" \
   "$TARGET/.claude/ai-review" \
   "$TARGET/.claude/skills/review-pr"; do
   if [ -e "$unexpected" ]; then
@@ -110,6 +109,92 @@ else
   check_rc=$?
   if [ "$check_rc" -ne 0 ]; then
     add_problem "sync-adr-index --check after rewrite exited $check_rc, expected 0"
+  fi
+fi
+
+# Default deterministic helpers and their shared libraries must travel with a
+# default install (ADR-054): default-installed skills shell out to them.
+for required in \
+  "$TARGET/.claude/bin/fence" \
+  "$TARGET/.claude/bin/adr-alloc" \
+  "$TARGET/.claude/bin/changelog-collect" \
+  "$TARGET/.claude/bin/pr-context" \
+  "$TARGET/.claude/bin/docs-render" \
+  "$TARGET/.claude/bin/lib/json-envelope.sh" \
+  "$TARGET/.claude/bin/lib/fences.py" \
+  "$TARGET/.claude/bin/lib/carryforward_read.py"; do
+  if [ ! -e "$required" ]; then
+    add_problem "default install missing ${required#$TARGET/}"
+  fi
+done
+if [ -e "$TARGET/.claude/bin/fence" ] && [ ! -x "$TARGET/.claude/bin/fence" ]; then
+  add_problem "target .claude/bin/fence is not executable"
+fi
+
+# Installed-layout marker-fence round-trip: the helper must read and rewrite a
+# zone in the installed layout without clobbering surrounding bytes. Fence
+# corruption is silent and destructive, so prove it on the shipped copy.
+if [ -x "$TARGET/.claude/bin/fence" ]; then
+  STATE_FIX="$WORK/state.md"
+  cat > "$STATE_FIX" <<'STATE'
+# State
+
+<!-- state:in-flight:start -->
+Issue: #1
+Status: prepared
+<!-- state:in-flight:end -->
+
+Editorial text outside the fence.
+STATE
+  cp "$STATE_FIX" "$WORK/state.orig"
+  body=$("$TARGET/.claude/bin/fence" read --file "$STATE_FIX" --dialect state --zone in-flight)
+  read_rc=$?
+  if [ "$read_rc" -ne 0 ]; then
+    add_problem "installed fence read exited $read_rc, expected 0"
+  fi
+  printf '%s\n' "$body" > "$WORK/body.txt"
+  "$TARGET/.claude/bin/fence" replace --file "$STATE_FIX" --dialect state --zone in-flight --body-file "$WORK/body.txt" >/dev/null 2>&1
+  rep_rc=$?
+  if [ "$rep_rc" -ne 0 ]; then
+    add_problem "installed fence replace exited $rep_rc, expected 0"
+  fi
+  if ! diff -q "$WORK/state.orig" "$STATE_FIX" >/dev/null 2>&1; then
+    add_problem "installed fence round-trip changed the file (expected byte-identity)"
+  fi
+fi
+
+# Installed-layout docs-render omit/collapse: a re-run that drops a section
+# must remove its block and leave no stray blank-line run.
+if [ -x "$TARGET/.claude/bin/docs-render" ]; then
+  DOCS_FIX="$WORK/readme.md"
+  cat > "$DOCS_FIX" <<'DOCS'
+<!-- workflow-docs:start:overview -->
+## Overview
+
+Old overview.
+<!-- workflow-docs:end:overview -->
+
+<!-- workflow-docs:start:more -->
+## More
+
+Pointers.
+<!-- workflow-docs:end:more -->
+DOCS
+  printf '[{"id":"overview","body":"## Overview\\n\\nNew overview."}]' \
+    | "$TARGET/.claude/bin/docs-render" --file "$DOCS_FIX" --sections - >/dev/null 2>&1
+  docs_rc=$?
+  if [ "$docs_rc" -ne 0 ]; then
+    add_problem "installed docs-render exited $docs_rc, expected 0"
+  fi
+  if grep -q 'workflow-docs:start:more' "$DOCS_FIX"; then
+    add_problem "installed docs-render did not omit the dropped section"
+  fi
+  if ! grep -q 'New overview' "$DOCS_FIX"; then
+    add_problem "installed docs-render did not replace the overview body"
+  fi
+  # No run of more than one blank line should remain (portable check).
+  if awk 'prev==""&&$0==""{f=1} {prev=$0} END{exit f?0:1}' "$DOCS_FIX"; then
+    add_problem "installed docs-render left a stray blank-line run"
   fi
 fi
 

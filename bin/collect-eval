@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# collect-eval — offline fixture harness for the deterministic collectors
+# (changelog-collect, pr-context) (ADR-054).
+#
+# Mirrors bin/review-eval: it drives each collector over its fixture tree
+# with fully offline inputs (--git-log-file / --gh-mock) and asserts the
+# emitted envelope `outputs` matches each fixture's expected.json byte-for-
+# byte. This is the byte-stability proof that the skills can rely on the
+# collectors' output shape. Wired into bin/self-test.
+#
+# Usage:
+#   bin/collect-eval [--format text|json] [-h]
+#
+# Exit codes (shared convention; see lib/json-envelope.sh):
+#   0  all fixtures match expected.json
+#   1  one or more fixtures diverged
+#   2  invocation error
+
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/json-envelope.sh
+. "$SCRIPT_DIR/lib/json-envelope.sh"
+
+usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; }
+
+FORMAT="text"
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --format)
+      [ $# -ge 2 ] || { printf 'collect-eval: --format needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+      FORMAT="$2"; shift 2 ;;
+    -h|--help) usage; exit 0 ;;
+    *) printf 'collect-eval: unknown argument: %s\n' "$1" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+  esac
+done
+case "$FORMAT" in
+  text|json) ;;
+  *) printf 'collect-eval: --format must be text or json (got: %s)\n' "$FORMAT" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac
+
+RESULT=$(python3 "$SCRIPT_DIR/lib/collect-eval-check.py")
+RC=$?
+
+STATUS=$(printf '%s' "$RESULT" | jq -r '.status')
+OUTPUTS=$(printf '%s' "$RESULT" | jq -c '.outputs')
+ERRORS=$(printf '%s' "$RESULT" | jq -c '.errors')
+
+if [ "$FORMAT" = "json" ]; then
+  print_envelope "collect-eval" "$STATUS" "$OUTPUTS" "[]" "$ERRORS"
+else
+  printf '%s\n' "$(printf '%s' "$RESULT" | jq -r '.text')"
+fi
+
+exit "$RC"

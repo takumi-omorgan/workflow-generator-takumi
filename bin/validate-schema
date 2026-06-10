@@ -1,0 +1,206 @@
+#!/usr/bin/env bash
+# validate-schema — validate a data file against a kit schema (ADR-054).
+#
+# Makes the schemas/*.yaml executable contracts rather than reference-only
+# docs. It reads the schema's unit (object|list), required fields,
+# additionalFields policy, and per-field type/const/enum/pattern via the
+# shared dependency-free reader (bin/lib/schema_read.py) and checks a JSON
+# data file against them. The receipt schema is the primary consumer; the
+# design-questions producer grammar keeps its dedicated extractor in
+# bin/validate-carry-forward, which also reads its rules from the schema.
+#
+# Usage:
+#   bin/validate-schema --schema PATH --data PATH [--format text|json] [-h]
+#   bin/validate-schema --schema PATH --data -            # read JSON from stdin
+#
+# Flags:
+#   --schema PATH        a kit schema file (e.g. schemas/receipt.v1.yaml)
+#   --data PATH          JSON data file to validate; `--data -` reads stdin
+#   --format text|json   default text; json emits the standard envelope
+#   -h, --help           print this header
+#
+# Exit codes (shared convention; see lib/json-envelope.sh):
+#   0  data conforms to the schema
+#   1  data does not conform (domain failure)
+#   2  invocation error (bad flags, unreadable/invalid schema or data)
+
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/json-envelope.sh
+. "$SCRIPT_DIR/lib/json-envelope.sh"
+
+usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; }
+
+FORMAT="text"
+SCHEMA=""
+DATA=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --format)
+      [ $# -ge 2 ] || { printf 'validate-schema: --format needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+      FORMAT="$2"; shift 2 ;;
+    --schema)
+      [ $# -ge 2 ] || { printf 'validate-schema: --schema needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+      SCHEMA="$2"; shift 2 ;;
+    --data)
+      [ $# -ge 2 ] || { printf 'validate-schema: --data needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+      DATA="$2"; shift 2 ;;
+    -h|--help) usage; exit 0 ;;
+    *) printf 'validate-schema: unknown argument: %s\n' "$1" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+  esac
+done
+case "$FORMAT" in
+  text|json) ;;
+  *) printf 'validate-schema: --format must be text or json (got: %s)\n' "$FORMAT" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac
+if [ -z "$SCHEMA" ] || [ -z "$DATA" ]; then
+  printf 'validate-schema: --schema and --data are required\n' >&2
+  exit "$ENVELOPE_EXIT_INVOCATION"
+fi
+if [ ! -f "$SCHEMA" ]; then
+  printf 'validate-schema: schema not found: %s\n' "$SCHEMA" >&2
+  exit "$ENVELOPE_EXIT_INVOCATION"
+fi
+if [ "$DATA" != "-" ] && [ ! -f "$DATA" ]; then
+  printf 'validate-schema: --data not found: %s\n' "$DATA" >&2
+  exit "$ENVELOPE_EXIT_INVOCATION"
+fi
+
+if [ "$DATA" = "-" ]; then
+  DATA_TEXT="$(cat)"
+else
+  DATA_TEXT="$(cat "$DATA")"
+fi
+
+RESULT=$(
+  SCHEMA="$SCHEMA" LIB_DIR="$SCRIPT_DIR/lib" DATA_NAME="$DATA" DATA_TEXT="$DATA_TEXT" \
+  python3 <<'PYEOF'
+import os, re, sys, json
+sys.path.insert(0, os.environ["LIB_DIR"])
+from schema_read import load_schema
+
+schema_path = os.environ["SCHEMA"]
+data_name = os.environ.get("DATA_NAME") or "-"
+
+try:
+    schema = load_schema(schema_path)
+except Exception as e:
+    print(json.dumps({"exit": 2, "status": "schema-error", "outputs": {},
+        "text": "validate-schema: cannot read schema: %s" % e,
+        "errors": [{"code": "schema-unreadable", "message": str(e)}]}))
+    sys.exit(0)
+
+try:
+    data = json.loads(os.environ.get("DATA_TEXT") or "")
+except Exception as e:
+    print(json.dumps({"exit": 2, "status": "data-error", "outputs": {},
+        "text": "validate-schema: --data is not valid JSON: %s" % e,
+        "errors": [{"code": "data-invalid", "message": str(e)}]}))
+    sys.exit(0)
+
+fields = schema["fields"]
+required = schema["required"]
+additional = schema["additionalFields"]
+
+
+def type_ok(value, t):
+    if t is None:
+        return True
+    if t == "string":
+        return isinstance(value, str)
+    if t == "integer":
+        return isinstance(value, int) and not isinstance(value, bool)
+    if t == "number":
+        return isinstance(value, (int, float)) and not isinstance(value, bool)
+    if t == "boolean":
+        return isinstance(value, bool)
+    if t == "object":
+        return isinstance(value, dict)
+    if t in ("list", "array"):
+        return isinstance(value, list)
+    return True
+
+
+def validate_object(obj, where):
+    problems = []
+    if not isinstance(obj, dict):
+        return ["%s: expected an object, got %s" % (where, type(obj).__name__)]
+    for req in required:
+        if req not in obj or obj.get(req) is None:
+            problems.append("%s: missing required field %r" % (where, req))
+    if additional == "forbid":
+        for k in obj:
+            if k not in fields:
+                problems.append("%s: unknown field %r (schema forbids extra fields)" % (where, k))
+    for name, spec in fields.items():
+        if name not in obj or obj[name] is None:
+            continue
+        v = obj[name]
+        if not type_ok(v, spec.get("type")):
+            problems.append("%s: field %r should be %s" % (where, name, spec["type"]))
+            continue
+        const = spec.get("const")
+        if const is not None:
+            if spec.get("type") == "integer":
+                ok = (v == int(const))
+            else:
+                ok = (str(v) == const)
+            if not ok:
+                problems.append("%s: field %r must equal %r" % (where, name, const))
+        enum = spec.get("enum")
+        if enum and str(v) not in enum:
+            problems.append("%s: field %r value %r not in {%s}" % (where, name, v, ", ".join(enum)))
+        pat = spec.get("pattern")
+        if pat and not re.match(pat, str(v)):
+            problems.append("%s: field %r value %r does not match %s" % (where, name, v, pat))
+    return problems
+
+
+problems = []
+count = 0
+if schema["unit"] == "list":
+    if not isinstance(data, list):
+        problems.append("root: schema unit is list; data must be a JSON array")
+    else:
+        for i, item in enumerate(data):
+            count += 1
+            problems += validate_object(item, "item[%d]" % i)
+else:
+    count = 1
+    problems += validate_object(data, "root")
+
+outputs = {"schema": schema.get("schema"), "version": schema.get("version"),
+           "unit": schema["unit"], "dataName": data_name,
+           "itemsChecked": count, "valid": not problems, "violations": problems}
+
+if problems:
+    status, exit_code = "invalid", 1
+    text = ("validate-schema: %d violation(s) against %s:\n" % (len(problems), schema.get("schema"))
+            + "\n".join("  - " + p for p in problems))
+else:
+    status, exit_code = "ok", 0
+    text = "validate-schema: ok — %s conforms to schema %s (v%s)" % (
+        data_name, schema.get("schema"), schema.get("version"))
+
+print(json.dumps({"exit": exit_code, "status": status, "outputs": outputs,
+                  "text": text, "errors": []}, ensure_ascii=False))
+PYEOF
+)
+
+EXIT_HINT=$(printf '%s' "$RESULT" | jq -r '.exit')
+STATUS=$(printf '%s' "$RESULT" | jq -r '.status')
+OUTPUTS=$(printf '%s' "$RESULT" | jq -c '.outputs')
+ERRORS=$(printf '%s' "$RESULT" | jq -c '.errors')
+
+if [ "$FORMAT" = "json" ]; then
+  print_envelope "validate-schema" "$STATUS" "$OUTPUTS" "[]" "$ERRORS"
+else
+  printf '%s\n' "$(printf '%s' "$RESULT" | jq -r '.text')"
+fi
+
+case "$EXIT_HINT" in
+  0) exit "$ENVELOPE_EXIT_OK" ;;
+  1) exit "$ENVELOPE_EXIT_DOMAIN" ;;
+  *) exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac

@@ -316,12 +316,14 @@ alignment-review obligation, and the `--no-prompt` mode rules.
     [`docs/workflow-control.md` §4](../../docs/workflow-control.md#4-finding-the-next-step))
     to `skill: pr-review-packager`, `args: n/a`,
     `preconditions: ["branch <name> is ahead of main"]`,
-    `blocked-by: none` — skip that zone if the file predates it. The
+    `blocked-by: none` — skip that zone if the file predates it. Use
+    `bin/fence replace --file design/state.md --dialect state --zone <zone> --body-file <tmp>`
+    for each rewrite rather than editing markers in the prompt. The
     `recent` zone is **not** touched here — it tracks merged PRs and
     is the responsibility of `/pr-review-packager`. If the file is
-    absent, skip silently. If marker fences are broken, do not
-    rewrite; report the broken zone in the evaluation summary's
-    follow-ups list and suggest `/pause`.
+    absent, skip silently. If marker fences are broken, `bin/fence`
+    exits 1 instead of writing; report the broken zone in the
+    evaluation summary's follow-ups list and suggest `/pause`.
 12. **Evaluation summary.** Print the final summary (see **Evaluation
     summary** below) **and write the same content to
     `notes/eval-issue-NNN.md`** (zero-padded issue number). The

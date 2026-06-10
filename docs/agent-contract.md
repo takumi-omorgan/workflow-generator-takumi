@@ -209,6 +209,14 @@ envelope is a tracked follow-up, not a contradiction of this contract.
 | [`bin/review-pr`](../bin/review-pr) | standard | 0, 1, 2, 3 | Generate a dry-run AI review artifact from a PR diff; posts nothing ([`docs/ai-review.md`](ai-review.md)) |
 | [`bin/publish-review`](../bin/publish-review) | standard | 0, 1, 2, 3, 4 | Preview, then post an AI review to a PR on the `--confirm` token; idempotent via receipts |
 | [`bin/review-eval`](../bin/review-eval) | standard | 0, 1, 2 | Offline fixture harness for AI PR review quality |
+| [`bin/fence`](../bin/fence) | standard | 0, 1, 2 | Read and splice marker-fenced zones (state/summary/workflow-docs/adr-index) without clobbering surrounding prose ([ADR-054](../design/adr/adr-054-script-vs-skill-boundary.md)) |
+| [`bin/fences-eval`](../bin/fences-eval) | standard | 0, 1, 2 | Offline golden-fixture harness proving byte-stable fence round-trip/splice |
+| [`bin/validate-schema`](../bin/validate-schema) | standard | 0, 1, 2 | Validate a JSON data file against a kit schema (unit/required/type/const/enum/pattern) |
+| [`bin/adr-alloc`](../bin/adr-alloc) | standard | 0, 1, 2 | Allocate the next ADR number/date/slug/index-row stub; writes nothing |
+| [`bin/changelog-collect`](../bin/changelog-collect) | standard | 0, 2 | Parse git history into grouped, deduped, categorized commit data as JSON (offline via `--git-log-file`/`--gh-mock`) |
+| [`bin/pr-context`](../bin/pr-context) | standard | 0, 2 | Extract PR-packaging context (issue/ADR/commit-groups/carry-forward) as JSON; writes nothing |
+| [`bin/docs-render`](../bin/docs-render) | standard | 0, 1, 2 | Splice marker-fenced doc sections (omit/merge/collapse) for the workflow-docs skill |
+| [`bin/collect-eval`](../bin/collect-eval) | standard | 0, 1, 2 | Offline fixture harness asserting changelog-collect / pr-context outputs are byte-stable |
 | [`bin/check-plan`](../bin/check-plan) | legacy | 0, 1, 2 | Validate an ADR or prompt against criteria |
 | [`bin/sync-adr-index`](../bin/sync-adr-index) | none (text) | 0, 1, 2 | Regenerate the ADR index table |
 

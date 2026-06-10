@@ -864,6 +864,100 @@
         2
       ],
       "description": "Offline fixture harness for AI PR review: runs review-pr --mock over ai-review/eval/fixtures and checks expectations + duplicate prevention (ADR-051)."
+    },
+    {
+      "name": "fence",
+      "path": "bin/fence",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Read and splice marker-fenced zones (state/summary/workflow-docs/adr-index) without clobbering surrounding prose; skills shell out to it (ADR-054)."
+    },
+    {
+      "name": "fences-eval",
+      "path": "bin/fences-eval",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Offline golden-fixture harness proving byte-stable marker-fence round-trip and splice behavior (ADR-054)."
+    },
+    {
+      "name": "validate-schema",
+      "path": "bin/validate-schema",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Validate a JSON data file against a kit schema (unit/required/type/const/enum/pattern) so schemas/*.yaml are executable contracts (ADR-054)."
+    },
+    {
+      "name": "adr-alloc",
+      "path": "bin/adr-alloc",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Allocate the next ADR number, date, slug, filename, and index-row stub by scanning design/adr/; writes nothing (ADR-054)."
+    },
+    {
+      "name": "changelog-collect",
+      "path": "bin/changelog-collect",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        2
+      ],
+      "description": "Parse git history into grouped, deduped, categorized commit data as JSON for the changelog/release skills; offline via --git-log-file/--gh-mock (ADR-054)."
+    },
+    {
+      "name": "collect-eval",
+      "path": "bin/collect-eval",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Offline fixture harness asserting changelog-collect and pr-context outputs match expected.json byte-for-byte (ADR-054)."
+    },
+    {
+      "name": "pr-context",
+      "path": "bin/pr-context",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        2
+      ],
+      "description": "Extract PR-packaging context (issue number via 3-priority fallback, ADR refs, commit groups, PR title, carry-forward) as JSON; writes nothing (ADR-054)."
+    },
+    {
+      "name": "docs-render",
+      "path": "bin/docs-render",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Splice marker-fenced doc sections (omit/merge/collapse) for the workflow-docs skill, preserving content outside the markers (ADR-054)."
     }
   ]
 }

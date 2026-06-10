@@ -1,0 +1,19 @@
+{
+  "branch": "experiment",
+  "base": "main",
+  "issueNumber": "23",
+  "issueSource": "commit",
+  "adrs": [],
+  "commitGroups": [
+    {
+      "verb": "feat",
+      "bullets": [
+        "feat: y",
+        "feat: x"
+      ]
+    }
+  ],
+  "prTitle": "feat: x",
+  "carryForward": [],
+  "warnings": []
+}

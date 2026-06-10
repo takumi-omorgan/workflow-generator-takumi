@@ -131,9 +131,17 @@ sufficient.
    write `skill: none` rather than guessing. If the project's
    `design/state.md` predates the zone (no `state:next-action` fences),
    append the zone after `continue-here`.
-8. **Write the file.** Rewrite only the zones whose contents
-   changed. Preserve marker fences; preserve out-of-fence content
-   verbatim.
+8. **Write the file.** Rewrite each changed zone with `bin/fence`
+   rather than editing markers in the prompt — it replaces only the
+   bytes between a zone's fences and preserves out-of-fence content
+   byte-for-byte:
+   ```
+   bin/fence replace --file design/state.md --dialect state --zone <zone> --body-file <tmp>
+   ```
+   (`--body-file` or `--body -` keeps multi-line bodies like the
+   `next-action` YAML intact.) For a project whose `state.md` predates
+   the `next-action` zone, `bin/fence` reports the zone as not found;
+   append the zone after `continue-here` only in that case.
 9. **Line-cap check.** After writing, run `wc -l design/state.md`.
    If the file exceeds 100 lines, show the user a one-line warning
    and suggest pruning the oldest `recent` entry. Do not auto-prune
@@ -154,8 +162,9 @@ sufficient.
 
 ## Edge cases
 
-- **`design/state.md` exists but marker fences are broken.** Stop.
-  Tell the user which zone is malformed; do not silently rewrite.
+- **`design/state.md` exists but marker fences are broken.** `bin/fence`
+  exits 1 (malformed) instead of writing; stop, tell the user which zone
+  is malformed, and do not silently rewrite.
 - **`design/state.md` over the line cap before this run.** Warn but
   do not refuse. The skill can still refresh zones; the warning
   guides manual pruning.

@@ -1,0 +1,6 @@
+{
+  "op": "replace",
+  "dialect": "summary",
+  "zone": "overview",
+  "body": "New overview text."
+}

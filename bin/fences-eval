@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# fences-eval — run the marker-fence golden fixtures offline (ADR-054).
+#
+# Mirrors bin/review-eval: a thin wrapper that drives the fixtures under
+# bin/lib/fences-fixtures/ through the real bin/fence CLI and the fences
+# module, then reports pass/fail. It proves byte-stable round-trip and splice
+# behavior — the kit's one silent, destructive failure mode — and is wired
+# into bin/self-test so every change is checked.
+#
+# Usage:
+#   bin/fences-eval [--format text|json] [-h]
+#
+# Exit codes (shared convention; see lib/json-envelope.sh):
+#   0  all fixtures and invariants pass
+#   1  one or more checks failed
+#   2  invocation error
+
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/json-envelope.sh
+. "$SCRIPT_DIR/lib/json-envelope.sh"
+
+usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; }
+
+FORMAT="text"
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --format)
+      [ $# -ge 2 ] || { printf 'fences-eval: --format needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+      FORMAT="$2"; shift 2 ;;
+    -h|--help) usage; exit 0 ;;
+    *) printf 'fences-eval: unknown argument: %s\n' "$1" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+  esac
+done
+case "$FORMAT" in
+  text|json) ;;
+  *) printf 'fences-eval: --format must be text or json (got: %s)\n' "$FORMAT" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac
+
+RESULT=$(python3 "$SCRIPT_DIR/lib/fences-eval-check.py")
+RC=$?
+
+STATUS=$(printf '%s' "$RESULT" | jq -r '.status')
+OUTPUTS=$(printf '%s' "$RESULT" | jq -c '.outputs')
+ERRORS=$(printf '%s' "$RESULT" | jq -c '.errors')
+
+if [ "$FORMAT" = "json" ]; then
+  print_envelope "fences-eval" "$STATUS" "$OUTPUTS" "[]" "$ERRORS"
+else
+  printf '%s\n' "$(printf '%s' "$RESULT" | jq -r '.text')"
+fi
+
+exit "$RC"
