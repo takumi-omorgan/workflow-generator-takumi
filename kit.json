@@ -1,6 +1,6 @@
 {
   "kit": "claude-code-workflow-kit",
-  "kitVersion": "4.1.0",
+  "kitVersion": "5.0.0",
   "schemaVersion": "1",
   "description": "Machine-readable index of the Claude Code Workflow Kit's skills, permission categories, inputs, outputs, handoffs, and programmatic surfaces. Hand-maintained; validated by bin/validate-kit-json. See ADR-047 and docs/agent-contract.md.",
   "contract": {

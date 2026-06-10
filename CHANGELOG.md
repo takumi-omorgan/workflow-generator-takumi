@@ -2,6 +2,65 @@
 
 All notable changes to this project.
 
+## v5.0.0 — public distribution readiness (2026-06-10)
+
+Range: `v4.0.0..v5.0.0`
+
+**MAJOR**: the kit's first public-distribution release candidate. This is a
+deliberate inflection point — the kit is now packaged for distribution as a
+standalone public repository, generated and verified by deterministic tooling
+rather than hand-maintained. The release also consolidates a script-boundary
+refactor that moved load-bearing parse, marker-fence, changelog, and
+release mechanics out of skill prose into tested helper scripts, so the
+behaviour skills depend on is now exercised by an offline test suite. The
+release advisor flags a major bump for this range.
+
+### Features
+
+- **Public distribution export.** A clean public tree is generated from the
+  source repository at a fixed commit and checked against a strict contract —
+  top-level allowlist, no internal/source paths, required public artifacts
+  present, no dangling links, no stale repository names or version pins. The
+  tooling never pushes, never creates a repository, and never publishes a
+  release; producing the public artifact and verifying it are separate from
+  any publish step.
+- **Deterministic release advisor.** A new helper scans a release range for
+  version-bump signals (breaking-change markers, breaking labels, superseded
+  decisions, new decision records, feature commits) and suggests
+  major/minor/patch with a confidence level as advisory JSON. It writes
+  nothing and tags nothing — the maintainer keeps the final release judgment,
+  the changelog prose, and the publish decision.
+- **Deterministic skill helpers.** Marker-fence editing, changelog
+  collection, and pull-request context extraction now run as standalone,
+  offline-testable scripts that the state, summary, changelog, and release
+  workflows call, replacing prose-described mechanics.
+- **On-demand AI pull-request review.** The optional AI review runtime
+  installs only when requested and stays off by default.
+
+### Decisions and policy
+
+- **One version line for source and public distribution.** The published
+  release tag equals `kit.json` `kitVersion`; there is a single source of
+  truth for the kit version and no divergent public/private numbering. The
+  public changelog is curated from tagged releases rather than shipping
+  internal development history verbatim, and [`docs/architecture.md`](docs/architecture.md)
+  is the public architecture reference.
+
+### Docs
+
+- AI pull-request review onboarding now states up front what a public user
+  should expect: it is optional, uses a bring-your-own provider account and
+  key, the provider (not the kit) bills usage, the key never enters any
+  kit-written file, the model only sees the pull-request diff and metadata,
+  and nothing is posted without explicit approval. The installed example
+  config is guarded to carry no secret-shaped values.
+
+### Process
+
+- Delivered as a sequence of focused, separately reviewed pull requests, each
+  gated by the kit's own validation suite and a clean public-export dry run
+  before this release candidate was assembled.
+
 ## v4.0.0 — kit-wide rename `Design/` → `design/` (2026-05-07)
 
 Range: `v3.4.0..v4.0.0`
