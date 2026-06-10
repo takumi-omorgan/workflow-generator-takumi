@@ -1,0 +1,259 @@
+#!/usr/bin/env bash
+# export-public — build a clean public distribution tree from this source
+# repo and verify it, without ever pushing anything (issue #16, ADR-056).
+#
+# The public repo (olivermorgan2/claude-workflow-kit) is a GENERATED export
+# of this private source repo — never hand-maintained and never a renamed
+# remote. This script produces that export deterministically from tracked
+# files at HEAD and runs the leak/link verifier plus (optionally) the repo
+# validation suite from inside the exported tree. It performs NO git push,
+# NO GitHub repo creation, NO release, and NO auth switch — those are a
+# separate, identity-gated step that is out of scope here. A dry run needs
+# no GitHub access at all.
+#
+# Pipeline (design: design/public-distribution-export-design-20260609.md):
+#   1. resolve the export version (default: v + kit.json kitVersion) and
+#      refuse to run if a requested --version disagrees with kitVersion
+#      (ADR-055 makes tag == kitVersion a machine-enforced invariant)
+#   2. git archive HEAD -> DEST              (tracked files only; never
+#                                             untracked material like .hermes/)
+#   3. prune EXCLUDE paths, root-anchored    (kit ADRs, notes, archive,
+#                                             internal design docs, extra prompts)
+#   4. apply TRANSFORM rules across shipping text (not examples/):
+#        - repo-name rewrite to the public repo
+#        - version-pin rewrite to the export version
+#        - personal-path scrub
+#        - ADR-link neutralization (de-link orphaned design/adr links)
+#   5. run bin/check-public-export over DEST  (leak/link contract)
+#   6. optionally run the repo validation suite from inside DEST (--gates)
+#
+# Usage:
+#   bin/export-public [--dest DIR] [--version vX.Y.Z]
+#       [--public-repo OWNER/NAME] [--gates|--no-gates]
+#       [--keep] [--dry-run] [--format text|json] [-h]
+#
+# Flags:
+#   --dest DIR        write the export here (default: a temp dir, removed
+#                     unless --keep). DIR is emptied first if it exists.
+#   --version vX.Y.Z  the release version to stamp (default v+kitVersion).
+#                     Refuses if it != kit.json kitVersion.
+#   --public-repo     target public repo owner/name (default
+#                     olivermorgan2/claude-workflow-kit)
+#   --gates           run validate-kit-json + check-consistency from inside
+#                     DEST (default: on). --no-gates skips them.
+#   --keep            keep DEST after the run (default: temp dirs are removed)
+#   --dry-run         affirm no-push intent; this script never pushes, so it
+#                     is a no-op accepted for clarity in pre-release scripts
+#   --format text|json
+#
+# Exit codes (shared convention; see lib/json-envelope.sh):
+#   0  export built and passed the verifier (and gates, if run)
+#   1  the export violated the contract or a gate failed (domain failure)
+#   2  invocation error (not a kit root, bad flags, version mismatch)
+#   3  a required tool (git) is unavailable
+
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+KIT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+# shellcheck source=lib/json-envelope.sh
+. "$SCRIPT_DIR/lib/json-envelope.sh"
+
+usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; }
+
+FORMAT="text"
+DEST=""
+VERSION=""
+PUBLIC_REPO="olivermorgan2/claude-workflow-kit"
+RUN_GATES=1
+KEEP=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --dest)        [ $# -ge 2 ] || { printf 'export-public: --dest needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; DEST="$2"; shift 2 ;;
+    --version)     [ $# -ge 2 ] || { printf 'export-public: --version needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; VERSION="$2"; shift 2 ;;
+    --public-repo) [ $# -ge 2 ] || { printf 'export-public: --public-repo needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; PUBLIC_REPO="$2"; shift 2 ;;
+    --gates)       RUN_GATES=1; shift ;;
+    --no-gates)    RUN_GATES=0; shift ;;
+    --keep)        KEEP=1; shift ;;
+    --dry-run)     shift ;;  # accepted, no-op: this script never pushes
+    --format)      [ $# -ge 2 ] || { printf 'export-public: --format needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; FORMAT="$2"; shift 2 ;;
+    -h|--help)     usage; exit 0 ;;
+    *) printf 'export-public: unknown argument: %s\n' "$1" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+  esac
+done
+case "$FORMAT" in
+  text|json) ;;
+  *) printf 'export-public: --format must be text or json (got: %s)\n' "$FORMAT" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac
+
+cd "$KIT_ROOT" || { printf 'export-public: cannot cd to kit root\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+[ -f kit.json ] || { printf 'export-public: run from the kit repo root (kit.json missing)\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+command -v git >/dev/null 2>&1 || { printf 'export-public: git is required\n' >&2; exit "$ENVELOPE_EXIT_AUTH"; }
+
+# Source identity to scrub (kept in sync with check-public-export defaults).
+SOURCE_OWNER="takumi-omorgan"
+SOURCE_REPO="takumi-omorgan/workflow-generator-takumi"
+OLD_PUBLIC_REPO="olivermorgan2/workflow-generator"
+
+# ---- 1. resolve and verify the export version --------------------------
+KIT_VERSION=$(python3 -c 'import json;print(json.load(open("kit.json"))["kitVersion"])' 2>/dev/null)
+[ -n "$KIT_VERSION" ] || { printf 'export-public: cannot read kitVersion from kit.json\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+CANON="v$KIT_VERSION"
+if [ -z "$VERSION" ]; then
+  VERSION="$CANON"
+else
+  [ "${VERSION#v}" = "$VERSION" ] && VERSION="v$VERSION"
+  if [ "$VERSION" != "$CANON" ]; then
+    printf 'export-public: requested version %s != kit.json kitVersion %s (ADR-055: tag must equal kitVersion)\n' "$VERSION" "$CANON" >&2
+    exit "$ENVELOPE_EXIT_INVOCATION"
+  fi
+fi
+
+# ---- DEST handling -----------------------------------------------------
+TEMP_DEST=0
+if [ -z "$DEST" ]; then
+  DEST=$(mktemp -d 2>/dev/null || mktemp -d -t export-public)
+  TEMP_DEST=1
+else
+  case "$DEST" in /*) ;; *) DEST="$KIT_ROOT/$DEST" ;; esac
+  rm -rf "$DEST"
+  mkdir -p "$DEST"
+fi
+cleanup() {
+  if [ "$TEMP_DEST" -eq 1 ] && [ "$KEEP" -eq 0 ]; then
+    rm -rf "$DEST" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT
+
+# ---- 2. git archive HEAD (tracked files only) --------------------------
+if ! git archive HEAD | tar -x -C "$DEST" 2>/dev/null; then
+  printf 'export-public: git archive HEAD failed (no commit yet?)\n' >&2
+  exit "$ENVELOPE_EXIT_AUTH"
+fi
+
+# ---- 3. prune EXCLUDE paths (root-anchored) ----------------------------
+# Internal-only material. examples/projects/*/design/** is deliberately
+# untouched — those are illustrative kit OUTPUT and still ship.
+rm -rf "$DEST/design/adr" "$DEST/design/prd-addenda"
+# root-level design/*.md reports only (not nested example design docs)
+if [ -d "$DEST/design" ]; then
+  find "$DEST/design" -maxdepth 1 -type f -name '*.md' -delete
+  # drop design/ if it is now empty (kept if examples-style subdirs remain;
+  # there are none at root level, so this removes an empty internal dir)
+  rmdir "$DEST/design" 2>/dev/null || true
+fi
+rm -rf "$DEST/notes" "$DEST/archive" "$DEST/.hermes"
+rm -rf "$DEST/ai-review/artifacts" "$DEST/ai-review/config.json"
+# prompts/: keep only _template.md
+if [ -d "$DEST/prompts" ]; then
+  find "$DEST/prompts" -mindepth 1 -maxdepth 1 ! -name '_template.md' -exec rm -rf {} +
+fi
+# the public-export tooling itself is source-only (see export_paths.py) —
+# prune the scripts, fixtures, lib helpers, and runbook from the artifact.
+rm -rf \
+  "$DEST/bin/check-public-export" "$DEST/bin/export-public" "$DEST/bin/export-eval" \
+  "$DEST/bin/lib/check-public-export.py" "$DEST/bin/lib/export-transform.py" \
+  "$DEST/bin/lib/export-eval-check.py" "$DEST/bin/lib/export_paths.py" \
+  "$DEST/bin/export-eval-fixtures" "$DEST/docs/publishing.md"
+
+# Reconcile metadata so the pruned tooling leaves no dangling reference:
+# drop their kit.json bin[] entries, the self-test step, and the docs row.
+# (run before pruning the reconcile helper's own DEST copy)
+python3 "$SCRIPT_DIR/lib/export-reconcile.py" "$DEST" || {
+  printf 'export-public: metadata reconciliation failed\n' >&2
+  exit "$ENVELOPE_EXIT_INVOCATION"
+}
+rm -f "$DEST/bin/lib/export-reconcile.py"
+
+# ---- 4. apply TRANSFORM rules ------------------------------------------
+# Scope: shipping text files OUTSIDE examples/ (example bodies are
+# illustrative output and are exempt from blind rewrites). Transforms run
+# in python for deterministic, multi-rule substitution.
+TRANSFORM_SUMMARY=$(
+  DEST="$DEST" VERSION="$VERSION" PUBLIC_REPO="$PUBLIC_REPO" \
+  SOURCE_OWNER="$SOURCE_OWNER" SOURCE_REPO="$SOURCE_REPO" OLD_PUBLIC_REPO="$OLD_PUBLIC_REPO" \
+  python3 "$SCRIPT_DIR/lib/export-transform.py"
+)
+TRC=$?
+if [ "$TRC" -ne 0 ]; then
+  printf 'export-public: transform step failed\n' >&2
+  exit "$ENVELOPE_EXIT_INVOCATION"
+fi
+
+# ---- 5. run the leak/link verifier over DEST ---------------------------
+CHECK_JSON=$("$SCRIPT_DIR/check-public-export" --staging "$DEST" --version "$VERSION" \
+  --source-owner "$SOURCE_OWNER" --source-repo "$SOURCE_REPO" \
+  --public-repo "$PUBLIC_REPO" --format json 2>/dev/null)
+CHECK_RC=$?
+CHECK_OUTPUTS=$(printf '%s' "$CHECK_JSON" | jq -c '.outputs' 2>/dev/null || printf '{}')
+
+# ---- 6. optional in-DEST validation gates ------------------------------
+GATES_JSON='[]'
+GATES_OK=1
+if [ "$RUN_GATES" -eq 1 ]; then
+  run_gate() {
+    local name="$1"; shift
+    local rc=0
+    ( cd "$DEST" && "$@" >/dev/null 2>&1 ) || rc=$?
+    [ "$rc" -eq 0 ] || GATES_OK=0
+    GATES_JSON=$(printf '%s' "$GATES_JSON" | jq -c --arg n "$name" --argjson rc "$rc" '. + [{gate:$n, exit:$rc, ok:($rc==0)}]')
+  }
+  # Use the exported tree's own bin/ so we validate the SHIPPED scripts.
+  if [ -x "$DEST/bin/validate-kit-json" ]; then run_gate "validate-kit-json" ./bin/validate-kit-json; fi
+  if [ -x "$DEST/bin/check-consistency" ]; then run_gate "check-consistency" ./bin/check-consistency; fi
+fi
+
+# ---- assemble report ---------------------------------------------------
+INCLUDED_COUNT=$(find "$DEST" -type f ! -path '*/.git/*' | wc -l | tr -d ' ')
+
+OVERALL_RC="$ENVELOPE_EXIT_OK"
+STATUS="exported"
+if [ "$CHECK_RC" -ne 0 ] || [ "$GATES_OK" -ne 1 ]; then
+  OVERALL_RC="$ENVELOPE_EXIT_DOMAIN"
+  STATUS="failed"
+fi
+
+KEPT_PATH="null"
+if [ "$KEEP" -eq 1 ] || [ "$TEMP_DEST" -eq 0 ]; then
+  KEPT_PATH="\"$DEST\""
+fi
+
+OUTPUTS=$(jq -nc \
+  --arg version "$VERSION" \
+  --arg publicRepo "$PUBLIC_REPO" \
+  --arg dest "$DEST" \
+  --argjson kept "$KEPT_PATH" \
+  --argjson fileCount "$INCLUDED_COUNT" \
+  --argjson check "$CHECK_OUTPUTS" \
+  --argjson gates "$GATES_JSON" \
+  --argjson gatesRun "$([ "$RUN_GATES" -eq 1 ] && echo true || echo false)" \
+  '{version:$version, publicRepo:$publicRepo, dest:$dest, keptPath:$kept,
+    fileCount:$fileCount, transformsApplied:true, check:$check,
+    gatesRun:$gatesRun, gates:$gates}')
+
+if [ "$FORMAT" = "json" ]; then
+  print_envelope "export-public" "$STATUS" "$OUTPUTS" "[]" "[]"
+else
+  CHECK_TEXT=$(printf '%s' "$CHECK_JSON" | jq -r '.outputs.violationCount // "?"')
+  if [ "$OVERALL_RC" = "$ENVELOPE_EXIT_OK" ]; then
+    printf 'export-public: ok — built %s for %s (%s files), verifier clean' "$VERSION" "$PUBLIC_REPO" "$INCLUDED_COUNT"
+    [ "$RUN_GATES" -eq 1 ] && printf ', gates passed'
+    printf '\n'
+    [ "$KEPT_PATH" != "null" ] && printf '  export kept at: %s\n' "$DEST"
+  else
+    printf 'export-public: FAILED — %s for %s\n' "$VERSION" "$PUBLIC_REPO"
+    if [ "$CHECK_RC" -ne 0 ]; then
+      printf '  verifier found %s violation(s):\n' "$(printf '%s' "$CHECK_OUTPUTS" | jq -r '.violationCount // "?"')"
+      printf '%s' "$CHECK_OUTPUTS" | jq -r '
+        .checks[] | select(.ok==false)
+        | "    [\(.id)] \(.name):", (.problems[] | "      - \(.path) — \(.detail)")' 2>/dev/null \
+        || printf '    (run bin/check-public-export --staging <dir> for detail)\n'
+    fi
+    if [ "$GATES_OK" -ne 1 ]; then
+      printf '  in-export gates failed: %s\n' "$(printf '%s' "$GATES_JSON" | jq -r '[.[]|select(.ok==false)|.gate]|join(", ")')"
+    fi
+  fi
+fi
+
+exit "$OVERALL_RC"

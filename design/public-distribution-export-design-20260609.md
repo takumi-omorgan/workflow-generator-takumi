@@ -1,7 +1,15 @@
 # Public Distribution Export — Design Proposal
 
 **Date:** 2026-06-09
-**Status:** DRAFT — export model awaiting approval (plan-first, ADR-006).
+**Status:** EXPORT MODEL ACCEPTED & IMPLEMENTED — the two-repo export model
+and its verification mechanics are decided in
+[ADR-056](adr/adr-056-two-repo-public-distribution-export-model.md) and built
+under issue #16 (`bin/export-public`, `bin/check-public-export`,
+`bin/export-eval`; runbook in [`docs/publishing.md`](../docs/publishing.md)).
+Publishing (repo creation/push, `gh`-identity switch, release) remains a
+later, identity-gated step. ADR-link neutralization is applied at **export
+time** (the design's documented fallback to a source sweep). Original draft
+framing retained below for audit.
 **Versioning & changelog policy (O1/O2): RESOLVED** — see
 [ADR-055](adr/adr-055-public-distribution-versioning-policy.md) (issue #17).
 **Author:** Claude Code (PTY session, Hermes-supervised)

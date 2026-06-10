@@ -70,6 +70,7 @@ fences is preserved.
 | [ADR-053](adr-053-workflow-docs-architecture-document.md) | Maintain a current architecture document via workflow-docs | accepted |
 | [ADR-054](adr-054-script-vs-skill-boundary.md) | Deterministic script vs. Claude-skill boundary | proposed |
 | [ADR-055](adr-055-public-distribution-versioning-policy.md) | Public distribution versioning and changelog policy | accepted |
+| [ADR-056](adr-056-two-repo-public-distribution-export-model.md) | Two-repo public distribution export model | accepted |
 
 <!-- adr-index:end -->
 

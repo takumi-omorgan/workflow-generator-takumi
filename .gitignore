@@ -17,6 +17,10 @@
 ai-review/artifacts/
 ai-review/config.json
 
+# Public distribution export — generated staging tree (bin/export-public).
+# Never committed: it is a reproducible build artifact, not source (ADR-056).
+dist/
+
 # Editor / IDE junk
 *.swp
 *.swo

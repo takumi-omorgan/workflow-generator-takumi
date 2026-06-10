@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# export-eval — offline fixture harness for the public-export verifier
+# (issue #16, ADR-056).
+#
+# Mirrors bin/collect-eval and bin/review-eval: it drives
+# bin/check-public-export over the staging trees under
+# bin/export-eval-fixtures/ and asserts each fixture's exit code and that
+# the reported violations name the expected bad file/path/reference. Fully
+# offline (no git archive, no network); wired into bin/self-test so the
+# public link/leak contract is part of normal validation.
+#
+# Usage:
+#   bin/export-eval [--fixtures DIR] [--format text|json] [-h]
+#
+# Exit codes (shared convention; see lib/json-envelope.sh):
+#   0  every fixture matched its expected outcome
+#   1  one or more fixtures diverged (domain failure)
+#   2  invocation error (no fixtures dir, bad flags)
+
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/json-envelope.sh
+. "$SCRIPT_DIR/lib/json-envelope.sh"
+
+usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; }
+
+FORMAT="text"
+FIXTURES="$SCRIPT_DIR/export-eval-fixtures"
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --fixtures) [ $# -ge 2 ] || { printf 'export-eval: --fixtures needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; FIXTURES="$2"; shift 2 ;;
+    --format)   [ $# -ge 2 ] || { printf 'export-eval: --format needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; FORMAT="$2"; shift 2 ;;
+    -h|--help)  usage; exit 0 ;;
+    *) printf 'export-eval: unknown argument: %s\n' "$1" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+  esac
+done
+case "$FORMAT" in
+  text|json) ;;
+  *) printf 'export-eval: --format must be text or json (got: %s)\n' "$FORMAT" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac
+[ -d "$FIXTURES" ] || { printf 'export-eval: fixtures dir not found: %s\n' "$FIXTURES" >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+
+RESULT=$(
+  CHECKER="$SCRIPT_DIR/check-public-export" FIXTURES="$FIXTURES" \
+  python3 "$SCRIPT_DIR/lib/export-eval-check.py"
+)
+
+EXIT_HINT=$(printf '%s' "$RESULT" | jq -r '.exit')
+STATUS=$(printf '%s' "$RESULT" | jq -r '.status')
+OUTPUTS=$(printf '%s' "$RESULT" | jq -c '.outputs')
+
+if [ "$FORMAT" = "json" ]; then
+  print_envelope "export-eval" "$STATUS" "$OUTPUTS" "[]" "[]"
+else
+  printf '%s\n' "$(printf '%s' "$RESULT" | jq -r '.text')"
+fi
+
+case "$EXIT_HINT" in
+  0) exit "$ENVELOPE_EXIT_OK" ;;
+  1) exit "$ENVELOPE_EXIT_DOMAIN" ;;
+  *) exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac
