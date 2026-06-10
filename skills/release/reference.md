@@ -8,27 +8,56 @@ invariants, and the pre/post self-checks referenced from
 
 ## Suggested-version heuristic
 
-When no version is supplied, propose a bump by inspecting everything
-since the last tag (or since the first commit, if no tag exists):
+When no version is supplied, the deterministic signal collection runs in
+`bin/release-suggest` (target projects: `.claude/bin/release-suggest`),
+not inline in this prompt:
 
-1. **major** if any of the following are true:
-   - A commit message or PR body contains `BREAKING CHANGE` / the PR
-     carries a `breaking` label.
-   - A previously `accepted` ADR has been `superseded` in this range
-     (detect by scanning `design/adr/*.md` diffs: a status change from
-     `accepted` to `superseded` or the addition of a `Supersedes:`
-     field in a new ADR).
-2. **minor** if:
-   - One or more new ADRs have been added in the range (new file in
-     `design/adr/`), or
-   - Any commit begins with `feat(` or uses the `add` verb on a
-     user-facing area.
-3. **patch** otherwise (only `fix`, `docs`, `chore`, `refactor`
-     commits).
+```
+bin/release-suggest --since-last-release --format json
+```
 
-The heuristic is conservative: it proposes, the user confirms or
-overrides. When multiple signals conflict, pick the highest tier
-(major > minor > patch) and explain why in the plan.
+The helper inspects everything since the last tag (or since the first
+commit, if no tag exists) and emits a JSON envelope whose `outputs`
+carry four fields the skill consumes verbatim:
+
+- `suggestedBump` — `major` | `minor` | `patch`, or `null` for an empty
+  range.
+- `confidence` — `high` | `medium` | `low` | `none`.
+- `signals` — the explicit `{signal, tier, detail}` list behind the
+  suggestion.
+- `warnings` — caveats (e.g. unconventional commits that could hide a
+  feature, or `gh` unavailable so a `breaking` label could not be
+  verified).
+
+The signal-to-tier rules the helper applies (highest tier present
+wins):
+
+1. **major** if any of:
+   - a commit message or body contains a `BREAKING CHANGE` /
+     `BREAKING-CHANGE` marker, or a conventional `!` breaking bang
+     (`feat!:`);
+   - the PR carries a `breaking` label (looked up via `gh`, or
+     `--gh-mock DIR` offline);
+   - an ADR supersede / status-change marker appears in the range (a
+     commit that supersedes an `accepted` ADR, or adds a `Supersedes:`
+     field). This tier alone yields `medium` confidence — confirm
+     against the ADR diffs before treating it as `major`.
+2. **minor** if one or more new ADRs are introduced in the range, or
+   `bin/changelog-collect` (which the helper reuses) categorizes one or
+   more commits as features.
+3. **patch** otherwise (only `fix` / `docs` / `chore` / `refactor`
+   commits and no higher signal).
+
+The helper is conservative and **advisory only** — it writes nothing
+and proposes; the skill and the user decide. When the suggestion is
+`low`/`medium` confidence, carries `warnings`, or the range is empty
+(`suggestedBump: null`), look closer before settling, and explain the
+chosen bump in the plan. `--version` / `--bump` always override the
+suggestion.
+
+For the byte-stable fixture coverage of these signals (patch-only,
+feature/minor, breaking/major, ADR-supersede/major, and empty range),
+see `bin/release-suggest-fixtures/` and `bin/collect-eval`.
 
 ## Project-shape detection — signals, threshold, outcome
 

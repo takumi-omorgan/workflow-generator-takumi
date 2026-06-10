@@ -1,0 +1,32 @@
+{
+  "range": {
+    "from": "v2.3.1",
+    "to": "HEAD",
+    "empty": false
+  },
+  "suggestedBump": "major",
+  "confidence": "high",
+  "signals": [
+    {
+      "signal": "breaking-change",
+      "tier": "major",
+      "detail": "commit c1 carries a BREAKING CHANGE marker"
+    },
+    {
+      "signal": "breaking-bang",
+      "tier": "major",
+      "detail": "commit c1 uses a conventional `!` breaking bang"
+    },
+    {
+      "signal": "breaking-label",
+      "tier": "major",
+      "detail": "PR #42 carries a 'breaking' label"
+    },
+    {
+      "signal": "feature-commits",
+      "tier": "minor",
+      "detail": "2 feature commit(s) categorized by changelog-collect"
+    }
+  ],
+  "warnings": []
+}

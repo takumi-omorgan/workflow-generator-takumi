@@ -1,0 +1,17 @@
+{
+  "range": {
+    "from": "v3.0.0",
+    "to": "HEAD",
+    "empty": false
+  },
+  "suggestedBump": "major",
+  "confidence": "medium",
+  "signals": [
+    {
+      "signal": "adr-superseded",
+      "tier": "major",
+      "detail": "commit d1 supersedes an accepted ADR (ADR-012, ADR-030)"
+    }
+  ],
+  "warnings": []
+}

@@ -1,0 +1,17 @@
+{
+  "range": {
+    "from": "v1.0.0",
+    "to": "HEAD",
+    "empty": false
+  },
+  "suggestedBump": "patch",
+  "confidence": "high",
+  "signals": [
+    {
+      "signal": "patch-only",
+      "tier": "patch",
+      "detail": "only fix/docs/chore/refactor commits; no feature or breaking signal"
+    }
+  ],
+  "warnings": []
+}

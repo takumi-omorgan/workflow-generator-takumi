@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """collect-eval-check — offline fixture checker for the collectors (ADR-054).
 
-Drives bin/changelog-collect and bin/pr-context over their fixture trees with
-the --git-log-file / --gh-mock offline inputs (mirroring AI-review's --mock),
+Drives bin/changelog-collect, bin/release-suggest, and bin/pr-context over
+their fixture trees with the --git-log-file / --gh-mock offline inputs
+(mirroring AI-review's --mock),
 captures the envelope `outputs`, and compares it byte-for-byte (as normalised
 JSON) against each fixture's expected.json. This pins the exact output shape
 the changelog and pr-review-packager skills parse — the behavioral contract.
@@ -64,6 +65,19 @@ def changelog_cmd(fixdir, args):
     return cmd
 
 
+def release_suggest_cmd(fixdir, args):
+    cmd = [os.path.join(BIN, "release-suggest"),
+           "--from", args["from"], "--to", args["to"]]
+    if args.get("includeMerges"):
+        cmd += ["--include-merges"]
+    cmd += ["--git-log-file", os.path.join(fixdir, "git-log.raw")]
+    ghmock = os.path.join(fixdir, "gh-mock")
+    if os.path.isdir(ghmock):
+        cmd += ["--gh-mock", ghmock]
+    cmd += ["--format", "json"]
+    return cmd
+
+
 def prcontext_cmd(fixdir, args):
     cmd = [os.path.join(BIN, "pr-context")]
     if args.get("base"):
@@ -82,6 +96,7 @@ def prcontext_cmd(fixdir, args):
 
 TOOLS = [
     ("changelog-collect", "changelog-collect-fixtures", changelog_cmd),
+    ("release-suggest", "release-suggest-fixtures", release_suggest_cmd),
     ("pr-context", "pr-context-fixtures", prcontext_cmd),
 ]
 
