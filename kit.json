@@ -969,6 +969,43 @@
         2
       ],
       "description": "Splice marker-fenced doc sections (omit/merge/collapse) for the workflow-docs skill, preserving content outside the markers (ADR-054)."
+    },
+    {
+      "name": "check-public-export",
+      "path": "bin/check-public-export",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Deterministic public-export verifier: asserts a staging tree's top-level allowlist, excluded private/source paths absent, required public artifacts present, no markdown links into excluded paths, no old owner/repo URLs, no absolute/temp paths, and no stale version pins; reads only, names every violation (ADR-056)."
+    },
+    {
+      "name": "export-public",
+      "path": "bin/export-public",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "description": "Build a clean public distribution tree from tracked files at HEAD (git archive + root-anchored exclude + name/version/path/ADR-link transforms), run check-public-export and the in-export validation gates; never pushes, creates no repo, publishes no release (ADR-056)."
+    },
+    {
+      "name": "export-eval",
+      "path": "bin/export-eval",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Offline fixture harness asserting check-public-export's exit codes and that violations name the bad file/path/reference across clean and leaky staging trees (ADR-056)."
     }
   ]
 }

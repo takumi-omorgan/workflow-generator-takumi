@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+# check-public-export — deterministic leak/link verifier for a public
+# export staging tree (issue #16, ADR-056).
+#
+# Given a staging directory (the transformed subset that bin/export-public
+# produces, or any candidate public tree), this script asserts the public
+# distribution contract WITHOUT any network or GitHub access. It writes
+# nothing; it only reads the staging tree and reports. It is a pure
+# function of the tree's contents, so it is fixture/smoke-testable
+# (bin/export-eval drives it over golden staging trees).
+#
+# Checks (each failure names the offending file / path / reference):
+#   A  allowlisted top-level content only — no unexpected top-level entry
+#   B  excluded private/source paths absent:
+#        root design/adr/**, root design/*.md, design/prd-addenda/**,
+#        notes/**, archive/**, .hermes/**, ai-review/config.json,
+#        ai-review/artifacts/**, and any prompts/* other than _template.md
+#   C  required public artifacts present: docs/architecture.md and
+#        prompts/_template.md (installer/prepare-issue depend on the latter)
+#   D  markdown relative links resolve to a file that exists in the tree —
+#        an orphaned link (e.g. into the now-excluded kit design/adr/**) is
+#        a failure. Resolving against the tree is what makes this correct:
+#        example-project ADR links (target still ships) pass; links into the
+#        excluded kit ADR set (target absent) fail. No string-matching of
+#        "design/adr", so legitimate prose/output descriptions are not
+#        false-positived.
+#   E  no stale old-owner / old-repo URL strings remain (configurable;
+#        defaults match this kit's source identity)
+#   F  no absolute local paths or temp/audit paths ship
+#   G  no stale version literal in install-surface files (only when
+#        --version is given): README.md, docs/install.md,
+#        bin/bootstrap-workflow-kit must not pin a release tag != the
+#        version being exported
+#
+# The repo validation suite (validate-kit-json, check-consistency, …) is
+# run from INSIDE the staging tree by bin/export-public, not here: those
+# need a full kit tree, whereas this checker is a pure leak/link scan that
+# also runs against minimal fixtures.
+#
+# Usage:
+#   bin/check-public-export --staging DIR [--version vX.Y.Z]
+#       [--source-owner OWNER] [--source-repo OWNER/NAME]
+#       [--public-repo OWNER/NAME] [--format text|json] [-h]
+#
+# Exit codes (shared convention; see lib/json-envelope.sh):
+#   0  the staging tree satisfies the public export contract
+#   1  one or more contract violations (domain failure)
+#   2  invocation error (no/!dir --staging, bad flags)
+
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/json-envelope.sh
+. "$SCRIPT_DIR/lib/json-envelope.sh"
+
+usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; }
+
+FORMAT="text"
+STAGING=""
+VERSION=""
+SOURCE_OWNER="takumi-omorgan"
+SOURCE_REPO="takumi-omorgan/workflow-generator-takumi"
+OLD_PUBLIC_REPO="olivermorgan2/workflow-generator"
+PUBLIC_REPO="olivermorgan2/claude-workflow-kit"
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --staging)       [ $# -ge 2 ] || { printf 'check-public-export: --staging needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; STAGING="$2"; shift 2 ;;
+    --version)       [ $# -ge 2 ] || { printf 'check-public-export: --version needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; VERSION="$2"; shift 2 ;;
+    --source-owner)  [ $# -ge 2 ] || { printf 'check-public-export: --source-owner needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; SOURCE_OWNER="$2"; shift 2 ;;
+    --source-repo)   [ $# -ge 2 ] || { printf 'check-public-export: --source-repo needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; SOURCE_REPO="$2"; shift 2 ;;
+    --public-repo)   [ $# -ge 2 ] || { printf 'check-public-export: --public-repo needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; PUBLIC_REPO="$2"; shift 2 ;;
+    --format)        [ $# -ge 2 ] || { printf 'check-public-export: --format needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }; FORMAT="$2"; shift 2 ;;
+    -h|--help)       usage; exit 0 ;;
+    *) printf 'check-public-export: unknown argument: %s\n' "$1" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+  esac
+done
+case "$FORMAT" in
+  text|json) ;;
+  *) printf 'check-public-export: --format must be text or json (got: %s)\n' "$FORMAT" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac
+[ -n "$STAGING" ] || { printf 'check-public-export: --staging DIR is required\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+[ -d "$STAGING" ] || { printf 'check-public-export: staging dir not found: %s\n' "$STAGING" >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+
+RESULT=$(
+  STAGING="$STAGING" VERSION="$VERSION" SOURCE_OWNER="$SOURCE_OWNER" \
+  SOURCE_REPO="$SOURCE_REPO" OLD_PUBLIC_REPO="$OLD_PUBLIC_REPO" PUBLIC_REPO="$PUBLIC_REPO" \
+  python3 "$SCRIPT_DIR/lib/check-public-export.py"
+)
+RC=$?
+if [ "$RC" -ne 0 ] && [ -z "$RESULT" ]; then
+  printf 'check-public-export: internal error running the checker\n' >&2
+  exit "$ENVELOPE_EXIT_INVOCATION"
+fi
+
+EXIT_HINT=$(printf '%s' "$RESULT" | jq -r '.exit')
+STATUS=$(printf '%s' "$RESULT" | jq -r '.status')
+OUTPUTS=$(printf '%s' "$RESULT" | jq -c '.outputs')
+
+if [ "$FORMAT" = "json" ]; then
+  print_envelope "check-public-export" "$STATUS" "$OUTPUTS" "[]" "[]"
+else
+  printf '%s\n' "$(printf '%s' "$RESULT" | jq -r '.text')"
+fi
+
+case "$EXIT_HINT" in
+  0) exit "$ENVELOPE_EXIT_OK" ;;
+  1) exit "$ENVELOPE_EXIT_DOMAIN" ;;
+  *) exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac

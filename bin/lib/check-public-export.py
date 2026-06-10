@@ -1,0 +1,298 @@
+#!/usr/bin/env python3
+"""check-public-export.py — deterministic public-export contract checker.
+
+Pure function of a staging directory's contents (issue #16, ADR-056). Reads
+the tree, never writes. Emits a JSON object on stdout:
+
+    {"exit": 0|1, "status": "...", "outputs": {...}, "text": "..."}
+
+Configured via environment (set by the bin/check-public-export wrapper):
+    STAGING          path to the staging tree (required)
+    VERSION          release version being exported, e.g. v4.1.0 (optional)
+    SOURCE_OWNER     old source owner that must not leak (e.g. takumi-omorgan)
+    SOURCE_REPO      old source repo owner/name (e.g. takumi-omorgan/workflow-generator-takumi)
+    OLD_PUBLIC_REPO  superseded public repo owner/name (e.g. olivermorgan2/workflow-generator)
+    PUBLIC_REPO      the new public repo owner/name (allowed)
+
+The check IDs (A..G) mirror the wrapper's header.
+"""
+
+import json
+import os
+import re
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from export_paths import (  # noqa: E402
+    classify_link, is_excluded, is_export_fixture, link_target_relpath,
+)
+
+STAGING = os.environ["STAGING"]
+VERSION = os.environ.get("VERSION", "").strip()
+SOURCE_OWNER = os.environ.get("SOURCE_OWNER", "").strip()
+SOURCE_REPO = os.environ.get("SOURCE_REPO", "").strip()
+OLD_PUBLIC_REPO = os.environ.get("OLD_PUBLIC_REPO", "").strip()
+PUBLIC_REPO = os.environ.get("PUBLIC_REPO", "").strip()
+
+# Top-level entries permitted in a public export. Anything else at the root
+# is a leak (e.g. design/, notes/, archive/, .hermes/ that the prune missed).
+ALLOWED_TOPLEVEL = {
+    "README.md", "LICENSE", "CLAUDE.md", "kit.json", "CHANGELOG.md",
+    ".gitignore", ".github", "ai-review", "bin", "docs", "examples",
+    "prompts", "schemas", "skills", "templates",
+}
+
+# Files we scan as text for string-leak checks (E/F). Binary/large dirs are
+# skipped by extension. Kept deterministic via sorted walks.
+TEXT_EXTS = {
+    ".md", ".py", ".sh", ".json", ".yaml", ".yml", ".txt", ".toml",
+    ".cfg", ".ini", ".gitignore",
+}
+
+problems = []  # each: {"check": "A".."G", "path": str, "detail": str}
+
+
+def add(check, path, detail):
+    problems.append({"check": check, "path": path, "detail": detail})
+
+
+def rel(p):
+    return os.path.relpath(p, STAGING)
+
+
+def walk_files():
+    """Yield every regular file under STAGING, sorted, repo-relative."""
+    out = []
+    for root, dirs, files in os.walk(STAGING):
+        dirs.sort()
+        for name in sorted(files):
+            full = os.path.join(root, name)
+            if os.path.isfile(full) and not os.path.islink(full):
+                out.append(full)
+    return out
+
+
+def is_text(path):
+    base = os.path.basename(path)
+    if base == ".gitignore":
+        return True
+    _, ext = os.path.splitext(path)
+    if ext in TEXT_EXTS:
+        return True
+    # extensionless scripts (bin/*) are text if they start with a shebang
+    try:
+        with open(path, "rb") as fh:
+            return fh.read(2) == b"#!"
+    except OSError:
+        return False
+
+
+def read(path):
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return fh.read()
+    except (UnicodeDecodeError, OSError):
+        return None
+
+
+def exists(relpath):
+    return os.path.exists(os.path.join(STAGING, relpath))
+
+
+# ---- A: allowlisted top-level content only --------------------------------
+for entry in sorted(os.listdir(STAGING)):
+    if entry == ".git":
+        continue  # a working .git is export plumbing, not shipped content
+    if entry not in ALLOWED_TOPLEVEL:
+        add("A", entry, "unexpected top-level entry not on the public allowlist")
+
+# ---- B: excluded private/source paths absent ------------------------------
+# Root-anchored: these must not exist at the export root. Example-project
+# trees (examples/projects/*/design/...) are deliberately NOT matched here.
+if os.path.isdir(os.path.join(STAGING, "design", "adr")):
+    add("B", "design/adr", "kit's own ADR set must not ship (excluded; see docs/architecture.md)")
+if os.path.isdir(os.path.join(STAGING, "design", "prd-addenda")):
+    add("B", "design/prd-addenda", "internal PRD addenda must not ship")
+# root-level design/*.md reports (eval plans, roadmaps, state.md, …)
+design_root = os.path.join(STAGING, "design")
+if os.path.isdir(design_root):
+    for name in sorted(os.listdir(design_root)):
+        if name.endswith(".md") and os.path.isfile(os.path.join(design_root, name)):
+            add("B", "design/%s" % name, "internal root design document must not ship")
+for d in ("notes", "archive", ".hermes"):
+    if os.path.exists(os.path.join(STAGING, d)):
+        add("B", d, "internal directory must not ship")
+if os.path.isfile(os.path.join(STAGING, "ai-review", "config.json")):
+    add("B", "ai-review/config.json", "local provider config must not ship")
+if os.path.isdir(os.path.join(STAGING, "ai-review", "artifacts")):
+    add("B", "ai-review/artifacts", "generated review artifacts must not ship")
+# prompts/: only _template.md may ship
+prompts_dir = os.path.join(STAGING, "prompts")
+if os.path.isdir(prompts_dir):
+    for name in sorted(os.listdir(prompts_dir)):
+        full = os.path.join(prompts_dir, name)
+        if os.path.isfile(full) and name != "_template.md":
+            add("B", "prompts/%s" % name,
+                "only prompts/_template.md may ship; this internal prompt must not")
+
+# ---- C: required public artifacts present ---------------------------------
+if not exists("docs/architecture.md"):
+    add("C", "docs/architecture.md", "required public architecture document is missing")
+if not exists("prompts/_template.md"):
+    add("C", "prompts/_template.md",
+        "required template is missing (installer/prepare-issue depend on it)")
+
+# ---- D: markdown links must not point at excluded private/source paths ----
+# A relative link is flagged only when it RESOLVES (root-relative) into an
+# excluded private/source path — the kit's own design/adr, notes/, archive/,
+# root design reports, internal prompts, etc. This is the precise contract
+# ("links do not point at excluded private/source paths"): it catches a
+# doc/skill/example linking into the excluded kit ADR set, while leaving
+# example-project ADR links (which resolve to examples/.../design/adr, NOT
+# excluded) and illustrative template placeholders (mvp.md, CLAUDE.md) alone.
+LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
+for path in walk_files():
+    if not path.endswith(".md"):
+        continue
+    md_rel = rel(path)
+    if is_export_fixture(md_rel):
+        continue  # opaque test data: deliberate orphan links live here
+    text = read(path)
+    if text is None:
+        continue
+    for m in LINK_RE.finditer(text):
+        raw = m.group(1).strip()
+        # strip optional markdown link title:  (path "title")
+        if " " in raw and not raw.startswith("<"):
+            raw = raw.split(" ", 1)[0]
+        if classify_link(raw) != "relative":
+            continue
+        resolved = link_target_relpath(md_rel, raw)
+        if resolved is None:
+            continue
+        if is_excluded(resolved):
+            add("D", md_rel,
+                "markdown link points at an excluded private/source path: %s "
+                "(resolves to %s)" % (raw, resolved))
+
+# ---- E: no stale old-owner / old-repo URL strings -------------------------
+# Order matters: the new PUBLIC_REPO legitimately contains the owner, so we
+# match the full old forms, plus bare repo slugs that are unambiguous.
+leak_strings = []
+if SOURCE_REPO:
+    leak_strings.append((SOURCE_REPO, "old source repo reference"))
+if OLD_PUBLIC_REPO and OLD_PUBLIC_REPO != PUBLIC_REPO:
+    leak_strings.append((OLD_PUBLIC_REPO, "superseded public repo reference"))
+if SOURCE_OWNER:
+    leak_strings.append((SOURCE_OWNER, "old source owner reference"))
+# bare old repo basenames (the slug after the slash), if they differ from
+# the public slug — catches `workflow-generator-takumi` style mentions
+for full in (SOURCE_REPO, OLD_PUBLIC_REPO):
+    if "/" in full:
+        slug = full.split("/", 1)[1]
+        pub_slug = PUBLIC_REPO.split("/", 1)[1] if "/" in PUBLIC_REPO else PUBLIC_REPO
+        if slug and slug != pub_slug and slug.endswith("-takumi"):
+            leak_strings.append((slug, "old source repo slug"))
+
+for path in walk_files():
+    if not is_text(path) or is_export_fixture(rel(path)):
+        continue
+    text = read(path)
+    if text is None:
+        continue
+    for needle, why in leak_strings:
+        if needle and needle in text:
+            line_no = text[: text.index(needle)].count("\n") + 1
+            add("E", "%s:%d" % (rel(path), line_no), "%s: %r" % (why, needle))
+
+# ---- F: no absolute local / temp / audit paths ----------------------------
+# Target real personal/temp paths, not anonymized illustrative ones like
+# "/Users/.../my-project" that legitimately appear in example output.
+PATH_LEAKS = [
+    ("/Users/hermes", "personal macOS home path"),
+    ("/home/hermes", "personal Linux home path"),
+    ("~/dotfiles", "personal dotfiles path"),
+    ("~/src/workflow-generator", "personal source-checkout path"),
+    ("/private/var/folders", "macOS temp path"),
+    ("/tmp/audit", "temp audit path"),
+]
+for path in walk_files():
+    if not is_text(path) or is_export_fixture(rel(path)):
+        continue
+    text = read(path)
+    if text is None:
+        continue
+    for needle, why in PATH_LEAKS:
+        if needle in text:
+            line_no = text[: text.index(needle)].count("\n") + 1
+            add("F", "%s:%d" % (rel(path), line_no), "%s: %r" % (why, needle))
+
+# ---- G: no stale version literal in install-surface files -----------------
+if VERSION:
+    norm = VERSION if VERSION.startswith("v") else "v" + VERSION
+    tag_re = re.compile(r"\bv\d+\.\d+\.\d+\b")
+    install_surfaces = ["README.md", "docs/install.md", "bin/bootstrap-workflow-kit"]
+    for relpath in install_surfaces:
+        full = os.path.join(STAGING, relpath)
+        if not os.path.isfile(full):
+            continue
+        text = read(full)
+        if text is None:
+            continue
+        for lineno, line in enumerate(text.split("\n"), 1):
+            # only lines that actually pin a release/download/branch tag
+            if not re.search(r"releases/download|--branch=|release download|WORKFLOW_KIT_VERSION", line):
+                continue
+            for tag in tag_re.findall(line):
+                if tag != norm:
+                    add("G", "%s:%d" % (relpath, lineno),
+                        "stale version pin %s (export version is %s)" % (tag, norm))
+
+# ---- assemble -------------------------------------------------------------
+by_check = {}
+for p in problems:
+    by_check.setdefault(p["check"], []).append(p)
+
+CHECK_NAMES = {
+    "A": "top-level allowlist",
+    "B": "excluded paths absent",
+    "C": "required artifacts present",
+    "D": "markdown links resolve",
+    "E": "no old owner/repo URLs",
+    "F": "no absolute/temp paths",
+    "G": "no stale version pins",
+}
+
+checks = []
+for cid in sorted(CHECK_NAMES):
+    items = by_check.get(cid, [])
+    checks.append({
+        "id": cid,
+        "name": CHECK_NAMES[cid],
+        "ok": not items,
+        "problems": [{"path": i["path"], "detail": i["detail"]} for i in items],
+    })
+
+if problems:
+    status, exit_code = "leak", 1
+    lines = ["check-public-export: FAIL — %d violation(s) in %s:" % (len(problems), STAGING)]
+    for c in checks:
+        if c["ok"]:
+            continue
+        lines.append("  [%s] %s:" % (c["id"], c["name"]))
+        for pr in c["problems"]:
+            lines.append("    - %s — %s" % (pr["path"], pr["detail"]))
+    text = "\n".join(lines)
+else:
+    status, exit_code = "clean", 0
+    text = "check-public-export: clean — %s satisfies the public export contract (7 checks passed)" % STAGING
+
+outputs = {
+    "staging": STAGING,
+    "version": VERSION or None,
+    "violationCount": len(problems),
+    "checks": checks,
+}
+
+print(json.dumps({"exit": exit_code, "status": status, "outputs": outputs, "text": text},
+                 ensure_ascii=False))
