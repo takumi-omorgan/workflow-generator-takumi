@@ -69,6 +69,7 @@ fences is preserved.
 | [ADR-052](adr-052-ai-review-target-install.md) | Target-local AI review installer option | accepted |
 | [ADR-053](adr-053-workflow-docs-architecture-document.md) | Maintain a current architecture document via workflow-docs | accepted |
 | [ADR-054](adr-054-script-vs-skill-boundary.md) | Deterministic script vs. Claude-skill boundary | proposed |
+| [ADR-055](adr-055-public-distribution-versioning-policy.md) | Public distribution versioning and changelog policy | accepted |
 
 <!-- adr-index:end -->
 
