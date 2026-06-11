@@ -118,6 +118,7 @@ for required in \
   "$TARGET/.claude/bin/fence" \
   "$TARGET/.claude/bin/adr-alloc" \
   "$TARGET/.claude/bin/changelog-collect" \
+  "$TARGET/.claude/bin/release-suggest" \
   "$TARGET/.claude/bin/pr-context" \
   "$TARGET/.claude/bin/docs-render" \
   "$TARGET/.claude/bin/lib/json-envelope.sh" \
