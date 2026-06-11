@@ -95,7 +95,6 @@ without asking. See [workflow control](docs/workflow-control.md).
 | `skills/` | The Claude Code skills the kit ships |
 | `templates/` | Starter templates rendered into your project |
 | `docs/` | Install, architecture, tutorial, workflow, troubleshooting, skills |
-| `design/adr/` | Accepted ADRs that govern the kit |
 | `examples/` | [Worked end-to-end projects](examples/README.md) |
 
 See [`docs/repo-structure.md`](docs/repo-structure.md) for the full map

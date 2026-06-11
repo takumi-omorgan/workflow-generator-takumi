@@ -11,41 +11,52 @@ that gets generated for a target project — that one is rendered from
   templates, docs, and examples.
 - Users install the kit into a **target project** under `.claude/skills/`.
   See [`docs/repo-structure.md`](docs/repo-structure.md).
-- The kit is scoped to **new projects only** (ADR-002). Do not add migration
+- The kit is scoped to **new projects only**. Do not add migration
   tooling for existing repos.
-- The workflow is **GitHub-first** (ADR-004) and **plan-first, issue-by-issue**
-  for execution (ADR-006).
+- The workflow is **GitHub-first** and **plan-first, issue-by-issue**
+  for execution.
 - The branching and PR model follows [GitHub Flow](https://docs.github.com/en/get-started/using-github/github-flow).
 
 ## Guiding documents
 
+- [`docs/repo-structure.md`](docs/repo-structure.md) — kit vs. target-project layout
+- [`docs/workflow-guide.md`](docs/workflow-guide.md) — action-oriented walkthrough of the kit
+- [`docs/skills.md`](docs/skills.md) — functional skill reference
+- [`docs/architecture.md`](docs/architecture.md) — how the kit itself is organized
+- [`README.md`](README.md) — positioning and product direction
+
+## Working rules
+
+- Follow the plan-first execution model: propose a plan, wait for
+  approval, then implement.
+- Keep work scoped to the GitHub issue being worked on.
+- Reference issue numbers in commit messages when the change is driven by
+  them.
+- Keep the kit lightweight — no premature automation, no speculative
+  abstractions.
+
+## Source-repo contributor notes
+
+The notes below are for contributors working in the kit's **source**
+repository. They reference material that is intentionally not part of the
+published distribution, so this whole section is stripped from the public
+export.
+
 - `design/adr/` — accepted decisions; consult before proposing changes that
   touch installation, scope, PRD intake, GitHub conventions, templates, or
-  execution model
-- `docs/repo-structure.md` — kit vs. target-project layout
-- `docs/workflow-guide.md` — current action-oriented walkthrough of the kit
-- `docs/skills.md` — current functional skill reference
-- `README.md` — current positioning and product direction
+  execution model. Key decisions: new-projects-only scope (ADR-002),
+  GitHub-first (ADR-004), and plan-first issue-by-issue execution (ADR-006).
 - `archive/` — archived original framing (historical audit
   trail only; do not treat as current direction). Includes
   `mvp-spec.md`, `build-out-plan.md`, and
   `generic-project-workflow.md` (the original methodology design doc
   the kit operationalises), plus `phase-1/` historical issue prompts.
-
-## Working rules
-
-- Follow the plan-first execution model from ADR-006: propose a plan, wait
-  for approval, then implement.
-- Keep work scoped to the GitHub issue being worked on. Per-issue prompts
-  live in `notes/`.
-- Reference ADR numbers and issue numbers in commit messages when the
-  change is driven by them.
+- Per-issue prompts live in `notes/`. Reference ADR numbers alongside issue
+  numbers in commit messages when the change is driven by an ADR.
 - SKILL.md bodies should not include parenthetical ADR attributions
   (`(per ADR-NNN)`, `(ADR-NNN)`) for traceability alone. Cite an ADR
   only when the reader needs the link to do the task — in which case
   use a markdown link in body text, not an inline parenthetical.
-- Keep the kit lightweight — no premature automation, no speculative
-  abstractions.
 - Never edit accepted ADRs in place. If a decision needs to change, add a
   new ADR that supersedes the old one. Mechanical path-string rewrites
   are an explicit exception (ADR-044).

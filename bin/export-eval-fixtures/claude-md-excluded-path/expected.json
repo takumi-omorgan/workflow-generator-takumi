@@ -1,0 +1,1 @@
+{"exit": 1, "version": "v5.0.0", "mustContain": ["CLAUDE.md", "design/adr/", "excluded private path"]}
