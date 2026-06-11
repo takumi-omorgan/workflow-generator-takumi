@@ -11,9 +11,15 @@ bin/export-eval-fixtures/ and asserts:
 This is the byte-stability / behavior proof the contract relies on, fully
 offline (no git archive, no network), suitable for bin/self-test and CI.
 
+When CHANGELOG_HELPER is set, one synthetic `helper:export-changelog`
+result is appended: it drives lib/export-changelog.py over an inline
+sample changelog (via stdin) and asserts the notes/public extraction
+behavior the export pipeline and publication runbook rely on.
+
 Environment (set by bin/export-eval):
-    CHECKER        path to bin/check-public-export
-    FIXTURES       fixtures root directory
+    CHECKER           path to bin/check-public-export
+    FIXTURES          fixtures root directory
+    CHANGELOG_HELPER  path to lib/export-changelog.py (optional)
 """
 
 import json
@@ -87,6 +93,54 @@ for name in fixtures:
         "ok": not problems,
         "expectedExit": exp_exit,
         "actualExit": actual_exit,
+        "reason": "; ".join(problems) if problems else "ok",
+    })
+
+CHANGELOG_HELPER = os.environ.get("CHANGELOG_HELPER")
+if CHANGELOG_HELPER:
+    SAMPLE = (
+        "# Changelog\n\n"
+        "## v2.0.0 — current (2026-01-02)\n\n"
+        "Range: `v1.0.0..v2.0.0`\n\n"
+        "- current entry\n\n"
+        "## v1.0.0 — old (2026-01-01)\n\n"
+        "- old entry\n"
+    )
+
+    def run_helper(mode, version):
+        proc = subprocess.run(
+            [sys.executable, CHANGELOG_HELPER,
+             "--mode", mode, "--version", version, "-"],
+            input=SAMPLE, capture_output=True, text=True)
+        return proc.returncode, proc.stdout
+
+    problems = []
+    rc, out = run_helper("notes", "v2.0.0")
+    if rc != 0:
+        problems.append("notes mode exited %d, expected 0" % rc)
+    elif out != "- current entry\n":
+        problems.append("notes mode emitted %r, expected the section body only"
+                        % out)
+    rc, out = run_helper("public", "v2.0.0")
+    if rc != 0:
+        problems.append("public mode exited %d, expected 0" % rc)
+    else:
+        heads = [ln for ln in out.split("\n") if ln.startswith("## v")]
+        if not out.startswith("# Changelog\n"):
+            problems.append("public mode output must start with '# Changelog'")
+        if heads != ["## v2.0.0 — current (2026-01-02)"]:
+            problems.append("public mode must keep exactly the requested "
+                            "section heading, got %r" % heads)
+        if "Range:" in out or "old entry" in out:
+            problems.append("public mode must drop Range: lines and other "
+                            "version sections")
+    rc, _ = run_helper("notes", "v9.9.9")
+    if rc != 1:
+        problems.append("missing version exited %d, expected 1" % rc)
+
+    results.append({
+        "name": "helper:export-changelog",
+        "ok": not problems,
         "reason": "; ".join(problems) if problems else "ok",
     })
 

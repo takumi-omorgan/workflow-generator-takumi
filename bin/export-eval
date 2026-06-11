@@ -43,6 +43,7 @@ esac
 
 RESULT=$(
   CHECKER="$SCRIPT_DIR/check-public-export" FIXTURES="$FIXTURES" \
+  CHANGELOG_HELPER="$SCRIPT_DIR/lib/export-changelog.py" \
   python3 "$SCRIPT_DIR/lib/export-eval-check.py"
 )
 
