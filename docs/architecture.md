@@ -167,7 +167,10 @@ The kit's **detailed decision history — its Architecture Decision Records
 (ADRs), evaluation reports, roadmaps, and superseded designs — is maintained
 internally and is not part of this public distribution.** Those records
 capture *why* past decisions were made and are not required to install, run,
-or extend the kit. This document is the public, current statement of the
+or extend the kit. Kit documentation refers to these records by bare
+identifiers such as `ADR-006`; they are internal design records of the
+source repository, and their outcomes are summarized in this document.
+This document is the public, current statement of the
 architecture; when a decision changes, this doc is what gets updated.
 
 If you are contributing and need the rationale behind a specific design choice,

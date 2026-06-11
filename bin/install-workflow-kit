@@ -112,7 +112,7 @@ OPTIONS
 EXAMPLES
   # Interactive install into a fresh repo
   cd ~/src/my-project
-  ~/src/workflow-generator/bin/install-workflow-kit
+  /path/to/kit-clone/bin/install-workflow-kit
 
   # One-shot install with flags, plus local docs copy
   install-workflow-kit \

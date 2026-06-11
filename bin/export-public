@@ -19,7 +19,10 @@
 #                                             untracked material like .hermes/)
 #   3. prune EXCLUDE paths, root-anchored    (kit ADRs, notes, archive,
 #                                             internal design docs, extra prompts)
+#      then curate CHANGELOG.md to the current release section only
+#      (lib/export-changelog.py; ADR-055 — internal history stays private)
 #   4. apply TRANSFORM rules across shipping text (not examples/):
+#        - private dogfooding-section removal (CLAUDE.md, docs/install.md)
 #        - repo-name rewrite to the public repo
 #        - version-pin rewrite to the export version
 #        - personal-path scrub
@@ -116,6 +119,27 @@ if [ -z "$DEST" ]; then
   TEMP_DEST=1
 else
   case "$DEST" in /*) ;; *) DEST="$KIT_ROOT/$DEST" ;; esac
+  DEST="${DEST%/}"
+  [ -n "$DEST" ] || DEST="/"
+  # Deletion safety: --dest is emptied with rm -rf, so refuse destinations
+  # whose deletion would be catastrophic, and only empty a directory we
+  # plausibly own (empty, or a previous export carrying kit.json).
+  if [ "$DEST" = "/" ] || [ "$DEST" = "$HOME" ] || [ "$DEST" = "$KIT_ROOT" ]; then
+    printf 'export-public: refusing --dest %s (would delete it)\n' "$DEST" >&2
+    exit "$ENVELOPE_EXIT_INVOCATION"
+  fi
+  case "$KIT_ROOT" in "$DEST"/*)
+    printf 'export-public: refusing --dest %s (contains this kit repo)\n' "$DEST" >&2
+    exit "$ENVELOPE_EXIT_INVOCATION" ;;
+  esac
+  if [ -e "$DEST" ] && [ ! -d "$DEST" ]; then
+    printf 'export-public: --dest %s exists and is not a directory\n' "$DEST" >&2
+    exit "$ENVELOPE_EXIT_INVOCATION"
+  fi
+  if [ -d "$DEST" ] && [ -n "$(ls -A "$DEST" 2>/dev/null)" ] && [ ! -f "$DEST/kit.json" ]; then
+    printf 'export-public: refusing to empty %s — not a previous export (no kit.json); remove it manually or pick another --dest\n' "$DEST" >&2
+    exit "$ENVELOPE_EXIT_INVOCATION"
+  fi
   rm -rf "$DEST"
   mkdir -p "$DEST"
 fi
@@ -154,6 +178,7 @@ fi
 rm -rf \
   "$DEST/bin/check-public-export" "$DEST/bin/export-public" "$DEST/bin/export-eval" \
   "$DEST/bin/lib/check-public-export.py" "$DEST/bin/lib/export-transform.py" \
+  "$DEST/bin/lib/export-changelog.py" \
   "$DEST/bin/lib/export-eval-check.py" "$DEST/bin/lib/export_paths.py" \
   "$DEST/bin/export-eval-fixtures" "$DEST/docs/publishing.md"
 
@@ -165,6 +190,19 @@ python3 "$SCRIPT_DIR/lib/export-reconcile.py" "$DEST" || {
   exit "$ENVELOPE_EXIT_INVOCATION"
 }
 rm -f "$DEST/bin/lib/export-reconcile.py"
+
+# ---- 3b. curate the public changelog -----------------------------------
+# The public CHANGELOG.md carries only the current release section; internal
+# development history (and its commit/issue deep links) stays in the source
+# repo (ADR-055: the public changelog is curated from tagged releases).
+# Reads the DEST copy (committed HEAD content), never the working tree.
+if ! python3 "$SCRIPT_DIR/lib/export-changelog.py" --mode public --version "$VERSION" \
+    "$DEST/CHANGELOG.md" > "$DEST/CHANGELOG.md.tmp"; then
+  printf 'export-public: changelog curation failed (no %s section in CHANGELOG.md?)\n' "$VERSION" >&2
+  rm -f "$DEST/CHANGELOG.md.tmp"
+  exit "$ENVELOPE_EXIT_INVOCATION"
+fi
+mv "$DEST/CHANGELOG.md.tmp" "$DEST/CHANGELOG.md"
 
 # ---- 4. apply TRANSFORM rules ------------------------------------------
 # Scope: shipping text files OUTSIDE examples/ (example bodies are

@@ -14,7 +14,7 @@ Configured via environment (set by the bin/check-public-export wrapper):
     OLD_PUBLIC_REPO  superseded public repo owner/name (e.g. olivermorgan2/workflow-generator)
     PUBLIC_REPO      the new public repo owner/name (allowed)
 
-The check IDs (A..G) mirror the wrapper's header.
+The check IDs (A..I) mirror the wrapper's header.
 """
 
 import json
@@ -24,7 +24,8 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from export_paths import (  # noqa: E402
-    classify_link, is_excluded, is_export_fixture, link_target_relpath,
+    PRIVATE_SECTION_HEADINGS, classify_link, heading_anchor, is_excluded,
+    is_export_fixture, link_target_relpath,
 )
 
 STAGING = os.environ["STAGING"]
@@ -228,6 +229,9 @@ for path in walk_files():
             add("F", "%s:%d" % (rel(path), line_no), "%s: %r" % (why, needle))
 
 # ---- G: no stale version literal in install-surface files -----------------
+# Whole-file scan (not just pin-context lines): install surfaces must be
+# version-neutral except for the version actually being exported, so a stale
+# tag cannot ship even in prose.
 if VERSION:
     norm = VERSION if VERSION.startswith("v") else "v" + VERSION
     tag_re = re.compile(r"\bv\d+\.\d+\.\d+\b")
@@ -240,13 +244,68 @@ if VERSION:
         if text is None:
             continue
         for lineno, line in enumerate(text.split("\n"), 1):
-            # only lines that actually pin a release/download/branch tag
-            if not re.search(r"releases/download|--branch=|release download|WORKFLOW_KIT_VERSION", line):
-                continue
             for tag in tag_re.findall(line):
                 if tag != norm:
                     add("G", "%s:%d" % (relpath, lineno),
                         "stale version pin %s (export version is %s)" % (tag, norm))
+
+# ---- H: public changelog is curated ----------------------------------------
+# The public CHANGELOG.md carries only the current release section, and no
+# commit/issue/pull deep links — they point at history the public repo does
+# not have. ALLOWED_CHANGELOG_LINK_RES is the explicit policy escape hatch:
+# add a compiled regex here to permit a specific deep-link shape.
+ALLOWED_CHANGELOG_LINK_RES = ()
+DEEP_LINK_RE = re.compile(
+    r"https?://github\.com/[^/\s)]+/[^/\s)]+/(?:commit|issues|pull)/\S+")
+changelog_path = os.path.join(STAGING, "CHANGELOG.md")
+if os.path.isfile(changelog_path):
+    text = read(changelog_path)
+    if text is not None:
+        for lineno, line in enumerate(text.split("\n"), 1):
+            for m in DEEP_LINK_RE.finditer(line):
+                url = m.group(0).rstrip(")")
+                if any(r.search(url) for r in ALLOWED_CHANGELOG_LINK_RES):
+                    continue
+                add("H", "CHANGELOG.md:%d" % lineno,
+                    "deep link into repo history must not ship: %s" % url)
+        if VERSION:
+            norm = VERSION if VERSION.startswith("v") else "v" + VERSION
+            heads = [ln for ln in text.split("\n")
+                     if re.match(r"^## v\d+\.\d+\.\d+\b", ln)]
+            if len(heads) != 1 or not heads[0].startswith("## %s" % norm):
+                found = ", ".join(h.split(" ", 2)[1] for h in heads) or "none"
+                add("H", "CHANGELOG.md",
+                    "public changelog must carry exactly one version section "
+                    "for %s; found: %s" % (norm, found))
+
+# ---- I: no private dogfooding sections -------------------------------------
+# The export transform removes these sections wholesale (see
+# export_paths.PRIVATE_SECTION_HEADINGS); neither the headings nor any
+# link to their anchors may survive into the artifact.
+for relpath, heading in PRIVATE_SECTION_HEADINGS:
+    full = os.path.join(STAGING, relpath)
+    if not os.path.isfile(full):
+        continue
+    text = read(full)
+    if text is None:
+        continue
+    for lineno, line in enumerate(text.split("\n"), 1):
+        if line.startswith(heading):
+            add("I", "%s:%d" % (relpath, lineno),
+                "private dogfooding section must not ship: %r" % heading)
+PRIVATE_ANCHORS = ["#" + heading_anchor(h) for _, h in PRIVATE_SECTION_HEADINGS]
+for path in walk_files():
+    if not path.endswith(".md") or is_export_fixture(rel(path)):
+        continue
+    text = read(path)
+    if text is None:
+        continue
+    for lineno, line in enumerate(text.split("\n"), 1):
+        for anchor in PRIVATE_ANCHORS:
+            if anchor in line:
+                add("I", "%s:%d" % (rel(path), lineno),
+                    "link to a removed private section must not ship: %s"
+                    % anchor)
 
 # ---- assemble -------------------------------------------------------------
 by_check = {}
@@ -261,6 +320,8 @@ CHECK_NAMES = {
     "E": "no old owner/repo URLs",
     "F": "no absolute/temp paths",
     "G": "no stale version pins",
+    "H": "changelog curated",
+    "I": "no private dogfooding sections",
 }
 
 checks = []
@@ -285,7 +346,8 @@ if problems:
     text = "\n".join(lines)
 else:
     status, exit_code = "clean", 0
-    text = "check-public-export: clean — %s satisfies the public export contract (7 checks passed)" % STAGING
+    text = ("check-public-export: clean — %s satisfies the public export "
+            "contract (%d checks passed)" % (STAGING, len(CHECK_NAMES)))
 
 outputs = {
     "staging": STAGING,

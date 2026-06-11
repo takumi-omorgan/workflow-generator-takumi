@@ -84,10 +84,8 @@ You have three options, in order of preference:
 All three produce the same target-project layout described in
 [`docs/repo-structure.md`](repo-structure.md). Per ADR-029, the kit is
 designed for **per-project remote install** — there is no long-lived
-local kit clone to maintain. Contributors who edit the kit itself want
-a different setup; see
-[Contributor / kit-developer setup](#contributor--kit-developer-setup)
-near the end of this doc.
+local kit clone to maintain.
+Contributors who edit the kit itself want a different setup; see [Contributor / kit-developer setup](#contributor--kit-developer-setup) near the end of this doc.
 
 ### 3A. Bootstrap install (recommended)
 
@@ -227,7 +225,7 @@ TMPKIT="$(mktemp -d)" && \
   rm -rf "$TMPKIT"
 ```
 
-Replace `v3.3.0` with whichever release you want to pin. Replace the
+Replace the tag with whichever release you want to pin. Replace the
 installer flags with whatever your project needs (see the table in
 [3A](#3a-bootstrap-install-recommended)).
 
@@ -406,14 +404,14 @@ Install the GitHub CLI (`brew install gh` on macOS) and run `gh auth login`.
 Run `gh auth login`. Choose SSH as the git protocol to match the clone
 command in step 3B.1.
 
-**`cp: ~/src/workflow-generator/skills/*: No such file or directory`**
+**`cp: .../skills/*: No such file or directory`**
 The kit was cloned to a different path than the guide assumes. Either
-re-clone to `~/src/workflow-generator` or substitute your actual path in
+re-clone the kit or substitute your actual clone path in
 step 3B.2 (or pass the correct path to `bin/install-workflow-kit`).
 
 **`install-workflow-kit: error: kit skills/ not found`**
 The installer resolves its sources relative to its own location. Run it
-directly from the kit clone (e.g. `~/src/workflow-generator/bin/install-workflow-kit`),
+directly from the kit clone (e.g. `/path/to/kit-clone/bin/install-workflow-kit`),
 not via a copy detached from the kit repo.
 
 **Claude Code does not see the skills**

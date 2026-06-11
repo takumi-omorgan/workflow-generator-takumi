@@ -29,8 +29,17 @@
 #   F  no absolute local paths or temp/audit paths ship
 #   G  no stale version literal in install-surface files (only when
 #        --version is given): README.md, docs/install.md,
-#        bin/bootstrap-workflow-kit must not pin a release tag != the
-#        version being exported
+#        bin/bootstrap-workflow-kit must not carry a release tag != the
+#        version being exported, anywhere in the file (pins or prose)
+#   H  public changelog is curated: CHANGELOG.md carries no
+#        commit/issue/pull deep links (they point at history the public
+#        repo does not have) and — when --version is given — exactly one
+#        version section, matching the version being exported
+#   I  no private dogfooding sections: the section headings listed in
+#        export_paths.PRIVATE_SECTION_HEADINGS (kit CLAUDE.md dogfooding,
+#        docs/install.md contributor setup) must not survive the export
+#        transform's section removal, and no shipped markdown may link
+#        to a removed section's anchor
 #
 # The repo validation suite (validate-kit-json, check-consistency, …) is
 # run from INSIDE the staging tree by bin/export-public, not here: those

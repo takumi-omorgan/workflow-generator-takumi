@@ -60,6 +60,13 @@ the kit's governing ADRs. The verifier is root-anchored to the kit's own
 
 **Transforms applied on the way out:**
 
+- `CHANGELOG.md` is curated to the **current release section only**
+  (`bin/lib/export-changelog.py`; ADR-055 — internal development history and
+  its commit/issue deep links stay private)
+- private dogfooding sections are removed wholesale — the kit `CLAUDE.md`
+  dogfooding section and the `docs/install.md` contributor setup section,
+  plus any line linking to their anchors (see
+  `export_paths.PRIVATE_SECTION_HEADINGS`)
 - old owner/repo URLs → the public repo name
 - stale version pins in install commands → the export version (`tag ==
   kitVersion`, enforced)
@@ -77,7 +84,9 @@ the kit's governing ADRs. The verifier is root-anchored to the kit's own
 | D | no markdown link points into an excluded private/source path |
 | E | no old owner/repo URL strings remain |
 | F | no personal absolute or temp/audit paths ship |
-| G | no stale version pin in install-surface files (`README.md`, `docs/install.md`, `bin/bootstrap-workflow-kit`) |
+| G | no stale version literal anywhere in install-surface files (`README.md`, `docs/install.md`, `bin/bootstrap-workflow-kit`) |
+| H | `CHANGELOG.md` is curated: exactly one version section (the export version), no commit/issue/pull deep links |
+| I | no private dogfooding section heading or link to its anchor survives |
 
 ## Pre-publish validation command
 
