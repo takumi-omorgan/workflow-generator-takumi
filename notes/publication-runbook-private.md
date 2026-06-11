@@ -28,6 +28,8 @@ The export is generated from tracked files at source `HEAD` and excludes private
 
 Public architecture is represented by `docs/architecture.md`, not the internal ADR history.
 
+The exported `CHANGELOG.md` is curated to the **current release section only** (`bin/lib/export-changelog.py`); internal development history and its commit/issue deep links never ship.
+
 ## Before any public release
 
 From the private/source repo:
@@ -73,7 +75,9 @@ Optional inspection:
 cd /Users/hermes/workflow-generator-takumi-m5/dist/public
 
 grep -n '"kitVersion"' kit.json
-sed -n '1,60p' CHANGELOG.md
+sed -n '1,40p' CHANGELOG.md
+grep -c '^## v' CHANGELOG.md                                  # expect: 1
+grep -n 'github.com/.*/\(commit\|issues\|pull\)/' CHANGELOG.md || echo 'no deep links'
 grep -n 'releases/download/v' README.md docs/install.md bin/bootstrap-workflow-kit
 
 test -f docs/architecture.md && echo 'architecture present'
@@ -113,16 +117,23 @@ gh repo create olivermorgan2/claude-workflow-kit \
   --push
 ```
 
-Tag and create the release:
+Tag and create the release. Release notes are the **current version's
+section only**, generated from the source repo's changelog — never the
+whole `CHANGELOG.md`:
 
 ```bash
 git tag v5.0.0
 git push origin v5.0.0
 
+python3 /Users/hermes/workflow-generator-takumi-m5/bin/lib/export-changelog.py \
+  --mode notes --version v5.0.0 \
+  /Users/hermes/workflow-generator-takumi-m5/CHANGELOG.md \
+  > /Users/hermes/workflow-generator-takumi-m5/dist/release-notes-v5.0.0.md
+
 gh release create v5.0.0 \
   --repo olivermorgan2/claude-workflow-kit \
   --title "v5.0.0" \
-  --notes-file CHANGELOG.md \
+  --notes-file /Users/hermes/workflow-generator-takumi-m5/dist/release-notes-v5.0.0.md \
   bin/bootstrap-workflow-kit
 ```
 
@@ -176,14 +187,20 @@ git add -A
 git commit -m "v5.1.0 — public distribution"
 git push origin main
 
-# 6. Tag and release.
+# 6. Tag and release with current-version-only notes generated from the
+#    source repo's changelog (never --notes-file CHANGELOG.md).
 git tag v5.1.0
 git push origin v5.1.0
+
+python3 /Users/hermes/workflow-generator-takumi-m5/bin/lib/export-changelog.py \
+  --mode notes --version v5.1.0 \
+  /Users/hermes/workflow-generator-takumi-m5/CHANGELOG.md \
+  > /Users/hermes/workflow-generator-takumi-m5/dist/release-notes-v5.1.0.md
 
 gh release create v5.1.0 \
   --repo olivermorgan2/claude-workflow-kit \
   --title "v5.1.0" \
-  --notes-file CHANGELOG.md \
+  --notes-file /Users/hermes/workflow-generator-takumi-m5/dist/release-notes-v5.1.0.md \
   bin/bootstrap-workflow-kit
 ```
 
