@@ -19,7 +19,8 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from export_paths import (  # noqa: E402
-    classify_link, is_excluded, is_export_fixture, link_target_relpath,
+    PRIVATE_SECTION_HEADINGS, classify_link, is_excluded, is_export_fixture,
+    link_target_relpath,
 )
 
 DEST = os.environ["DEST"]
@@ -65,7 +66,8 @@ TAG_RE = re.compile(r"\bv\d+\.\d+\.\d+\b")
 PIN_CONTEXT_RE = re.compile(r"releases/download|--branch=|release download|WORKFLOW_KIT_VERSION")
 
 counts = {"nameRewrites": 0, "versionRewrites": 0, "adrLinksDelinked": 0,
-          "personalLinesScrubbed": 0, "filesChanged": 0}
+          "personalLinesScrubbed": 0, "privateSectionsRemoved": 0,
+          "filesChanged": 0}
 
 
 def is_exempt(path):
@@ -87,8 +89,43 @@ def delink_private(text, md_rel):
     return LINK_RE.sub(_sub, text)
 
 
+def remove_private_sections(text, md_rel):
+    """Remove whole private/dogfooding sections (PRIVATE_SECTION_HEADINGS)
+    from their file: heading line through the line before the next "## "
+    heading, or EOF. Removing the section wholesale keeps the personal-path
+    line scrub from leaving empty code blocks and broken prose behind."""
+    headings = [h for (rel, h) in PRIVATE_SECTION_HEADINGS if rel == md_rel]
+    if not headings:
+        return text, False
+    lines = text.split("\n")
+    out, i, removed = [], 0, False
+    while i < len(lines):
+        if any(lines[i].startswith(h) for h in headings):
+            j = i + 1
+            while j < len(lines) and not lines[j].startswith("## "):
+                j += 1
+            # drop blank/separator lines left dangling above the heading
+            while out and out[-1].strip() in ("", "---"):
+                out.pop()
+            counts["privateSectionsRemoved"] += 1
+            removed = True
+            i = j
+            continue
+        out.append(lines[i])
+        i += 1
+    return "\n".join(out), removed
+
+
 def transform_text(text, md_rel, exempt):
     changed = False
+
+    # remove private/dogfooding sections before any line-level scrubbing
+    new, removed = remove_private_sections(text, md_rel)
+    if removed:
+        changed = True
+        text = new
+        if not text.endswith("\n"):
+            text += "\n"
 
     # de-link orphaned links into excluded private paths (always)
     new = delink_private(text, md_rel)
