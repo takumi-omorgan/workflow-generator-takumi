@@ -53,12 +53,25 @@ EXPORT_TOOLING_PATHS = (
     "bin/export-public",
     "bin/export-eval",
     "bin/lib/check-public-export.py",
+    "bin/lib/export-changelog.py",
     "bin/lib/export-transform.py",
     "bin/lib/export-eval-check.py",
     "bin/lib/export-reconcile.py",
     "bin/lib/export_paths.py",
     "bin/export-eval-fixtures",
     "docs/publishing.md",
+)
+
+
+# Sections of shipping files that are private/dogfooding-only. The export
+# transform removes each section (heading line through the line before the
+# next "## " heading, or EOF) so the personal-path scrub never has to chew
+# through them line by line; verifier check I asserts none survive. Both
+# sides share this constant so the removal rule and the contract never
+# drift apart.
+PRIVATE_SECTION_HEADINGS = (
+    ("CLAUDE.md", "## Developing the kit on itself"),
+    ("docs/install.md", "## Contributor / kit-developer setup"),
 )
 
 
@@ -73,10 +86,12 @@ def is_export_tooling(relpath):
 def is_export_fixture(relpath):
     """The export verifier's own eval fixtures (bin/export-eval-fixtures/**)
     are synthetic test inputs that deliberately embed leak strings and
-    orphaned links. They ship so the public self-test can run export-eval,
-    but they must NOT be transformed or content-scanned (doing so would both
-    corrupt the fixtures and raise false-positive leaks). Both the verifier
-    and the transformer treat this subtree as opaque test data."""
+    orphaned links. They are SOURCE-ONLY: bin/export-public prunes them from
+    the public artifact along with the rest of the export tooling (see
+    EXPORT_TOOLING_PATHS). This guard exists so the verifier and the
+    transformer stay inert over trees that still contain them — e.g. when
+    either is run over the source repo itself — instead of corrupting the
+    fixtures or raising false-positive leaks."""
     rp = relpath.replace("\\", "/").lstrip("./")
     return rp == "bin/export-eval-fixtures" or rp.startswith("bin/export-eval-fixtures/")
 
