@@ -70,6 +70,7 @@ EXPORT_TOOLING_PATHS = (
 # sides share this constant so the removal rule and the contract never
 # drift apart.
 PRIVATE_SECTION_HEADINGS = (
+    ("CLAUDE.md", "## Source-repo contributor notes"),
     ("CLAUDE.md", "## Developing the kit on itself"),
     ("docs/install.md", "## Contributor / kit-developer setup"),
 )

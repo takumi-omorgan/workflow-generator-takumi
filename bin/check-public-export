@@ -36,10 +36,15 @@
 #        repo does not have) and — when --version is given — exactly one
 #        version section, matching the version being exported
 #   I  no private dogfooding sections: the section headings listed in
-#        export_paths.PRIVATE_SECTION_HEADINGS (kit CLAUDE.md dogfooding,
-#        docs/install.md contributor setup) must not survive the export
-#        transform's section removal, and no shipped markdown may link
-#        to a removed section's anchor
+#        export_paths.PRIVATE_SECTION_HEADINGS (kit CLAUDE.md dogfooding and
+#        source-repo contributor notes, docs/install.md contributor setup)
+#        must not survive the export transform's section removal, and no
+#        shipped markdown may link to a removed section's anchor
+#   J  kit CLAUDE.md names no excluded private guiding-doc paths: the
+#        top-level CLAUDE.md (the kit's own repo rules, never a target
+#        project) must not carry a code-span path that resolves to an
+#        excluded private dir (design/adr/, archive/, notes/, …) — such
+#        guidance belongs in a removed source-repo-only section
 #
 # The repo validation suite (validate-kit-json, check-consistency, …) is
 # run from INSIDE the staging tree by bin/export-public, not here: those

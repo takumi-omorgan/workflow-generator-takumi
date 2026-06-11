@@ -14,7 +14,7 @@ Configured via environment (set by the bin/check-public-export wrapper):
     OLD_PUBLIC_REPO  superseded public repo owner/name (e.g. olivermorgan2/workflow-generator)
     PUBLIC_REPO      the new public repo owner/name (allowed)
 
-The check IDs (A..I) mirror the wrapper's header.
+The check IDs (A..J) mirror the wrapper's header.
 """
 
 import json
@@ -307,6 +307,33 @@ for path in walk_files():
                     "link to a removed private section must not ship: %s"
                     % anchor)
 
+# ---- J: kit CLAUDE.md names no excluded private guiding-doc paths ----------
+# The top-level CLAUDE.md is the kit's OWN repository rules — it never
+# describes a target project, so any code-span path it names (e.g.
+# `design/adr/`, `archive/`, `notes/`) is a kit-private path. Those dirs are
+# excluded from the export, so naming them in the shipped CLAUDE.md points
+# public users at material that does not ship. Private-only guidance belongs
+# in a PRIVATE_SECTION_HEADINGS section (removed wholesale by check I); this
+# catches a bare reference that leaks outside such a section. Reuses
+# is_excluded() so the boundary never drifts from checks B/D. Scoped to
+# CLAUDE.md alone: elsewhere a `design/adr/` mention is legitimately the
+# TARGET project's generated path, not the kit's.
+CODE_SPAN_RE = re.compile(r"`([^`\n]+)`")
+claude_md = os.path.join(STAGING, "CLAUDE.md")
+if os.path.isfile(claude_md):
+    text = read(claude_md)
+    if text is not None:
+        for lineno, line in enumerate(text.split("\n"), 1):
+            for m in CODE_SPAN_RE.finditer(line):
+                span = m.group(1).strip()
+                if "/" not in span and span not in ("notes", "archive"):
+                    continue  # not a path-like span
+                if is_excluded(span):
+                    add("J", "CLAUDE.md:%d" % lineno,
+                        "kit CLAUDE.md names an excluded private path that "
+                        "does not ship: `%s` (move it into a source-repo-only "
+                        "section)" % span)
+
 # ---- assemble -------------------------------------------------------------
 by_check = {}
 for p in problems:
@@ -322,6 +349,7 @@ CHECK_NAMES = {
     "G": "no stale version pins",
     "H": "changelog curated",
     "I": "no private dogfooding sections",
+    "J": "kit CLAUDE.md names no excluded paths",
 }
 
 checks = []
