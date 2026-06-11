@@ -38,7 +38,8 @@
 #   I  no private dogfooding sections: the section headings listed in
 #        export_paths.PRIVATE_SECTION_HEADINGS (kit CLAUDE.md dogfooding,
 #        docs/install.md contributor setup) must not survive the export
-#        transform's section removal
+#        transform's section removal, and no shipped markdown may link
+#        to a removed section's anchor
 #
 # The repo validation suite (validate-kit-json, check-consistency, …) is
 # run from INSIDE the staging tree by bin/export-public, not here: those

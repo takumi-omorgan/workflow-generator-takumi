@@ -84,10 +84,8 @@ You have three options, in order of preference:
 All three produce the same target-project layout described in
 [`docs/repo-structure.md`](repo-structure.md). Per ADR-029, the kit is
 designed for **per-project remote install** — there is no long-lived
-local kit clone to maintain. Contributors who edit the kit itself want
-a different setup; see
-[Contributor / kit-developer setup](#contributor--kit-developer-setup)
-near the end of this doc.
+local kit clone to maintain.
+Contributors who edit the kit itself want a different setup; see [Contributor / kit-developer setup](#contributor--kit-developer-setup) near the end of this doc.
 
 ### 3A. Bootstrap install (recommended)
 

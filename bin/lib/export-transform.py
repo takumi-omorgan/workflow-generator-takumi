@@ -19,8 +19,8 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from export_paths import (  # noqa: E402
-    PRIVATE_SECTION_HEADINGS, classify_link, is_excluded, is_export_fixture,
-    link_target_relpath,
+    PRIVATE_SECTION_HEADINGS, classify_link, heading_anchor, is_excluded,
+    is_export_fixture, link_target_relpath,
 )
 
 DEST = os.environ["DEST"]
@@ -93,7 +93,9 @@ def remove_private_sections(text, md_rel):
     """Remove whole private/dogfooding sections (PRIVATE_SECTION_HEADINGS)
     from their file: heading line through the line before the next "## "
     heading, or EOF. Removing the section wholesale keeps the personal-path
-    line scrub from leaving empty code blocks and broken prose behind."""
+    line scrub from leaving empty code blocks and broken prose behind.
+    Lines linking to a removed heading's anchor are dropped too (the source
+    keeps such cross-references on their own line so this stays clean)."""
     headings = [h for (rel, h) in PRIVATE_SECTION_HEADINGS if rel == md_rel]
     if not headings:
         return text, False
@@ -104,15 +106,23 @@ def remove_private_sections(text, md_rel):
             j = i + 1
             while j < len(lines) and not lines[j].startswith("## "):
                 j += 1
-            # drop blank/separator lines left dangling above the heading
+            # drop blank/separator lines left dangling above the heading,
+            # then keep exactly one blank line before the next heading
             while out and out[-1].strip() in ("", "---"):
                 out.pop()
+            if j < len(lines) and out:
+                out.append("")
             counts["privateSectionsRemoved"] += 1
             removed = True
             i = j
             continue
         out.append(lines[i])
         i += 1
+    anchors = ["#" + heading_anchor(h) for h in headings]
+    kept = [ln for ln in out if not any(a in ln for a in anchors)]
+    if kept != out:
+        removed = True
+        out = kept
     return "\n".join(out), removed
 
 

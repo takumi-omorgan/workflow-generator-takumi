@@ -75,6 +75,19 @@ PRIVATE_SECTION_HEADINGS = (
 )
 
 
+def heading_anchor(heading):
+    """GitHub-style anchor slug for a markdown heading (or heading prefix).
+
+    Used to scrub and to detect intra-doc links to removed private sections:
+    the transform drops whole lines that link to a removed heading's anchor,
+    and verifier check I flags any such anchor reference that survives.
+    A PRIVATE_SECTION_HEADINGS entry may be a prefix of the real heading, so
+    consumers match by substring containment of the prefix slug."""
+    text = heading.lstrip("#").strip().lower()
+    text = re.sub(r"[^\w\- ]", "", text)
+    return text.replace(" ", "-")
+
+
 def is_export_tooling(relpath):
     rp = relpath.replace("\\", "/").lstrip("./")
     for t in EXPORT_TOOLING_PATHS:

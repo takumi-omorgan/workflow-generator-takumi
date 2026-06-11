@@ -24,8 +24,8 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from export_paths import (  # noqa: E402
-    PRIVATE_SECTION_HEADINGS, classify_link, is_excluded, is_export_fixture,
-    link_target_relpath,
+    PRIVATE_SECTION_HEADINGS, classify_link, heading_anchor, is_excluded,
+    is_export_fixture, link_target_relpath,
 )
 
 STAGING = os.environ["STAGING"]
@@ -280,7 +280,8 @@ if os.path.isfile(changelog_path):
 
 # ---- I: no private dogfooding sections -------------------------------------
 # The export transform removes these sections wholesale (see
-# export_paths.PRIVATE_SECTION_HEADINGS); none may survive into the artifact.
+# export_paths.PRIVATE_SECTION_HEADINGS); neither the headings nor any
+# link to their anchors may survive into the artifact.
 for relpath, heading in PRIVATE_SECTION_HEADINGS:
     full = os.path.join(STAGING, relpath)
     if not os.path.isfile(full):
@@ -292,6 +293,19 @@ for relpath, heading in PRIVATE_SECTION_HEADINGS:
         if line.startswith(heading):
             add("I", "%s:%d" % (relpath, lineno),
                 "private dogfooding section must not ship: %r" % heading)
+PRIVATE_ANCHORS = ["#" + heading_anchor(h) for _, h in PRIVATE_SECTION_HEADINGS]
+for path in walk_files():
+    if not path.endswith(".md") or is_export_fixture(rel(path)):
+        continue
+    text = read(path)
+    if text is None:
+        continue
+    for lineno, line in enumerate(text.split("\n"), 1):
+        for anchor in PRIVATE_ANCHORS:
+            if anchor in line:
+                add("I", "%s:%d" % (rel(path), lineno),
+                    "link to a removed private section must not ship: %s"
+                    % anchor)
 
 # ---- assemble -------------------------------------------------------------
 by_check = {}
