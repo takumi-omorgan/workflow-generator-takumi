@@ -17,7 +17,7 @@
 # Writing a receipt with this script is OPTIONAL: a skill running in a
 # target project that does not ship this helper writes the same JSON file
 # directly, following docs/receipts.md. This script is the deterministic
-# reference writer/reader used in the kit's own dogfooding and self-test.
+# reference writer/reader used in the kit's own self-test.
 #
 # Usage:
 #   # write / update a receipt
