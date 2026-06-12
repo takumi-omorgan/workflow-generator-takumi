@@ -354,8 +354,8 @@ their own projects. If you are working on the kit itself
 long-lived local clone of the kit's source, not the bootstrap flow.
 
 ```bash
-gh repo clone olivermorgan2/workflow-generator ~/src/workflow-generator
-cd ~/src/workflow-generator
+gh repo clone takumi-omorgan/workflow-generator-takumi ~/src/workflow-generator-takumi
+cd ~/src/workflow-generator-takumi
 ~/dotfiles/claude-config/bin/link-skills           # one-time, dogfooding
 ```
 
