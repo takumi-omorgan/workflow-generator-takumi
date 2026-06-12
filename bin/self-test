@@ -173,6 +173,16 @@ record "stub:adr-alloc" "stub" "0" "$?"
 # receipt write + find round-trip in a throwaway dir
 bin/write-receipt --skill self-test --key stub --status completed --dir "$STUB/receipts" >/dev/null 2>&1
 record "stub:receipt-write" "stub" "0" "$?"
+
+# regression: collect-eval must pass even when cwd is reached through a
+# symlink (macOS /tmp -> /private/tmp; symlinked checkout/export trees).
+# Guards pr-context's ADR-path normalisation: the collect-eval fixtures
+# pass an absolute --adr-dir, and a symlinked cwd used to make the emitted
+# path absolute, diverging from expected.json (surfaced in the v5.0.0
+# public export).
+ln -snf "$(pwd -P)" "$STUB/linkroot" 2>/dev/null
+( cd "$STUB/linkroot" && bin/collect-eval >/dev/null 2>&1 )
+record "stub:collect-eval-symlinked-cwd" "stub" "0" "$?"
 bin/write-receipt --find --skill self-test --key stub --status completed --dir "$STUB/receipts" >/dev/null 2>&1
 record "stub:receipt-find" "stub" "0" "$?"
 
