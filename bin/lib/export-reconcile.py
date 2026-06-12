@@ -8,7 +8,9 @@ is pruned from the public artifact by bin/export-public. This step removes the
 metadata that would otherwise dangle and fail the in-export validation gates:
 
   - kit.json: drop the bin[] entries for the pruned scripts (else
-    check-consistency C3 flags a registered path with no file)
+    check-consistency C3 flags a registered path with no file), and drop
+    contract pointers into excluded private paths (the contract's `adr`
+    points at the kit's own design/adr set, which never ships)
   - bin/self-test: drop the `export-eval` step (else a public self-test calls
     a script that no longer ships)
   - docs/README.md: drop the publishing.md index row (else a dangling link)
@@ -19,6 +21,9 @@ Deterministic and idempotent. Usage: export-reconcile.py STAGING_DIR
 import json
 import os
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from export_paths import is_excluded  # noqa: E402
 
 DEST = sys.argv[1]
 
@@ -37,6 +42,12 @@ def reconcile_kit_json():
         kit = json.load(fh)
     before = kit.get("bin", [])
     kit["bin"] = [b for b in before if b.get("path") not in PRUNED_BIN_PATHS]
+    contract = kit.get("contract")
+    if isinstance(contract, dict):
+        kit["contract"] = {
+            k: v for k, v in contract.items()
+            if not (isinstance(v, str) and is_excluded(v))
+        }
     with open(path, "w", encoding="utf-8") as fh:
         json.dump(kit, fh, indent=2, ensure_ascii=False)
         fh.write("\n")

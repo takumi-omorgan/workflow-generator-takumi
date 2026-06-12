@@ -11,7 +11,7 @@ described in several places, governed by
 2. [The approval gate](#2-the-approval-gate) — the one sequence by which
    the assistant decides to stop, plan, and wait.
 3. [The verb layer](#3-the-human-facing-verb-layer) — a small vocabulary
-   in front of the nineteen-skill inventory.
+   in front of the full skill inventory.
 4. [Finding the next step](#4-finding-the-next-step) — `/start`, `/next`,
    and the structured `next-action` zone in `design/state.md`.
 
@@ -122,7 +122,7 @@ executor's instance of this bypass.
 
 ## 3. The human-facing verb layer
 
-The kit ships nineteen skills. You do not need to remember all of them.
+You do not need to remember every skill the kit ships.
 A small **verb layer** sits in front of the inventory: reach for a verb,
 and it maps to the underlying skill(s). The full
 [skills reference](skills.md) and [`kit.json`](../kit.json) still expose

@@ -1,0 +1,7 @@
+# macOS
+.DS_Store
+
+# Audit-harness regenerable outputs — convention documented in
+# notes/skills-audit-*/README.md.
+notes/skills-audit-*/skills-audit.csv
+archive/old-report.csv

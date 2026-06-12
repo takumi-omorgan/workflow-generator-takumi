@@ -1,0 +1,7 @@
+{
+  "kit": "fixture",
+  "contract": {
+    "adr": "design/adr/adr-047-machine-readable-agent-contract.md",
+    "doc": "docs/architecture.md"
+  }
+}

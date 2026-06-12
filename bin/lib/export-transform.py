@@ -19,8 +19,9 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from export_paths import (  # noqa: E402
-    PRIVATE_SECTION_HEADINGS, classify_link, heading_anchor, is_excluded,
-    is_export_fixture, link_target_relpath,
+    PIN_CONTEXT_RE, PRIVATE_SECTION_HEADINGS, VERSION_TAG_RE, classify_link,
+    gitignore_line_is_private, heading_anchor, is_excluded, is_export_fixture,
+    link_target_relpath,
 )
 
 DEST = os.environ["DEST"]
@@ -62,12 +63,12 @@ LINK_RE = re.compile(r"\[([^\]]*)\]\(([^)]+)\)")
 # Version pins: any vN.N.N tag literal -> the export version, but only on
 # lines that actually pin a release/download/branch (avoid rewriting prose
 # that legitimately references historical versions, e.g. a changelog).
-TAG_RE = re.compile(r"\bv\d+\.\d+\.\d+\b")
-PIN_CONTEXT_RE = re.compile(r"releases/download|--branch=|release download|WORKFLOW_KIT_VERSION")
+# VERSION_TAG_RE / PIN_CONTEXT_RE live in export_paths so the verifier's
+# stale-pin check shares the same notion of "pin".
 
 counts = {"nameRewrites": 0, "versionRewrites": 0, "adrLinksDelinked": 0,
           "personalLinesScrubbed": 0, "privateSectionsRemoved": 0,
-          "filesChanged": 0}
+          "gitignoreLinesScrubbed": 0, "filesChanged": 0}
 
 
 def is_exempt(path):
@@ -126,6 +127,36 @@ def remove_private_sections(text, md_rel):
     return "\n".join(out), removed
 
 
+def scrub_gitignore(text):
+    """Drop .gitignore patterns (and their comment blocks) that target
+    kit-private roots — source-only audit tooling outputs under notes/ etc.
+    A blank-line-separated block whose patterns are all private is removed
+    wholesale, comments included, so no orphaned commentary about private
+    tooling ships; in a mixed block only the private lines are dropped."""
+    out_blocks, block = [], []
+
+    def flush(block):
+        if not block:
+            return
+        patterns = [ln for ln in block if not ln.lstrip().startswith("#")]
+        if patterns and all(gitignore_line_is_private(p) for p in patterns):
+            counts["gitignoreLinesScrubbed"] += len(block)
+            return
+        kept = [ln for ln in block if not gitignore_line_is_private(ln)]
+        counts["gitignoreLinesScrubbed"] += len(block) - len(kept)
+        if kept:
+            out_blocks.append(kept)
+
+    for ln in text.split("\n"):
+        if ln.strip() == "":
+            flush(block)
+            block = []
+        else:
+            block.append(ln)
+    flush(block)
+    return "\n\n".join("\n".join(b) for b in out_blocks) + "\n"
+
+
 def transform_text(text, md_rel, exempt):
     changed = False
 
@@ -164,7 +195,7 @@ def transform_text(text, md_rel, exempt):
                     counts["versionRewrites"] += 1
                     return VERSION
                 return m.group(0)
-            newline = TAG_RE.sub(_pin, line)
+            newline = VERSION_TAG_RE.sub(_pin, line)
             if newline != line:
                 changed = True
             out_lines.append(newline)
@@ -181,6 +212,13 @@ def transform_text(text, md_rel, exempt):
             continue
         kept.append(line)
     text = "\n".join(kept)
+
+    # the shipped .gitignore must not mention source-only private tooling
+    if md_rel == ".gitignore":
+        new = scrub_gitignore(text)
+        if new != text:
+            changed = True
+            text = new
 
     return text, changed
 

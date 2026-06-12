@@ -5,21 +5,21 @@
 #
 # Usage:
 #   # Most common: scaffold the current directory into a kit-shaped target.
-#   bash <(curl -fsSL https://github.com/olivermorgan2/workflow-generator/releases/download/v3.3.0/bootstrap-workflow-kit) \
+#   bash <(curl -fsSL https://github.com/olivermorgan2/claude-workflow-kit/releases/download/v5.0.0/bootstrap-workflow-kit) \
 #     --project-name=my-project
 #
 #   # Or: download, inspect, then run.
-#   gh release download v3.3.0 -p bootstrap-workflow-kit \
-#     -R olivermorgan2/workflow-generator
+#   gh release download v5.0.0 -p bootstrap-workflow-kit \
+#     -R olivermorgan2/claude-workflow-kit
 #   chmod +x bootstrap-workflow-kit
 #   ./bootstrap-workflow-kit --project-name=my-project
 #
 # Environment variables:
-#   WORKFLOW_KIT_VERSION   Tag to fetch (e.g. v3.3.0). If unset, resolves
+#   WORKFLOW_KIT_VERSION   Tag to fetch (e.g. v5.0.0). If unset, resolves
 #                          to the latest tag via `gh release view` (or
 #                          `git ls-remote --tags --sort=-v:refname` as
 #                          fallback).
-#   WORKFLOW_KIT_REPO      Source repo (default: olivermorgan2/workflow-generator).
+#   WORKFLOW_KIT_REPO      Source repo (default: olivermorgan2/claude-workflow-kit).
 #                          Override for forks.
 #
 # Behaviour:
@@ -36,7 +36,7 @@
 
 set -euo pipefail
 
-REPO="${WORKFLOW_KIT_REPO:-olivermorgan2/workflow-generator}"
+REPO="${WORKFLOW_KIT_REPO:-olivermorgan2/claude-workflow-kit}"
 VERSION="${WORKFLOW_KIT_VERSION:-}"
 
 log() { printf '[bootstrap-workflow-kit] %s\n' "$*" >&2; }

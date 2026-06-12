@@ -34,7 +34,7 @@ name — it becomes both the GitHub repo and the local folder:
 ```bash
 gh repo create my-project --public --clone
 cd my-project
-bash <(curl -fsSL https://github.com/olivermorgan2/workflow-generator/releases/download/v3.3.0/bootstrap-workflow-kit) \
+bash <(curl -fsSL https://github.com/olivermorgan2/claude-workflow-kit/releases/download/v5.0.0/bootstrap-workflow-kit) \
   --project-name=my-project
 ```
 
@@ -115,7 +115,7 @@ of what lives in the kit versus what gets generated in your project.
 ## Status and license
 
 In active development; the latest release is on the
-[releases page](https://github.com/olivermorgan2/workflow-generator/releases).
+[releases page](https://github.com/olivermorgan2/claude-workflow-kit/releases).
 Released under the [MIT License](LICENSE), which covers the **kit
 itself** — the skills, templates, scripts, and docs here. It does not
 propagate to projects you build with the kit: your `design/` docs,

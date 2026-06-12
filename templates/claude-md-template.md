@@ -148,7 +148,7 @@ See also:
 
 ## Workflow rules
 
-This project follows the [Claude Code Workflow Kit](https://github.com/olivermorgan2/workflow-generator)
+This project follows the [Claude Code Workflow Kit](https://github.com/olivermorgan2/claude-workflow-kit)
 model. The rules below are load-bearing — Claude Code should treat them
 as hard requirements unless a human overrides them in the session.
 

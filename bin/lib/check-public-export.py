@@ -14,7 +14,7 @@ Configured via environment (set by the bin/check-public-export wrapper):
     OLD_PUBLIC_REPO  superseded public repo owner/name (e.g. olivermorgan2/workflow-generator)
     PUBLIC_REPO      the new public repo owner/name (allowed)
 
-The check IDs (A..J) mirror the wrapper's header.
+The check IDs (A..L) mirror the wrapper's header.
 """
 
 import json
@@ -24,8 +24,9 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from export_paths import (  # noqa: E402
-    PRIVATE_SECTION_HEADINGS, classify_link, heading_anchor, is_excluded,
-    is_export_fixture, link_target_relpath,
+    PIN_CONTEXT_RE, PRIVATE_SECTION_HEADINGS, VERSION_TAG_RE, classify_link,
+    gitignore_line_is_private, heading_anchor, is_excluded, is_export_fixture,
+    link_target_relpath,
 )
 
 STAGING = os.environ["STAGING"]
@@ -231,10 +232,13 @@ for path in walk_files():
 # ---- G: no stale version literal in install-surface files -----------------
 # Whole-file scan (not just pin-context lines): install surfaces must be
 # version-neutral except for the version actually being exported, so a stale
-# tag cannot ship even in prose.
+# tag cannot ship even in prose. Beyond the install surfaces, any shipping
+# text file's PIN-CONTEXT lines (releases/download, --branch=, …) must carry
+# only the export version — the same scope the transform rewrites — so a
+# stale pin outside the install surfaces cannot silently ship either.
+# examples/ are exempt from blind rewrites and so exempt here too.
 if VERSION:
     norm = VERSION if VERSION.startswith("v") else "v" + VERSION
-    tag_re = re.compile(r"\bv\d+\.\d+\.\d+\b")
     install_surfaces = ["README.md", "docs/install.md", "bin/bootstrap-workflow-kit"]
     for relpath in install_surfaces:
         full = os.path.join(STAGING, relpath)
@@ -244,10 +248,27 @@ if VERSION:
         if text is None:
             continue
         for lineno, line in enumerate(text.split("\n"), 1):
-            for tag in tag_re.findall(line):
+            for tag in VERSION_TAG_RE.findall(line):
                 if tag != norm:
                     add("G", "%s:%d" % (relpath, lineno),
                         "stale version pin %s (export version is %s)" % (tag, norm))
+    for path in walk_files():
+        relpath = rel(path)
+        if relpath in install_surfaces or relpath.startswith("examples/"):
+            continue
+        if not is_text(path) or is_export_fixture(relpath):
+            continue
+        text = read(path)
+        if text is None:
+            continue
+        for lineno, line in enumerate(text.split("\n"), 1):
+            if not PIN_CONTEXT_RE.search(line):
+                continue
+            for tag in VERSION_TAG_RE.findall(line):
+                if tag != norm:
+                    add("G", "%s:%d" % (relpath, lineno),
+                        "stale version pin %s on an install/pin-context line "
+                        "(export version is %s)" % (tag, norm))
 
 # ---- H: public changelog is curated ----------------------------------------
 # The public CHANGELOG.md carries only the current release section, and no
@@ -334,6 +355,48 @@ if os.path.isfile(claude_md):
                         "does not ship: `%s` (move it into a source-repo-only "
                         "section)" % span)
 
+# ---- K: kit.json contract points only at shipped files ---------------------
+# kit.json's `contract` object holds repo paths agents are told to read (the
+# governing ADR, the human doc, the validator). Skill artefact paths describe
+# TARGET-project layouts and are exempt; the contract describes THIS repo, so
+# every entry must name a file that ships — not an excluded private path (the
+# reconcile step drops those) and not a missing file.
+kit_json = os.path.join(STAGING, "kit.json")
+if os.path.isfile(kit_json):
+    text = read(kit_json)
+    try:
+        kit = json.loads(text) if text is not None else None
+    except json.JSONDecodeError as e:
+        kit = None
+        add("K", "kit.json", "not valid JSON: %s" % e)
+    contract = (kit or {}).get("contract")
+    if isinstance(contract, dict):
+        for key, value in sorted(contract.items()):
+            if not isinstance(value, str):
+                continue
+            if is_excluded(value):
+                add("K", "kit.json",
+                    "contract.%s points at an excluded private/source path "
+                    "that does not ship: %s" % (key, value))
+            elif not exists(value):
+                add("K", "kit.json",
+                    "contract.%s points at a file missing from the export: %s"
+                    % (key, value))
+
+# ---- L: shipped .gitignore references no private paths ----------------------
+# The exported .gitignore must not carry ignore patterns for — or comments
+# about — source-only private tooling (notes/, archive/, .hermes); the
+# transform scrubs those blocks, and none may survive.
+gitignore = os.path.join(STAGING, ".gitignore")
+if os.path.isfile(gitignore):
+    text = read(gitignore)
+    if text is not None:
+        for lineno, line in enumerate(text.split("\n"), 1):
+            if gitignore_line_is_private(line):
+                add("L", ".gitignore:%d" % lineno,
+                    "references a kit-private path that does not ship: %r"
+                    % line.strip())
+
 # ---- assemble -------------------------------------------------------------
 by_check = {}
 for p in problems:
@@ -350,6 +413,8 @@ CHECK_NAMES = {
     "H": "changelog curated",
     "I": "no private dogfooding sections",
     "J": "kit CLAUDE.md names no excluded paths",
+    "K": "kit.json contract paths ship",
+    "L": ".gitignore references no private paths",
 }
 
 checks = []

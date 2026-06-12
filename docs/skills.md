@@ -36,7 +36,7 @@ The full classification rules are in
 
 ## Start here: the verb layer
 
-You do not need to memorise all nineteen-plus skills below. A small
+You do not need to memorise all of the skills below. A small
 **verb layer** sits in front of the inventory — reach for a verb and it
 maps to the underlying skill(s):
 
