@@ -27,10 +27,12 @@
 #   E  no stale old-owner / old-repo URL strings remain (configurable;
 #        defaults match this kit's source identity)
 #   F  no absolute local paths or temp/audit paths ship
-#   G  no stale version literal in install-surface files (only when
-#        --version is given): README.md, docs/install.md,
-#        bin/bootstrap-workflow-kit must not carry a release tag != the
-#        version being exported, anywhere in the file (pins or prose)
+#   G  no stale version literal (only when --version is given): the install
+#        surfaces (README.md, docs/install.md, bin/bootstrap-workflow-kit)
+#        must not carry a release tag != the version being exported anywhere
+#        in the file (pins or prose), and no other shipping text file may
+#        carry one on a pin-context line (releases/download, --branch=, …;
+#        examples/ exempt, matching the transform's rewrite scope)
 #   H  public changelog is curated: CHANGELOG.md carries no
 #        commit/issue/pull deep links (they point at history the public
 #        repo does not have) and — when --version is given — exactly one
@@ -45,6 +47,12 @@
 #        project) must not carry a code-span path that resolves to an
 #        excluded private dir (design/adr/, archive/, notes/, …) — such
 #        guidance belongs in a removed source-repo-only section
+#   K  kit.json contract paths ship: every kit.json `contract` entry must
+#        name a file present in the tree — not an excluded private path
+#        (e.g. the kit's own design/adr ADR) and not a missing file
+#   L  shipped .gitignore references no private paths: no ignore pattern
+#        for — or comment about — source-only tooling under notes/,
+#        archive/, or .hermes may survive the export transform's scrub
 #
 # The repo validation suite (validate-kit-json, check-consistency, …) is
 # run from INSIDE the staging tree by bin/export-public, not here: those

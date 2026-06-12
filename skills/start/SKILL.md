@@ -29,7 +29,7 @@ next:
 The kit's front door. `/start` (and its alias `/next`) answers one
 question — **what do I run now?** — by inspecting project state and
 recommending the next appropriate skill, rather than making the user
-remember the nineteen-skill inventory. It is the router half of the
+remember the full skill inventory. It is the router half of the
 unified control model in
 [ADR-048](../../design/adr/adr-048-unified-workflow-control.md); the
 canonical model lives in

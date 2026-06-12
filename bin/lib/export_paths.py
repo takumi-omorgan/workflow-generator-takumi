@@ -22,6 +22,19 @@ import re
 _ROOT_DESIGN_REPORT = re.compile(r"design/[^/]+\.md$")
 _PROMPT_NON_TEMPLATE = re.compile(r"prompts/(?!_template\.md$)[^/]+$")
 
+# Kit-private root directories that never ship. Shared by is_excluded() and
+# the .gitignore scrub/check so the boundary cannot drift.
+PRIVATE_ROOT_DIRS = ("notes", "archive", ".hermes")
+
+# Version-pin classification, shared by the transform (which rewrites stale
+# tags on pin-context lines) and the verifier (which asserts none survive):
+# a vN.N.N literal counts as a PIN only on lines that actually pin a
+# release/download/branch — prose that legitimately references historical
+# versions (e.g. a changelog narrative) is not a pin.
+VERSION_TAG_RE = re.compile(r"\bv\d+\.\d+\.\d+\b")
+PIN_CONTEXT_RE = re.compile(
+    r"releases/download|--branch=|release download|WORKFLOW_KIT_VERSION")
+
 
 def is_excluded(relpath):
     """relpath: POSIX path relative to the export root."""
@@ -32,7 +45,7 @@ def is_excluded(relpath):
         return True
     if _ROOT_DESIGN_REPORT.fullmatch(rp):
         return True
-    for d in ("notes", "archive", ".hermes"):
+    for d in PRIVATE_ROOT_DIRS:
         if rp == d or rp.startswith(d + "/"):
             return True
     if rp == "ai-review/config.json" or rp.startswith("ai-review/artifacts/"):
@@ -108,6 +121,24 @@ def is_export_fixture(relpath):
     fixtures or raising false-positive leaks."""
     rp = relpath.replace("\\", "/").lstrip("./")
     return rp == "bin/export-eval-fixtures" or rp.startswith("bin/export-eval-fixtures/")
+
+
+# A .gitignore line (pattern or comment) references a kit-private root when
+# it names notes/, archive/, or .hermes — patterns for source-only tooling
+# outputs (and the comments documenting them) must not ship. The guard before
+# each name keeps words that merely end in a root name (e.g. "footnotes/")
+# from matching.
+_GITIGNORE_PRIVATE_RE = re.compile(
+    r"(?:^|[^\w.-])(?:%s)" % "|".join(
+        re.escape(d) + ("" if d.startswith(".") else "/")
+        for d in PRIVATE_ROOT_DIRS))
+
+
+def gitignore_line_is_private(line):
+    """True if a .gitignore line references a kit-private root that never
+    ships in the public export. Used by the transform (to scrub the line or
+    its whole block) and by the verifier (to flag any survivor)."""
+    return bool(_GITIGNORE_PRIVATE_RE.search(line))
 
 
 def classify_link(target):
