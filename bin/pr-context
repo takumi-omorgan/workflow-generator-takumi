@@ -192,8 +192,14 @@ for tok in adr_tokens:
     path = None
     if matches:
         # Normalise to a cwd-relative path so output is stable regardless of
-        # how --adr-dir was spelled (absolute, relative, trailing slash).
-        rel = os.path.relpath(matches[0])
+        # how --adr-dir was spelled (absolute, relative, trailing slash) or
+        # whether cwd is reached through a symlink. os.getcwd() returns the
+        # physical path while abspath keeps the logical one, so a plain
+        # relpath would diverge under a symlinked cwd (e.g. macOS /tmp ->
+        # /private/tmp, or an export tree checked out below a symlink) and
+        # fall back to a non-portable absolute path. Resolve both sides
+        # first so the relative result is symlink-stable.
+        rel = os.path.relpath(os.path.realpath(matches[0]), os.path.realpath(os.curdir))
         path = matches[0] if rel.startswith("..") else rel
     adrs.append({"token": tok, "path": path, "resolved": bool(matches)})
 
