@@ -1,6 +1,6 @@
 # Claude Code Workflow Kit — State
 
-**Last updated:** 2026-06-05
+**Last updated:** 2026-06-21
 **Source of truth:** `gh` is canonical for issue/PR status; this file is a pointer.
 
 <!-- state:phase:start -->
@@ -15,10 +15,10 @@ single
 
 ## In-flight issue
 
-- **Issue:** M5 (roadmap Issues 22–28) — AI PR review integration
-- **Prompt:** design/prd-addenda/001-ai-pr-review.md + design/workflow-generator-roadmap-and-issues-20260605.md §M5
-- **Branch:** m5-ai-pr-review-integration
-- **Status:** implemented; PR open for review (not merged)
+- **Issue:** v5.0.0 public distribution — publish to `olivermorgan2/claude-workflow-kit`
+- **Prompt:** notes/publication-runbook-private.md + docs/publishing.md
+- **Branch:** main (source frozen) / publish operates on generated `dist/public`
+- **Status:** source frozen at `kit.json` kitVersion `5.0.0`; public export hardened through PR #31; **awaiting identity-gated publish** (public repo not yet created, no `v5.0.0` tag)
 
 <!-- state:in-flight:end -->
 
@@ -30,11 +30,11 @@ Rolling list of the last five issues completed (oldest drops off as
 new entries land). One line each: PR number, ADR if any, one-line
 summary.
 
-- #94 — none — drop dated stub framing from CLAUDE.md (closes #93)
-- #92 — none — repoint examples/*.md walk-throughs from deleted issue-prompt files to prompts/issue-NNN-*.md (closes #91)
-- #90 — none — finish legacy notes/issue-prompt.md removal: collapse guide into prompts/_template.md header + fix four broken references (closes #89)
-- #88 — none — unify example.md naming and document orchestration-only skills (#84 Phase 3 — closes #84)
-- #87 — none — bring 4 over-budget SKILL.md files under L2 budget via sidecars (#84 Phase 2)
+- #31 — none — drop "dogfooding" from public-shipped write-receipt header
+- #30 — none — make pr-context ADR paths symlink-stable so collect-eval passes in public export
+- #29 — none — point contributor clone at the real source repo
+- #28 — none — close v5.0.0 public-export follow-up gaps from the Fable 5 review
+- #27 — none — keep kit-private guiding-doc references out of the public export
 
 <!-- state:recent:end -->
 
@@ -42,7 +42,8 @@ summary.
 
 ## Blockers
 
-none
+Public repo `olivermorgan2/claude-workflow-kit` not yet created; `gh` auth
+must switch to `olivermorgan2` before the identity-gated publish step.
 
 <!-- state:blockers:end -->
 
@@ -50,7 +51,7 @@ none
 
 ## Continue here
 
-M5 (AI PR review integration) is implemented on branch `m5-ai-pr-review-integration` and open as a PR for review (do not merge). Adds the `/review-pr` skill, three `bin/*` surfaces (`review-pr`, `publish-review`, `review-eval`), the `ai-review/` prompt pack + config example + eval fixtures, two schemas, ADR-051 (supersedes ADR-046), and PRD addendum 001. Safe by default: review generation posts nothing; publishing needs the deterministic `--confirm publish-pr-N` token and writes a receipt. Deferred: installer distribution of the review tools to target projects, real diff chunking, full-codebase context (see ADR-051 / addendum Open questions). Next after merge: pick the next item from `notes/refactoring-ideas.md` Unfiled, or address the M5 deferrals.
+v5.0.0 metadata is frozen (`kit.json` kitVersion `5.0.0`, curated `CHANGELOG.md` v5.0.0 section) and the public-export workstream is hardened through PR #31. The release is blocked only on the human, identity-gated publish step — not on code. Pre-publish correctness fixes folded in stay v5.0.0 (no bump): ship `bin/check-plan` to target projects so the `adr-writer` ADR gate actually runs, and expand `ADR-NNN..MMM` range / comma-list tokens in `bin/pr-context`. Next: run pre-publish validation (`notes/publication-runbook-private.md`), then the identity-gated publish (create the public repo, push `dist/public`, tag `v5.0.0`, `gh release create`). After publish, file the remaining `notes/workflow-kit-notes.md` dry-run feedback (review-pr timeout/heartbeat, docs-render preamble, prd-to-mvp default, install-summary clarity, trusted auto-publish, Codex provider docs, quality-gate orchestrator) as the v5.0.1 / v5.1.0 backlog.
 
 <!-- state:continue-here:end -->
 
@@ -59,10 +60,10 @@ M5 (AI PR review integration) is implemented on branch `m5-ai-pr-review-integrat
 ## Next action
 
 ```yaml
-skill: none
-args: n/a
-preconditions: []
-blocked-by: none
+skill: release            # or the manual runbook (publish is identity-gated)
+args: --version=5.0.0
+preconditions: [clean export-public on HEAD, gh auth = olivermorgan2]
+blocked-by: public repo olivermorgan2/claude-workflow-kit not yet created
 ```
 
 <!-- state:next-action:end -->

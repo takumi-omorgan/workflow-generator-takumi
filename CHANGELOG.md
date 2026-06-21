@@ -37,6 +37,20 @@ release advisor flags a major bump for this range.
 - **On-demand AI pull-request review.** The optional AI review runtime
   installs only when requested and stays off by default.
 
+### Fixes
+
+- **Ship `check-plan` to target projects.** The `adr-writer` ADR pre-write
+  gate pipes every rendered ADR through `bin/check-plan`, but the installer
+  did not ship that helper, so the documented quality gate silently no-opped
+  in installed projects. `check-plan` and its self-contained eval module now
+  travel with every default install, and `check-install-render` proves the
+  shipped copy actually evaluates ADR criteria.
+- **Expand ADR ranges and comma lists in `pr-context`.** ADR-token extraction
+  now expands `ADR-NNN..MMM` ranges and comma lists of bare numbers that
+  share one anchor (e.g. `ADR-001..004` or `ADR-010,012`), so multi-ADR
+  commits no longer under-report. Unrelated trailing refs such as
+  `(ADR-013, #17)` are left intact.
+
 ### Decisions and policy
 
 - **One version line for source and public distribution.** The published

@@ -373,8 +373,14 @@ ensure_gitignore_line() {
 #      uses release-suggest for the advisory bump signal), so the scripts and
 #      the shared JSON-envelope + fences libraries travel with the kit on
 #      every install. Per ADR-054.
-DEFAULT_BIN="fence adr-alloc changelog-collect release-suggest pr-context docs-render"
-DEFAULT_LIB="json-envelope.sh fences.py carryforward_read.py"
+#
+#      check-plan is the programmatic ADR pre-write gate that adr-writer
+#      step 7 pipes every rendered ADR through; without it the gate silently
+#      no-ops in installed projects. It carries its self-contained eval module
+#      (bin/lib/check-plan-eval.sh) — the criteria logic lives there, so no
+#      skill data file is required at runtime.
+DEFAULT_BIN="fence adr-alloc changelog-collect release-suggest pr-context docs-render check-plan"
+DEFAULT_LIB="json-envelope.sh fences.py carryforward_read.py check-plan-eval.sh"
 mkdir -p "$TARGET_DIR/.claude/bin/lib"
 for script in $DEFAULT_BIN; do
   src="$KIT_ROOT/bin/$script"

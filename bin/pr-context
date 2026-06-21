@@ -4,8 +4,10 @@
 #
 # The deterministic spine the pr-review-packager skill used to run inline:
 # the 3-priority issue-number fallback (branch -> commit subjects -> newest
-# prompt), ADR-token extraction and glob resolution, conventional-commit
-# change grouping, a PR-title draft, and the design-questions carry-forward
+# prompt), ADR-token extraction and glob resolution (including ADR-NNN..MMM
+# ranges and comma lists of bare numbers that share one anchor),
+# conventional-commit change grouping, a PR-title draft, and the
+# design-questions carry-forward
 # read (grouped by target-issue). The skill writes the PR narrative, owns the
 # approval gate, and calls gh pr create — none of which lives here.
 #
@@ -181,10 +183,42 @@ if newest_prompt is not None:
     except OSError:
         pass
 adr_tokens = []
-for n in re.findall(r"ADR-?(\d+)", adr_scan_text, re.I):
-    tok = "ADR-%03d" % int(n)
+
+
+def _add_adr(num):
+    tok = "ADR-%03d" % num
     if tok not in adr_tokens:
         adr_tokens.append(tok)
+
+
+# Each ADR anchor is "ADR-?<digits>" optionally followed by a run of
+# range (`..`) or comma tails of bare numbers that share the anchor, e.g.
+# a commit subject "ADR-001..004" or "ADR-010,012". A tail digit is only
+# consumed when it immediately trails an anchor through a `..`/`,`
+# separator, so unrelated trailing refs like "(ADR-013, #17)" — where the
+# comma is followed by `#`, not a digit — are left intact. Ranges expand
+# inclusive; a defensive cap keeps a pathological span from exploding.
+_ADR_ANCHOR = re.compile(r"ADR-?(\d+)((?:\s*(?:\.\.|,)\s*(?:ADR-?)?\d+)*)", re.I)
+_ADR_TAIL = re.compile(r"(\.\.|,)\s*(?:ADR-?)?(\d+)", re.I)
+_ADR_RANGE_CAP = 64
+
+for m in _ADR_ANCHOR.finditer(adr_scan_text):
+    prev = int(m.group(1))
+    _add_adr(prev)
+    for tm in _ADR_TAIL.finditer(m.group(2) or ""):
+        nxt = int(tm.group(2))
+        if tm.group(1) == "..":
+            lo, hi = (prev, nxt) if prev <= nxt else (nxt, prev)
+            if hi - lo <= _ADR_RANGE_CAP:
+                for k in range(lo, hi + 1):
+                    _add_adr(k)
+            else:
+                # Span too wide to be a real ADR range; keep only the endpoints.
+                _add_adr(lo)
+                _add_adr(hi)
+        else:
+            _add_adr(nxt)
+        prev = nxt
 adrs = []
 for tok in adr_tokens:
     num = tok.split("-")[1]

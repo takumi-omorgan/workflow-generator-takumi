@@ -121,9 +121,11 @@ for required in \
   "$TARGET/.claude/bin/release-suggest" \
   "$TARGET/.claude/bin/pr-context" \
   "$TARGET/.claude/bin/docs-render" \
+  "$TARGET/.claude/bin/check-plan" \
   "$TARGET/.claude/bin/lib/json-envelope.sh" \
   "$TARGET/.claude/bin/lib/fences.py" \
-  "$TARGET/.claude/bin/lib/carryforward_read.py"; do
+  "$TARGET/.claude/bin/lib/carryforward_read.py" \
+  "$TARGET/.claude/bin/lib/check-plan-eval.sh"; do
   if [ ! -e "$required" ]; then
     add_problem "default install missing ${required#$TARGET/}"
   fi
@@ -196,6 +198,60 @@ DOCS
   # No run of more than one blank line should remain (portable check).
   if awk 'prev==""&&$0==""{f=1} {prev=$0} END{exit f?0:1}' "$DOCS_FIX"; then
     add_problem "installed docs-render left a stray blank-line run"
+  fi
+fi
+
+# Installed-layout check-plan ADR gate: adr-writer step 7 pipes every rendered
+# ADR through the shipped bin/check-plan. Prove the shipped copy actually
+# evaluates ADR criteria (a passing ADR exits 0) rather than silently skipping
+# the gate because the script never travelled with the install.
+if [ -x "$TARGET/.claude/bin/check-plan" ]; then
+  ADR_FIX="$WORK/adr-sample.md"
+  cat > "$ADR_FIX" <<'ADR'
+# Sample decision for the install gate
+
+## Status
+
+Accepted
+
+## Context
+
+The installer must ship check-plan so the adr-writer ADR gate runs in target
+projects. This fixture exercises the deterministic criteria end to end.
+
+## Options considered
+
+### Option A: Ship check-plan with every default install
+
+Bundle the script and its eval module so the gate runs everywhere.
+
+- Pros: the ADR gate runs in every target project.
+- Cons: two more files travel with the installer.
+
+### Option B: Leave it out and document a manual fallback
+
+Skills would describe applying the criteria by hand.
+
+- Pros: nothing extra to ship.
+- Cons: the documented gate silently no-ops.
+
+## Decision
+
+We adopt Option A: ship the check-plan script and its eval module with every
+default install.
+
+## Consequences
+
+The ADR pre-write gate evaluates real criteria instead of silently no-opping.
+ADR
+
+  gate_json=$("$TARGET/.claude/bin/check-plan" --criteria-set adr --input "$ADR_FIX" --format json 2>"$WORK/check-plan.err")
+  gate_rc=$?
+  if [ "$gate_rc" -ne 0 ]; then
+    add_problem "installed check-plan exited $gate_rc on a passing ADR, expected 0 (stderr: $(cat "$WORK/check-plan.err"))"
+  fi
+  if ! printf '%s' "$gate_json" | grep -q '"criteria-set":"adr"'; then
+    add_problem "installed check-plan did not emit an adr criteria envelope"
   fi
 fi
 
