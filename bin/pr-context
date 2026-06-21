@@ -191,14 +191,17 @@ def _add_adr(num):
         adr_tokens.append(tok)
 
 
-# Each ADR anchor is "ADR-?<digits>" optionally followed by a run of
-# range (`..`) or comma tails of bare numbers that share the anchor, e.g.
-# a commit subject "ADR-001..004" or "ADR-010,012". A tail digit is only
-# consumed when it immediately trails an anchor through a `..`/`,`
-# separator, so unrelated trailing refs like "(ADR-013, #17)" — where the
-# comma is followed by `#`, not a digit — are left intact. Ranges expand
-# inclusive; a defensive cap keeps a pathological span from exploding.
-_ADR_ANCHOR = re.compile(r"ADR-?(\d+)((?:\s*(?:\.\.|,)\s*(?:ADR-?)?\d+)*)", re.I)
+# Each ADR anchor is "ADR-?<digits>" optionally followed by a run of range
+# (`..`) or comma tails that share the anchor, e.g. a commit subject
+# "ADR-001..004" or "ADR-010,012". To avoid swallowing ordinary numeric
+# prose, a comma tail is consumed ONLY when the number is tight against the
+# comma (no whitespace) — so "ADR-013, 2026 cleanup" or "(ADR-013, #17)"
+# keeps just ADR-013, while "ADR-010,012" expands. Spaced comma lists that
+# repeat the prefix ("ADR-010, ADR-012") are still captured because each
+# prefixed token is an independent anchor. Ranges expand inclusive; a
+# defensive cap keeps a pathological span from exploding.
+_ADR_ANCHOR = re.compile(
+    r"ADR-?(\d+)((?:\s*\.\.\s*(?:ADR-?)?\d+|,(?:ADR-?)?\d+)*)", re.I)
 _ADR_TAIL = re.compile(r"(\.\.|,)\s*(?:ADR-?)?(\d+)", re.I)
 _ADR_RANGE_CAP = 64
 

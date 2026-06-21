@@ -33,6 +33,11 @@
       "token": "ADR-012",
       "path": "bin/pr-context-fixtures/adr-range-and-list/adr/adr-012-stub.md",
       "resolved": true
+    },
+    {
+      "token": "ADR-013",
+      "path": "bin/pr-context-fixtures/adr-range-and-list/adr/adr-013-stub.md",
+      "resolved": true
     }
   ],
   "commitGroups": [
@@ -46,6 +51,12 @@
       "verb": "fix",
       "bullets": [
         "fix: list two"
+      ]
+    },
+    {
+      "verb": "docs",
+      "bullets": [
+        "docs: mention prior work ADR-013, 2026 cleanup"
       ]
     }
   ],

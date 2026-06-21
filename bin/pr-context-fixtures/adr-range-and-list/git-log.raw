@@ -1,2 +1,3 @@
 sha1	feat(core): big change (ADR-001..004, #20)
 sha2	fix: list two (ADR-010,012, #20)
+sha3	docs: mention prior work ADR-013, 2026 cleanup (#20)
