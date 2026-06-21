@@ -1,0 +1,66 @@
+{
+  "branch": "issue-20-multi-adr",
+  "base": "main",
+  "issueNumber": "20",
+  "issueSource": "branch",
+  "adrs": [
+    {
+      "token": "ADR-001",
+      "path": "bin/pr-context-fixtures/adr-range-and-list/adr/adr-001-stub.md",
+      "resolved": true
+    },
+    {
+      "token": "ADR-002",
+      "path": "bin/pr-context-fixtures/adr-range-and-list/adr/adr-002-stub.md",
+      "resolved": true
+    },
+    {
+      "token": "ADR-003",
+      "path": "bin/pr-context-fixtures/adr-range-and-list/adr/adr-003-stub.md",
+      "resolved": true
+    },
+    {
+      "token": "ADR-004",
+      "path": "bin/pr-context-fixtures/adr-range-and-list/adr/adr-004-stub.md",
+      "resolved": true
+    },
+    {
+      "token": "ADR-010",
+      "path": "bin/pr-context-fixtures/adr-range-and-list/adr/adr-010-stub.md",
+      "resolved": true
+    },
+    {
+      "token": "ADR-012",
+      "path": "bin/pr-context-fixtures/adr-range-and-list/adr/adr-012-stub.md",
+      "resolved": true
+    },
+    {
+      "token": "ADR-013",
+      "path": "bin/pr-context-fixtures/adr-range-and-list/adr/adr-013-stub.md",
+      "resolved": true
+    }
+  ],
+  "commitGroups": [
+    {
+      "verb": "feat",
+      "bullets": [
+        "feat(core): big change"
+      ]
+    },
+    {
+      "verb": "fix",
+      "bullets": [
+        "fix: list two"
+      ]
+    },
+    {
+      "verb": "docs",
+      "bullets": [
+        "docs: mention prior work ADR-013, 2026 cleanup"
+      ]
+    }
+  ],
+  "prTitle": "feat(core): big change",
+  "carryForward": [],
+  "warnings": []
+}
