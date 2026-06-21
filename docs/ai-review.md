@@ -179,7 +179,10 @@ unset key as a setup error (exit `3`).
 Because the transport is fixed — a `POST` to `<baseURL>/chat/completions` with
 bearer auth — endpoints that need a different request path, extra query
 parameters (such as Azure OpenAI's `api-version`), or a non-bearer auth header
-are not supported by the current script.
+are not supported by the current script. The request also sets
+`response_format: {"type": "json_object"}` (JSON mode) and reads the reply from
+`choices[0].message.content`, so the endpoint must support that OpenAI
+request/response shape.
 
 ## 2. Generate a dry-run review
 
