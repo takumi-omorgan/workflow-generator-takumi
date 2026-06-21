@@ -207,8 +207,9 @@ Persistent secret options:
 - CI secret store for automation
 
 Never put API keys in `.claude/ai-review/config.json`; `apiKeyEnv` names the
-environment variable only. See [`docs/ai-review.md`](ai-review.md) for the
-review/publish flow.
+environment variable only. OpenRouter is just the documented default — see
+[`docs/ai-review.md`](ai-review.md) for the review/publish flow and how to
+point the review at OpenAI directly or any other OpenAI-compatible provider.
 
 ### 3B. Explicit fetch alternative
 

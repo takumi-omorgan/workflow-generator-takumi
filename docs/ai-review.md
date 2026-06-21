@@ -136,6 +136,44 @@ Config resolves in this order, with later values winning: built-in defaults
 If no key is set, `review-pr` exits `3` with a setup message rather than
 failing obscurely — and never asks you for the key.
 
+### Using a different provider
+
+OpenRouter is only the documented default. Any OpenAI-compatible
+`chat/completions` endpoint works — only `baseURL`, `model`, and `apiKeyEnv`
+change. The `provider` label is free-form: it tags receipts and artifact
+provenance and does not switch code paths, so the transport is identical for
+every provider.
+
+**OpenAI directly** (the GPT / Codex models), keyed by `OPENAI_API_KEY`:
+
+```json
+{
+  "schema": "ai-review-config",
+  "version": 1,
+  "provider": "openai",
+  "baseURL": "https://api.openai.com/v1",
+  "model": "gpt-4o-mini",
+  "apiKeyEnv": "OPENAI_API_KEY",
+  "timeoutSeconds": 60,
+  "maxDiffBytes": 200000,
+  "profile": "balanced"
+}
+```
+
+```bash
+export OPENAI_API_KEY=sk-...   # shell only; do not put this in config.json
+```
+
+**Any other OpenAI-compatible endpoint** — Azure OpenAI, a self-hosted
+gateway, or a local server such as Ollama, vLLM, or llama.cpp — follows the
+same shape: point `baseURL` at the endpoint's `…/v1` root (no trailing
+`/chat/completions`, which `review-pr` appends), set `model` to whatever that
+endpoint expects, and name the key's environment variable in `apiKeyEnv`. Drop
+the OpenRouter-specific `headers` (`HTTP-Referer`, `X-Title`) unless your
+provider asks for them. A local server that does not check keys still needs
+the named variable exported to some non-empty placeholder, because `review-pr`
+treats an unset key as a setup error (exit `3`).
+
 ## 2. Generate a dry-run review
 
 ```bash
