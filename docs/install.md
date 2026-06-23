@@ -28,6 +28,7 @@ are cross-platform where possible.
 |---|---|---|
 | **Git** | Version control | Ships with macOS (Xcode CLT) or `brew install git` |
 | **GitHub CLI (`gh`)** | Repo, issue, and PR operations from the terminal | `brew install gh` then `gh auth login` |
+| **`jq`** | JSON parsing in the kit's deterministic helper scripts (`changelog`, `release`, `pr-review-packager`, …) | `brew install jq` |
 | **Claude Code** | AI-assisted development | `npm install -g @anthropic-ai/claude-code` |
 | **SSH key** | Passwordless git over SSH | `ssh-keygen -t ed25519` then add the public key to GitHub |
 
@@ -37,6 +38,7 @@ are cross-platform where possible.
 git --version          # any recent 2.x is fine
 gh --version           # any recent 2.x is fine
 gh auth status         # should report "Logged in to github.com"
+jq --version           # any 1.6+ is fine
 claude --version       # confirms Claude Code is on your PATH
 ssh -T git@github.com  # "Hi <user>! You've successfully authenticated"
 ```

@@ -21,18 +21,21 @@ brief "Resolved" note) once it no longer applies.
   weak in the release protocol, then turn the specifics into concrete
   mitigations (and likely an ADR).
 
-### R2 — Source repo has diverged from the reviewed public release
+## Resolved
 
-- **Risk.** The public repo (`olivermorgan2/claude-workflow-kit`, v5.0.0) that
-  Codex reviewed is not a clean export of this source repo (latest tag v4.0.0).
-  The public command model (`/start`, `/next`, `/decide`, `/backlog`, `/work`,
-  `/ship`), several docs (`architecture.md`, `agent-contract.md`,
-  `workflow-control.md`), and validation scripts (`self-test`,
-  `validate-kit-json`, `validate-carry-forward`, `check-consistency`) exist in
-  public but nowhere in source history. As a result, 6 of 7 Codex findings have
-  no source counterpart and cannot be "fixed in source then exported" as posed.
-- **Status.** Open. Distilled in
+### R2 — "Source repo has diverged from the reviewed public release" (retired)
+
+- **Original risk (now disproven).** The first pass claimed the public v5.0.0
+  release was not a clean export of source (assumed latest tag `v4.0.0`), with
+  the v5 command model, several docs, and validation scripts "absent from
+  source history" — and concluded 6 of 7 Codex findings had no source
+  counterpart.
+- **Resolution.** That premise was a stale read of the tree. Current source is
+  at `kit.json` `kitVersion 5.0.0`; the `start` router skill exists under
+  `skills/start/`; `docs/architecture.md`, `docs/workflow-control.md`,
+  `docs/workflow-guide.md`, `docs/claude-code-guide.md` and `bin/self-test`,
+  `bin/validate-kit-json`, `bin/validate-carry-forward`, `bin/check-consistency`
+  all exist. There is no v5 vs. source divergence to reconcile. 4 of 7 findings
+  were source-actionable doc/content fixes (now shipped); 3 are false positives.
+  See the corrected dispositions in
   [reviews/2026-06-23-public-release-codex-findings.md](reviews/2026-06-23-public-release-codex-findings.md).
-- **Owner / next step.** Resolve the source↔public relationship (see
-  [open-questions.md](open-questions.md) Q2): forward-port public v5 into source,
-  or re-export from source. Until then, only Finding 7 is source-actionable.

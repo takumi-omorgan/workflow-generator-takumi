@@ -8,7 +8,67 @@ findings. We verified each against the **source** repo
 (`takumi-omorgan/workflow-generator-takumi`), not the reviewer's `/private/tmp`
 copy.
 
-## Verdict
+> **Correction (2026-06-23, second pass).** The first-pass verdict below was
+> written against a stale read of the source tree (assumed `v4.0.0`, with the
+> v5 command model, docs, and validation scripts "absent from source"). That
+> is **wrong for current source**: `kit.json` is at `kitVersion 5.0.0`, the
+> `start` router skill exists under `skills/start/`, and `docs/architecture.md`,
+> `docs/workflow-control.md`, `docs/workflow-guide.md`,
+> `docs/claude-code-guide.md`, plus `bin/self-test`, `bin/validate-kit-json`,
+> `bin/validate-carry-forward`, and `bin/check-consistency` all exist in source.
+> The findings are therefore **mostly source-content/doc polish and false
+> positives**, not transform-created divergence. The re-verified dispositions
+> and the fixes actually shipped are in **[Corrected dispositions](#corrected-dispositions-second-pass)**
+> below; the original first-pass text is retained beneath it as an audit trail.
+
+## Corrected dispositions (second pass)
+
+Re-verified against current source (`kit.json` 5.0.0). Net: **4 of 7 are
+source-actionable doc/content fixes (now fixed), 3 are confirmed false
+positives.** None are transform-created.
+
+- **Finding 1 (`jq` prerequisite) — VALID, fixed.** The first pass called this
+  invalid ("only `gh --jq`"). Wrong: standalone `jq` is used in shipped,
+  target-installed helpers — `bin/fence`, `bin/adr-alloc`,
+  `bin/changelog-collect`, `bin/release-suggest`, `bin/pr-context`,
+  `bin/docs-render` (the installer's `DEFAULT_BIN` set, copied into a target's
+  `.claude/bin/`), and `bin/self-test` literally gates on `for tool in python3
+  jq bash`. `jq` is a real runtime prerequisite. **Fix:** added `jq` to the
+  prerequisites table + verify block in `docs/install.md` and to the
+  prerequisites line in `README.md`.
+- **Finding 7 (`docs/github-setup.md`) — VALID, fixed.** "What's next" marked
+  `workflow-guide.md` and `claude-code-guide.md` as "coming in a later issue"
+  (both exist) and linked a non-existent `adr-guide.md`. **Fix:** turned the
+  two existing docs into live links, dropped the "coming later" hedging, and
+  replaced the `adr-guide.md` line with `docs/skills.md` (which covers
+  `/adr-writer`). Also fixed the stale `olivermorgan2/workflow-generator` repo
+  name in the labels note → `olivermorgan2/claude-workflow-kit`.
+- **Findings 2 + 3 (verb/alias ambiguity) — VALID as a doc-clarity issue,
+  fixed.** Not "commands that don't exist": `/start` **is** an installed router
+  skill (`skills/start/`) and `docs/workflow-control.md` already documents the
+  verb→skill map precisely (only `/start`/`/next`, `/feature-prd`, `/review-pr`
+  are new slash commands; `/decide`, `/backlog`, `/work`, `/ship` are
+  documentation aliases for existing skills). `README.md` and
+  `docs/architecture.md` presented all six verbs flatly, implying each is an
+  installed command. **Fix:** clarified both to distinguish the installed
+  `/start` router from the documentation-alias verbs, pointing at
+  `workflow-control.md`.
+- **Findings 4 + 6 — FALSE POSITIVE, no change.** Finding 4: the release SKILL
+  anchor matches its heading's GitHub slug. Finding 6: the flagged links are
+  inside fenced code blocks, so they render literally, not as clickable links.
+- **Finding 5 ("example links 404") — FALSE POSITIVE in substance, no change.**
+  The URLs are inside code blocks (illustrative example output, not active
+  links users follow) and the only live install/bootstrap commands in
+  `README.md` / `docs/install.md` are already correct
+  (`olivermorgan2/claude-workflow-kit` @ `v5.0.0`). The naming/version was
+  already reconciled in current source; the remaining `olivermorgan2/workflow-generator`
+  / `v3.3.0` strings live only in historical `CHANGELOG.md` entries, internal
+  `design/`/`notes/`/`prompts/` material (stripped from the public export), the
+  `bin/export-eval-fixtures/stale-version/` test fixture (intentionally stale),
+  and skill `example.md` illustrations — all correctly left untouched per the
+  "don't rewrite historical/example content" rule.
+
+## Verdict (first pass — superseded by the correction above)
 
 Codex's automated checks on the public repo passed (`bin/self-test` 20/20,
 `validate-kit-json`, `validate-carry-forward`, `check-consistency`,
@@ -17,7 +77,7 @@ Codex's automated checks on the public repo passed (`bin/self-test` 20/20,
 [risks.md](../risks.md) R2 and [open-questions.md](../open-questions.md) Q2.
 Most findings have no source counterpart.
 
-## Distilled findings (source disposition)
+## Distilled findings (first pass — superseded; see corrected dispositions above)
 
 - **Valid in source (1):** Finding 7 — `docs/github-setup.md` marks
   `workflow-guide.md` and `claude-code-guide.md` as "coming in a later issue"
@@ -37,20 +97,38 @@ Most findings have no source counterpart.
 
 ## Durable lessons
 
-- **Verify findings against the source tree, not a copied review path** — line
-  numbers and even whole files differ between public and source.
+- **Verify findings against the source tree at its *current* HEAD, not a
+  remembered version.** The first pass assumed `v4.0.0` and declared half the
+  findings "absent from source"; current source is `v5.0.0` and the files all
+  exist. Read `kit.json`/`git tag`/the tree before asserting divergence.
 - **Code-fenced placeholders are not broken links.** Before flagging a link,
   check whether it is inside a fenced or inline code span, because those render
-  literally.
-- **`gh --jq` is not a `jq` dependency.** Distinguish gh's built-in flag from
-  the standalone binary when auditing prerequisites.
+  literally. (Finding 5/6 — confirmed false positives.)
+- **`gh --jq` is not the only `jq` in the kit.** The first pass stopped at
+  `gh --jq` and missed the standalone `jq` in six target-installed helpers and
+  in `bin/self-test`'s tool gate. When auditing a prerequisite, grep the whole
+  shipped script set, not just the obvious call site.
 
-## Resolution / disposition
+## Resolution / disposition (corrected)
 
-- Finding 7: fix in source (`docs/github-setup.md`). Small, self-contained.
-- Findings 1, 4, 6: no source change — invalid here. Re-verify on the public
-  side if/when public re-syncs from source.
-- Finding 5 + the stale/wrong bootstrap URL (`olivermorgan2/workflow-generator`
-  @ v3.3.0): roll into the naming/version reconciliation (Q1).
-- Findings 2, 3 and the divergence overall: blocked on Q2 (how source relates
-  to public v5.0.0). No public-release fixes implemented this pass.
+Implemented this pass as source fixes (no public re-export — user runs a fresh
+export later):
+
+- **Finding 1:** added `jq` to prerequisites in `docs/install.md` + `README.md`.
+- **Finding 7:** de-staled `docs/github-setup.md` "What's next" (live links,
+  dropped "coming later", replaced non-existent `adr-guide.md` with
+  `docs/skills.md`) and fixed the stale repo name in the labels note.
+- **Findings 2 + 3:** clarified the verb layer vs. installed `/start` router in
+  `README.md` and `docs/architecture.md`.
+- **Findings 4, 5, 6:** confirmed false positives — no change. The naming/version
+  in active install commands was already correct (`claude-workflow-kit` @
+  `v5.0.0`); remaining old strings are historical/internal/fixture/example and
+  intentionally untouched.
+
+The first-pass resolution (below, struck) deferred everything on Q2's
+source↔public divergence, which no longer applies.
+
+- ~~Finding 7: fix in source (`docs/github-setup.md`). Small, self-contained.~~
+- ~~Findings 1, 4, 6: no source change — invalid here.~~
+- ~~Finding 5 + stale bootstrap URL: roll into naming/version reconciliation (Q1).~~
+- ~~Findings 2, 3 and the divergence overall: blocked on Q2.~~

@@ -165,7 +165,7 @@ Keep the default GitHub labels (`enhancement`, `good first issue`, etc.)
 or delete them — both are fine. The kit only depends on the six above.
 
 > **For the kit repo itself:** these labels already exist on
-> `olivermorgan2/workflow-generator`. You do not need to re-create them.
+> `olivermorgan2/claude-workflow-kit`. You do not need to re-create them.
 
 ---
 
@@ -358,9 +358,9 @@ gh pr merge --squash --delete-branch
 
 ## What's next
 
-- `docs/workflow-guide.md` — end-to-end flow from idea to deploy (coming in a later issue)
-- `docs/adr-guide.md` — when and how to write ADRs (coming in a later issue)
-- `docs/claude-code-guide.md` — how to use the installed skills (coming in a later issue)
+- [`docs/workflow-guide.md`](workflow-guide.md) — end-to-end flow from idea to release
+- [`docs/skills.md`](skills.md) — how to use the installed skills, including `/adr-writer` for writing ADRs
+- [`docs/claude-code-guide.md`](claude-code-guide.md) — using Claude Code with the kit
 
 ## Alignment
 

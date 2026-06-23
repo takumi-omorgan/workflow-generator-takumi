@@ -45,11 +45,14 @@ repo** unless we deliberately promote a curated, public-ready version to
 the public repo. Promotion is an explicit, reviewed act — nothing leaks to
 public by default.
 
-> **Naming note.** Some existing in-repo links (e.g. release URLs in
-> `README.md`) reference `olivermorgan2/workflow-generator`. The
-> public-repo name recorded here is the operating name supplied for this
-> collaboration; reconcile the two before any public release. Tracked in
-> [open-questions.md](open-questions.md).
+> **Naming note.** The active install/bootstrap commands in `README.md` and
+> `docs/install.md` already use the canonical `olivermorgan2/claude-workflow-kit`
+> @ `v5.0.0`. The remaining `olivermorgan2/workflow-generator` references are
+> historical `CHANGELOG.md` entries, internal material stripped from the public
+> export, an intentionally stale test fixture, and skill `example.md`
+> illustrations — left as-is by design. What remains is the *protocol* for
+> keeping identity consistent across exports, tracked in
+> [open-questions.md](open-questions.md) (Q1).
 
 ## Collaboration protocol
 

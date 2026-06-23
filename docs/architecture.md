@@ -69,6 +69,10 @@ Work is scoped **one GitHub issue per branch and PR**, following
 
 A **verb layer** sits in front of the full command set so you don't have to
 memorize it: `/start`, `/decide`, `/backlog`, `/work`, `/ship`, `/release`.
+Of these, only `/start` (with its `/next` alias) is an installed router
+skill; `/decide`, `/backlog`, `/work`, and `/ship` are **documentation
+aliases** that map to existing skills rather than separate command folders
+(see [workflow control](workflow-control.md) for the verb→skill map).
 Type `/start` (or `/next`) and the kit inspects the project state and tells
 you the next step. Three **operating modes** — interactive, assisted,
 autonomous — set how much the assistant does before pausing for you.
