@@ -28,7 +28,7 @@ are cross-platform where possible.
 |---|---|---|
 | **Git** | Version control | Ships with macOS (Xcode CLT) or `brew install git` |
 | **GitHub CLI (`gh`)** | Repo, issue, and PR operations from the terminal | `brew install gh` then `gh auth login` |
-| **`jq`** | JSON parsing in the kit's deterministic helper scripts (`changelog`, `release`, `pr-review-packager`, …) | `brew install jq` |
+| **`jq`** | JSON parsing in shipped helper scripts such as `bin/changelog-collect`, `bin/release-suggest`, and `bin/pr-context` | `brew install jq` |
 | **Claude Code** | AI-assisted development | `npm install -g @anthropic-ai/claude-code` |
 | **SSH key** | Passwordless git over SSH | `ssh-keygen -t ed25519` then add the public key to GitHub |
 
