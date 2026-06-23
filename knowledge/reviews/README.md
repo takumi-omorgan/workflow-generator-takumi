@@ -26,4 +26,4 @@ See [../SCHEMA.md](../SCHEMA.md) for the full curation rules.
 
 ## Index
 
-_No review notes yet._
+- [2026-06-23 — Codex review of public release (v5.0.0)](2026-06-23-public-release-codex-findings.md)

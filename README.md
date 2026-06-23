@@ -25,7 +25,7 @@ Claude Code) and what it does not is spelled out in
 ## Quick start
 
 **Prerequisites (once per machine):** Git, the GitHub CLI (`gh`,
-authenticated), and Claude Code. Verification commands are in
+authenticated), `jq`, and Claude Code. Verification commands are in
 [`docs/install.md`](docs/install.md#1-prerequisites).
 
 **Install into a new project.** Replace `my-project` with your own
@@ -81,12 +81,15 @@ The kit covers the whole lifecycle — not just scaffolding, but ongoing
 ADRs, continuous architecture-document maintenance, issue-by-issue execution,
 releases, and session continuity.
 
-Not sure what to run? Type **`/start`** (or `/next`) and the kit
-inspects your project and tells you the next step. The full command set
-sits behind a small **verb layer** — `/start`, `/decide`, `/backlog`,
-`/work`, `/ship`, `/release` — and three **operating modes**
-(interactive, assisted, autonomous) that set how much the assistant does
-without asking. See [workflow control](docs/workflow-control.md).
+Not sure what to run? Type **`/start`** (or its `/next` alias) and the
+kit inspects your project and tells you the next step. `/start` is an
+installed router skill; the other verbs — `/decide`, `/backlog`,
+`/work`, `/ship` — are **documentation aliases** that map to the
+underlying skills (e.g. `/work` → `prepare-issue` →
+`claude-issue-executor`), not separate installed commands. Three
+**operating modes** (interactive, assisted, autonomous) set how much the
+assistant does without asking. See
+[workflow control](docs/workflow-control.md) for the verb→skill map.
 
 ## What's in this repo
 

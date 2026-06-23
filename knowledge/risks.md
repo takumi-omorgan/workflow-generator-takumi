@@ -20,3 +20,22 @@ brief "Resolved" note) once it no longer applies.
 - **Owner / next step.** Await the user's details on what specifically is
   weak in the release protocol, then turn the specifics into concrete
   mitigations (and likely an ADR).
+
+## Resolved
+
+### R2 — "Source repo has diverged from the reviewed public release" (retired)
+
+- **Original risk (now disproven).** The first pass claimed the public v5.0.0
+  release was not a clean export of source (assumed latest tag `v4.0.0`), with
+  the v5 command model, several docs, and validation scripts "absent from
+  source history" — and concluded 6 of 7 Codex findings had no source
+  counterpart.
+- **Resolution.** That premise was a stale read of the tree. Current source is
+  at `kit.json` `kitVersion 5.0.0`; the `start` router skill exists under
+  `skills/start/`; `docs/architecture.md`, `docs/workflow-control.md`,
+  `docs/workflow-guide.md`, `docs/claude-code-guide.md` and `bin/self-test`,
+  `bin/validate-kit-json`, `bin/validate-carry-forward`, `bin/check-consistency`
+  all exist. There is no v5 vs. source divergence to reconcile. 4 of 7 findings
+  were source-actionable doc/content fixes (now shipped); 3 are false positives.
+  See the corrected dispositions in
+  [reviews/2026-06-23-public-release-codex-findings.md](reviews/2026-06-23-public-release-codex-findings.md).
