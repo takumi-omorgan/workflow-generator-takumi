@@ -5,17 +5,17 @@
 #
 # Usage:
 #   # Most common: scaffold the current directory into a kit-shaped target.
-#   bash <(curl -fsSL https://github.com/olivermorgan2/claude-workflow-kit/releases/download/v5.0.0/bootstrap-workflow-kit) \
+#   bash <(curl -fsSL https://github.com/olivermorgan2/claude-workflow-kit/releases/download/v5.0.1/bootstrap-workflow-kit) \
 #     --project-name=my-project
 #
 #   # Or: download, inspect, then run.
-#   gh release download v5.0.0 -p bootstrap-workflow-kit \
+#   gh release download v5.0.1 -p bootstrap-workflow-kit \
 #     -R olivermorgan2/claude-workflow-kit
 #   chmod +x bootstrap-workflow-kit
 #   ./bootstrap-workflow-kit --project-name=my-project
 #
 # Environment variables:
-#   WORKFLOW_KIT_VERSION   Tag to fetch (e.g. v5.0.0). If unset, resolves
+#   WORKFLOW_KIT_VERSION   Tag to fetch (e.g. v5.0.1). If unset, resolves
 #                          to the latest tag via `gh release view` (or
 #                          `git ls-remote --tags --sort=-v:refname` as
 #                          fallback).

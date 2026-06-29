@@ -2,6 +2,32 @@
 
 All notable changes to this project.
 
+## v5.0.1 — install-surface and onboarding doc fixes (2026-06-29)
+
+Range: `v5.0.0..v5.0.1`
+
+**PATCH**: documentation-only corrections to the first public release. No
+behaviour, skill, or schema changes — the installed kit is identical to
+v5.0.0.
+
+### Fixes
+
+- **`jq` is now listed as a prerequisite.** Several shipped helper scripts
+  (`bin/changelog-collect`, `bin/release-suggest`, `bin/pr-context`) parse
+  JSON with `jq`, but it was missing from the prerequisite list in the
+  README and the install guide. Both now name it, with an install hint and a
+  version check.
+- **Verb-layer description corrected.** The README and architecture doc
+  overstated the command surface: only `/start` (with its `/next` alias) is
+  an installed router skill. `/decide`, `/backlog`, `/work`, and `/ship` are
+  **documentation aliases** that map to the underlying skills (e.g. `/work` →
+  `prepare-issue` → `claude-issue-executor`), not separate installed
+  commands. The docs now describe the verb→skill mapping accurately.
+- **GitHub setup "further reading" de-staled.** The closing links in the
+  GitHub setup guide pointed at documents marked "coming in a later issue";
+  those documents now exist, so the links resolve to the workflow guide, the
+  skills reference, and the Claude Code guide.
+
 ## v5.0.0 — public distribution readiness (2026-06-10)
 
 Range: `v4.0.0..v5.0.0`

@@ -24,7 +24,10 @@ _PROMPT_NON_TEMPLATE = re.compile(r"prompts/(?!_template\.md$)[^/]+$")
 
 # Kit-private root directories that never ship. Shared by is_excluded() and
 # the .gitignore scrub/check so the boundary cannot drift.
-PRIVATE_ROOT_DIRS = ("notes", "archive", ".hermes")
+# knowledge/ is the source repo's internal knowledge layer (project brief,
+# risks, open questions, review findings) — private to development, like
+# notes/ and archive/, and replaced publicly by docs/.
+PRIVATE_ROOT_DIRS = ("notes", "archive", ".hermes", "knowledge")
 
 # Version-pin classification, shared by the transform (which rewrites stale
 # tags on pin-context lines) and the verifier (which asserts none survive):
