@@ -24,9 +24,9 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from export_paths import (  # noqa: E402
-    PIN_CONTEXT_RE, PRIVATE_SECTION_HEADINGS, VERSION_TAG_RE, classify_link,
-    gitignore_line_is_private, heading_anchor, is_excluded, is_export_fixture,
-    link_target_relpath,
+    PIN_CONTEXT_RE, PRIVATE_ROOT_DIRS, PRIVATE_SECTION_HEADINGS, VERSION_TAG_RE,
+    classify_link, gitignore_line_is_private, heading_anchor, is_excluded,
+    is_export_fixture, link_target_relpath,
 )
 
 STAGING = os.environ["STAGING"]
@@ -121,7 +121,7 @@ if os.path.isdir(design_root):
     for name in sorted(os.listdir(design_root)):
         if name.endswith(".md") and os.path.isfile(os.path.join(design_root, name)):
             add("B", "design/%s" % name, "internal root design document must not ship")
-for d in ("notes", "archive", ".hermes"):
+for d in PRIVATE_ROOT_DIRS:
     if os.path.exists(os.path.join(STAGING, d)):
         add("B", d, "internal directory must not ship")
 if os.path.isfile(os.path.join(STAGING, "ai-review", "config.json")):
@@ -347,7 +347,7 @@ if os.path.isfile(claude_md):
         for lineno, line in enumerate(text.split("\n"), 1):
             for m in CODE_SPAN_RE.finditer(line):
                 span = m.group(1).strip()
-                if "/" not in span and span not in ("notes", "archive"):
+                if "/" not in span and span not in PRIVATE_ROOT_DIRS:
                     continue  # not a path-like span
                 if is_excluded(span):
                     add("J", "CLAUDE.md:%d" % lineno,

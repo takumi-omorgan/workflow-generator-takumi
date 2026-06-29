@@ -98,7 +98,7 @@ temporary kit copy on exit.
 
 ```bash
 cd my-project                                              # target project root
-bash <(curl -fsSL https://github.com/olivermorgan2/claude-workflow-kit/releases/download/v5.0.0/bootstrap-workflow-kit) \
+bash <(curl -fsSL https://github.com/olivermorgan2/claude-workflow-kit/releases/download/v5.0.1/bootstrap-workflow-kit) \
   --project-name=my-project
 ```
 
@@ -106,7 +106,7 @@ Prefer to inspect the script before running, or pipe-to-bash makes
 you nervous? Download it first:
 
 ```bash
-gh release download v5.0.0 -p bootstrap-workflow-kit \
+gh release download v5.0.1 -p bootstrap-workflow-kit \
   -R olivermorgan2/claude-workflow-kit
 chmod +x bootstrap-workflow-kit
 ./bootstrap-workflow-kit --project-name=my-project
@@ -126,7 +126,7 @@ Environment variables:
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `WORKFLOW_KIT_VERSION` | latest tag | Pin to a specific tag, e.g. `v5.0.0`. |
+| `WORKFLOW_KIT_VERSION` | latest tag | Pin to a specific tag, e.g. `v5.0.1`. |
 | `WORKFLOW_KIT_REPO` | `olivermorgan2/claude-workflow-kit` | Override for forks. |
 
 The installer's behaviour itself is unchanged from ADR-009:
@@ -170,7 +170,7 @@ Useful installer flags (forwarded by the bootstrap):
 > "Jane Doe" alongside the rest of the install:
 >
 > ```bash
-> bash <(curl -fsSL https://github.com/olivermorgan2/claude-workflow-kit/releases/download/v5.0.0/bootstrap-workflow-kit) \
+> bash <(curl -fsSL https://github.com/olivermorgan2/claude-workflow-kit/releases/download/v5.0.1/bootstrap-workflow-kit) \
 >   --project-name=my-project \
 >   --license=mit \
 >   --license-holder="Jane Doe"
@@ -188,7 +188,7 @@ packs, schemas, and `config.example.json`, but preserves any user-edited
 AI PR review is an explicit per-target choice. To install it:
 
 ```bash
-bash <(curl -fsSL https://github.com/olivermorgan2/claude-workflow-kit/releases/download/v5.0.0/bootstrap-workflow-kit) \
+bash <(curl -fsSL https://github.com/olivermorgan2/claude-workflow-kit/releases/download/v5.0.1/bootstrap-workflow-kit) \
   --project-name=my-project \
   --with-ai-review
 ```
@@ -223,7 +223,7 @@ clean up:
 ```bash
 TMPKIT="$(mktemp -d)" && \
   gh repo clone olivermorgan2/claude-workflow-kit "$TMPKIT" -- \
-    --depth=1 --branch=v5.0.0 && \
+    --depth=1 --branch=v5.0.1 && \
   "$TMPKIT/bin/install-workflow-kit" --project-name=my-project && \
   rm -rf "$TMPKIT"
 ```
@@ -236,7 +236,7 @@ If `gh` is not installed, swap the clone line for plain git over
 HTTPS:
 
 ```bash
-git clone --depth=1 --branch=v5.0.0 \
+git clone --depth=1 --branch=v5.0.1 \
   https://github.com/olivermorgan2/claude-workflow-kit.git "$TMPKIT"
 ```
 
@@ -250,8 +250,8 @@ diagnostic reference if the installer misbehaves.
 
 ```bash
 TMPKIT="$(mktemp -d)"
-gh repo clone olivermorgan2/claude-workflow-kit "$TMPKIT" -- --depth=1 --branch=v5.0.0
-# or:  git clone --depth=1 --branch=v5.0.0 https://github.com/olivermorgan2/claude-workflow-kit.git "$TMPKIT"
+gh repo clone olivermorgan2/claude-workflow-kit "$TMPKIT" -- --depth=1 --branch=v5.0.1
+# or:  git clone --depth=1 --branch=v5.0.1 https://github.com/olivermorgan2/claude-workflow-kit.git "$TMPKIT"
 ```
 
 #### 3C.2 From inside the target project, copy the skills

@@ -34,7 +34,7 @@ name — it becomes both the GitHub repo and the local folder:
 ```bash
 gh repo create my-project --public --clone
 cd my-project
-bash <(curl -fsSL https://github.com/olivermorgan2/claude-workflow-kit/releases/download/v5.0.0/bootstrap-workflow-kit) \
+bash <(curl -fsSL https://github.com/olivermorgan2/claude-workflow-kit/releases/download/v5.0.1/bootstrap-workflow-kit) \
   --project-name=my-project
 ```
 

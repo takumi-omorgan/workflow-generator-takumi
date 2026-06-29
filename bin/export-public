@@ -167,7 +167,7 @@ if [ -d "$DEST/design" ]; then
   # there are none at root level, so this removes an empty internal dir)
   rmdir "$DEST/design" 2>/dev/null || true
 fi
-rm -rf "$DEST/notes" "$DEST/archive" "$DEST/.hermes"
+rm -rf "$DEST/notes" "$DEST/archive" "$DEST/.hermes" "$DEST/knowledge"
 rm -rf "$DEST/ai-review/artifacts" "$DEST/ai-review/config.json"
 # prompts/: keep only _template.md
 if [ -d "$DEST/prompts" ]; then
