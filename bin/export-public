@@ -168,6 +168,9 @@ if [ -d "$DEST/design" ]; then
   rmdir "$DEST/design" 2>/dev/null || true
 fi
 rm -rf "$DEST/notes" "$DEST/archive" "$DEST/.hermes" "$DEST/knowledge"
+# hermes-workflow-overlay: source-repo-only process files (export_paths.py
+# OVERLAY_PRIVATE_FILES — keep the two lists in sync)
+rm -f "$DEST/.github/workflows/workflow-guard.yml"
 rm -rf "$DEST/ai-review/artifacts" "$DEST/ai-review/config.json"
 # prompts/: keep only _template.md
 if [ -d "$DEST/prompts" ]; then

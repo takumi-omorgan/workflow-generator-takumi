@@ -29,6 +29,10 @@ _PROMPT_NON_TEMPLATE = re.compile(r"prompts/(?!_template\.md$)[^/]+$")
 # notes/ and archive/, and replaced publicly by docs/.
 PRIVATE_ROOT_DIRS = ("notes", "archive", ".hermes", "knowledge")
 
+# Source-repo-only process files from the hermes-workflow-overlay (guard CI
+# for the private source repo). Never ship in the public export.
+OVERLAY_PRIVATE_FILES = (".github/workflows/workflow-guard.yml",)
+
 # Version-pin classification, shared by the transform (which rewrites stale
 # tags on pin-context lines) and the verifier (which asserts none survive):
 # a vN.N.N literal counts as a PIN only on lines that actually pin a
@@ -52,6 +56,8 @@ def is_excluded(relpath):
         if rp == d or rp.startswith(d + "/"):
             return True
     if rp == "ai-review/config.json" or rp.startswith("ai-review/artifacts/"):
+        return True
+    if rp in OVERLAY_PRIVATE_FILES:
         return True
     if _PROMPT_NON_TEMPLATE.fullmatch(rp):
         return True
@@ -88,6 +94,7 @@ EXPORT_TOOLING_PATHS = (
 PRIVATE_SECTION_HEADINGS = (
     ("CLAUDE.md", "## Source-repo contributor notes"),
     ("CLAUDE.md", "## Developing the kit on itself"),
+    ("CLAUDE.md", "## Hermes hardened workflow"),
     ("docs/install.md", "## Contributor / kit-developer setup"),
 )
 
