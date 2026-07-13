@@ -32,7 +32,7 @@ Raised (2026-07-13) as a **future workflow-layer consideration only**: a
 Hermes-side Kanban/board view over in-flight issues and PRs, to make
 supervision state visible at a glance.
 
-**Answered in principle (2026-07-13) — direction agreed, build still deferred.**
+**Direction settled (2026-07-13); build decision still deferred.**
 If a Hermes Kanban is built, it stays **external / orchestrator-only**. Nothing
 is implemented, and it remains a dependency of no current or planned work.
 

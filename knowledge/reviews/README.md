@@ -6,7 +6,8 @@ durable lesson, not the raw comment thread.
 
 Reviews are model-neutral: the reviewer is whichever independent model ran
 the gate. Record the **model ID actually used** in each note rather than
-assuming a default — the default has changed before and will change again.
+assuming a default — defaults drift, so a note that names no model cannot be
+audited later.
 
 ## What to record
 
