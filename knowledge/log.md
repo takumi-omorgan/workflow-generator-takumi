@@ -3,6 +3,48 @@
 Append-only, dated log of knowledge-layer updates. Newest entries at the
 top. One line per update; link to the file or section that changed.
 
+## 2026-07-14
+
+- **ADR-058 (SKILL.md body budget and progressive disclosure) accepted under
+  mandate; the ratification-debt cap is consumed.** Accepted in the PR for
+  issue #49 after adversarial review reached READY (4/5, zero blockers) on its
+  second pass — see
+  [reviews/2026-07-14-adr-058-review.md](reviews/2026-07-14-adr-058-review.md).
+  ADR-058 is now the one phase of ADRs awaiting Oliver's async ratification
+  ([`CLAUDE.md`](../CLAUDE.md) → "Ratification debt"), so **`adr-059`..`adr-061`
+  may not be proposed and no M6 implementation issues may be filed** until he
+  ratifies it. Decision-only: `bin/check-skill-budget`, the generated baseline,
+  and the skill migrations are **decided, not built**.
+- **The review killed the ADR's original mechanism, and the reason generalises.**
+  The draft proposed an *advisory* 800-word check plus a grace list that "must
+  shrink each release"; the reviewer rejected it as *"a hope that future-you
+  will feel differently, which is the status quo that produced the problem"* —
+  the proposed cure was a weaker form of the disease. The accepted design
+  (Option D) instead pins each of the 18 over-budget skills to **its own current
+  word count** as a CI-blocking ceiling, blocking from the checker's first
+  commit, with no advisory phase to flip. Growth stops on day one without
+  demanding a 22-skill rewrite first. Durable lesson: **a baseline is only a
+  ratchet if the baseline itself is ratcheted** — ceilings must be provably
+  non-increasing, or one PR raises the ceiling and the body together and passes.
+- **Measured, not estimated.** The draft's "roughly 35,000 words" was replaced
+  with observed counts: **33,444 words across 22 skills**, 18 of which exceed
+  800 (median 1,397); five heaviest 2,384–2,706 words. The reviewer itself
+  miscounted ("20 of 22 exceed"; actual is 18) — its conclusion held, but the
+  slip is a reminder that a reviewer's arithmetic is not evidence either.
+- **A model's self-report is not evidence of which model served the request.**
+  The reviewer availability probe answered `claude-opus-4-6`, which would have
+  meant Claude reviewing its own work. It was a hallucinated self-ID: no
+  Anthropic model exists in the configured primary *or* fallback chain, the
+  `hermes --dev` routing banner read `qwen/qwen3.7-plus`, and three repeat
+  probes agreed. Receipts must cite routing/provider evidence, never the
+  model's self-description — it can neither confirm nor condemn the reviewer.
+- **Open defect recorded:** [ADR-054](../design/adr/adr-054-script-vs-skill-boundary.md)
+  is still marked `proposed` although its helpers shipped under issue #13 (17
+  `bin/` files cite it) — implementation merged without its ADR ever being
+  accepted. ADR-058 no longer claims otherwise. The drift needs its own gate;
+  it was out of scope for a decision-only PR. Tracked in
+  [`design/state.md`](../design/state.md) → Blockers.
+
 ## 2026-07-13
 
 - **Oliver ratified ADR-057; the ratification-debt cap is free.** ADR-057 was
