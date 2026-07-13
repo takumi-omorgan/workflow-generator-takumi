@@ -15,10 +15,10 @@ single
 
 ## In-flight issue
 
-- **Issue:** #45 — adopt the public export integrity gate (ADR-057)
-- **Prompt:** n/a (decision-only issue)
-- **Branch:** `accept-adr-057-public-export-integrity-gate` (PR #46)
-- **Status:** ADR-057 **accepted** — reviewed to `READY` by `qwen/qwen3.7-plus` (4/5, 0 blockers). The ADR was **rewritten** first: an audit of the live public repo falsified two of its three original premises (no identity mismatch, no internal exhaust — the ADR-056 export contract *is* being honoured at published HEAD `1c0eba3`). It now rests only on the one real, latent gap: nothing verifies after a publish that the remote matches the verified export artifact. The identity-rewrite work the false premise commissioned was dropped. `bin/verify-published` is **decided, not built** — implementation is a follow-up (risk R1 stays open until it ships). Public repo `olivermorgan2/claude-workflow-kit` is live; releases `v5.0.0` (tag `a38a142`) and `v5.0.1` (tag `1c0eba3`, latest); source `kit.json` kitVersion `5.0.1`.
+- **Issue:** #47 — ratify ADR-057 and clear the ratification debt
+- **Prompt:** n/a (bookkeeping-only issue)
+- **Branch:** `ratify-adr-057`
+- **Status:** Oliver **ratified ADR-057** on 2026-07-13; the ratification-debt cap is free, so the `adr-058`..`adr-061` proposals may proceed. Ratification is recorded in the knowledge layer, not in the ADR — the ADR format carries no ratification field and accepted ADRs are never edited in place. ADR-057's substance is unchanged: it rests on the one real, latent gap (nothing verifies after a publish that the remote matches the verified export artifact), and `bin/verify-published` remains **decided, not built** — implementation is a follow-up and risk R1 stays open until it ships.
 
 <!-- state:in-flight:end -->
 
@@ -30,11 +30,11 @@ Rolling list of the last five issues completed (oldest drops off as
 new entries land). One line each: PR number, ADR if any, one-line
 summary.
 
+- #46 — ADR-057 — accept the public export integrity gate (re-motivated after an audit falsified two of three premises)
 - #40 — none — guard: scan only added lines for placeholder tokens (was false-positiving on historical entries)
 - #37 — none — apply the Hermes hardened-workflow overlay to the source repo
 - #36 — none — release v5.0.1: prune the internal knowledge layer from the export, bump pins/changelog
 - #35 — none — address the public-release review (jq prerequisite, verb-layer docs, github-setup)
-- #34 — none — initialize the workflow-kit knowledge layer
 
 <!-- state:recent:end -->
 
@@ -57,8 +57,9 @@ overlay (`CLAUDE.md` plus the `guard` workflow) from PR #37, with the guard's
 placeholder scan corrected in PR #40. The next body of work is the M6–M9
 backlog.
 
-**ADR-057 is now accepted** (PR #46, issue #45) — the first of the backlog's
-prerequisite ADRs to clear the gate. Getting it there required rewriting it:
+**ADR-057 is accepted and ratified** (accepted in PR #46 / issue #45; ratified
+by Oliver on 2026-07-13) — the first of the backlog's prerequisite ADRs to
+clear the gate. Getting it there required rewriting it:
 its original premises about the published repo were audited and two of three
 were **false**, so it was re-motivated around the single real gap (no
 post-publish verification of the remote) and re-reviewed. See
@@ -75,9 +76,9 @@ carrying a `knowledge/reviews/` receipt, which `guard` enforces) before its
 implementation issues open, so the next step is to propose those ADRs — not to
 open M6 issues.
 
-Note the ratification-debt cap: ADR-057 is accepted under mandate and awaits
-Oliver's async ratification, so at most this one phase of ADRs may sit
-unratified.
+The ratification-debt cap is **free**: ADR-057 is ratified, so no phase of ADRs
+sits unratified and the next one may be proposed. Whichever ADRs land next will
+consume the cap again until Oliver ratifies them.
 
 <!-- state:continue-here:end -->
 
@@ -87,8 +88,8 @@ unratified.
 
 ```yaml
 skill: adr-writer
-args: propose adr-058..061 — one PR per ADR, each with a knowledge/reviews/ receipt (adr-057 accepted in PR #46)
-preconditions: [drafts moved onto a branch, adversarial reviewer available]
+args: propose adr-058..061 — one PR per ADR, each with a knowledge/reviews/ receipt (adr-057 accepted in PR #46, ratified 2026-07-13)
+preconditions: [drafts moved onto a branch, adversarial reviewer available, ratification debt clear]
 blocked-by: none
 ```
 

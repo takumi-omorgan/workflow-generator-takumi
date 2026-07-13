@@ -12,6 +12,11 @@ public kit lives at `olivermorgan2/claude-workflow-kit` with releases
 `v5.0.0` (2026-06-12) and `v5.0.1` (2026-06-29, latest). The source repo is
 post-release and carries the Hermes hardened-workflow overlay.
 
+ADR-057 (public export integrity gate) is **accepted and ratified** (ratified
+by Oliver on 2026-07-13), so **no ADR phase is awaiting ratification** — the
+ratification-debt cap is free and the M6–M9 prerequisite ADRs
+(`adr-058`..`adr-061`) may be proposed.
+
 `design/state.md` is the session-continuity pointer for what to do next;
 `gh` is canonical for issue and PR status. This line is the knowledge
 layer's phase claim — it and [log.md](log.md) move together in a closeout.
