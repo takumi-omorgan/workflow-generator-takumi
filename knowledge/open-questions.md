@@ -6,26 +6,6 @@ linking it, then moving the entry to "Resolved".
 
 ## Open
 
-### Q1 — What specifically needs tightening in the public release protocol?
-
-The protocol for promoting work from the private/source repo to the public
-repo needs tightening, but the specific weaknesses are not yet enumerated.
-**The user will supply the details next.** Capture them here when provided,
-then convert into concrete mitigations under [risks.md](risks.md) (R1) and,
-if warranted, a governing ADR.
-
-Related (now largely settled in source): the active install/bootstrap
-commands in `README.md` and `docs/install.md` already use the canonical
-name and version (`olivermorgan2/claude-workflow-kit` @ `v5.0.1`), so the
-naming/version reconciliation the first pass flagged here is done for the
-user-facing surface. The only remaining `olivermorgan2/workflow-generator`
-/ `v3.3.0` strings are in historical `CHANGELOG.md` entries, internal
-`design/`/`notes/`/`prompts/` material (stripped from the public export),
-the `bin/export-eval-fixtures/stale-version/` test fixture (intentionally
-stale), and skill `example.md` illustrations — all left as-is by design.
-What remains under this question is the *protocol* for keeping that
-identity consistent across exports, not a concrete outstanding defect.
-
 ### Q3 — Should the workflow layer grow a Hermes-side Kanban view?
 
 Raised (2026-07-13) as a **future workflow-layer consideration only**: a
@@ -60,6 +40,34 @@ shipped surface. Do not conflate the two, and do not treat Q3 as a reason to
 revisit ADR-012.
 
 ## Resolved
+
+### Q1 — What specifically needs tightening in the public release protocol?
+
+**Resolved (2026-07-13): exactly one thing — post-publish verification.**
+The weaknesses were finally enumerated by *auditing the live public repo*
+rather than by speculation, and most of the feared ones do not exist.
+
+At the published HEAD (`1c0eba3`), the tree is exactly the 258 files
+`bin/export-public` produces: no leaked `design/adr/`, `notes/`, `archive/`,
+or `.hermes/`; `prompts/` reduced to `_template.md`; the `CLAUDE.md`
+contributor section stripped; and the install-surface identity strings
+(`README.md`, `docs/install.md`, `bin/bootstrap-workflow-kit`) all naming the
+repo they ship in. The leak/identity/stale-version fears this question was
+opened for are **being correctly handled** by the ADR-056 export contract.
+
+The one real weakness is the seam this question already suspected — *"the
+protocol for keeping that identity consistent across exports, not a concrete
+outstanding defect."* `bin/export-public` never pushes (ADR-056 Decision 1),
+so publishing is a manual human step, and nothing verifies afterwards that the
+live remote matches the artifact the export verified. That gap is now governed
+by
+[ADR-057](../design/adr/adr-057-public-export-integrity-gate.md) (accepted),
+which decides `bin/verify-published` as a post-publish gate.
+
+Mitigation is **decided, not yet built** — see [risks.md](risks.md) (R1), which
+stays open until the script ships. Review receipt, including the falsified
+premises that nearly sent this the wrong way:
+[reviews/2026-07-13-adr-057-review.md](reviews/2026-07-13-adr-057-review.md).
 
 ### Q2 — How does the source repo relate to the public v5.0.0 release?
 
