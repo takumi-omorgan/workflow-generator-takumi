@@ -16,6 +16,14 @@ top. One line per update; link to the file or section that changed.
   — and accepted ADRs are never edited in place (ADR-044). Ratification does
   not change ADR-057's substance: `bin/verify-published` remains **decided, not
   built**, so [risks.md](risks.md) R1 stays open until it ships.
+  **Provenance, stated honestly:** the ratification was conveyed through the
+  Hermes supervision channel (session directive of 2026-07-13) and is an
+  **operator attestation** — no Oliver-authored artifact in this repo was
+  directly observed. It is anchored to issue #47 comment `4963184634` rather
+  than to a commit message alone. The adversarial review of the ratification PR
+  (`qwen/qwen3.7-plus`, READY 4/5, 0 blockers) raised exactly this as its one
+  major finding; the attestation comment is the fix. Receipt:
+  [reviews/2026-07-13-adr-057-ratification-review.md](reviews/2026-07-13-adr-057-ratification-review.md).
 - **Accepted ADR-057 (public export integrity gate) — after falsifying two of
   its three motivating premises.** The first draft claimed the published repo
   had an identity mismatch and shipped internal exhaust (`archive/`, `notes/`,
