@@ -3,6 +3,25 @@
 Append-only, dated log of knowledge-layer updates. Newest entries at the
 top. One line per update; link to the file or section that changed.
 
+## 2026-07-13
+
+- **Closed out v5.0.x: the kit is published.** `design/state.md` had been stale
+  since 2026-06-21, still describing v5.0.0 as frozen and "awaiting
+  identity-gated publish". Verified against `gh`: the public repo
+  `olivermorgan2/claude-workflow-kit` exists (created 2026-06-12, public), and
+  releases `v5.0.0` (tag `a38a142`, 2026-06-12) and `v5.0.1` (tag `1c0eba3`,
+  2026-06-29, latest) are both published; source `kit.json` kitVersion is
+  `5.0.1`. Rewrote the in-flight, blockers, recent-work, continue-here, and
+  next-action sections accordingly — the publish blocker is cleared, and the
+  next step is proposing the M6–M9 prerequisite ADRs (which currently exist
+  only as untracked local drafts), not opening M6 issues.
+- Recorded the durable lesson behind PR #40: the `guard` placeholder check
+  grepped whole changed files, so a knowledge/design file that *describes* a
+  placeholder token false-positived. Process checks over an append-only
+  knowledge layer must scan **added lines**, not file contents — otherwise the
+  layer's own history makes the gate unusable. Added
+  [open-questions.md](open-questions.md) Q3 (Hermes Kanban, deferred).
+
 ## 2026-06-23
 
 - **Corrected the Codex-findings diagnosis (second pass).** The first-pass
