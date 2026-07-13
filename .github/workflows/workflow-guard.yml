@@ -66,12 +66,13 @@ jobs:
 
       - name: No placeholders introduced in design/ or knowledge/
         run: |
-          fail=0
-          while IFS= read -r f; do
-            case "$f" in design/*|knowledge/*) ;; *) continue ;; esac
-            [ -f "$f" ] || continue
-            if grep -nE '\{\{|\}\}|_TBD_|<!-- FILL' "$f"; then
-              echo "::error::$f contains template placeholders"; fail=1
-            fi
-          done < /tmp/changed.txt
-          exit $fail
+          # Scan only ADDED lines — historical entries may legitimately
+          # quote placeholder tokens when describing validation runs.
+          added=$(git diff "origin/${{ github.base_ref }}"...HEAD -- design knowledge \
+            | grep -E '^\+' | grep -v '^\+\+\+' \
+            | grep -E '\{\{|\}\}|_TBD_|<!-- FILL' || true)
+          if [ -n "$added" ]; then
+            echo "::error::template placeholders introduced in design/ or knowledge/:"
+            printf '%s\n' "$added"
+            exit 1
+          fi
