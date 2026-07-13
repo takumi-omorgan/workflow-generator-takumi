@@ -16,7 +16,7 @@ if warranted, a governing ADR.
 
 Related (now largely settled in source): the active install/bootstrap
 commands in `README.md` and `docs/install.md` already use the canonical
-name and version (`olivermorgan2/claude-workflow-kit` @ `v5.0.0`), so the
+name and version (`olivermorgan2/claude-workflow-kit` @ `v5.0.1`), so the
 naming/version reconciliation the first pass flagged here is done for the
 user-facing surface. The only remaining `olivermorgan2/workflow-generator`
 / `v3.3.0` strings are in historical `CHANGELOG.md` entries, internal
