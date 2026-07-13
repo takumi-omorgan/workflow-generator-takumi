@@ -65,16 +65,22 @@ runtime. The kit stays generic; this protocol governs how *we* build it.
 | Actor | Role |
 |---|---|
 | **Claude Code (Opus 4.8)** | Builder / planner / implementer / knowledge curator |
-| **Codex** | Adversarial reviewer / scorer |
+| **Adversarial reviewer** | Independent reviewer / scorer. Default: **Qwen 3.7 Plus** (`qwen/qwen3.7-plus`) via OpenRouter/Hermes |
 | **Hermes** | Orchestrator / verifier / closeout reporter |
+
+The reviewer role is defined by its *independence*, not by a specific model.
+Qwen 3.7 Plus is the current default; an equivalent independent reviewer may
+stand in, and the model ID actually used is recorded in the review receipt.
+If the reviewer is unavailable, the gate **halts** — it is never waived and
+never silently reassigned to another model.
 
 ### Gates
 
-- **PRD gate** — Claude drafts the PRD; Codex reviews; Claude revises once;
-  knowledge layer is updated.
-- **Milestone / ADR gate** — Claude drafts the milestone or ADR; Codex
+- **PRD gate** — Claude drafts the PRD; the reviewer reviews; Claude revises
+  once; knowledge layer is updated.
+- **Milestone / ADR gate** — Claude drafts the milestone or ADR; the reviewer
   reviews; Claude revises once; knowledge layer is updated.
-- **PR quality gate** — Codex runs a scored review loop. Targets:
+- **PR quality gate** — the reviewer runs a scored review loop. Targets:
   **4/5 score**, **zero blockers**, **green validation**, and at most
   **3 review loops**.
 

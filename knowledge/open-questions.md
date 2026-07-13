@@ -30,9 +30,28 @@ identity consistent across exports, not a concrete outstanding defect.
 
 Raised (2026-07-13) as a **future workflow-layer consideration only**: a
 Hermes-side Kanban/board view over in-flight issues and PRs, to make
-supervision state visible at a glance. **Deferred — nothing implemented, and
-it is not a dependency of any current or planned work.** No design, scope, or
-acceptance criteria have been agreed; the details are still to be supplied.
+supervision state visible at a glance.
+
+**Direction settled (2026-07-13); build decision still deferred.**
+If a Hermes Kanban is built, it stays **external / orchestrator-only**. Nothing
+is implemented, and it remains a dependency of no current or planned work.
+
+The agreed shape, should it be built:
+
+- **GitHub stays canonical** for issues, PRs, and milestones. The kit ships no
+  board, queue, or database runtime, and this answer does not add one.
+- **Hermes Kanban mirrors GitHub** — it is a read/dispatch view over the
+  canonical source, never a second source of truth.
+- **Dispatch inputs come from the fence-parseable zones in
+  [`design/state.md`](../design/state.md)** — `state:in-flight` and
+  `state:next-action` — which already exist and are machine-readable.
+- **Backlog import** from ADR/backlog entries, if wanted, is **Hermes-side
+  only**.
+- **No Hermes-specific board internals leak into the public kit** unless that
+  is explicitly scoped in a later ADR.
+
+Left open: whether to build it at all, and its design/acceptance criteria.
+What is now settled is only *where it may live* — outside the kit.
 
 Note this is distinct from [ADR-012](../design/adr/adr-012-github-projects-integration.md)
 (accepted), which covers GitHub Projects boards *inside a target project* as a

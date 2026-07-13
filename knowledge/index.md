@@ -20,7 +20,7 @@ layer's phase claim — it and [log.md](log.md) move together in a closeout.
 
 | File | What you'll find |
 |---|---|
-| [project-brief.md](project-brief.md) | What the kit is, its lifecycle, the public/private split, and the Claude/Codex/Hermes collaboration protocol |
+| [project-brief.md](project-brief.md) | What the kit is, its lifecycle, the public/private split, and the Claude / adversarial-reviewer / Hermes collaboration protocol |
 | [risks.md](risks.md) | Active risks being tracked |
 | [open-questions.md](open-questions.md) | Unresolved questions awaiting input or a decision |
 | [log.md](log.md) | Dated, append-only log of knowledge updates |
