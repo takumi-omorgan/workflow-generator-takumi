@@ -16,7 +16,7 @@ if warranted, a governing ADR.
 
 Related (now largely settled in source): the active install/bootstrap
 commands in `README.md` and `docs/install.md` already use the canonical
-name and version (`olivermorgan2/claude-workflow-kit` @ `v5.0.0`), so the
+name and version (`olivermorgan2/claude-workflow-kit` @ `v5.0.1`), so the
 naming/version reconciliation the first pass flagged here is done for the
 user-facing surface. The only remaining `olivermorgan2/workflow-generator`
 / `v3.3.0` strings are in historical `CHANGELOG.md` entries, internal
@@ -25,6 +25,20 @@ the `bin/export-eval-fixtures/stale-version/` test fixture (intentionally
 stale), and skill `example.md` illustrations — all left as-is by design.
 What remains under this question is the *protocol* for keeping that
 identity consistent across exports, not a concrete outstanding defect.
+
+### Q3 — Should the workflow layer grow a Hermes-side Kanban view?
+
+Raised (2026-07-13) as a **future workflow-layer consideration only**: a
+Hermes-side Kanban/board view over in-flight issues and PRs, to make
+supervision state visible at a glance. **Deferred — nothing implemented, and
+it is not a dependency of any current or planned work.** No design, scope, or
+acceptance criteria have been agreed; the details are still to be supplied.
+
+Note this is distinct from [ADR-012](../design/adr/adr-012-github-projects-integration.md)
+(accepted), which covers GitHub Projects boards *inside a target project* as a
+kit feature. Q3 is about the **supervision layer around the kit**, not the kit's
+shipped surface. Do not conflate the two, and do not treat Q3 as a reason to
+revisit ADR-012.
 
 ## Resolved
 
