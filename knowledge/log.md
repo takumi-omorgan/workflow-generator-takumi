@@ -5,6 +5,27 @@ top. One line per update; link to the file or section that changed.
 
 ## 2026-07-13
 
+- **Switched the default adversarial reviewer from Codex to Qwen 3.7 Plus.**
+  The hardened-workflow gate in [`CLAUDE.md`](../CLAUDE.md) and the roles/gates
+  in [project-brief.md](project-brief.md) named Codex as the reviewer. The
+  operating default is now **Qwen 3.7 Plus** (`qwen/qwen3.7-plus`) via
+  OpenRouter/Hermes. **The gate itself is unchanged** — `READY` is still
+  required, and reviewer-unavailable still means HALT, now explicitly with no
+  silent fallback to another model. Made the durable-review wording in
+  [SCHEMA.md](SCHEMA.md) and [reviews/README.md](reviews/README.md)
+  model-neutral, and required receipts to record the **model ID actually
+  used** so the next default change doesn't invalidate the archive. Historical
+  receipts keep their accurate Codex attribution — they *were* Codex reviews.
+- **Recorded the Hermes Kanban direction: external / orchestrator-only.**
+  Answered [open-questions.md](open-questions.md) Q3 in principle (build still
+  deferred, nothing implemented). GitHub remains canonical for issues, PRs, and
+  milestones; the kit ships no board/queue/DB runtime and this decision adds
+  none. A Hermes Kanban, if built, mirrors GitHub and reads the
+  fence-parseable `design/state.md` zones (`state:in-flight`,
+  `state:next-action`) as dispatch inputs; optional backlog import stays
+  Hermes-side. No Hermes-specific board internals enter the public kit unless
+  a later ADR scopes it. Distinct from ADR-012 (GitHub Projects boards inside a
+  *target* project), which is untouched.
 - **Closed out v5.0.x: the kit is published.** `design/state.md` had been stale
   since 2026-06-21, still describing v5.0.0 as frozen and "awaiting
   identity-gated publish". Verified against `gh`: the public repo

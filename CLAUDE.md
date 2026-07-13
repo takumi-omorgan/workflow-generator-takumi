@@ -92,11 +92,15 @@ and with fabricated closeout docs. No session may waive these.
 ### Gates cannot be skipped, only failed
 
 - **Adversarial review is a hard gate.** Every ADR, PRD/normalization
-  output, and phase closeout gets an independent adversarial review (Codex
-  or equivalent) reaching `READY` before acceptance/merge. If the reviewer
-  is unavailable (usage limit, outage, missing CLI): **HALT the phase and
-  report to Oliver.** "Review deferred, covered by tests" is exactly the
-  rationalization that caused the failure — it is forbidden.
+  output, and phase closeout gets an independent adversarial review reaching
+  `READY` before acceptance/merge. The default reviewer is **Qwen 3.7 Plus**
+  (`qwen/qwen3.7-plus`) via OpenRouter/Hermes; an equivalent independent
+  reviewer may stand in. Record the model ID actually used in the review
+  receipt — never assume it. If the reviewer is unavailable (usage limit,
+  outage, auth failure, missing CLI): **HALT the phase and report to
+  Oliver.** Do not silently fall back to a different model. "Review
+  deferred, covered by tests" is exactly the rationalization that caused the
+  failure — it is forbidden.
 - **No mandate may remove a gate.** An autonomous-phase mandate can
   delegate *who operates* a gate, never whether it runs. Plan-first
   approval, issue-per-PR, adversarial review, and green tests apply in

@@ -42,8 +42,8 @@ build the kit.
 - Decisions and the reasoning behind them (or links to the governing ADR).
 - Risks — anything that could derail the project or the public release.
 - Open questions awaiting an answer, a decision, or external input.
-- Distilled review findings — the durable lesson from a Codex review,
-  not the line-by-line comments.
+- Distilled review findings — the durable lesson from an adversarial review
+  (noting the reviewer model ID), not the line-by-line comments.
 - Glossary / domain facts — terms, roles, conventions that recur.
 
 **Do not persist** (these belong elsewhere or nowhere):
