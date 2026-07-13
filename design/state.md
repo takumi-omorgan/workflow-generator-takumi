@@ -15,10 +15,10 @@ single
 
 ## In-flight issue
 
-- **Issue:** none — v5.0.1 is shipped and the public repo is live
-- **Prompt:** n/a
-- **Branch:** main
-- **Status:** public repo `olivermorgan2/claude-workflow-kit` exists (created 2026-06-12, public). Releases `v5.0.0` (tag `a38a142`, 2026-06-12) and `v5.0.1` (tag `1c0eba3`, 2026-06-29, latest) are published. Source `kit.json` kitVersion is `5.0.1`. The identity-gated publish that blocked the release is done.
+- **Issue:** #45 — adopt the public export integrity gate (ADR-057)
+- **Prompt:** n/a (decision-only issue)
+- **Branch:** `accept-adr-057-public-export-integrity-gate` (PR #46)
+- **Status:** ADR-057 **accepted** — reviewed to `READY` by `qwen/qwen3.7-plus` (4/5, 0 blockers). The ADR was **rewritten** first: an audit of the live public repo falsified two of its three original premises (no identity mismatch, no internal exhaust — the ADR-056 export contract *is* being honoured at published HEAD `1c0eba3`). It now rests only on the one real, latent gap: nothing verifies after a publish that the remote matches the verified export artifact. The identity-rewrite work the false premise commissioned was dropped. `bin/verify-published` is **decided, not built** — implementation is a follow-up (risk R1 stays open until it ships). Public repo `olivermorgan2/claude-workflow-kit` is live; releases `v5.0.0` (tag `a38a142`) and `v5.0.1` (tag `1c0eba3`, latest); source `kit.json` kitVersion `5.0.1`.
 
 <!-- state:in-flight:end -->
 
@@ -55,14 +55,29 @@ v5.0.0 and v5.0.1 are published to `olivermorgan2/claude-workflow-kit`. The
 source repo is post-release and now carries the Hermes hardened-workflow
 overlay (`CLAUDE.md` plus the `guard` workflow) from PR #37, with the guard's
 placeholder scan corrected in PR #40. The next body of work is the M6–M9
-backlog. Its ADR drafts (`adr-057` public-export integrity gate, `adr-058`
-skill body budget, `adr-059` target-project kit lifecycle, `adr-060` ship-loop
-adoption tier, `adr-061` runtime asset manifest) and the M6–M9 issue backlog
-exist **only as untracked local drafts** — none has been proposed,
-adversarially reviewed, or accepted. The overlay requires a phase's
-prerequisite ADRs to be accepted (each carrying a `knowledge/reviews/` receipt,
-which `guard` enforces) before its implementation issues open, so the next step
-is to propose those ADRs — not to open M6 issues.
+backlog.
+
+**ADR-057 is now accepted** (PR #46, issue #45) — the first of the backlog's
+prerequisite ADRs to clear the gate. Getting it there required rewriting it:
+its original premises about the published repo were audited and two of three
+were **false**, so it was re-motivated around the single real gap (no
+post-publish verification of the remote) and re-reviewed. See
+[`knowledge/reviews/2026-07-13-adr-057-review.md`](../knowledge/reviews/2026-07-13-adr-057-review.md);
+the durable lesson is to **observe an asserted defect before designing against
+it**, which applies directly to the remaining drafts.
+
+The remaining ADR drafts (`adr-058` skill body budget, `adr-059`
+target-project kit lifecycle, `adr-060` ship-loop adoption tier, `adr-061`
+runtime asset manifest) and the M6–M9 issue backlog still exist **only as
+untracked local drafts** — none has been proposed, adversarially reviewed, or
+accepted. The overlay requires a phase's prerequisite ADRs to be accepted (each
+carrying a `knowledge/reviews/` receipt, which `guard` enforces) before its
+implementation issues open, so the next step is to propose those ADRs — not to
+open M6 issues.
+
+Note the ratification-debt cap: ADR-057 is accepted under mandate and awaits
+Oliver's async ratification, so at most this one phase of ADRs may sit
+unratified.
 
 <!-- state:continue-here:end -->
 
@@ -72,7 +87,7 @@ is to propose those ADRs — not to open M6 issues.
 
 ```yaml
 skill: adr-writer
-args: propose adr-057..061 — one PR per ADR, each with a knowledge/reviews/ receipt
+args: propose adr-058..061 — one PR per ADR, each with a knowledge/reviews/ receipt (adr-057 accepted in PR #46)
 preconditions: [drafts moved onto a branch, adversarial reviewer available]
 blocked-by: none
 ```

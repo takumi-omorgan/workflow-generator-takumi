@@ -5,6 +5,27 @@ top. One line per update; link to the file or section that changed.
 
 ## 2026-07-13
 
+- **Accepted ADR-057 (public export integrity gate) — after falsifying two of
+  its three motivating premises.** The first draft claimed the published repo
+  had an identity mismatch and shipped internal exhaust (`archive/`, `notes/`,
+  the `CLAUDE.md` contributor section). An audit of the live public repo at its
+  then-HEAD (`1c0eba3`) found **both claims false**: the published tree is
+  exactly the 258 files `bin/export-public` produces, with correct identity
+  strings and no excluded paths. The **ADR-056 export contract is being
+  honoured**. Only the third claim held — there is no post-publish verification
+  — and it is *latent*, not an active defect. ADR-057 was **rewritten** around
+  that one real gap (the verified `dist/` tree and the live remote are
+  separately derived; nothing asserts they match) and re-reviewed to `READY`
+  (`qwen/qwen3.7-plus`, 4/5, 0 blockers, 4 minor findings all applied). The
+  identity-rewrite work the false premise had commissioned was **dropped**.
+  Resolved [open-questions.md](open-questions.md) Q1 and re-scoped
+  [risks.md](risks.md) R1 (mitigation decided; `bin/verify-published` not yet
+  built). Receipt:
+  [reviews/2026-07-13-adr-057-review.md](reviews/2026-07-13-adr-057-review.md).
+  **Durable lesson (second occurrence): when a review asserts an observable
+  defect, observe it before designing against it.** A `READY` score from a
+  reviewer without repo access is conditional on its own premise findings —
+  read the findings, not just the verdict.
 - **Switched the default adversarial reviewer from Codex to Qwen 3.7 Plus.**
   The hardened-workflow gate in [`CLAUDE.md`](../CLAUDE.md) and the roles/gates
   in [project-brief.md](project-brief.md) named Codex as the reviewer. The

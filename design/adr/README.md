@@ -71,6 +71,7 @@ fences is preserved.
 | [ADR-054](adr-054-script-vs-skill-boundary.md) | Deterministic script vs. Claude-skill boundary | proposed |
 | [ADR-055](adr-055-public-distribution-versioning-policy.md) | Public distribution versioning and changelog policy | accepted |
 | [ADR-056](adr-056-two-repo-public-distribution-export-model.md) | Two-repo public distribution export model | accepted |
+| [ADR-057](adr-057-public-export-integrity-gate.md) | Public export integrity gate | accepted |
 
 <!-- adr-index:end -->
 
