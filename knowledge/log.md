@@ -5,6 +5,52 @@ top. One line per update; link to the file or section that changed.
 
 ## 2026-07-14
 
+- **Oliver ratified ADR-061 (operator attestation — provenance in the next bullet);
+  the ratification-debt cap is free.** ADR-061 was accepted *under mandate* in PR #54
+  (issue #53) and held the one slot the overlay allows for a phase of ADRs awaiting
+  async ratification ([`CLAUDE.md`](../CLAUDE.md) → "Ratification debt"). With it
+  ratified, **no phase sits unratified**: a further phase of ADRs may be accepted, and
+  ADR-061's implementation issues — plus the ADR-058 follow-ups — are now fileable.
+  Recorded **here and in [`design/state.md`](../design/state.md), not in the ADR**: the
+  format carries only `Status` and `Date` — there is no ratification field — and
+  accepted ADRs are never edited in place (ADR-044). Ratification changes no substance:
+  `runtime-assets.md`, `bin/list-runtime-assets`, and the required/optional fail-fast
+  installer semantics remain **decided, not built**. Bookkeeping tracked in issue #58.
+- **Provenance of that ratification, stated at its true strength.** It was conveyed
+  through the **Hermes supervision channel** (session directive of 2026-07-14, verbatim:
+  *"I ratify ADR-061 and approve you to move forward"*), not by any Oliver-authored
+  artifact in this repo — **no signature, no email, no commit, and no repo-side message
+  was observed before the attestation comment was posted.** It is an **operator
+  attestation**, anchored to issue [#58 comment 4966870880](https://github.com/takumi-omorgan/workflow-generator-takumi/issues/58#issuecomment-4966870880),
+  which was posted *before* the bookkeeping landed and invites Oliver to confirm it into
+  a first-party record. This is the ADR-057/058 ratification rule being applied rather
+  than re-learned: **a human approval is not self-evidencing, and the knowledge layer
+  may not out-claim its evidence.** If the relay is wrong, reverting the PR for issue #58
+  restores the debt and re-blocks the next phase of ADRs; nothing else depends on it.
+- **Clearing the debt cap does not unhalt ADR-059/060 — a necessary condition is not a
+  sufficient one.** The two are independent blocks that happened to coincide, and the
+  tempting inference ("the cap is free, so the halted drafts may proceed") is exactly
+  the one to refuse. ADR-059 is halted on *substance*: its Decision rests on a falsified
+  premise and needs a **committed install manifest**, a different artifact — Oliver's
+  ruling, still open in **#55**. ADR-060 is downstream of it. All three files
+  ([`design/state.md`](../design/state.md), [index.md](index.md), and this log) say so
+  explicitly, so a future session cannot read the freed cap as a green light. Durable
+  lesson: **when one of two overlapping blocks lifts, say plainly that the other did
+  not** — a closeout that only reports what unblocked reads as though everything did.
+- **`state.md`'s `next-action` YAML has been silently lossy — `#` and `: ` are live
+  syntax in an unquoted scalar.** Found while applying the review finding above, not by
+  the reviewer. In YAML, a `#` after a space **starts a comment**: the pre-existing
+  `args:` line (`... redraft (issue #55) — receipt-layer premise falsified ...`) parsed
+  *successfully* while **truncating everything from `#55` onward**, and a `: ` inside a
+  plain scalar is a hard parse error. The `next-action` block routinely carries issue
+  numbers and prose colons — precisely the two characters that corrupt it. All three
+  values are now **quoted** and the block is verified to round-trip through
+  `yaml.safe_load` intact. Note which failure mode is the dangerous one: the invalid
+  case **errors loudly**; the lossy case **parses**. And
+  [`bin/check-state-cap`](../bin/check-state-cap) counts lines — it **never parses the
+  YAML it guards**, so nothing caught this. Durable lesson: **quote YAML scalars that
+  can contain `#` or `: `; a guard that does not parse its artifact does not guard it.**
+  Closing that check is a fileable follow-up.
 - **ADR-059 HALTED before review — its load-bearing premise is false.** The draft
   claimed "the receipt layer already records what the installer wrote and at which
   version" and made that the Decision: *"the receipt layer becomes the source of

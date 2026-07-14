@@ -21,16 +21,17 @@ issue #51 — an operator attestation relayed through the Hermes supervision
 channel, not a first-party artifact). Its tooling (`bin/check-skill-budget`, the
 generated baseline, the skill migrations) is **decided, not built**.
 
-ADR-061 (declarative runtime-asset manifest) is **accepted under mandate
-(2026-07-14, issue #53) and awaiting Oliver's ratification**. It is the first of
-the three M6–M9 prerequisite ADRs (`adr-059`, `adr-060`, `adr-061`), which count
-as **one phase** for ratification-debt purposes; `adr-059` and `adr-060` follow
-in that same phase. Its manifest and parser are **decided, not built**.
+ADR-061 (declarative runtime-asset manifest) is **accepted and ratified**
+(accepted under mandate 2026-07-14, issue #53 / PR #54; ratified by Oliver on
+2026-07-14, issue #58 — an operator attestation relayed through the Hermes
+supervision channel, not a first-party artifact). It is the first of the three
+M6–M9 prerequisite ADRs (`adr-059`, `adr-060`, `adr-061`), and the only one that
+landed. Its manifest and parser are **decided, not built**.
 
-**One phase of ADRs is awaiting ratification** — the ratification-debt cap
-([`CLAUDE.md`](../CLAUDE.md) → "Ratification debt") allows exactly one, so it is
-**at the cap, not over it**. No further phase of ADRs may be accepted, and M6+
-implementation issues stay shut, until Oliver ratifies this one.
+**No phase of ADRs is awaiting ratification** — ADR-061 was the sole occupant of
+the ratification-debt cap ([`CLAUDE.md`](../CLAUDE.md) → "Ratification debt"),
+which is now **free**. A further phase of ADRs may be accepted, and ADR-061's
+implementation issues (plus the ADR-058 follow-ups) may be filed.
 
 **ADR-059 and ADR-060 are HALTED, not merely un-proposed.** ADR-059's Decision
 rests on a premise verified false — the receipt layer neither records what the
@@ -39,7 +40,9 @@ installer wrote, survives a clone, nor can express file ownership (see
 needs a *committed install manifest*, a different artifact, and adopting one
 changes its Decision — so it was stopped before review rather than patched.
 ADR-060 is downstream of it. **Both remain untracked drafts; neither may be
-proposed until Oliver rules on the redraft.**
+proposed until Oliver rules on the redraft** (issue #55, still open). The freed
+ratification-debt cap does **not** unhalt them: the cap was never what blocked
+them, so clearing it is necessary but not sufficient.
 
 `design/state.md` is the session-continuity pointer for what to do next;
 `gh` is canonical for issue and PR status. This line is the knowledge
