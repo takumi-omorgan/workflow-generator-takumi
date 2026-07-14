@@ -255,7 +255,7 @@ PR #76's fix touched 3 of the 4 (the example.md polish was lost when the duplica
 
 ### 36. Declarative runtime-asset manifest for the installer
 
-**Status:** idea
+**Status:** adr-drafted — [ADR-061](../design/adr/adr-061-runtime-asset-manifest.md) (accepted 2026-07-14), bundled with #37 per both entries' alignment notes
 **Target:** v-next
 **Captured:** 2026-05-06
 **Origin:** PR #65 review feedback (issue #60 — installer cluster fix). Reviewer's main concern: "The installer is now becoming the de facto package manifest for runtime dependencies. Right now the dependency graph exists in multiple places: skills reference templates implicitly, installer copies templates explicitly, docs describe expectations separately. That creates future drift risk."
@@ -289,7 +289,7 @@ Adding a new runtime template today requires a five-step ritual: add template �
 
 ### 37. Categorize installer assets as required vs optional (fail-fast vs warn-and-continue)
 
-**Status:** idea
+**Status:** adr-drafted — [ADR-061](../design/adr/adr-061-runtime-asset-manifest.md) (accepted 2026-07-14), option 3 (manifest-derived), bundled with #36
 **Target:** v-next
 **Captured:** 2026-05-06
 **Origin:** PR #65 review feedback (issue #60 — installer cluster fix). Reviewer's smaller point: "warn-and-continue on missing-source rather than fail-fast is reasonable for optional helpers, but some of these assets are no longer optional. If a required runtime template is missing from the kit source, the installer may now produce a partially broken target while still reporting success."
