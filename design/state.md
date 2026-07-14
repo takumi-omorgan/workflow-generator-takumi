@@ -15,10 +15,10 @@ single
 
 ## In-flight issue
 
-- **Issue:** #49 — ADR-058: adopt the SKILL.md body budget and progressive disclosure
-- **Prompt:** n/a (decision-only ADR acceptance)
-- **Branch:** `accept-adr-058-skill-body-budget`
-- **Status:** ADR-058 **accepted under mandate**, awaiting Oliver's async ratification. Decision-only: `bin/check-skill-budget`, the baseline file, and the skill migrations are **decided, not built**. Adversarial review reached READY (4/5, zero blockers) on the second pass — see [`knowledge/reviews/2026-07-14-adr-058-review.md`](../knowledge/reviews/2026-07-14-adr-058-review.md).
+- **Issue:** #51 — ratify ADR-058 and clear the ratification debt
+- **Prompt:** n/a (bookkeeping-only issue)
+- **Branch:** `ratify-adr-058`
+- **Status:** Oliver **ratified ADR-058** on 2026-07-14; the ratification-debt cap is free, so the `adr-059`..`adr-061` proposals may proceed. Ratification is an **operator attestation** relayed through the Hermes supervision channel — anchored to issue [#51 comment 4964025789](https://github.com/takumi-omorgan/workflow-generator-takumi/issues/51#issuecomment-4964025789), not to any Oliver-authored artifact in this repo. It is recorded in the knowledge layer, not in the ADR: the format carries no ratification field and accepted ADRs are never edited in place. ADR-058's substance is unchanged — `bin/check-skill-budget`, the generated baseline, and the skill migrations remain **decided, not built**.
 
 <!-- state:in-flight:end -->
 
@@ -30,11 +30,11 @@ Rolling list of the last five issues completed (oldest drops off as
 new entries land). One line each: PR number, ADR if any, one-line
 summary.
 
+- #50 — ADR-058 — accept the SKILL.md body budget and progressive disclosure (per-skill ratcheting ceiling, not an advisory check)
 - #48 — ADR-057 — ratify ADR-057 and clear the ratification debt
 - #46 — ADR-057 — accept the public export integrity gate (re-motivated after an audit falsified two of three premises)
 - #40 — none — guard: scan only added lines for placeholder tokens (was false-positiving on historical entries)
 - #37 — none — apply the Hermes hardened-workflow overlay to the source repo
-- #36 — none — release v5.0.1: prune the internal knowledge layer from the export, bump pins/changelog
 
 <!-- state:recent:end -->
 
@@ -58,12 +58,14 @@ repo is post-release under the Hermes hardened-workflow overlay. The current
 body of work is proposing the M6–M9 prerequisite ADRs, one PR each, each with a
 `knowledge/reviews/` receipt (which `guard` enforces).
 
-**ADR-058 is accepted** (issue #49) and **consumes the ratification-debt cap**.
-Per the overlay, at most one phase of ADRs may sit "accepted under mandate,
-awaiting ratification" — so `adr-059` (target-project kit lifecycle), `adr-060`
-(ship-loop adoption tier) and `adr-061` (runtime asset manifest) **must wait for
-Oliver to ratify ADR-058** before they are proposed, and no M6 implementation
-issues may be filed until then. Those three remain untracked local drafts.
+**ADR-058 is accepted and ratified** (accepted in PR #50 / issue #49; ratified
+by Oliver on 2026-07-14, issue #51 — an **operator attestation** relayed through
+the Hermes supervision channel, not a first-party artifact; see the in-flight
+section above for the provenance). The ratification-debt cap is **free**: no
+phase of ADRs sits unratified, so `adr-059` (target-project kit lifecycle),
+`adr-060` (ship-loop adoption tier) and `adr-061` (runtime asset manifest) may
+now be proposed — one PR each, each carrying a review receipt. They are still
+untracked local drafts. M6 implementation issues stay shut until they land.
 
 Read the ADR-058 review before writing the next ADR. The draft proposed an
 *advisory* budget check with a grace list that would "shrink each release"; the
@@ -73,7 +75,7 @@ skill to its own current word count as a CI-blocking ceiling that can only fall.
 Durable lesson: **a baseline is only a ratchet if the baseline itself is
 ratcheted**, or one PR raises the ceiling and the body together and passes.
 
-Follow-up issues to file once the cap frees: `bin/check-skill-budget` (with the
+Follow-up issues, now fileable: `bin/check-skill-budget` (with the
 monotonic-ceiling diff), the generated baseline, the `docs/skills.md` "what goes
 where" section, and migrating the five heaviest skills (2,384–2,706 words).
 
@@ -85,9 +87,9 @@ where" section, and migrating the five heaviest skills (2,384–2,706 words).
 
 ```yaml
 skill: none
-args: await Oliver's ratification of ADR-058 (accepted under mandate, PR for issue #49) — the debt cap is consumed until then
-preconditions: [ADR-058 PR merged]
-blocked-by: ratification-debt cap (adr-059..061 may not be proposed until ADR-058 is ratified)
+args: propose ADR-059 (target-project kit lifecycle) — one PR, with a knowledge/reviews receipt; adr-060 and adr-061 follow
+preconditions: [ADR-058 ratified, ratification-debt cap free]
+blocked-by: none
 ```
 
 <!-- state:next-action:end -->

@@ -5,6 +5,41 @@ top. One line per update; link to the file or section that changed.
 
 ## 2026-07-14
 
+- **Oliver ratified ADR-058 (operator attestation — provenance in the next
+  bullet); the ratification-debt cap is free.** ADR-058 was
+  accepted *under mandate* in PR #50 (issue #49) and held the one slot the
+  overlay allows for a phase of ADRs awaiting async ratification
+  ([`CLAUDE.md`](../CLAUDE.md) → "Ratification debt"). With it ratified, no
+  phase sits unratified and the remaining M6–M9 prerequisite ADRs
+  (`adr-059`..`adr-061`) are unblocked for proposal. Recorded **here and in
+  [`design/state.md`](../design/state.md), not in the ADR**: the format carries
+  only `Status` and `Date` — there is no ratification field — and accepted ADRs
+  are never edited in place (ADR-044). Ratification changes no substance:
+  `bin/check-skill-budget`, the generated baseline, and the skill migrations
+  remain **decided, not built**.
+- **Provenance of that ratification, stated at its true strength.** It was
+  conveyed through the **Hermes supervision channel** (session directive of
+  2026-07-14), not by any Oliver-authored artifact in this repo — no signature,
+  no email, no commit was observed. It is an **operator attestation**, anchored
+  to issue [#51 comment 4964025789](https://github.com/takumi-omorgan/workflow-generator-takumi/issues/51#issuecomment-4964025789),
+  which was posted *before* the bookkeeping landed and invites Oliver to confirm
+  it into a first-party record. This is the ADR-057 ratification rule being
+  applied rather than re-learned: **a human approval is not self-evidencing, and
+  the knowledge layer may not out-claim its evidence.** If the relay is wrong,
+  reverting PR for issue #51 restores the debt and re-blocks `adr-059`..`adr-061`;
+  nothing else depends on it.
+- **A reviewer's narration of its own process is not evidence either.** The
+  ratification review ([reviews/2026-07-14-adr-058-ratification-review.md](reviews/2026-07-14-adr-058-ratification-review.md))
+  opened its second pass by describing how it had "read all three changed files,
+  grepped the full tree, verified ADR-057's file is untouched, and re-run the
+  validation suite." It has no repo access and no tools — it saw only the
+  self-contained pack it was handed. The conclusions held (each is checkable
+  against the pack), but the account of how they were reached was **fabricated
+  tool-use**. This generalises the ADR-058 self-ID lesson: both a model's
+  identity claim and its diligence claim are just fluent text it can invent.
+  Trust only what the operator can independently check — routing config,
+  provider report, and whether each conclusion follows from material the
+  reviewer actually received. **Verify the claim; discard the narration.**
 - **ADR-058 (SKILL.md body budget and progressive disclosure) accepted under
   mandate; the ratification-debt cap is consumed.** Accepted in the PR for
   issue #49 after adversarial review reached READY (4/5, zero blockers) on its
