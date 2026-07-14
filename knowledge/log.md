@@ -5,6 +5,31 @@ top. One line per update; link to the file or section that changed.
 
 ## 2026-07-14
 
+- **ADR-059 HALTED before review — its load-bearing premise is false.** The draft
+  claimed "the receipt layer already records what the installer wrote and at which
+  version" and made that the Decision: *"the receipt layer becomes the source of
+  truth for what the kit owns in a target project."* Verification falsified it four
+  ways: the installer **writes no receipt** (`bin/install-workflow-kit:410` merely
+  *copies* the `write-receipt` script); `docs/receipts.md` calls installer receipts
+  a **deferred follow-up**; receipts are **gitignored** (`templates/gitignore.target:22`),
+  so a fresh clone has none; and the ADR-050 schema is keyed by **work-unit**
+  (issue/PR/release tag) with **no path list, version, or hash** — it cannot answer
+  "unmodified since install." ADR-059 needs a *committed install manifest*, which is
+  a **different artifact**, and making receipts committed would **contradict accepted
+  ADR-050** (which requires a superseding ADR first). That reaches the Decision, so
+  the pre-approved plan's stop condition fired. **ADR-060 is halted with it** (its
+  Option C calls `doctor`, an ADR-059 surface). No ADR-059/060 issue, branch or PR
+  was opened; both remain untracked drafts. Escalated to Oliver — see
+  [reviews/2026-07-14-adr-059-halt.md](reviews/2026-07-14-adr-059-halt.md), which
+  lays out the option space **without choosing one**.
+- **Durable lesson: "the X layer already does Y" is a premise, not a citation.**
+  ADR-059 named artifacts that genuinely exist (`bin/write-receipt`,
+  `schemas/receipt.v1.yaml`) and inferred a *capability* from their *existence*.
+  Existence was true; shape, durability and coverage were all false — and the
+  Decision rested on all three. The cheap mechanical check: **for every "X already
+  does Y", open X and find Y.** Three greps falsified it before a line of review
+  was spent. This is the same failure class as ADR-057, whose audit falsified two
+  of three premises.
 - **ADR-061 (declarative runtime-asset manifest) accepted under mandate**
   (issue #53) — the first of the three M6–M9 prerequisite ADRs, and the one the
   other two consume. It replaces the installer's inline `RUNTIME_TEMPLATES`

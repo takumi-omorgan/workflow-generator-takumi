@@ -32,6 +32,15 @@ in that same phase. Its manifest and parser are **decided, not built**.
 **at the cap, not over it**. No further phase of ADRs may be accepted, and M6+
 implementation issues stay shut, until Oliver ratifies this one.
 
+**ADR-059 and ADR-060 are HALTED, not merely un-proposed.** ADR-059's Decision
+rests on a premise verified false — the receipt layer neither records what the
+installer wrote, survives a clone, nor can express file ownership (see
+[reviews/2026-07-14-adr-059-halt.md](reviews/2026-07-14-adr-059-halt.md)). It
+needs a *committed install manifest*, a different artifact, and adopting one
+changes its Decision — so it was stopped before review rather than patched.
+ADR-060 is downstream of it. **Both remain untracked drafts; neither may be
+proposed until Oliver rules on the redraft.**
+
 `design/state.md` is the session-continuity pointer for what to do next;
 `gh` is canonical for issue and PR status. This line is the knowledge
 layer's phase claim — it and [log.md](log.md) move together in a closeout.
