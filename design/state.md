@@ -15,8 +15,8 @@ single
 
 ## In-flight issue
 
-- **Issue:** #58 — ratify ADR-061 and clear the ratification debt (bookkeeping only)
-- **Status:** Oliver **ratified ADR-061** on 2026-07-14 (accepted under mandate in PR #54 / issue #53); the ratification-debt cap is **free**. Ratification is an **operator attestation** relayed through the Hermes supervision channel — anchored to issue [#58 comment 4966870880](https://github.com/takumi-omorgan/workflow-generator-takumi/issues/58#issuecomment-4966870880), not to any Oliver-authored artifact in this repo. Recorded in state/knowledge, not in the ADR: the format has no ratification field and accepted ADRs are never edited in place. ADR-061's substance is unchanged — the manifest and `bin/list-runtime-assets` stay **decided, not built**. **ADR-059 and ADR-060 remain HALTED** (blocker 1); ratifying ADR-061 does **not** unhalt them.
+- **Issue:** #60 — ADR-059 redraft: accept the target-project kit lifecycle on a committed install ledger
+- **Status:** **ADR-059 accepted under mandate; ratification pending.** Oliver ruled **Option A** on #55 — an **operator attestation** relayed through the Hermes supervision channel, anchored to [#55 comment 4967121740](https://github.com/takumi-omorgan/workflow-generator-takumi/issues/55#issuecomment-4967121740), not to any Oliver-authored artifact in this repo. The Decision: the installer writes a committed, file-keyed, hashed `.claude/kit-lock.json` ledger; `upgrade`/`doctor`/`uninstall` are built on **manifest (ADR-061) + ledger (ADR-059)**. **ADR-050 is not superseded** — the redraft stops *depending* on receipts. Adversarial review READY on pass 3 of 3 (`qwen/qwen3.7-plus`). **Decided, not built**, and blocked on ADR-061's tooling.
 
 <!-- state:in-flight:end -->
 
@@ -38,21 +38,17 @@ Rolling last five completed issues; oldest drops off. PR number, ADR, summary.
 
 ## Blockers
 
-**1. ADR-059 HALTED — needs Oliver's ruling (issue #55).** Its Decision ("the receipt
-layer becomes the source of truth for what the kit owns") rests on a false premise: the
-installer writes **no** receipt, receipts are **gitignored** (a fresh clone has none),
-and the ADR-050 schema is **work-unit-keyed with no path/version/hash** — so
-"unmodified since install" is unanswerable. It needs a **committed install manifest** —
-a different artifact — and making receipts committed would contradict **accepted**
-ADR-050. **ADR-060 is halted with it** (its Option C calls `doctor`, an ADR-059
-surface). Analysis + option space: [halt note](../knowledge/reviews/2026-07-14-adr-059-halt.md).
+**1. ADR-059 ratification debt.** Accepted **under mandate**, awaiting Oliver's async
+ratification. The overlay allows **one** such phase at a time: until he ratifies, **no further
+phase of ADRs may be accepted** and ADR-059's implementation issues may not be filed. ADR-061
+implementation and the ADR-058 follow-ups are **not** blocked by this.
 
-**2. Open defect:** ADR-054 is still `proposed` though its helpers shipped under issue
-#13 (17 `bin/` files cite it) — implementation merged without its ADR ever being
-accepted. Needs its own gate.
+**2. ADR-060 HALTED.** Untracked draft, downstream of ADR-059 (its Option C calls `doctor`).
+Accepting ADR-059 does **not** unhalt it: it needs its own redraft — adding the ADR-061
+citation its text lacks — and may not be proposed while blocker 1 stands.
 
-**Not a blocker any more:** the ratification-debt cap. ADR-061 was its sole occupant
-and is now ratified, so **no phase of ADRs is awaiting ratification**.
+**3. Open defect:** ADR-054 is still `proposed` though its helpers shipped under issue #13
+(17 `bin/` files cite it) — merged without its ADR ever being accepted. Needs its own gate.
 
 <!-- state:blockers:end -->
 
@@ -63,25 +59,20 @@ and is now ratified, so **no phase of ADRs is awaiting ratification**.
 v5.0.0/v5.0.1 are published to `olivermorgan2/claude-workflow-kit`; the source repo is
 post-release under the Hermes hardened-workflow overlay.
 
-**ADR-061 is accepted and ratified** (accepted in PR #54 / issue #53; ratified by
-Oliver 2026-07-14, issue #58 — an **operator attestation** relayed through the Hermes
-supervision channel, not a first-party artifact; see the in-flight section above for
-the provenance). The debt cap is **free**. Still decided, not built — so ADR-061's
-implementation issues, and the ADR-058 follow-ups (`bin/check-skill-budget`, the
-generated baseline, the `docs/skills.md` section, migrating the five heaviest skills),
-are now **fileable**.
+**ADR-059 (accepted, unratified) and ADR-061 (accepted, ratified) are both decided, not
+built.** Neither `runtime-assets.md` nor `bin/list-runtime-assets` exists; there is no
+`doctor`/`upgrade`/`uninstall` code anywhere.
 
-**Do NOT simply "propose ADR-059" next — it is halted, not pending, and ratifying
-ADR-061 did not unhalt it.** The cap was never what blocked it: its Decision rests on
-a falsified premise and needs a *committed install manifest*, a different artifact.
-Read the [halt note](../knowledge/reviews/2026-07-14-adr-059-halt.md) first: it lays
-out three options and deliberately **chooses none**. That is Oliver's call, in #55.
+**Fileable now** (not blocked by the ratification debt): **ADR-061's implementation issues** —
+its manifest and parser are the prerequisite for *every* ADR-059 deliverable, so this is the
+natural next build — plus the ADR-058 follow-ups (`bin/check-skill-budget`, the generated
+baseline, the `docs/skills.md` section, migrating the five heaviest skills).
+**Blocked until Oliver ratifies ADR-059:** ADR-060's redraft, and ADR-059's implementation.
 
-Two review lessons, each of which cost a pass:
-[ADR-061](../knowledge/reviews/2026-07-14-adr-061-review.md) — **an ADR may not depend
-on a vocabulary defined by a downstream draft.**
-[ADR-059](../knowledge/reviews/2026-07-14-adr-059-halt.md) — **"the X layer already
-does Y" is a premise, not a citation**; open X and find Y.
+Three review lessons, each of which cost a pass:
+[ADR-061](../knowledge/reviews/2026-07-14-adr-061-review.md) — **an ADR may not depend on a vocabulary defined by a downstream draft.**
+[ADR-059 halt](../knowledge/reviews/2026-07-14-adr-059-halt.md) — **"the X layer already does Y" is a premise, not a citation**; open X and find Y.
+[ADR-059 redraft](../knowledge/reviews/2026-07-14-adr-059-redraft-review.md) — **a field asked to mean two things will authorise the wrong one**; and **one agreeable review pass is not a gate**.
 
 <!-- state:continue-here:end -->
 
@@ -91,9 +82,9 @@ does Y" is a premise, not a citation**; open X and find Y.
 
 ```yaml
 skill: none
-args: "Oliver rules on the ADR-059 redraft (issue #55) — receipt-layer premise falsified; needs a committed install manifest. ADR-059/060 stay halted until then. Meanwhile ADR-061 implementation issues and the ADR-058 follow-ups are fileable."
-preconditions: ["ADR-061 ratified (operator attestation, issue #58)", "ratification-debt cap free"]
-blocked-by: "awaiting-oliver (ADR-059 only; nothing else)"
+args: "File ADR-061 implementation issues (runtime-assets.md + bin/list-runtime-assets) — the prerequisite for every ADR-059 deliverable. ADR-058 follow-ups are also fileable. Oliver must ratify ADR-059 before ADR-060's redraft or ADR-059's implementation issues."
+preconditions: ["ADR-059 accepted under mandate (ratification pending)", "ADR-061 accepted and ratified"]
+blocked-by: "awaiting-oliver (ADR-059 ratification — blocks ADR-060 redraft and ADR-059 implementation only)"
 ```
 
 <!-- state:next-action:end -->
