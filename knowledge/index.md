@@ -15,12 +15,14 @@ post-release and carries the Hermes hardened-workflow overlay.
 ADR-057 (public export integrity gate) is **accepted and ratified** (ratified
 by Oliver on 2026-07-13).
 
-ADR-058 (SKILL.md body budget and progressive disclosure) is **accepted under
-mandate** (issue #49, 2026-07-14) and **awaiting Oliver's ratification**, so the
-ratification-debt cap is **consumed**: `adr-059`..`adr-061` may not be proposed
-and no M6 implementation issues may be filed until ADR-058 is ratified. Its
-tooling (`bin/check-skill-budget`, the generated baseline, the skill
-migrations) is **decided, not built**.
+ADR-058 (SKILL.md body budget and progressive disclosure) is **accepted and
+ratified** (accepted under mandate, issue #49; ratified by Oliver on 2026-07-14,
+issue #51 — an operator attestation relayed through the Hermes supervision
+channel, not a first-party artifact). Its tooling (`bin/check-skill-budget`, the
+generated baseline, the skill migrations) is **decided, not built**.
+
+**No phase of ADRs is awaiting ratification** — the ratification-debt cap is
+**free**, so `adr-059`..`adr-061` may now be proposed.
 
 `design/state.md` is the session-continuity pointer for what to do next;
 `gh` is canonical for issue and PR status. This line is the knowledge
