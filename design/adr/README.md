@@ -73,6 +73,7 @@ fences is preserved.
 | [ADR-056](adr-056-two-repo-public-distribution-export-model.md) | Two-repo public distribution export model | accepted |
 | [ADR-057](adr-057-public-export-integrity-gate.md) | Public export integrity gate | accepted |
 | [ADR-058](adr-058-skill-body-budget-and-progressive-disclosure.md) | SKILL.md body budget and progressive disclosure | accepted |
+| [ADR-059](adr-059-target-project-kit-lifecycle.md) | Target-project kit lifecycle — upgrade, doctor, uninstall | accepted |
 | [ADR-061](adr-061-runtime-asset-manifest.md) | Declarative runtime-asset manifest with required/optional semantics | accepted |
 
 <!-- adr-index:end -->

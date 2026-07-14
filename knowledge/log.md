@@ -5,6 +5,50 @@ top. One line per update; link to the file or section that changed.
 
 ## 2026-07-14
 
+- **ADR-059 redrafted and accepted under mandate — the lifecycle now rests on a
+  committed install ledger, not on receipts.** Oliver ruled **Option A** of the halt
+  note's option space (issue #55 — an **operator attestation** relayed through the
+  Hermes supervision channel, directive verbatim: *"approved"*, applied to a plan
+  recommending Option A; **no Oliver-authored artifact in this repo was observed**,
+  and the [ruling comment](https://github.com/takumi-omorgan/workflow-generator-takumi/issues/55#issuecomment-4967121740)
+  is that artifact). The Decision: the installer writes a committed, file-keyed,
+  hashed `.claude/kit-lock.json`, and `upgrade`/`doctor`/`uninstall` are built on
+  **manifest (ADR-061) + ledger (ADR-059)** — the manifest declares what *should* be
+  installed and who owns it; the ledger records what *was* written. `.claude/` is
+  already committed in targets except three paths, so the ledger needs **no gitignore
+  change** (`templates/gitignore.target:18-22`). Scope issue #60, PR #61,
+  [review receipt](reviews/2026-07-14-adr-059-redraft-review.md).
+- **ADR-050 is explicitly *not* superseded.** The redraft **stops depending on**
+  receipts rather than redefining them — which is precisely what dissolves the
+  "contradicts ADR-050" risk the [halt note](reviews/2026-07-14-adr-059-halt.md)
+  raised. Receipts stay gitignored, per-run, work-unit-keyed idempotency artifacts;
+  ADR-050's deferred follow-ups stay deferred. ADR-061 is **adopted, not extended**:
+  its closed ownership vocabulary (`kit-owned | generated | user-seeded`) is used
+  verbatim, its profile set stays `{ full }`, its since-version column stays
+  informational. ADR-059 is **decided, not built** — and it is blocked on ADR-061,
+  which is *also* not built.
+- **ADR-059 now occupies the ratification-debt cap** (freed hours earlier by ADR-061's
+  ratification). It is accepted *under mandate*, **awaiting Oliver's async
+  ratification** — tracked in a follow-up ratification-request issue. Until he
+  ratifies, **ADR-060 and ADR-059's implementation issues may not be filed**.
+  **ADR-060 remains HALTED** pending its own redraft; ratifying ADR-059 will not
+  unhalt it.
+- **Review lesson — one agreeable pass is not a gate.** Pass 1 (neutral framing)
+  returned READY on 17 checked premises. Pass 2 re-ran the *same artifact* under an
+  explicitly **hostile** framing and found a **blocking** defect: the missing-ledger
+  path would have written the *user's own edited* content hash under a kit asset ID,
+  so the next upgrade would read it as proof of kit provenance and **auto-clobber the
+  user's work** — violating the ADR's headline guarantee via its own documented
+  degradation path. Fixed with a `provenance: installed | adopted` field: an `adopted`
+  entry is never eligible for `replace`, and provenance is *earned by being written,
+  never by being observed*. READY on pass 3 of 3.
+- **Durable lesson: when one field is asked to mean two things, it will eventually
+  authorise the wrong one.** `sha256` meant "bytes we wrote" in the happy path and
+  "bytes we found" in the degraded path, and the degraded value flowed into the happy
+  path's decision. Ask of every field: *who may write it, and what may a reader
+  conclude from it?* If those answers do not compose, it is two fields. (Same shape as
+  the halt that produced this redraft, which asked *receipts* to mean something they
+  did not.)
 - **Oliver ratified ADR-061 (operator attestation — provenance in the next bullet);
   the ratification-debt cap is free.** ADR-061 was accepted *under mandate* in PR #54
   (issue #53) and held the one slot the overlay allows for a phase of ADRs awaiting
