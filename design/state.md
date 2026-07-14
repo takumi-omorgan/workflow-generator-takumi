@@ -26,11 +26,11 @@ single
 
 Rolling last five completed issues; oldest drops off. PR number, ADR, summary.
 
+- #61 — ADR-059 — redraft and accept the kit lifecycle on a committed `.claude/kit-lock.json` install ledger (manifest + ledger; ADR-050 *not* superseded; accepted under mandate)
 - #56 — none — record the ADR-059 HALT and the ADR-061 ratification request (docs only; #55 left open for Oliver's ruling)
 - #54 — ADR-061 — accept the declarative runtime-asset manifest (installer's inline 12→13-entry list becomes a manifest; missing *required* asset becomes fail-fast)
 - #52 — ADR-058 — ratify ADR-058 and clear the ratification debt
 - #50 — ADR-058 — accept the SKILL.md body budget and progressive disclosure (per-skill ratcheting ceiling, not an advisory check)
-- #48 — ADR-057 — ratify ADR-057 and clear the ratification debt
 
 <!-- state:recent:end -->
 

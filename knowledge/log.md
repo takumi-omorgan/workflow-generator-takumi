@@ -16,7 +16,7 @@ top. One line per update; link to the file or section that changed.
   **manifest (ADR-061) + ledger (ADR-059)** — the manifest declares what *should* be
   installed and who owns it; the ledger records what *was* written. `.claude/` is
   already committed in targets except three paths, so the ledger needs **no gitignore
-  change** (`templates/gitignore.target:18-22`). Scope issue #60,
+  change** (`templates/gitignore.target:18-22`). Scope issue #60, PR #61,
   [review receipt](reviews/2026-07-14-adr-059-redraft-review.md).
 - **ADR-050 is explicitly *not* superseded.** The redraft **stops depending on**
   receipts rather than redefining them — which is precisely what dissolves the
