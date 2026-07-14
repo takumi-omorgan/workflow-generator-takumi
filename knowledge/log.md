@@ -5,6 +5,40 @@ top. One line per update; link to the file or section that changed.
 
 ## 2026-07-14
 
+- **ADR-061 (declarative runtime-asset manifest) accepted under mandate**
+  (issue #53) — the first of the three M6–M9 prerequisite ADRs, and the one the
+  other two consume. It replaces the installer's inline `RUNTIME_TEMPLATES`
+  array with a `runtime-assets.md` manifest + `bin/list-runtime-assets` parser,
+  and turns a missing **required** asset from warn-and-continue into fail-fast.
+  The drift it targets is not hypothetical: the array shipped with **12** entries
+  (PR #65, `d245674`) and carries **13** today. **Decided, not built.**
+- **The review caught a dependency inversion that would have made the sequencing
+  decorative.** ADR-061 sequences before ADR-059/060 *because* they consume its
+  manifest — but as drafted it exposed two enumerated columns (`profiles`,
+  ownership class) whose valid values were defined by those very drafts. It
+  would have shipped a column only an unaccepted document could validate. The
+  cure: **ADR-061 now owns both vocabularies** — ownership is a closed set that
+  ADR-059 adopts (changing it needs a superseding ADR), and profiles ship as
+  exactly `{ full }`, closed and enforced, which ADR-060 extends on acceptance.
+  Durable lesson: **if X sequences before Y because Y consumes X, every
+  enumerated value X exposes must be closed by X.** Caught at review it is a
+  wording fix; caught later it is a data migration. See
+  [reviews/2026-07-14-adr-061-review.md](reviews/2026-07-14-adr-061-review.md).
+- **The parser contract is part of the decision, not an implementation detail.**
+  The reviewer's sharpest finding: the cited precedent (`criteria.md`) is a table
+  scripts *cite* but none parses, so `bin/list-runtime-assets` is the kit's first
+  such parser — and a *permissive* parser that skipped malformed rows would have
+  recreated the warn-and-continue failure the ADR exists to end, one layer up.
+  The ADR now pins it: strict parsing (a bad row is a hard error, never skipped),
+  **no fallback to a hardcoded list** on an unparseable manifest (that would
+  quietly restore the rejected Option A), and `--allow-missing` as an explicit,
+  loud, test-only flag.
+- **Reviewer identity is evidenced by routing, not self-report.** Both passes
+  recorded `model: qwen/qwen3.7-plus`, `provider: openrouter`, `failed: false`
+  from `hermes --usage-file`, with a fallback chain containing no Anthropic
+  model. This is the ADR-058 hallucinated-self-ID lesson applied: **a model's
+  claim about which model it is carries no evidential weight in either
+  direction** — the routing record does.
 - **Oliver ratified ADR-058 (operator attestation — provenance in the next
   bullet); the ratification-debt cap is free.** ADR-058 was
   accepted *under mandate* in PR #50 (issue #49) and held the one slot the

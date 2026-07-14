@@ -21,8 +21,16 @@ issue #51 — an operator attestation relayed through the Hermes supervision
 channel, not a first-party artifact). Its tooling (`bin/check-skill-budget`, the
 generated baseline, the skill migrations) is **decided, not built**.
 
-**No phase of ADRs is awaiting ratification** — the ratification-debt cap is
-**free**, so `adr-059`..`adr-061` may now be proposed.
+ADR-061 (declarative runtime-asset manifest) is **accepted under mandate
+(2026-07-14, issue #53) and awaiting Oliver's ratification**. It is the first of
+the three M6–M9 prerequisite ADRs (`adr-059`, `adr-060`, `adr-061`), which count
+as **one phase** for ratification-debt purposes; `adr-059` and `adr-060` follow
+in that same phase. Its manifest and parser are **decided, not built**.
+
+**One phase of ADRs is awaiting ratification** — the ratification-debt cap
+([`CLAUDE.md`](../CLAUDE.md) → "Ratification debt") allows exactly one, so it is
+**at the cap, not over it**. No further phase of ADRs may be accepted, and M6+
+implementation issues stay shut, until Oliver ratifies this one.
 
 `design/state.md` is the session-continuity pointer for what to do next;
 `gh` is canonical for issue and PR status. This line is the knowledge
