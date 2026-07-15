@@ -34,6 +34,53 @@ The full classification rules are in
 
 ---
 
+## What goes where: SKILL.md body vs. `docs/skills/<name>.md`
+
+A skill's `SKILL.md` is loaded into the agent's context on **every**
+invocation, where it competes with the project material the skill is
+supposed to operate on. So the body carries only what the agent needs to
+act; everything a *human operator* reads to understand the skill lives in
+a companion reference file, `docs/skills/<name>.md`. This split is
+enforced by a word budget on the body — see
+[`bin/check-skill-budget`](../bin/check-skill-budget) — so knowing where a
+sentence belongs is a mechanical call, not a matter of taste.
+
+**Stays in the `SKILL.md` body** — the operating instructions, i.e.
+anything the agent needs at runtime to produce a correct result *without
+following a link*:
+
+- **Inputs** and their descriptions.
+- The **step-by-step procedure**.
+- **Gates** — preconditions and postconditions the agent must check.
+- **Outputs** and their exact formats.
+- **Handoffs** to other skills.
+- **Hard rules** the agent must never violate.
+
+**Moves to `docs/skills/<name>.md`** — the reference material, which the
+human operator reads and the agent never does:
+
+- **Rationale** for the skill's design.
+- **ADR history** — why this shape was chosen.
+- **Worked examples**.
+- **Edge-case essays**.
+- **Background** and historical context.
+- Any non-essential prose that is only bloating the body.
+
+### The hard constraint: the body stays self-sufficient at runtime
+
+The agent loads only `SKILL.md` and **never follows the reference link**.
+So the body must remain self-sufficient: if moving a sentence would cause
+the agent to fail at producing a correct result, the sentence **stays in
+the body**, budget notwithstanding. A rule relocated to `docs/` is a
+silently-dropped rule. The budget bounds prose accretion; it never
+outranks runtime correctness.
+
+The `description` frontmatter field is **not** part of the body and is not
+budgeted; it, `kit.json`, and `validate-kit-json` are unaffected by this
+convention.
+
+---
+
 ## Start here: the verb layer
 
 You do not need to memorise all of the skills below. A small
