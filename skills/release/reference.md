@@ -114,6 +114,19 @@ After scanning, `/release` records one of two values:
 The `shape` value is presented to the user in the release plan, so
 the classification is visible before the approval gate.
 
+### Clarifier banner (exact text)
+
+For `shape = workflow`, prepend this banner to the release notes so it ships
+into both the annotated tag and the GitHub Release body; its first line also
+becomes the annotated tag's summary, labelling the tag itself. For
+`shape = product`, no banner — the changelog renders verbatim.
+
+```
+> This is a workflow tag for documentation drift-tracking; the project is
+> not a software product (see PRD for project shape). The version number is
+> for snapshot ordering, not semantic versioning of an API.
+```
+
 If `design/prd.md` / `design/prd-normalized.md` / `design/build-out-plan.md`
 are missing (e.g. on a fresh project that hasn't run `/idea-to-prd`
 or `/prd-to-mvp` yet), those signals score zero — they neither fire
