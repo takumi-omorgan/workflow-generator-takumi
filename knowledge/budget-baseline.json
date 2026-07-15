@@ -1,0 +1,20 @@
+{
+  "adr-writer": 1429,
+  "audit-milestone": 1259,
+  "changelog": 1703,
+  "check-plan": 1629,
+  "clarify": 1339,
+  "claude-issue-executor": 2615,
+  "complete-milestone": 1671,
+  "issue-planner": 2478,
+  "milestone-summary": 1407,
+  "pause": 1386,
+  "planning": 1373,
+  "pr-review-packager": 2387,
+  "prd-normalizer": 883,
+  "prd-to-mvp": 974,
+  "prepare-issue": 1836,
+  "release": 2384,
+  "resume": 1175,
+  "workflow-docs": 2706
+}

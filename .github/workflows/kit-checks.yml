@@ -20,6 +20,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # check-skill-budget's ratchet compares the baseline against
+          # HEAD~1 (the base tip on a PR merge commit); it needs one commit
+          # of history beyond HEAD (ADR-058).
+          fetch-depth: 2
 
       - name: Show tool versions
         run: |
@@ -56,6 +61,9 @@ jobs:
 
       - name: list-runtime-assets parses the manifest (ADR-061)
         run: bin/list-runtime-assets --profile=full --format json
+
+      - name: check-skill-budget (SKILL.md body budget + ratchet)
+        run: bin/check-skill-budget
 
       - name: check-state-cap
         run: bin/check-state-cap --check
