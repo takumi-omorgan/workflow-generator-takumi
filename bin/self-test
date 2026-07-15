@@ -103,6 +103,8 @@ fi
 step "validate-kit-json"       0 bin/validate-kit-json
 step "validate-carry-forward"  0 bin/validate-carry-forward
 step "check-consistency"       0 bin/check-consistency
+step "check-manifest"          0 bin/check-manifest
+step "list-runtime-assets"     0 bin/list-runtime-assets --profile=full
 step "check-state-cap"         0 bin/check-state-cap --check
 step "check-install-render"    0 bin/check-install-render
 step "review-eval"             0 bin/review-eval
@@ -185,6 +187,25 @@ ln -snf "$(pwd -P)" "$STUB/linkroot" 2>/dev/null
 record "stub:collect-eval-symlinked-cwd" "stub" "0" "$?"
 bin/write-receipt --find --skill self-test --key stub --status completed --dir "$STUB/receipts" >/dev/null 2>&1
 record "stub:receipt-find" "stub" "0" "$?"
+
+# list-runtime-assets parser fixtures (ADR-061): the parser's failure
+# modes are part of the decision — prove strict parsing on throwaway
+# manifests without touching the real one.
+bin/list-runtime-assets --manifest bin/list-runtime-assets-fixtures/valid.md --format json >/dev/null 2>&1
+record "stub:list-assets-valid" "stub" "0" "$?"
+bin/list-runtime-assets --manifest bin/list-runtime-assets-fixtures/malformed-row.md >/dev/null 2>&1
+record "stub:list-assets-malformed" "stub" "1" "$?"
+bin/list-runtime-assets --manifest bin/list-runtime-assets-fixtures/unknown-profile.md >/dev/null 2>&1
+record "stub:list-assets-unknown-profile" "stub" "1" "$?"
+bin/list-runtime-assets --manifest bin/list-runtime-assets-fixtures/missing-required.md >/dev/null 2>&1
+record "stub:list-assets-missing-required" "stub" "1" "$?"
+bin/list-runtime-assets --manifest bin/list-runtime-assets-fixtures/missing-required.md --allow-missing >/dev/null 2>&1
+record "stub:list-assets-allow-missing" "stub" "0" "$?"
+bin/list-runtime-assets --manifest bin/list-runtime-assets-fixtures/valid.md --profile bogus >/dev/null 2>&1
+record "stub:list-assets-bad-profile" "stub" "2" "$?"
+# --profile filter emits exactly the profile's rows (both fixture rows are `full`).
+la_rows=$(bin/list-runtime-assets --manifest bin/list-runtime-assets-fixtures/valid.md --profile=full 2>/dev/null | wc -l | tr -d ' ')
+record "stub:list-assets-profile-filter" "stub" "2" "$la_rows"
 
 # AI PR review: generate a review artifact offline (mock), then preview the
 # publish (posts nothing). Exercises bin/review-pr and bin/publish-review

@@ -294,6 +294,26 @@ for kv in "${CLI_VALUES[@]+"${CLI_VALUES[@]}"}"; do
 done
 
 # ---------------------------------------------------------------------------
+# Runtime-asset manifest (ADR-061)
+# ---------------------------------------------------------------------------
+# Derive the install set from runtime-assets.md via bin/list-runtime-assets
+# rather than a hardcoded array. The parser runs with the kit root as its
+# working directory so manifest source paths resolve against the kit tree.
+# A missing/unparseable manifest or a missing REQUIRED source is a hard
+# error here — before any kit file is written into the target — so an
+# aborted install leaves the target clean.
+MANIFEST_ASSETS="$(mktemp "${TMPDIR:-/tmp}/kit-manifest-assets.XXXXXX")"
+MANIFEST_ERR="$MANIFEST_ASSETS.err"
+cleanup_manifest_tmp() { rm -f "$MANIFEST_ASSETS" "$MANIFEST_ERR" 2>/dev/null || true; }
+trap cleanup_manifest_tmp EXIT
+if ! ( cd "$KIT_ROOT" && bin/list-runtime-assets --profile=full ) \
+     >"$MANIFEST_ASSETS" 2>"$MANIFEST_ERR"; then
+  err "runtime-asset manifest did not parse; nothing was written to the target:"
+  while IFS= read -r line; do err "  $line"; done < "$MANIFEST_ERR"
+  exit 1
+fi
+
+# ---------------------------------------------------------------------------
 # Scaffolding
 # ---------------------------------------------------------------------------
 
@@ -479,42 +499,32 @@ else
   warn "no prompts/_template.md or notes/issue-prompt.md found in the kit; prompts/ created empty"
 fi
 
-# 2b. Copy runtime templates (consumed by skills running in the target).
-#     Allowlist — claude-md-template.md is install-time only and is rendered
-#     into CLAUDE.md in step 3, not copied; templates/licenses/ is handled
-#     by the --license flag in step 5; templates/*.target files are
-#     install-shaped seeds copied to non-templates/ destinations below.
-RUNTIME_TEMPLATES=(
-  adr-template.md
-  ai-summary-template.md
-  architecture-template.md
-  build-out-plan-template.md
-  decisions-template.md
-  issue-template.md
-  milestone-summary-template.md
-  mvp-template.md
-  planning-template.md
-  pr-template.md
-  prd-template.md
-  readme-template.md
-  state-template.md
-)
+# 2b. Copy runtime templates (consumed by skills running in the target),
+#     derived from runtime-assets.md (ADR-061) rather than a hardcoded
+#     allowlist. The manifest rows whose dest lands under templates/ are
+#     exactly the runtime templates. claude-md-template.md is install-time
+#     only (rendered into CLAUDE.md in step 3, no templates/ dest);
+#     templates/licenses/ is handled by --license in step 5;
+#     templates/*.target files seed non-templates/ destinations elsewhere.
 mkdir -p "$TARGET_DIR/templates"
-info "copying runtime templates into templates/"
-for tmpl in "${RUNTIME_TEMPLATES[@]}"; do
-  src="$KIT_ROOT/templates/$tmpl"
-  dest="$TARGET_DIR/templates/$tmpl"
-  if [ ! -f "$src" ]; then
-    warn "  kit template missing: templates/$tmpl"
+info "copying runtime templates into templates/ (from runtime-assets.md)"
+while IFS="$(printf '\t')" read -r _id src dest _req _profiles _own _since; do
+  [ -n "${dest:-}" ] || continue
+  case "$dest" in templates/*) ;; *) continue ;; esac
+  srcpath="$KIT_ROOT/$src"
+  destpath="$TARGET_DIR/$dest"
+  if [ ! -f "$srcpath" ]; then
+    warn "  kit template missing: $src"
     continue
   fi
-  if [ -f "$dest" ] && [ "$FORCE" -ne 1 ]; then
-    info "  skip (exists): templates/$tmpl"
+  if [ -f "$destpath" ] && [ "$FORCE" -ne 1 ]; then
+    info "  skip (exists): $dest"
     continue
   fi
-  info "  copy:          templates/$tmpl"
-  cp "$src" "$dest"
-done
+  info "  copy:          $dest"
+  mkdir -p "$(dirname "$destpath")"
+  cp "$srcpath" "$destpath"
+done < "$MANIFEST_ASSETS"
 
 # 2c. Seed .github/pull_request_template.md from the kit's PR template.
 #     Referenced by the CLAUDE.md template's GitHub conventions section.
@@ -712,6 +722,87 @@ if [ -n "$LICENSE_ID" ]; then
     rm -f "$license_tmp"
   fi
 fi
+
+# ---------------------------------------------------------------------------
+# 6. Write the ADR-059 install ledger (.claude/kit-lock.json).
+# ---------------------------------------------------------------------------
+# Final write step. Records every installed asset with the exact bytes the
+# installer wrote (sha256), joined to the manifest by stable id, so a later
+# upgrade can prove "unmodified since install". Only files actually present
+# in the target are recorded; provenance is "installed" because the kit
+# wrote these bytes.
+#
+# ADR-059 is silent on how a directory-row asset (ADR-061 source ending in
+# `/`) maps to the file-keyed ledger; the conservative choice is one entry
+# per installed file, all sharing the row's manifest id (the ledger joins
+# to the manifest on id, and several files legitimately belong to one asset).
+if command -v sha256sum >/dev/null 2>&1; then
+  hash_of() { sha256sum "$1" | awk '{print $1}'; }
+elif command -v shasum >/dev/null 2>&1; then
+  hash_of() { shasum -a 256 "$1" | awk '{print $1}'; }
+else
+  err "no sha256sum or shasum available; cannot write .claude/kit-lock.json"
+  err "(a ledger whose hashes the kit cannot compute is worse than none — ADR-059)"
+  exit 1
+fi
+
+KIT_VERSION="$(sed -n 's/.*"kitVersion"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$KIT_ROOT/kit.json" | head -1)"
+[ -n "$KIT_VERSION" ] || KIT_VERSION="unknown"
+INSTALLED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+LEDGER_DEST="$TARGET_DIR/.claude/kit-lock.json"
+mkdir -p "$TARGET_DIR/.claude"
+
+LEDGER_ENTRIES="$(mktemp "${TMPDIR:-/tmp}/kit-lock-entries.XXXXXX")"
+while IFS="$(printf '\t')" read -r id src dest _req _profiles own since; do
+  [ -n "${id:-}" ] || continue
+  case "$src" in
+    */)  # directory row: one entry per installed file under dest
+      dpath="$TARGET_DIR/${dest%/}"
+      [ -d "$dpath" ] || continue
+      while IFS= read -r f; do
+        rel="${f#"$TARGET_DIR"/}"
+        sha="$(hash_of "$f")"
+        printf '%s\t%s\t%s\t%s\t%s\n' "$id" "$rel" "$own" "$sha" "$since" >> "$LEDGER_ENTRIES"
+      done < <(find "$dpath" -type f | LC_ALL=C sort)
+      ;;
+    *)   # file row
+      dpath="$TARGET_DIR/$dest"
+      [ -f "$dpath" ] || continue
+      sha="$(hash_of "$dpath")"
+      printf '%s\t%s\t%s\t%s\t%s\n' "$id" "$dest" "$own" "$sha" "$since" >> "$LEDGER_ENTRIES"
+      ;;
+  esac
+done < "$MANIFEST_ASSETS"
+
+# Emit JSON with printf (no python3 dependency; ADR-059 keeps python3
+# optional in the install path). Every field is an id, a relative path, a
+# closed-vocabulary token, a hex digest, or a timestamp — no JSON-escaping
+# hazard — but reject a stray double-quote rather than emit invalid JSON.
+LEDGER_N=$(wc -l < "$LEDGER_ENTRIES" | tr -d ' ')
+{
+  printf '{\n'
+  printf '  "schema": "kit-lock",\n'
+  printf '  "version": 1,\n'
+  printf '  "kitVersion": "%s",\n' "$KIT_VERSION"
+  printf '  "installedAt": "%s",\n' "$INSTALLED_AT"
+  printf '  "profile": "full",\n'
+  printf '  "assets": ['
+  i=0
+  while IFS="$(printf '\t')" read -r id rel own sha since; do
+    case "$id$rel$own$sha$since" in *'"'*)
+      err "refusing to write kit-lock.json: unexpected double-quote in ledger field ($id $rel)"; exit 1 ;;
+    esac
+    i=$((i + 1))
+    [ "$i" -gt 1 ] && printf ','
+    printf '\n    {"id": "%s", "dest": "%s", "ownership": "%s", "sha256": "%s", "provenance": "installed", "since": "%s"}' \
+      "$id" "$rel" "$own" "$sha" "$since"
+  done < "$LEDGER_ENTRIES"
+  [ "$LEDGER_N" -gt 0 ] && printf '\n  '
+  printf ']\n'
+  printf '}\n'
+} > "$LEDGER_DEST"
+rm -f "$LEDGER_ENTRIES"
+info "wrote install ledger .claude/kit-lock.json ($LEDGER_N asset file(s), kitVersion $KIT_VERSION)"
 
 # ---------------------------------------------------------------------------
 # Git: init if needed, then commit.

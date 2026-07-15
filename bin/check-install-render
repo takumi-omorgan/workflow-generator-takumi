@@ -134,6 +134,62 @@ if [ -e "$TARGET/.claude/bin/fence" ] && [ ! -x "$TARGET/.claude/bin/fence" ]; t
   add_problem "target .claude/bin/fence is not executable"
 fi
 
+# ADR-059 install ledger: the installer writes .claude/kit-lock.json as its
+# final step. It is an EXPECTED committed artifact (not stray output), and
+# it must be schema-valid — a malformed ledger is worse than none because
+# the upgrade planner trusts it.
+LEDGER="$TARGET/.claude/kit-lock.json"
+if [ ! -f "$LEDGER" ]; then
+  add_problem "default install did not write the ADR-059 ledger .claude/kit-lock.json"
+else
+  ledger_scan=$(python3 - "$LEDGER" <<'PY'
+import json, re, sys
+raw = open(sys.argv[1], encoding="utf-8").read()
+try:
+    d = json.loads(raw)
+except Exception as exc:
+    print("kit-lock.json is not valid JSON: %s" % exc); raise SystemExit(1)
+problems = []
+if d.get("schema") != "kit-lock":
+    problems.append("schema is %r, expected 'kit-lock'" % d.get("schema"))
+if d.get("version") != 1:
+    problems.append("version is %r, expected 1" % d.get("version"))
+if not d.get("kitVersion"):
+    problems.append("missing kitVersion")
+if d.get("profile") != "full":
+    problems.append("profile is %r, expected 'full'" % d.get("profile"))
+assets = d.get("assets")
+if not isinstance(assets, list) or not assets:
+    problems.append("assets is missing or empty")
+    assets = []
+OWN = {"kit-owned", "generated", "user-seeded"}
+hex64 = re.compile(r"^[0-9a-f]{64}$")
+dests = set()
+for a in assets:
+    for f in ("id", "dest", "ownership", "sha256", "provenance", "since"):
+        if f not in a:
+            problems.append("asset %r missing field %s" % (a.get("dest", "?"), f)); break
+    else:
+        dests.add(a["dest"])
+        if a["provenance"] != "installed":
+            problems.append("asset %s provenance %r, expected 'installed'" % (a["dest"], a["provenance"]))
+        if a["ownership"] not in OWN:
+            problems.append("asset %s ownership %r not in %s" % (a["dest"], a["ownership"], sorted(OWN)))
+        if not hex64.match(a["sha256"]):
+            problems.append("asset %s sha256 is not a 64-hex digest" % a["dest"])
+# A known kit-owned file must be recorded, proving the ledger reflects the
+# real install rather than an empty shell.
+if ".claude/skills/adr-writer/SKILL.md" not in dests:
+    problems.append("ledger does not record .claude/skills/adr-writer/SKILL.md")
+if problems:
+    print("; ".join(problems)); raise SystemExit(1)
+PY
+)
+  if [ $? -ne 0 ]; then
+    add_problem "ledger .claude/kit-lock.json is not schema-valid: $ledger_scan"
+  fi
+fi
+
 # Installed-layout marker-fence round-trip: the helper must read and rewrite a
 # zone in the installed layout without clobbering surrounding bytes. Fence
 # corruption is silent and destructive, so prove it on the shipped copy.

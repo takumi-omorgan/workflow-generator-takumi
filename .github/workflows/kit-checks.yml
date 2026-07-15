@@ -54,6 +54,9 @@ jobs:
       - name: check-manifest (runtime-assets.md ↔ kit tree)
         run: bin/check-manifest
 
+      - name: list-runtime-assets parses the manifest (ADR-061)
+        run: bin/list-runtime-assets --profile=full --format json
+
       - name: check-state-cap
         run: bin/check-state-cap --check
 

@@ -827,6 +827,18 @@
       "description": "Validate the runtime-asset manifest (runtime-assets.md): schema version, table shape, id/vocabulary constraints, unique ids and dests, and source existence (ADR-061)."
     },
     {
+      "name": "list-runtime-assets",
+      "path": "bin/list-runtime-assets",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Parse the runtime-asset manifest (runtime-assets.md) and emit the profile-filtered install/ownership asset list the installer, upgrade planner, and profile logic derive from; strict (malformed row, unknown profile/ownership, missing required source all hard-error), no fallback list (ADR-061)."
+    },
+    {
       "name": "self-test",
       "path": "bin/self-test",
       "format": "json",
