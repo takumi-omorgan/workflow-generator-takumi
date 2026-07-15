@@ -105,6 +105,7 @@ step "validate-carry-forward"  0 bin/validate-carry-forward
 step "check-consistency"       0 bin/check-consistency
 step "check-manifest"          0 bin/check-manifest
 step "list-runtime-assets"     0 bin/list-runtime-assets --profile=full
+step "check-skill-budget"      0 bin/check-skill-budget
 step "check-state-cap"         0 bin/check-state-cap --check
 step "check-install-render"    0 bin/check-install-render
 step "review-eval"             0 bin/review-eval
@@ -206,6 +207,44 @@ record "stub:list-assets-bad-profile" "stub" "2" "$?"
 # --profile filter emits exactly the profile's rows (both fixture rows are `full`).
 la_rows=$(bin/list-runtime-assets --manifest bin/list-runtime-assets-fixtures/valid.md --profile=full 2>/dev/null | wc -l | tr -d ' ')
 record "stub:list-assets-profile-filter" "stub" "2" "$la_rows"
+
+# check-skill-budget fixtures (ADR-058): the body-over-ceiling failure and
+# the ceiling-rise ratchet, plus a ratchet-held pass, on throwaway trees.
+CSB="$SCRIPT_DIR/check-skill-budget"
+BUD="$STAGING/budget"
+mkdir -p "$BUD/over/skills/foo"
+{ printf -- '---\nname: foo\n---\n'; for _ in $(seq 1 50); do printf 'w '; done; printf '\n'; } > "$BUD/over/skills/foo/SKILL.md"
+printf '{"foo": 10}\n' > "$BUD/over/baseline.json"
+( cd "$BUD/over" && "$CSB" --skills-dir skills --baseline baseline.json --no-ratchet ) >/dev/null 2>&1
+record "stub:budget-over-ceiling" "stub" "1" "$?"
+
+# ceiling-rise across two commits -> ratchet fails (exit 1)
+BUDR="$BUD/ratchet"
+mkdir -p "$BUDR/skills/foo" "$BUDR/knowledge"
+(
+  cd "$BUDR" && git init -q && git config user.email t@self-test && git config user.name self-test
+  printf -- '---\nname: foo\n---\nfive little words go here\n' > skills/foo/SKILL.md
+  printf '{"foo": 100}\n' > knowledge/budget-baseline.json
+  git add -A && git commit -qm c1
+  printf '{"foo": 200}\n' > knowledge/budget-baseline.json
+  git add -A && git commit -qm c2
+) >/dev/null 2>&1
+( cd "$BUDR" && "$CSB" --skills-dir skills --baseline knowledge/budget-baseline.json ) >/dev/null 2>&1
+record "stub:budget-ceiling-rise" "stub" "1" "$?"
+
+# unchanged ceiling across two commits (body shrinks/stays) -> ratchet holds (exit 0)
+BUDH="$BUD/held"
+mkdir -p "$BUDH/skills/foo" "$BUDH/knowledge"
+(
+  cd "$BUDH" && git init -q && git config user.email t@self-test && git config user.name self-test
+  printf -- '---\nname: foo\n---\nfive little words go here\n' > skills/foo/SKILL.md
+  printf '{"foo": 100}\n' > knowledge/budget-baseline.json
+  git add -A && git commit -qm c1
+  printf 'six little words go here now\n' >> skills/foo/SKILL.md
+  git add -A && git commit -qm c2
+) >/dev/null 2>&1
+( cd "$BUDH" && "$CSB" --skills-dir skills --baseline knowledge/budget-baseline.json ) >/dev/null 2>&1
+record "stub:budget-ratchet-held" "stub" "0" "$?"
 
 # AI PR review: generate a review artifact offline (mock), then preview the
 # publish (posts nothing). Exercises bin/review-pr and bin/publish-review

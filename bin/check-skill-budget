@@ -1,0 +1,222 @@
+#!/usr/bin/env bash
+# check-skill-budget — enforce the SKILL.md body budget (ADR-058).
+#
+# Two rules, blocking in CI:
+#   1. A skill NOT in the baseline must have a body of <= 800 words
+#      (YAML frontmatter excluded).
+#   2. A skill IN the baseline must not exceed its recorded ceiling.
+# Plus the ratchet: the baseline's ceilings are monotonically
+# non-increasing. The checker diffs the current baseline against its own
+# state in the previous commit (`git show HEAD~1:<baseline>`) and fails if
+# any ceiling rises or a new entry is added. The only legal baseline edits
+# are lowering a ceiling and deleting an entry. If the previous commit has
+# no baseline (or there is no parent commit), the ratchet is skipped — so
+# the PR that introduces the baseline does not fail itself.
+#
+# Body word count = SKILL.md with YAML frontmatter (the opening `---`
+# through the closing `---`, inclusive) removed, counted like
+# `awk '/^---$/{c++; next} c>=2' | wc -w`. This is the exact method that
+# produced the audited counts the baseline is generated from.
+#
+# Usage:
+#   bin/check-skill-budget [--format text|json] [--skills-dir DIR]
+#                          [--baseline PATH] [--no-ratchet] [-h]
+#
+# --skills-dir / --baseline exist for fixtures. --no-ratchet is for
+# fixtures that are not git repositories; it never relaxes rules 1–2.
+#
+# Exit codes (shared convention; see lib/json-envelope.sh):
+#   0  within budget
+#   1  budget violation (over ceiling / over 800 / ceiling raised)
+#   2  invocation error (bad flags, unreadable baseline)
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/json-envelope.sh
+. "$SCRIPT_DIR/lib/json-envelope.sh"
+
+usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; }
+
+FORMAT="text"
+SKILLS_DIR="skills"
+BASELINE="knowledge/budget-baseline.json"
+NO_RATCHET=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --format)
+      [ $# -ge 2 ] || { printf 'check-skill-budget: --format needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+      FORMAT="$2"; shift 2 ;;
+    --format=*) FORMAT="${1#*=}"; shift ;;
+    --skills-dir)
+      [ $# -ge 2 ] || { printf 'check-skill-budget: --skills-dir needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+      SKILLS_DIR="$2"; shift 2 ;;
+    --skills-dir=*) SKILLS_DIR="${1#*=}"; shift ;;
+    --baseline)
+      [ $# -ge 2 ] || { printf 'check-skill-budget: --baseline needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+      BASELINE="$2"; shift 2 ;;
+    --baseline=*) BASELINE="${1#*=}"; shift ;;
+    --no-ratchet) NO_RATCHET=1; shift ;;
+    -h|--help) usage; exit 0 ;;
+    *) printf 'check-skill-budget: unknown argument: %s\n' "$1" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+  esac
+done
+case "$FORMAT" in
+  text|json) ;;
+  *) printf 'check-skill-budget: --format must be text or json (got: %s)\n' "$FORMAT" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac
+
+if [ ! -d "$SKILLS_DIR" ]; then
+  printf 'check-skill-budget: skills dir not found: %s\n' "$SKILLS_DIR" >&2
+  exit "$ENVELOPE_EXIT_INVOCATION"
+fi
+if [ ! -f "$BASELINE" ] || [ ! -r "$BASELINE" ]; then
+  printf 'check-skill-budget: baseline not found or unreadable: %s\n' "$BASELINE" >&2
+  exit "$ENVELOPE_EXIT_INVOCATION"
+fi
+
+# Fetch the previous-commit baseline for the ratchet, if available. An
+# absent parent, absent file, or non-git tree yields an empty string and
+# the ratchet is skipped (the introducing PR must not fail itself).
+PREV_BASELINE=""
+HAVE_PREV=0
+if [ "$NO_RATCHET" -eq 0 ]; then
+  if PREV_BASELINE="$(git show "HEAD~1:$BASELINE" 2>/dev/null)"; then
+    HAVE_PREV=1
+  fi
+fi
+
+RESULT=$(
+  SKILLS_DIR="$SKILLS_DIR" BASELINE="$BASELINE" \
+  PREV_BASELINE="$PREV_BASELINE" HAVE_PREV="$HAVE_PREV" \
+  python3 <<'PYEOF'
+import glob, json, os, sys
+
+skills_dir = os.environ["SKILLS_DIR"]
+baseline_path = os.environ["BASELINE"]
+have_prev = os.environ.get("HAVE_PREV") == "1"
+prev_raw = os.environ.get("PREV_BASELINE", "")
+
+BUDGET = 800
+
+
+def emit(exit_code, status, outputs, text):
+    print(json.dumps({"exit": exit_code, "status": status,
+                      "outputs": outputs, "text": text}, ensure_ascii=False))
+    sys.exit(0)
+
+
+def body_word_count(path):
+    # Matches `awk '/^---$/{c++; next} c>=2' | wc -w`: drop the frontmatter
+    # (through the second `---`), count whitespace-separated tokens of the
+    # remaining lines. `---` lines never contribute words.
+    c = 0
+    words = 0
+    with open(path, encoding="utf-8") as fh:
+        for line in fh:
+            line = line.rstrip("\n")
+            if line == "---":
+                c += 1
+                continue
+            if c >= 2:
+                words += len(line.split())
+    return words
+
+
+try:
+    with open(baseline_path, encoding="utf-8") as fh:
+        baseline = json.load(fh)
+except Exception as e:
+    emit(2, "bad-baseline", {"problems": ["baseline unreadable: %s" % e]},
+         "check-skill-budget: baseline unreadable: %s" % e)
+
+if not isinstance(baseline, dict) or not all(isinstance(v, int) for v in baseline.values()):
+    emit(2, "bad-baseline",
+         {"problems": ["baseline must be a JSON object of name -> integer ceiling"]},
+         "check-skill-budget: baseline must be an object of name -> integer ceiling")
+
+problems = []
+
+# ---- rules 1 & 2: per-skill body budget -----------------------------------
+counts = {}
+for skill_md in sorted(glob.glob(os.path.join(skills_dir, "*", "SKILL.md"))):
+    name = os.path.basename(os.path.dirname(skill_md))
+    w = body_word_count(skill_md)
+    counts[name] = w
+    if name in baseline:
+        ceiling = baseline[name]
+        if w > ceiling:
+            problems.append("%s: body is %d words, over its baseline ceiling of %d "
+                            "(a baselined body may shrink, never grow)" % (name, w, ceiling))
+    else:
+        if w > BUDGET:
+            problems.append("%s: body is %d words, over the %d-word budget for "
+                            "non-baselined skills (migrate it or it must not be added over budget)"
+                            % (name, w, BUDGET))
+
+# A baseline entry with no matching skill is stale bookkeeping.
+for name in baseline:
+    if name not in counts:
+        problems.append("baseline names %r but skills/%s/SKILL.md does not exist "
+                        "(delete the stale entry)" % (name, name))
+
+# ---- ratchet: ceilings are monotonically non-increasing -------------------
+ratchet_applied = False
+if have_prev:
+    try:
+        prev = json.loads(prev_raw)
+    except Exception as e:
+        prev = None
+        problems.append("previous-commit baseline is not valid JSON: %s" % e)
+    if isinstance(prev, dict):
+        ratchet_applied = True
+        for name, ceiling in baseline.items():
+            if name not in prev:
+                problems.append("ratchet: %r is a NEW baseline entry (adding entries is "
+                                "forbidden; new skills must be <= %d words)" % (name, BUDGET))
+            elif ceiling > prev[name]:
+                problems.append("ratchet: %r ceiling rose from %d to %d "
+                                "(ceilings may only fall)" % (name, prev[name], ceiling))
+
+checked = len(counts)
+outputs = {
+    "skillsDir": skills_dir, "baseline": baseline_path, "budget": BUDGET,
+    "baselinedCount": len(baseline), "skillsChecked": checked,
+    "ratchetApplied": ratchet_applied, "counts": counts,
+    "problems": problems,
+}
+
+if problems:
+    text = ("check-skill-budget: FAIL — %d problem(s) (%d skills, %d baselined%s):\n"
+            % (len(problems), checked, len(baseline),
+               "" if ratchet_applied else "; ratchet skipped (no prior baseline)")
+            + "\n".join("  - " + p for p in problems))
+    emit(1, "over-budget", outputs, text)
+else:
+    text = ("check-skill-budget: ok — %d skills within budget; %d baselined ceiling(s)%s"
+            % (checked, len(baseline),
+               "; ratchet held" if ratchet_applied else "; ratchet skipped (no prior baseline)"))
+    emit(0, "ok", outputs, text)
+PYEOF
+)
+
+EXIT_HINT=$(printf '%s' "$RESULT" | jq -r '.exit')
+STATUS=$(printf '%s' "$RESULT" | jq -r '.status')
+OUTPUTS=$(printf '%s' "$RESULT" | jq -c '.outputs // {}')
+
+if [ "$FORMAT" = "json" ]; then
+  if [ "$EXIT_HINT" = "0" ]; then
+    print_envelope "check-skill-budget" "$STATUS" "$OUTPUTS" "[]" "[]"
+  else
+    ERRORS=$(printf '%s' "$RESULT" | jq -c '[(.outputs.problems // [])[] | {code: "budget", message: .}]')
+    print_envelope "check-skill-budget" "$STATUS" "$OUTPUTS" "[]" "$ERRORS"
+  fi
+else
+  printf '%s\n' "$(printf '%s' "$RESULT" | jq -r '.text')"
+fi
+
+case "$EXIT_HINT" in
+  0) exit "$ENVELOPE_EXIT_OK" ;;
+  1) exit "$ENVELOPE_EXIT_DOMAIN" ;;
+  *) exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac
