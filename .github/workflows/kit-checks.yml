@@ -51,6 +51,9 @@ jobs:
       - name: check-consistency (docs ↔ metadata)
         run: bin/check-consistency
 
+      - name: check-manifest (runtime-assets.md ↔ kit tree)
+        run: bin/check-manifest
+
       - name: check-state-cap
         run: bin/check-state-cap --check
 

@@ -815,6 +815,18 @@
       "description": "Verify docs and metadata agree: skills.md vs kit.json, the verb layer, the bin registry, schema references, and category legend (ADR-050)."
     },
     {
+      "name": "check-manifest",
+      "path": "bin/check-manifest",
+      "format": "json",
+      "envelope": "standard-v1",
+      "exitCodes": [
+        0,
+        1,
+        2
+      ],
+      "description": "Validate the runtime-asset manifest (runtime-assets.md): schema version, table shape, id/vocabulary constraints, unique ids and dests, and source existence (ADR-061)."
+    },
+    {
       "name": "self-test",
       "path": "bin/self-test",
       "format": "json",
