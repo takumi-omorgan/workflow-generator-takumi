@@ -1,0 +1,324 @@
+#!/usr/bin/env bash
+# check-manifest — validate the runtime-asset manifest (runtime-assets.md)
+# against its schema and the kit tree (ADR-061).
+#
+# Strict by design: a malformed table or row is a hard error naming the
+# row; a missing or unparseable manifest aborts; there is no fallback to
+# a hardcoded asset list. A required asset whose source is missing from
+# the kit tree is an error (all missing sources are accumulated and
+# reported once); an optional asset's missing source is a warning.
+#
+# Constraints checked (all are always evaluated; the summary counts them):
+#   M1  schemaVersion declared exactly once, integer, known major (1)
+#   M2  exactly one manifest table with the exact expected header, with
+#       at least one data row, and no table rows outside it
+#   M3  every row has exactly 7 non-empty cells (row named on failure)
+#   M4  id matches ^[a-z0-9][a-z0-9-]*$
+#   M5  ids are unique
+#   M6  required column is `required` or `optional`
+#   M7  profiles is a non-empty, duplicate-free subset of the closed
+#       vocabulary { full }
+#   M8  ownership is one of kit-owned | generated | user-seeded
+#   M9  dest is a relative path without `..`, and unique
+#   M10 source is a relative path without `..`
+#   M11 source exists in the kit tree (dir rows end with `/`); required
+#       missing => error, optional missing => warning
+#   M12 since-version is present (informational; not otherwise validated)
+#
+# Usage:
+#   bin/check-manifest [--format text|json] [--manifest PATH]
+#                      [--allow-missing] [-h]
+#
+# --allow-missing is TEST-ONLY: it downgrades missing *required* sources
+# (M11) to warnings and nothing else, and prints a prominent banner
+# naming every asset it downgraded. It is never used by the shipped
+# install path. --manifest exists for test fixtures.
+#
+# Exit codes (shared convention; see lib/json-envelope.sh):
+#   0  manifest valid (warnings possible)
+#   1  constraint violation (domain failure)
+#   2  invocation error (manifest missing/unreadable, bad flags)
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/json-envelope.sh
+. "$SCRIPT_DIR/lib/json-envelope.sh"
+
+usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; }
+
+FORMAT="text"
+MANIFEST="runtime-assets.md"
+ALLOW_MISSING=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --format)
+      [ $# -ge 2 ] || { printf 'check-manifest: --format needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+      FORMAT="$2"; shift 2 ;;
+    --manifest)
+      [ $# -ge 2 ] || { printf 'check-manifest: --manifest needs an argument\n' >&2; exit "$ENVELOPE_EXIT_INVOCATION"; }
+      MANIFEST="$2"; shift 2 ;;
+    --allow-missing) ALLOW_MISSING=1; shift ;;
+    -h|--help) usage; exit 0 ;;
+    *) printf 'check-manifest: unknown argument: %s\n' "$1" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+  esac
+done
+case "$FORMAT" in
+  text|json) ;;
+  *) printf 'check-manifest: --format must be text or json (got: %s)\n' "$FORMAT" >&2; exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac
+
+if [ ! -f "$MANIFEST" ] || [ ! -r "$MANIFEST" ]; then
+  printf 'check-manifest: manifest not found or unreadable: %s (run from the kit repo root)\n' "$MANIFEST" >&2
+  printf 'check-manifest: a missing manifest is a hard error; there is no fallback asset list.\n' >&2
+  exit "$ENVELOPE_EXIT_INVOCATION"
+fi
+
+if [ "$ALLOW_MISSING" -eq 1 ]; then
+  {
+    printf '****************************************************************\n'
+    printf '*** check-manifest: --allow-missing is active (TEST ONLY).  ***\n'
+    printf '*** Missing REQUIRED sources are downgraded to warnings.    ***\n'
+    printf '*** Never use this on the shipped install path.             ***\n'
+    printf '****************************************************************\n'
+  } >&2
+fi
+
+RESULT=$(
+  MANIFEST_PATH="$MANIFEST" ALLOW_MISSING="$ALLOW_MISSING" \
+  python3 <<'PYEOF'
+import json, os, re, sys
+
+manifest_path = os.environ["MANIFEST_PATH"]
+allow_missing = os.environ.get("ALLOW_MISSING") == "1"
+
+KNOWN_SCHEMA_MAJORS = {1}
+COLUMNS = ["id", "source", "dest", "required", "profiles", "ownership", "since-version"]
+REQUIRED_VOCAB = {"required", "optional"}
+PROFILE_VOCAB = {"full"}
+OWNERSHIP_VOCAB = {"kit-owned", "generated", "user-seeded"}
+ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
+
+# constraint id -> list of problem strings (empty list = pass)
+CONSTRAINTS = [
+    ("M1", "schemaVersion declared once with a known major"),
+    ("M2", "exactly one manifest table with the expected header"),
+    ("M3", "every row has exactly %d non-empty cells" % len(COLUMNS)),
+    ("M4", "id format"),
+    ("M5", "ids unique"),
+    ("M6", "required vocabulary"),
+    ("M7", "profiles vocabulary (closed set: %s)" % ", ".join(sorted(PROFILE_VOCAB))),
+    ("M8", "ownership vocabulary (closed set: %s)" % ", ".join(sorted(OWNERSHIP_VOCAB))),
+    ("M9", "dest relative and unique"),
+    ("M10", "source relative"),
+    ("M11", "source exists in the kit tree"),
+    ("M12", "since-version present"),
+]
+problems = {cid: [] for cid, _ in CONSTRAINTS}
+warnings = []
+downgraded = []
+
+try:
+    with open(manifest_path, encoding="utf-8") as fh:
+        lines = fh.read().split("\n")
+except Exception as e:
+    print(json.dumps({"exit": 2, "status": "unreadable",
+        "outputs": {"problems": ["manifest unreadable: %s" % e]},
+        "text": "check-manifest: manifest unreadable: %s" % e}))
+    sys.exit(0)
+
+# ---- M1: schemaVersion ---------------------------------------------------
+sv_matches = [(i + 1, m.group(1)) for i, ln in enumerate(lines)
+              if (m := re.match(r"^schemaVersion:\s*(.+?)\s*$", ln))]
+if not sv_matches:
+    problems["M1"].append("no `schemaVersion:` declaration found")
+elif len(sv_matches) > 1:
+    problems["M1"].append("multiple schemaVersion declarations (lines %s)"
+                          % ", ".join(str(n) for n, _ in sv_matches))
+else:
+    lineno, val = sv_matches[0]
+    if not val.isdigit():
+        problems["M1"].append("schemaVersion %r (line %d) is not an integer" % (val, lineno))
+    elif int(val) not in KNOWN_SCHEMA_MAJORS:
+        problems["M1"].append(
+            "schemaVersion %s is not a known major (known: %s); refusing to guess"
+            % (val, ", ".join(str(v) for v in sorted(KNOWN_SCHEMA_MAJORS))))
+
+# ---- locate the table (M2) -----------------------------------------------
+def cells_of(line):
+    body = line.strip()
+    if not (body.startswith("|") and body.endswith("|") and len(body) >= 2):
+        return None
+    return [c.strip() for c in body[1:-1].split("|")]
+
+def is_separator(cs):
+    return cs is not None and all(re.fullmatch(r":?-+:?", c) for c in cs)
+
+header_idxs = [i for i, ln in enumerate(lines)
+               if (cs := cells_of(ln)) is not None
+               and [c.lower() for c in cs] == COLUMNS]
+
+table_lines = set()   # 0-based indices belonging to the recognised table
+rows = []             # (lineno_1based, cells)
+if not header_idxs:
+    problems["M2"].append("no manifest table header found (expected columns: | %s |)"
+                          % " | ".join(COLUMNS))
+elif len(header_idxs) > 1:
+    problems["M2"].append("multiple manifest table headers (lines %s)"
+                          % ", ".join(str(i + 1) for i in header_idxs))
+else:
+    h = header_idxs[0]
+    table_lines.add(h)
+    if h + 1 >= len(lines) or not is_separator(cells_of(lines[h + 1])):
+        problems["M2"].append("manifest table header (line %d) is not followed by a separator row" % (h + 1))
+    else:
+        table_lines.add(h + 1)
+        j = h + 2
+        while j < len(lines) and lines[j].strip().startswith("|"):
+            table_lines.add(j)
+            rows.append((j + 1, cells_of(lines[j])))
+            j += 1
+        if not rows:
+            problems["M2"].append("manifest table has no data rows")
+
+# Any pipe-line outside the recognised table is a stray row: a row that
+# drifted out of the table would otherwise be silently ignored.
+for i, ln in enumerate(lines):
+    if ln.strip().startswith("|") and i not in table_lines:
+        problems["M2"].append("table row outside the manifest table at line %d: %s"
+                              % (i + 1, ln.strip()[:60]))
+
+# ---- per-row checks --------------------------------------------------------
+def rel_path_problem(p):
+    if p.startswith("/") or re.match(r"^[A-Za-z]:", p):
+        return "is absolute"
+    if "\\" in p:
+        return "contains a backslash"
+    if ".." in p.split("/"):
+        return "contains `..`"
+    return None
+
+seen_ids = {}
+seen_dests = {}
+asset_count = 0
+for lineno, cs in rows:
+    name = (cs[0] if cs and cs[0] else "line %d" % lineno)
+    if cs is None or len(cs) != len(COLUMNS) or any(c == "" for c in cs):
+        got = "unparseable" if cs is None else "%d cell(s)%s" % (
+            len(cs), "; empty cell(s)" if len(cs) == len(COLUMNS) else "")
+        problems["M3"].append("row %r (line %d): expected %d non-empty cells, got %s"
+                              % (name, lineno, len(COLUMNS), got))
+        continue  # cannot trust the columns of a malformed row
+    asset_count += 1
+    aid, source, dest, required, profiles, ownership, since = cs
+
+    if not ID_RE.fullmatch(aid):
+        problems["M4"].append("row %r (line %d): id does not match ^[a-z0-9][a-z0-9-]*$" % (aid, lineno))
+    if aid in seen_ids:
+        problems["M5"].append("row %r (line %d): duplicate id (first at line %d)"
+                              % (aid, lineno, seen_ids[aid]))
+    else:
+        seen_ids[aid] = lineno
+
+    if required not in REQUIRED_VOCAB:
+        problems["M6"].append("row %r (line %d): required must be one of %s (got %r)"
+                              % (aid, lineno, "|".join(sorted(REQUIRED_VOCAB)), required))
+
+    tokens = [t.strip() for t in profiles.split(",")]
+    if not tokens or any(t == "" for t in tokens):
+        problems["M7"].append("row %r (line %d): profiles list is empty or has an empty entry" % (aid, lineno))
+    else:
+        for t in tokens:
+            if t not in PROFILE_VOCAB:
+                problems["M7"].append(
+                    "row %r (line %d): unknown profile %r (closed vocabulary: %s; "
+                    "extending it requires an ADR amending ADR-061)"
+                    % (aid, lineno, t, ", ".join(sorted(PROFILE_VOCAB))))
+        if len(tokens) != len(set(tokens)):
+            problems["M7"].append("row %r (line %d): duplicate profile tokens" % (aid, lineno))
+
+    if ownership not in OWNERSHIP_VOCAB:
+        problems["M8"].append("row %r (line %d): ownership must be one of %s (got %r)"
+                              % (aid, lineno, " | ".join(sorted(OWNERSHIP_VOCAB)), ownership))
+
+    dp = rel_path_problem(dest)
+    if dp:
+        problems["M9"].append("row %r (line %d): dest %s (%s)" % (aid, lineno, dp, dest))
+    if dest in seen_dests:
+        problems["M9"].append("row %r (line %d): duplicate dest %r (first at line %d)"
+                              % (aid, lineno, dest, seen_dests[dest]))
+    else:
+        seen_dests[dest] = lineno
+
+    sp = rel_path_problem(source)
+    if sp:
+        problems["M10"].append("row %r (line %d): source %s (%s)" % (aid, lineno, sp, source))
+    else:
+        is_dir_row = source.endswith("/")
+        path = source.rstrip("/")
+        exists = os.path.isdir(path) if is_dir_row else os.path.isfile(path)
+        if not exists:
+            kind = "directory" if is_dir_row else "file"
+            msg = "row %r (line %d): source %s missing from the kit tree (%s)" % (aid, lineno, kind, source)
+            if required == "required" and not allow_missing:
+                problems["M11"].append(msg)
+            elif required == "required":
+                downgraded.append(aid)
+                warnings.append("M11 (downgraded by --allow-missing): " + msg)
+            else:
+                warnings.append("M11: optional " + msg)
+
+    if not since:
+        problems["M12"].append("row %r (line %d): since-version is empty" % (aid, lineno))
+
+# ---- assemble --------------------------------------------------------------
+all_problems = [f"{cid}: {p}" for cid, _ in CONSTRAINTS for p in problems[cid]]
+checked = len(CONSTRAINTS)
+passed = sum(1 for cid, _ in CONSTRAINTS if not problems[cid])
+counts = {"assets": asset_count,
+          "required": sum(1 for _, cs in rows if cs and len(cs) == len(COLUMNS) and cs[3] == "required"),
+          "optional": sum(1 for _, cs in rows if cs and len(cs) == len(COLUMNS) and cs[3] == "optional")}
+outputs = {"manifest": manifest_path, "schemaVersion": sv_matches[0][1] if len(sv_matches) == 1 else None,
+           "counts": counts, "constraintsChecked": checked, "constraintsPassed": passed,
+           "allowMissing": allow_missing, "downgraded": downgraded,
+           "problems": all_problems, "warnings": warnings}
+
+if all_problems:
+    text = ("check-manifest: INVALID — %d problem(s); %d/%d constraints pass (%d asset row(s)):\n"
+            % (len(all_problems), passed, checked, counts["assets"])
+            + "\n".join("  - " + p for p in all_problems))
+    out = {"exit": 1, "status": "invalid", "outputs": outputs, "text": text}
+else:
+    text = ("check-manifest: ok — %d asset row(s) (%d required, %d optional); %d/%d constraints pass"
+            % (counts["assets"], counts["required"], counts["optional"], passed, checked))
+    out = {"exit": 0, "status": "valid", "outputs": outputs, "text": text}
+if warnings:
+    out["text"] += "\n" + "\n".join("  warning: " + w for w in warnings)
+print(json.dumps(out, ensure_ascii=False))
+PYEOF
+)
+
+EXIT_HINT=$(printf '%s' "$RESULT" | jq -r '.exit')
+STATUS=$(printf '%s' "$RESULT" | jq -r '.status')
+OUTPUTS=$(printf '%s' "$RESULT" | jq -c '.outputs')
+
+if [ "$ALLOW_MISSING" -eq 1 ]; then
+  SKIPPED=$(printf '%s' "$RESULT" | jq -r '.outputs.downgraded // [] | join(", ")')
+  if [ -n "$SKIPPED" ]; then
+    printf '*** check-manifest: --allow-missing downgraded missing required source(s) for: %s\n' "$SKIPPED" >&2
+  else
+    printf '*** check-manifest: --allow-missing had nothing to downgrade (no required sources missing).\n' >&2
+  fi
+fi
+
+if [ "$FORMAT" = "json" ]; then
+  print_envelope "check-manifest" "$STATUS" "$OUTPUTS" "[]" "[]"
+else
+  printf '%s' "$RESULT" | jq -r '.text'
+fi
+
+case "$EXIT_HINT" in
+  0) exit "$ENVELOPE_EXIT_OK" ;;
+  1) exit "$ENVELOPE_EXIT_DOMAIN" ;;
+  *) exit "$ENVELOPE_EXIT_INVOCATION" ;;
+esac
